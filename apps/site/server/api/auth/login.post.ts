@@ -4,7 +4,7 @@
  */
 
 import { createToken } from '../../middleware/auth';
-import { db } from '../db';
+import { db } from '../db.ts';
 import { users } from '@my-blog/core/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';

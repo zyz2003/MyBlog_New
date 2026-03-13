@@ -3,7 +3,7 @@
  * GET /api/tags
  */
 
-import { db, tags } from '../db';
+import { db, tags } from '../db.ts';
 import { asc } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {

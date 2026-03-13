@@ -4,7 +4,7 @@
  */
 
 import { getCurrentUser } from '../../middleware/auth';
-import { db, posts, categories, tags, postCategories, postTags } from '../db';
+import { db, posts, categories, tags, postCategories, postTags } from '../db.ts';
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
