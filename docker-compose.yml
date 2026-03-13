@@ -1,6 +1,23 @@
 version: '3.8'
 
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: my-blog-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: my_blog
+      MYSQL_USER: blog
+      MYSQL_PASSWORD: blog123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
   blog:
     build:
       context: .
@@ -8,13 +25,20 @@ services:
     container_name: my-blog
     ports:
       - "3000:3000"
-    volumes:
-      - blog-data:/app/apps/site/data
     environment:
       - NODE_ENV=production
-      - DATABASE_PATH=/app/apps/site/data/blog.db
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=blog
+      - DB_PASSWORD=blog123
+      - DB_NAME=my_blog
+      - JWT_SECRET=my-blog-secret-key-change-in-production
+    depends_on:
+      - mysql
     restart: unless-stopped
 
 volumes:
+  mysql-data:
+    driver: local
   blog-data:
     driver: local

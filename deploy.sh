@@ -1,28 +1,25 @@
 #!/bin/bash
-# 博客系统部署脚本
+# 博客系统部署脚本 - 使用 docker-compose
 set -e
 
-CONTAINER_NAME="my-blog"
-IMAGE_NAME="my-blog:dev"
-PORT="3000"
+echo "停止并移除旧容器..."
+docker-compose down 2>/dev/null || true
 
 echo "构建镜像..."
-docker build -t $IMAGE_NAME .
+docker-compose build
 
-echo "停止旧容器..."
-docker stop $CONTAINER_NAME 2>/dev/null || true
-docker rm $CONTAINER_NAME 2>/dev/null || true
-
-echo "创建数据卷..."
-docker volume create ${CONTAINER_NAME}-data 2>/dev/null || true
-
-echo "启动容器..."
-docker run -d \
-    --name $CONTAINER_NAME \
-    -p $PORT:3000 \
-    -v ${CONTAINER_NAME}-data:/app/apps/site/data \
-    --restart unless-stopped \
-    $IMAGE_NAME
+echo "启动服务..."
+docker-compose up -d
 
 sleep 3
-echo "部署完成！访问：http://你的服务器 IP:$PORT"
+
+echo ""
+echo "=========================================="
+echo "部署完成！"
+echo "博客系统：http://你的服务器 IP:3000"
+echo "MySQL: 本地端口 3306 (blog/blog123)"
+echo "=========================================="
+echo ""
+echo "查看日志：docker-compose logs -f"
+echo "停止服务：docker-compose down"
+echo ""

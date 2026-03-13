@@ -22,7 +22,7 @@ COPY packages/core/package.json ./packages/core/
 COPY apps/site/package.json ./apps/site/
 COPY apps/admin/package.json ./apps/admin/
 
-# 安装依赖（Linux 环境下 better-sqlite3 可以正常构建）
+# 安装依赖
 RUN pnpm install --frozen-lockfile
 
 # 复制全部源代码
@@ -31,9 +31,6 @@ COPY . .
 # 构建应用
 RUN pnpm build
 
-# 确保数据目录存在
-RUN mkdir -p /app/apps/site/data
-
 # 暴露端口
 EXPOSE 3000
 
@@ -41,7 +38,6 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV NUXT_HOST=0.0.0.0
 ENV NUXT_PORT=3000
-ENV DATABASE_PATH=/app/apps/site/data/blog.db
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
