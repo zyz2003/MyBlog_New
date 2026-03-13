@@ -48,6 +48,13 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 
 ### 已完成工作 (Phase 1.1)
 
+**Docker 环境** (2026-03-13):
+- ✅ Dockerfile - 生产环境构建
+- ✅ Dockerfile.dev - 开发环境构建
+- ✅ docker-compose.yml - 生产/开发模式
+- ✅ .dockerignore - Docker 忽略配置
+- ✅ .pnpmrc.docker - Docker 专用 pnpm 配置
+
 **API Server**:
 - ✅ 认证中间件 (`server/middleware/auth.ts`)
 - ✅ 登录 API (`server/api/auth/login.post.ts`)
@@ -87,7 +94,7 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 - ✅ .pnpmrc 配置 (hoisted 模式)
 
 ### 待完成工作
-- [ ] 解决 better-sqlite3 构建问题
+- [x] 解决 better-sqlite3 构建问题 - 使用 Docker 容器运行
 - [ ] 运行数据库迁移 (pnpm db:migrate)
 - [ ] 测试 API 功能
 - [ ] 联调前后端
@@ -95,6 +102,11 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 ---
 
 ## Recent Progress
+
+**2026-03-13 Session 5**:
+- 创建 Docker 环境配置（Dockerfile, docker-compose.yml, .dockerignore, .pnpmrc.docker）
+- 添加 start 脚本到根目录 package.json
+- 代码已推送到 GitHub，用户将在服务器上自行构建运行
 
 **2026-03-13 Session 4**:
 - 创建前台布局、首页、文章详情页
@@ -139,28 +151,18 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 
 | Question | Status |
 |----------|--------|
-| better-sqlite3 构建问题 | ⚠️ 需要解决：Node.js v22.14.0 + Windows 环境 + pnpm isolated 模式导致原生模块构建失败 |
+| better-sqlite3 构建问题 | ✅ 已解决：使用 Docker 容器运行（Node.js 20 + Linux 环境） |
 
 ---
 
 ## Known Issues
 
-### better-sqlite3 构建失败
+### better-sqlite3 构建失败 - 已解决
 
-**问题**: better-sqlite3 原生模块无法构建，导致数据库迁移和 API 无法运行
-
-**尝试过的解决方案**:
-1. ❌ pnpm rebuild better-sqlite3
-2. ❌ npm rebuild better-sqlite3
-3. ❌ 升级到 better-sqlite3 v11
-4. ❌ pnpm approve-builds (需要交互式输入)
-5. ❌ node-gyp rebuild (需要 Visual Studio 构建工具)
-6. ❌ pnpm hoisted 模式
-
-**推荐解决方案**:
-1. 安装 Windows 构建工具：`npm install -g windows-build-tools`
-2. 降级 Node.js 到 v20 LTS
-3. 使用 Docker 容器运行
+**解决方案**: 使用 Docker 容器运行
+- Dockerfile 使用 Node.js 20-alpine 镜像
+- Linux 环境下 better-sqlite3 可以正常构建
+- 服务器上使用 `docker build` 和 `docker run` 运行
 
 ---
 
@@ -168,19 +170,21 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Last session end**: 2026-03-13
 **Current task**: Phase 1.1 - 完善项目脚手架
-**Completed**: API Server + 前端页面开发完成
-**Blocked**: better-sqlite3 原生模块构建失败
+**Completed**: API Server + 前端页面 + Docker 环境配置
+**Status**: 等待服务器构建和测试
 
-**Next action** (需要你先解决构建问题):
-1. 方案 A: 安装 Windows 构建工具后运行 `pnpm rebuild`
-2. 方案 B: 降级 Node.js 到 v20 LTS 后重新安装
-3. 方案 C: 使用 Docker 容器运行开发环境
+**服务器操作**:
+1. SSH 登录服务器
+2. 安装 Git: `sudo apt update && sudo apt install -y git`
+3. 克隆代码：`cd /opt/my-blog && git clone https://github.com/zyz2003/MyBlog_New.git .`
+4. Docker 构建：`docker build -t my-blog:dev .`
+5. Docker 运行：`docker run -d --name my-blog -p 3000:3000 -v my-blog-data:/app/apps/site/data my-blog:dev`
+6. 查看日志：`docker logs -f my-blog`
 
-解决构建问题后:
-1. 运行 `pnpm db:migrate` 初始化数据库
-2. 运行 `pnpm dev` 启动开发服务器
-3. 测试前后端联调
+**访问地址**:
+- 前台：`http://服务器域名:3000`
+- 后台：`http://服务器域名:3000/admin`
 
 ---
 
-*Last updated: 2026-03-13 after frontend pages complete, blocked by better-sqlite3 build issue*
+*Last updated: 2026-03-13 - Docker 环境配置完成，等待服务器构建和测试*

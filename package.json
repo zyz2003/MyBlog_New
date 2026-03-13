@@ -8,8 +8,10 @@
   "scripts": {
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
+    "start": "pnpm -r preview",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "db:migrate": "pnpm --filter @my-blog/site db:migrate"
   },
   "engines": {
     "node": ">=18.0.0",

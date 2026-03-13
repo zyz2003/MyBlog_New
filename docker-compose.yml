@@ -1,22 +1,40 @@
 version: '3.8'
 
 services:
-  # 博客开发环境
-  blog-dev:
+  # 博客 - 生产模式
+  blog:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: my-blog
+    ports:
+      - "3000:3000"
+    volumes:
+      # 持久化数据目录
+      - blog-data:/app/apps/site/data
+    environment:
+      - NODE_ENV=production
+      - NUXT_HOST=0.0.0.0
+      - NUXT_PORT=3000
+      - DATABASE_PATH=/app/apps/site/data/blog.db
+    restart: unless-stopped
+
+  # 博客 - 开发模式（可选，用于本地开发）
+  blog-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     container_name: my-blog-dev
     ports:
-      - "3000:3000"  # Nuxt 主应用
-      - "3001:3001"  # Nuxt DevTools
+      - "3000:3000"
+      - "3001:3001"
     volumes:
       # 挂载源代码目录（热重载）
       - ./apps:/app/apps
       - ./packages:/app/packages
       - ./docs:/app/docs
       # 持久化数据目录
-      - blog-data:/app/apps/site/data
+      - blog-data-dev:/app/apps/site/data
       # 避免挂载 node_modules（使用容器内的）
       - /app/node_modules
       - /app/apps/site/node_modules
@@ -29,7 +47,11 @@ services:
       - DATABASE_PATH=/app/apps/site/data/blog.db
     command: pnpm dev
     restart: unless-stopped
+    profiles:
+      - dev
 
 volumes:
   blog-data:
+    driver: local
+  blog-data-dev:
     driver: local
