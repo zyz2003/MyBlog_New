@@ -40,6 +40,10 @@ export default defineNuxtConfig({
     externals: {
       inherit: true,
     },
+    // 添加 server 目录的别名
+    alias: {
+      '#db': './server/db',
+    },
     rollupConfig: {
       output: {
         preserveModules: true,

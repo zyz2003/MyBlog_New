@@ -3,7 +3,7 @@
  * GET /api/articles
  */
 
-import { db, posts, users, categories, tags, postCategories, postTags } from '../db.ts';
+import { db, posts, users, categories, tags, postCategories, postTags } from '#db';
 import { eq, and, desc, sql, like, or } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
