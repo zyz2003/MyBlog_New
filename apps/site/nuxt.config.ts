@@ -15,7 +15,10 @@ export default defineNuxtConfig({
     public: {
       siteName: 'My Blog',
       siteDescription: '个人博客系统',
-    }
+      apiBaseUrl: '/api',
+    },
+    databasePath: process.env.DATABASE_PATH || './data/blog.db',
+    jwtSecret: process.env.JWT_SECRET || 'my-blog-secret-key-change-in-production',
   },
 
   // 路由配置
@@ -33,6 +36,20 @@ export default defineNuxtConfig({
         base: './data',
       },
     },
+    // 外部和内部依赖配置（用于 server 端）
+    externals: {
+      inherit: true,
+    },
+    rollupConfig: {
+      output: {
+        preserveModules: true,
+      },
+    },
+  },
+
+  // 别名配置（server 端使用）
+  alias: {
+    '@': './server',
   },
 
   // 类型检查
