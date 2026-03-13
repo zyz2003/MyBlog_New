@@ -2,6 +2,9 @@
 # 使用 Node.js 20 LTS
 FROM node:20-alpine
 
+# 设置 Alpine 国内镜像源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
 # 安装必要的工具
 RUN apk add --no-cache git
 
