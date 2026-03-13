@@ -49,7 +49,7 @@ export default defineNuxtConfig({
 
   // 别名配置（server 端使用）
   alias: {
-    '@': './server',
+    '@': '.',
   },
 
   // 类型检查
