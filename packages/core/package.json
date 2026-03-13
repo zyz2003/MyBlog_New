@@ -12,6 +12,10 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./schema": {
+      "types": "./src/schema.ts",
+      "import": "./src/schema.ts"
+    },
     "./plugin-adapter": {
       "types": "./dist/plugin-adapter.d.ts",
       "import": "./dist/plugin-adapter.mjs",
