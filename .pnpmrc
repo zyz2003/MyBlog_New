@@ -1,0 +1,5 @@
+store-dir=D:/CodeDevelopment/Environment/NodeJs/store
+cache-dir=D:/CodeDevelopment/Environment/NodeJs/node_cache
+shamefully-hoist=false
+enable-pre-post-scripts=true
+node-linker=hoisted

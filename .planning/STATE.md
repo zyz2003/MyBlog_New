@@ -1,7 +1,7 @@
 # Project State: 个人博客系统
 
 **Current Phase**: Phase 1 - 项目脚手架与核心系统
-**Current Wave**: Wave 1 - API Server 完成
+**Current Wave**: Wave 2 - 前端页面完成，数据库构建问题待解决
 **Last Updated**: 2026-03-13
 
 ---
@@ -20,7 +20,7 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 
 | # | Phase | Status | Plans | Progress |
 |---|-------|--------|-------|----------|
-| 1 | 项目脚手架与核心系统 | ◆ | 1/1 | 60% |
+| 1 | 项目脚手架与核心系统 | ◆ | 1/1 | 80% |
 | 2 | 用户认证与内容管理 | ◯ | 0/8 | 0% |
 | 3 | 媒体资源管理 | ◯ | 0/3 | 0% |
 | 4 | 示例插件与文档 | ◯ | 0/2 | 0% |
@@ -41,7 +41,10 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 - ✅ 数据库核心已有 (Drizzle ORM + SQLite)
 - ✅ 核心 Schema 已有 (users, posts, categories, tags)
 - ✅ Phase 1.1 计划创建完成
-- ✅ Nitro API Server 基本完成
+- ✅ Nitro API Server 完成
+- ✅ 前台页面完成 (首页、文章详情页)
+- ✅ 后台页面完成 (登录、仪表盘、文章管理)
+- ⚠️ better-sqlite3 原生模块构建失败 - 需要解决
 
 ### 已完成工作 (Phase 1.1)
 
@@ -65,20 +68,39 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 - ✅ 数据库迁移脚本 (`scripts/migrate.ts`)
 - ✅ 数据库连接模块 (`server/db.ts`)
 
+**前台页面**:
+- ✅ 布局组件 (`layouts/default.vue`)
+- ✅ 首页 - 文章列表 (`pages/index.vue`)
+- ✅ 文章详情页 (`pages/articles/[slug].vue`)
+
+**后台页面**:
+- ✅ 布局组件 (`layouts/default.vue`)
+- ✅ 登录页 (`pages/login.vue`)
+- ✅ 仪表盘 (`pages/dashboard/index.vue`)
+- ✅ 文章管理列表 (`pages/articles/index.vue`)
+- ✅ 文章创建页 (`pages/articles/create.vue`)
+- ✅ 文章编辑页 (`pages/articles/[id].vue`)
+
 **配置更新**:
 - ✅ site package.json 更新依赖
 - ✅ nuxt.config.ts 配置 Nitro 和别名
+- ✅ .pnpmrc 配置 (hoisted 模式)
 
 ### 待完成工作
-- [ ] 安装依赖 (pnpm install)
+- [ ] 解决 better-sqlite3 构建问题
 - [ ] 运行数据库迁移 (pnpm db:migrate)
 - [ ] 测试 API 功能
-- [ ] 创建前台页面
-- [ ] 创建后台页面
+- [ ] 联调前后端
 
 ---
 
 ## Recent Progress
+
+**2026-03-13 Session 4**:
+- 创建前台布局、首页、文章详情页
+- 创建后台布局、登录页、仪表盘、文章管理页
+- 安装依赖完成
+- better-sqlite3 原生模块构建失败（Node.js v22 + pnpm isolated 模式问题）
 
 **2026-03-13 Session 3**:
 - 创建完整的 Nitro API Server
@@ -109,12 +131,36 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 | 数据库保持 packages/core 内 | 2026-03-13 | ✓ Decision |
 | JWT 认证方案 | 2026-03-13 | ✓ Implemented |
 | 使用 bcrypt 加密密码 | 2026-03-13 | ✓ Implemented |
+| pnpm hoisted 模式 | 2026-03-13 | ✓ Active |
 
 ---
 
 ## Open Questions
 
-(暂无)
+| Question | Status |
+|----------|--------|
+| better-sqlite3 构建问题 | ⚠️ 需要解决：Node.js v22.14.0 + Windows 环境 + pnpm isolated 模式导致原生模块构建失败 |
+
+---
+
+## Known Issues
+
+### better-sqlite3 构建失败
+
+**问题**: better-sqlite3 原生模块无法构建，导致数据库迁移和 API 无法运行
+
+**尝试过的解决方案**:
+1. ❌ pnpm rebuild better-sqlite3
+2. ❌ npm rebuild better-sqlite3
+3. ❌ 升级到 better-sqlite3 v11
+4. ❌ pnpm approve-builds (需要交互式输入)
+5. ❌ node-gyp rebuild (需要 Visual Studio 构建工具)
+6. ❌ pnpm hoisted 模式
+
+**推荐解决方案**:
+1. 安装 Windows 构建工具：`npm install -g windows-build-tools`
+2. 降级 Node.js 到 v20 LTS
+3. 使用 Docker 容器运行
 
 ---
 
@@ -122,13 +168,19 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Last session end**: 2026-03-13
 **Current task**: Phase 1.1 - 完善项目脚手架
-**Completed**: API Server 开发完成
-**Next action**:
-1. 运行 `pnpm install` 安装依赖
-2. 运行 `pnpm db:migrate` 初始化数据库
-3. 运行 `pnpm dev` 启动开发服务器
-4. 继续开发前台/后台页面
+**Completed**: API Server + 前端页面开发完成
+**Blocked**: better-sqlite3 原生模块构建失败
+
+**Next action** (需要你先解决构建问题):
+1. 方案 A: 安装 Windows 构建工具后运行 `pnpm rebuild`
+2. 方案 B: 降级 Node.js 到 v20 LTS 后重新安装
+3. 方案 C: 使用 Docker 容器运行开发环境
+
+解决构建问题后:
+1. 运行 `pnpm db:migrate` 初始化数据库
+2. 运行 `pnpm dev` 启动开发服务器
+3. 测试前后端联调
 
 ---
 
-*Last updated: 2026-03-13 after API Server development complete*
+*Last updated: 2026-03-13 after frontend pages complete, blocked by better-sqlite3 build issue*
