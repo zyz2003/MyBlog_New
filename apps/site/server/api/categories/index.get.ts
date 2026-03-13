@@ -3,7 +3,7 @@
  * GET /api/categories
  */
 
-import { db, categories } from '@/server/db';
+import { db, categories } from '../db';
 import { eq, asc } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {

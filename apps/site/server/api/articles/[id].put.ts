@@ -4,7 +4,7 @@
  */
 
 import { getCurrentUser } from '../../middleware/auth';
-import { db, posts, categories, tags, postCategories, postTags } from '@/server/db';
+import { db, posts, categories, tags, postCategories, postTags } from '../db';
 import { eq, and } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {

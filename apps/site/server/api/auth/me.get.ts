@@ -4,7 +4,7 @@
  */
 
 import { getCurrentUser } from '../../middleware/auth';
-import { db } from '@/server/db';
+import { db } from '../db';
 import { users } from '@my-blog/core/schema';
 import { eq } from 'drizzle-orm';
 

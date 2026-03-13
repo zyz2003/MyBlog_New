@@ -3,7 +3,7 @@
  * GET /api/articles/:slug
  */
 
-import { db, posts, users } from '@/server/db';
+import { db, posts, users } from '../db';
 import { eq, and } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {

@@ -3,7 +3,7 @@
  * GET /api/categories/:slug
  */
 
-import { db, categories, posts, postCategories } from '@/server/db';
+import { db, categories, posts, postCategories } from '../db';
 import { eq, and, sql } from 'drizzle-orm';
 
 export default defineEventHandler(async (event) => {
