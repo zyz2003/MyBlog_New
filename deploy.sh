@@ -2,8 +2,8 @@
 # 博客系统部署脚本
 set -e
 
-CONTAINER_NAME="my-blog"
-IMAGE_NAME="my-blog:latest"
+CONTAINER_NAME="my-blog-new"
+IMAGE_NAME="my-blog-new:latest"
 PORT="3000"
 
 echo "构建镜像..."
