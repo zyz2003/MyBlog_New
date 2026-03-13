@@ -1,16 +1,97 @@
 <script setup>
-// 复用编辑页面
-definePageMeta({
-  key: (route) => route.path,
+// 表单数据
+const form = ref({
+  title: '',
+  slug: '',
+  summary: '',
+  content: '',
+  coverImage: '',
+  status: 'draft',
+  categoryIds: [],
+  tagIds: [],
 })
 
-// 重定向到编辑页面逻辑
-const router = useRouter()
+const categories = ref([])
+const tags = ref([])
+const saving = ref(false)
 
-// 如果是 create 路由，不加载文章
-if (router.currentRoute.value.params.id === 'create') {
-  // 新建模式，不需要加载数据
+// 切换分类
+const toggleCategory = (id) => {
+  const index = form.value.categoryIds.indexOf(id)
+  if (index === -1) {
+    form.value.categoryIds.push(id)
+  } else {
+    form.value.categoryIds.splice(index, 1)
+  }
 }
+
+// 切换标签
+const toggleTag = (id) => {
+  const index = form.value.tagIds.indexOf(id)
+  if (index === -1) {
+    form.value.tagIds.push(id)
+  } else {
+    form.value.tagIds.splice(index, 1)
+  }
+}
+
+// 加载分类
+const loadCategories = async () => {
+  try {
+    const data = await $fetch('/api/categories')
+    categories.value = data.data || []
+  } catch (e) {
+    console.error('Failed to load categories:', e)
+  }
+}
+
+// 加载标签
+const loadTags = async () => {
+  try {
+    const data = await $fetch('/api/tags')
+    tags.value = data.data || []
+  } catch (e) {
+    console.error('Failed to load tags:', e)
+  }
+}
+
+// 保存文章
+const saveArticle = async (status) => {
+  if (!form.value.title.trim()) {
+    alert('请输入文章标题')
+    return
+  }
+  if (!form.value.content.trim()) {
+    alert('请输入文章内容')
+    return
+  }
+
+  try {
+    saving.value = true
+
+    const payload = {
+      ...form.value,
+      status,
+    }
+
+    const result = await $fetch('/api/articles', {
+      method: 'POST',
+      body: payload,
+    })
+
+    alert('创建成功')
+    navigateTo(`/admin/articles/edit/${result.id}`)
+  } catch (e) {
+    console.error('Failed to save article:', e)
+    alert('保存失败：' + (e.data?.message || '未知错误'))
+  } finally {
+    saving.value = false
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadCategories(), loadTags()])
+})
 </script>
 
 <template>
@@ -183,98 +264,3 @@ if (router.currentRoute.value.params.id === 'create') {
     </div>
   </div>
 </template>
-
-<script setup>
-const form = ref({
-  title: '',
-  slug: '',
-  summary: '',
-  content: '',
-  coverImage: '',
-  status: 'draft',
-  categoryIds: [],
-  tagIds: [],
-})
-
-const categories = ref([])
-const tags = ref([])
-const saving = ref(false)
-
-// 切换分类
-const toggleCategory = (id) => {
-  const index = form.value.categoryIds.indexOf(id)
-  if (index === -1) {
-    form.value.categoryIds.push(id)
-  } else {
-    form.value.categoryIds.splice(index, 1)
-  }
-}
-
-// 切换标签
-const toggleTag = (id) => {
-  const index = form.value.tagIds.indexOf(id)
-  if (index === -1) {
-    form.value.tagIds.push(id)
-  } else {
-    form.value.tagIds.splice(index, 1)
-  }
-}
-
-// 加载分类
-const loadCategories = async () => {
-  try {
-    const data = await $fetch('/api/categories')
-    categories.value = data.data || []
-  } catch (e) {
-    console.error('Failed to load categories:', e)
-  }
-}
-
-// 加载标签
-const loadTags = async () => {
-  try {
-    const data = await $fetch('/api/tags')
-    tags.value = data.data || []
-  } catch (e) {
-    console.error('Failed to load tags:', e)
-  }
-}
-
-// 保存文章
-const saveArticle = async (status) => {
-  if (!form.value.title.trim()) {
-    alert('请输入文章标题')
-    return
-  }
-  if (!form.value.content.trim()) {
-    alert('请输入文章内容')
-    return
-  }
-
-  try {
-    saving.value = true
-
-    const payload = {
-      ...form.value,
-      status,
-    }
-
-    const result = await $fetch('/api/articles', {
-      method: 'POST',
-      body: payload,
-    })
-
-    alert('创建成功')
-    navigateTo(`/admin/articles/edit/${result.id}`)
-  } catch (e) {
-    console.error('Failed to save article:', e)
-    alert('保存失败：' + (e.data?.message || '未知错误'))
-  } finally {
-    saving.value = false
-  }
-}
-
-onMounted(async () => {
-  await Promise.all([loadCategories(), loadTags()])
-})
-</script>
