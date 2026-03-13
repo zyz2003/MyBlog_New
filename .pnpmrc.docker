@@ -1,5 +1,6 @@
 # Docker 环境下的 pnpm 配置
-# 覆盖根目录的 .pnpmrc（Windows 路径在 Docker 中无效）
+# 使用淘宝镜像源加速
+registry=https://registry.npmmirror.com
 store-dir=/root/.local/share/pnpm/store
 cache-dir=/root/.cache/pnpm
 shamefully-hoist=true

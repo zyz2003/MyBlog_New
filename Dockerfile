@@ -1,12 +1,9 @@
 # 博客系统 - 生产环境
 # 使用 Node.js 20 LTS
-FROM node:20-alpine
+FROM node:20-slim
 
-# 设置 Alpine 国内镜像源
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-
-# 安装必要的工具
-RUN apk add --no-cache git
+# 设置 npm 淘宝镜像
+ENV NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
 
 # 设置工作目录
 WORKDIR /app
