@@ -1,0 +1,43 @@
+{
+  "name": "@my-blog/core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./plugin-adapter": {
+      "types": "./dist/plugin-adapter.d.ts",
+      "import": "./dist/plugin-adapter.mjs",
+      "require": "./dist/plugin-adapter.cjs"
+    },
+    "./database": {
+      "types": "./dist/database.d.ts",
+      "import": "./dist/database.mjs",
+      "require": "./dist/database.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "unbuild --stub",
+    "build": "unbuild",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.29.0",
+    "better-sqlite3": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.10.0",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.0",
+    "unbuild": "^2.0.0"
+  }
+}
