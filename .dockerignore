@@ -1,0 +1,16 @@
+.git
+.gitignore
+.planning
+*.md
+!README.md
+.vscode
+.idea
+*.log
+.DS_Store
+data/*.db
+data/*.db-journal
+node_modules
+dist
+.cache
+.nuxt
+.output
