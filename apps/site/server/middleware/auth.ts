@@ -8,11 +8,23 @@ import type { H3Event } from 'h3';
 
 // JWT 密钥 - 生产环境必须设置 JWT_SECRET 环境变量
 const JWT_SECRET_ENV = process.env.JWT_SECRET;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
+// 生产环境严格校验 JWT_SECRET
 if (!JWT_SECRET_ENV) {
-  console.warn('WARNING: JWT_SECRET environment variable is not set!');
-  console.warn('Using a temporary secret for development only.');
-  console.warn('Set JWT_SECRET in your .env file before deploying to production.');
+  if (IS_PRODUCTION) {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  console.warn('[DEV] JWT_SECRET not set, using temporary secret');
+}
+
+// 校验 JWT_SECRET 长度
+if (JWT_SECRET_ENV && JWT_SECRET_ENV.length < 32) {
+  const msg = 'JWT_SECRET should be at least 32 characters for security';
+  if (IS_PRODUCTION) {
+    throw new Error(msg);
+  }
+  console.warn(`[DEV] ${msg}`);
 }
 
 const JWT_SECRET = new TextEncoder().encode(
