@@ -1,8 +1,8 @@
 # Project State: 个人博客系统
 
 **Current Phase**: Phase 1 - 项目脚手架与核心系统
-**Current Wave**: Wave 2 - 前端页面完成，数据库构建问题待解决
-**Last Updated**: 2026-03-13
+**Current Wave**: Wave 3 - 安全修复完成，等待数据库迁移
+**Last Updated**: 2026-03-14
 
 ---
 
@@ -93,8 +93,22 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 - ✅ nuxt.config.ts 配置 Nitro 和别名
 - ✅ .pnpmrc 配置 (hoisted 模式)
 
+### 安全修复 (2026-03-14)
+
+**修复内容**:
+- ✅ JWT 密钥从硬编码改为从 `JWT_SECRET` 环境变量读取
+- ✅ 默认管理员密码从硬编码 `admin123` 改为从 `ADMIN_PASSWORD` 环境变量读取或生成随机密码
+- ✅ 使用 `crypto.randomBytes` 生成密码学安全的随机密码
+- ✅ TypeScript 类型安全改进 (`auth.ts` 使用 `H3Event` 类型)
+- ✅ 迁移脚本登录提示修正
+
+**评审状态**: ✅ Code Reviewer 评审通过 (有条件通过)
+
 ### 待完成工作
 - [x] 解决 better-sqlite3 构建问题 - 使用 Docker 容器运行
+- [x] 修复 JWT 密钥硬编码安全问题 - 已改为环境变量读取
+- [x] 移除默认密码硬编码 - 改用 ADMIN_PASSWORD 环境变量或生成随机密码
+- [x] 修复 TypeScript 类型安全问题 - auth.ts 类型定义完善
 - [ ] 运行数据库迁移 (pnpm db:migrate)
 - [ ] 测试 API 功能
 - [ ] 联调前后端
@@ -102,6 +116,14 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 ---
 
 ## Recent Progress
+
+**2026-03-14 Session 6 - 安全修复**:
+- 修复 JWT 密钥硬编码问题（auth.ts, nuxt.config.ts）
+- 修复默认管理员密码硬编码问题（migrate.ts）
+- 使用 crypto.randomBytes 生成安全随机密码
+- 修复 TypeScript 类型安全问题
+- Code Reviewer 评审通过
+- 更新 STATE.md 开发日志
 
 **2026-03-13 Session 5**:
 - 创建 Docker 环境配置（Dockerfile, docker-compose.yml, .dockerignore, .pnpmrc.docker）
@@ -144,6 +166,8 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 | JWT 认证方案 | 2026-03-13 | ✓ Implemented |
 | 使用 bcrypt 加密密码 | 2026-03-13 | ✓ Implemented |
 | pnpm hoisted 模式 | 2026-03-13 | ✓ Active |
+| 安全修复优先 | 2026-03-14 | ✓ Completed |
+| 团队协作分析 | 2026-03-14 | ✓ Completed |
 
 ---
 
@@ -187,4 +211,4 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 
 ---
 
-*Last updated: 2026-03-13 - Docker 环境配置完成，等待服务器构建和测试*
+*Last updated: 2026-03-14 - 安全修复完成，Code Reviewer 评审通过*

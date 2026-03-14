@@ -18,7 +18,8 @@ export default defineNuxtConfig({
       apiBaseUrl: '/api',
     },
     databasePath: process.env.DATABASE_PATH || './data/blog.db',
-    jwtSecret: process.env.JWT_SECRET || 'my-blog-secret-key-change-in-production',
+    // JWT 密钥 - 生产环境必须设置 JWT_SECRET 环境变量
+    jwtSecret: process.env.JWT_SECRET,
   },
 
   // 路由配置
@@ -42,12 +43,7 @@ export default defineNuxtConfig({
     },
     // 添加 server 目录的别名
     alias: {
-      '#db': './server/db',
-    },
-    rollupConfig: {
-      output: {
-        preserveModules: true,
-      },
+      '#db': './server/db.ts',
     },
   },
 

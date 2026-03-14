@@ -5,16 +5,25 @@
  * Usage: pnpm db:migrate
  */
 
+// 加载环境变量 - 使用根目录的 .env 文件
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
+import { randomBytes } from 'crypto';
 
 // 从环境变量获取数据库配置
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '3306'),
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
+  password: process.env.DB_PASSWORD || '123456',
   database: process.env.DB_NAME || 'my_blog',
 };
 
@@ -36,10 +45,10 @@ async function runMigrations() {
 
     console.log('Running database migrations...');
 
-    // 运行迁移
-    await connection.query(`
-      -- 用户表
-      CREATE TABLE IF NOT EXISTS users (
+    // 逐个执行 SQL 语句
+    const statements = [
+      // 用户表
+      `CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(32) PRIMARY KEY,
         username VARCHAR(50) NOT NULL UNIQUE,
         email VARCHAR(100) NOT NULL UNIQUE,
@@ -50,13 +59,11 @@ async function runMigrations() {
         status VARCHAR(20) DEFAULT 'active' NOT NULL,
         last_login_at TIMESTAMP NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        CONSTRAINT chk_user_role CHECK (role IN ('admin', 'editor', 'author', 'subscriber')),
-        CONSTRAINT chk_user_status CHECK (status IN ('active', 'inactive', 'banned'))
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-      -- 文章表
-      CREATE TABLE IF NOT EXISTS posts (
+      // 文章表
+      `CREATE TABLE IF NOT EXISTS posts (
         id VARCHAR(32) PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         slug VARCHAR(255) NOT NULL UNIQUE,
@@ -79,13 +86,11 @@ async function runMigrations() {
         seo_keywords TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        CONSTRAINT chk_post_status CHECK (status IN ('draft', 'published', 'scheduled', 'archived')),
-        CONSTRAINT chk_post_format CHECK (content_format IN ('markdown', 'html', 'rich-text')),
         CONSTRAINT fk_posts_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-      -- 分类表
-      CREATE TABLE IF NOT EXISTS categories (
+      // 分类表
+      `CREATE TABLE IF NOT EXISTS categories (
         id VARCHAR(32) PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         slug VARCHAR(100) NOT NULL UNIQUE,
@@ -96,10 +101,10 @@ async function runMigrations() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         CONSTRAINT fk_categories_parent FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE SET NULL
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-      -- 标签表
-      CREATE TABLE IF NOT EXISTS tags (
+      // 标签表
+      `CREATE TABLE IF NOT EXISTS tags (
         id VARCHAR(32) PRIMARY KEY,
         name VARCHAR(50) NOT NULL UNIQUE,
         slug VARCHAR(50) NOT NULL UNIQUE,
@@ -107,42 +112,62 @@ async function runMigrations() {
         color VARCHAR(20),
         post_count INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-      -- 文章 - 分类关联表
-      CREATE TABLE IF NOT EXISTS post_categories (
+      // 文章 - 分类关联表
+      `CREATE TABLE IF NOT EXISTS post_categories (
         post_id VARCHAR(32) NOT NULL,
         category_id VARCHAR(32) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (post_id, category_id),
         CONSTRAINT fk_pc_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
         CONSTRAINT fk_pc_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-      -- 文章 - 标签关联表
-      CREATE TABLE IF NOT EXISTS post_tags (
+      // 文章 - 标签关联表
+      `CREATE TABLE IF NOT EXISTS post_tags (
         post_id VARCHAR(32) NOT NULL,
         tag_id VARCHAR(32) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (post_id, tag_id),
         CONSTRAINT fk_pt_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
         CONSTRAINT fk_pt_tag FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-      -- 迁移记录表
-      CREATE TABLE IF NOT EXISTS _migrations (
+      // 迁移记录表
+      `CREATE TABLE IF NOT EXISTS _migrations (
         id VARCHAR(50) PRIMARY KEY,
         executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+    ];
 
-      -- 索引
-      CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status);
-      CREATE INDEX IF NOT EXISTS idx_posts_author ON posts(author_id);
-      CREATE INDEX IF NOT EXISTS idx_posts_published_at ON posts(published_at);
-      CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
-      CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
-      CREATE INDEX IF NOT EXISTS idx_tags_slug ON tags(slug);
-    `);
+    for (const sql of statements) {
+      await connection.query(sql);
+      console.log('✓ Table created');
+    }
+
+    // 创建索引
+    const indexes = [
+      'CREATE INDEX idx_posts_status ON posts(status)',
+      'CREATE INDEX idx_posts_author ON posts(author_id)',
+      'CREATE INDEX idx_posts_published_at ON posts(published_at)',
+      'CREATE INDEX idx_posts_slug ON posts(slug)',
+      'CREATE INDEX idx_categories_slug ON categories(slug)',
+      'CREATE INDEX idx_tags_slug ON tags(slug)',
+    ];
+
+    for (const sql of indexes) {
+      try {
+        await connection.query(sql);
+        console.log('✓ Index created');
+      } catch (e: any) {
+        if (e.code === 'ER_DUP_KEY_NAME') {
+          console.log('✓ Index already exists');
+        } else {
+          throw e;
+        }
+      }
+    }
 
     console.log('✓ Database tables created successfully!');
 
@@ -150,13 +175,27 @@ async function runMigrations() {
     console.log('Creating default admin user...');
 
     const [existingUsers]: any[] = await connection.query(
-      'SELECT * FROM users WHERE role = ? LIMIT 1',
-      ['admin']
+      'SELECT * FROM users LIMIT 1'
     );
 
     if (existingUsers.length === 0) {
+      // 从环境变量读取管理员密码，如果没有设置则生成随机密码
+      const adminPassword = process.env.ADMIN_PASSWORD;
+      let passwordToHash: string;
+
+      if (adminPassword) {
+        passwordToHash = adminPassword;
+        console.log('✓ Using password from ADMIN_PASSWORD environment variable');
+      } else {
+        // 使用密码学安全的随机数生成器生成随机密码
+        passwordToHash = 'admin-' + randomBytes(6).toString('hex');
+        console.warn('\\n⚠️  WARNING: ADMIN_PASSWORD not set, using random password');
+        console.warn('Save this password immediately:', passwordToHash);
+        console.warn('Set ADMIN_PASSWORD in .env file to use a custom password.\\n');
+      }
+
       const adminId = nanoid();
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
       await connection.query(
         `INSERT INTO users (id, username, email, password, role, status, created_at, updated_at)
@@ -166,7 +205,11 @@ async function runMigrations() {
 
       console.log('✓ Default admin user created!');
       console.log('  Username: admin');
-      console.log('  Password: admin123');
+      if (adminPassword) {
+        console.log('  Password: (from ADMIN_PASSWORD environment variable)');
+      } else {
+        console.log('  Password:', passwordToHash);
+      }
       console.log('  (请首次登录后修改密码)');
     } else {
       console.log('✓ Admin user already exists');
@@ -185,11 +228,11 @@ async function runMigrations() {
 
     await connection.end();
 
-    console.log('\n✅ Database initialization complete!');
-    console.log('\nNext steps:');
+    console.log('\\n✅ Database initialization complete!');
+    console.log('\\nNext steps:');
     console.log('  1. Run "pnpm dev" to start the development server');
-    console.log('  2. Login with admin/admin123');
-    console.log('  3. Change the default password!');
+    console.log('  2. Login with admin / <your password>');
+    console.log('  3. Change the default password after first login!');
 
   } catch (error) {
     console.error('Migration failed:', error);

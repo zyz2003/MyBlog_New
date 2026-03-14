@@ -4,10 +4,19 @@
  */
 
 import { jwtVerify, SignJWT } from 'jose';
+import type { H3Event } from 'h3';
 
-// JWT 密钥（生产环境应该使用环境变量）
+// JWT 密钥 - 生产环境必须设置 JWT_SECRET 环境变量
+const JWT_SECRET_ENV = process.env.JWT_SECRET;
+
+if (!JWT_SECRET_ENV) {
+  console.warn('WARNING: JWT_SECRET environment variable is not set!');
+  console.warn('Using a temporary secret for development only.');
+  console.warn('Set JWT_SECRET in your .env file before deploying to production.');
+}
+
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'my-blog-secret-key-change-in-production'
+  JWT_SECRET_ENV || 'dev-secret-key-must-change-in-production'
 );
 
 // 不需要认证的路由
@@ -59,7 +68,7 @@ export default defineEventHandler(async (event) => {
 /**
  * 获取当前用户
  */
-export function getCurrentUser(event: any) {
+export function getCurrentUser(event: H3Event) {
   return getContext(event, 'user');
 }
 
