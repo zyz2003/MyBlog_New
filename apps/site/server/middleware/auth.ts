@@ -5,6 +5,7 @@
 
 import { jwtVerify, SignJWT } from 'jose';
 import type { H3Event } from 'h3';
+import { defineEventHandler, getHeader, createError } from 'h3';
 
 // JWT 密钥 - 生产环境必须设置 JWT_SECRET 环境变量
 const JWT_SECRET_ENV = process.env.JWT_SECRET;
@@ -15,16 +16,13 @@ if (!JWT_SECRET_ENV) {
   if (IS_PRODUCTION) {
     throw new Error('JWT_SECRET environment variable is required in production');
   }
-  console.warn('[DEV] JWT_SECRET not set, using temporary secret');
 }
 
 // 校验 JWT_SECRET 长度
 if (JWT_SECRET_ENV && JWT_SECRET_ENV.length < 32) {
-  const msg = 'JWT_SECRET should be at least 32 characters for security';
   if (IS_PRODUCTION) {
-    throw new Error(msg);
+    throw new Error('JWT_SECRET should be at least 32 characters for security');
   }
-  console.warn(`[DEV] ${msg}`);
 }
 
 const JWT_SECRET = new TextEncoder().encode(
@@ -68,8 +66,8 @@ export default defineEventHandler(async (event) => {
     // 验证 token
     const verified = await jwtVerify(token, JWT_SECRET);
     // 将用户信息添加到上下文中
-    setContext(event, 'user', verified.payload);
-  } catch (error) {
+    event.context.user = verified.payload;
+  } catch (error: any) {
     throw createError({
       statusCode: 401,
       message: 'Token 无效或已过期',
@@ -81,7 +79,7 @@ export default defineEventHandler(async (event) => {
  * 获取当前用户
  */
 export function getCurrentUser(event: H3Event) {
-  return getContext(event, 'user');
+  return event.context.user;
 }
 
 /**

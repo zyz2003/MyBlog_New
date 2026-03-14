@@ -65,7 +65,8 @@ export default defineEventHandler(async (event) => {
     const postId = nanoid();
     const now = new Date();
 
-    const newPost = await db.insert(posts).values({
+    // MySQL 不支持 returning()，直接插入后使用 postId 查询
+    await db.insert(posts).values({
       id: postId,
       title,
       slug: finalSlug,
@@ -81,7 +82,7 @@ export default defineEventHandler(async (event) => {
       seoKeywords,
       createdAt: now,
       updatedAt: now,
-    }).returning();
+    });
 
     // 关联分类
     if (categoryIds.length > 0) {

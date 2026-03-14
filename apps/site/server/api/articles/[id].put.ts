@@ -79,8 +79,8 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // 更新文章
-    const updatedPost = await db.update(posts)
+    // 更新文章 (MySQL 不支持 .returning()，先 update 再 query)
+    await db.update(posts)
       .set({
         title: title || existingPost.title,
         slug: slug || existingPost.slug,
@@ -94,8 +94,7 @@ export default defineEventHandler(async (event) => {
         seoKeywords: seoKeywords !== undefined ? seoKeywords : existingPost.seoKeywords,
         updatedAt: new Date(),
       })
-      .where(eq(posts.id, id))
-      .returning();
+      .where(eq(posts.id, id));
 
     // 更新分类关联（先删除旧的，再添加新的）
     if (categoryIds) {

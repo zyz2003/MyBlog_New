@@ -1,7 +1,7 @@
 # Project State: 个人博客系统
 
 **Current Phase**: Phase 1 - 项目脚手架与核心系统
-**Current Wave**: Wave 4 - P1 安全增强完成
+**Current Wave**: Wave 5 - Quick Task 3 数据库迁移与 API 联调完成
 **Last Updated**: 2026-03-14
 
 ---
@@ -119,13 +119,22 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 - [x] 修复 JWT 密钥硬编码安全问题 - 已改为环境变量读取
 - [x] 移除默认密码硬编码 - 改用 ADMIN_PASSWORD 环境变量或生成随机密码
 - [x] 修复 TypeScript 类型安全问题 - auth.ts 类型定义完善
-- [ ] 运行数据库迁移 (pnpm db:migrate)
-- [ ] 测试 API 功能
-- [ ] 联调前后端
+- [x] 运行数据库迁移 (pnpm db:migrate) - MySQL 迁移成功
+- [x] 测试 API 功能 - API 测试全部通过
+- [x] 联调前后端 - 完成
 
 ---
 
 ## Recent Progress
+
+**2026-03-14 Quick Task 3 - 数据库迁移与 API 联调**:
+- 数据库迁移成功 (MySQL)
+- API 测试全部通过
+- 修复 Bug: 创建文章 API (.returning() 问题)
+- 修复 Bug: 更新文章 API (.returning() 问题)
+- 修复 Bug: package.json dotenv 位置
+- 团队评审通过
+- 更新 STATE.md 开发日志
 
 **2026-03-14 Session 7 - P1 安全增强**:
 - 添加 JWT_SECRET 最小长度校验 (32 字符)
@@ -188,6 +197,8 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 | 团队协作分析 | 2026-03-14 | ✓ Completed |
 | P1 安全增强 | 2026-03-14 | ✓ Completed |
 | GSD Quick Task 工作流 | 2026-03-14 | ✓ Active |
+| 数据库迁移到 MySQL | 2026-03-14 | ✓ Completed |
+| API Bug 修复 | 2026-03-14 | ✓ Completed |
 
 ---
 
@@ -231,4 +242,4 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 
 ---
 
-*Last updated: 2026-03-14 - 安全修复完成，Code Reviewer 评审通过*
+*Last updated: 2026-03-14 - Quick Task 3 完成，数据库迁移成功，API 测试全部通过*
