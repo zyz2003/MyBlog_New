@@ -161,7 +161,7 @@ async function runMigrations() {
         await connection.query(sql);
         console.log('✓ Index created');
       } catch (e: any) {
-        if (e.code === 'ER_DUP_KEY_NAME') {
+        if (e.code === 'ER_DUP_KEY_NAME' || e.code === 'ER_DUP_KEY') {
           console.log('✓ Index already exists');
         } else {
           throw e;

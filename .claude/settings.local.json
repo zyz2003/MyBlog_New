@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node verify-db.js)",
+      "Bash(node --experimental-require-module D:/CodeDevelopment/project/My_blog_new/verify-db.js)",
+      "Bash(taskkill //IM node.exe //F)",
+      "Bash(pnpm dev:*)",
+      "Bash(ls -la D:/CodeDevelopment/project/My_blog_new/apps/site/.env*)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"username\"\":\"\"admin\"\",\"\"password\"\":\"\"admin123\"\"}')",
+      "Bash(curl -s http://localhost:3000/api/auth/me -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Imp5M3NiWEVWN245STZXSThzYks2cyIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzM0NjA0MjksImV4cCI6MTc3MzU0NjgyOX0.2Anxi7Cd3gKsqQfZeWaN0KKotmz_2sUsUvMgNpYUaaQ\")",
+      "Bash(curl -s http://localhost:3000/api/health)",
+      "Bash(mysql -h localhost -u root -p123456 -D my_blog -e \"SHOW TABLES;\")",
+      "Bash(mysql -h localhost -u root -p123456 -D my_blog -e \"SELECT id, username, email, role, status, created_at FROM users WHERE role = ''admin'';\")",
+      "Bash(mysql -h localhost -u root -p123456 -D my_blog -e \"SELECT * FROM _migrations;\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3000\")",
+      "Bash(curl -s http://localhost:3000/api/articles)",
+      "Bash(curl -s http://localhost:3000/api/categories)",
+      "Bash(curl -s http://localhost:3000/api/tags)",
+      "Bash(curl -s https://registry.npmjs.org/h3/latest)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''''exports'''',''''N/A''''\\)\\)\")",
+      "Bash(cat node_modules/.pnpm/h3@*/node_modules/h3/dist/index.d.ts)",
+      "Bash(grep -r \"getContext\\\\|setContext\" d:/CodeDevelopment/project/My_blog_new/node_modules/.pnpm/h3@*/node_modules/h3/dist/index.d.ts)",
+      "Bash(taskkill /F /PID 39428)",
+      "Bash(curl -s http://localhost:3000/api/auth/me -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Imp5M3NiWEVWN245STZXSThzYks2cyIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzM0NjI0MjUsImV4cCI6MTc3MzU0ODgyNX0.fo9GrLbYc-D_bQdvKSYGohp1mu97Ma37HueX-4EC4KY\")",
+      "Bash(curl -s http://localhost:3000/api/articles -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Imp5M3NiWEVWN245STZXSThzYks2cyIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzM0NjI0MjUsImV4cCI6MTc3MzU0ODgyNX0.fo9GrLbYc-D_bQdvKSYGohp1mu97Ma37HueX-4EC4KY\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/articles -H \"Content-Type: application/json\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Imp5M3NiWEVWN245STZXSThzYks2cyIsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3NzM0NjI0MjUsImV4cCI6MTc3MzU0ODgyNX0.fo9GrLbYc-D_bQdvKSYGohp1mu97Ma37HueX-4EC4KY\" -d '{\"\"title\"\":\"\"测试文章标题\"\",\"\"summary\"\":\"\"这是一篇测试文章的摘要\"\",\"\"content\"\":\"\"这是测试文章的正文内容\"\",\"\"status\"\":\"\"published\"\"}')"
+    ]
+  }
+}

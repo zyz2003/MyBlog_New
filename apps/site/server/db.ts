@@ -1,6 +1,10 @@
 /**
  * 数据库连接单例
  * 使用 MySQL + Drizzle ORM
+ *
+ * 注意：不要在这里使用 dotenv.config()
+ * Nuxt 会在启动时自动加载 .env 文件到 process.env
+ * 在 Nitro 服务器环境中，dotenv.config() 可能无法找到正确的 .env 文件路径
  */
 
 import { drizzle } from 'drizzle-orm/mysql2';
