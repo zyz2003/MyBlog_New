@@ -15,13 +15,13 @@ created: 2026-03-17
 
 ## Test Infrastructure
 
-| Property | Value |
-|----------|-------|
-| **Framework** | vitest (for utils) + shell scripts (for infra) |
-| **Config file** | vitest.config.ts (Wave 0 installs) |
-| **Quick run command** | `pnpm test` |
-| **Full suite command** | `pnpm test && pnpm lint && pnpm type-check` |
-| **Estimated runtime** | ~30 seconds |
+| Property               | Value                                          |
+| ---------------------- | ---------------------------------------------- |
+| **Framework**          | vitest (for utils) + shell scripts (for infra) |
+| **Config file**        | vitest.config.ts (Wave 0 installs)             |
+| **Quick run command**  | `pnpm test`                                    |
+| **Full suite command** | `pnpm test && pnpm lint && pnpm type-check`    |
+| **Estimated runtime**  | ~30 seconds                                    |
 
 ---
 
@@ -36,15 +36,15 @@ created: 2026-03-17
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 1 | CORE-01 | shell | `pnpm exec pnpm ls -r` | ❌ W0 | ⬜ pending |
-| 01-01-02 | 01 | 1 | CORE-02 | vitest | `pnpm test` | ❌ W0 | ⬜ pending |
-| 01-01-03 | 01 | 1 | CORE-03 | shell | `pnpm lint` | ❌ W0 | ⬜ pending |
-| 01-01-04 | 01 | 1 | CORE-04 | shell | `git commit -m "test"` | ❌ W0 | ⬜ pending |
-| 01-01-05 | 01 | 1 | CORE-05 | shell | `pnpm build` | ❌ W0 | ⬜ pending |
+| Task ID  | Plan | Wave | Requirement | Test Type | Automated Command      | File Exists | Status     |
+| -------- | ---- | ---- | ----------- | --------- | ---------------------- | ----------- | ---------- |
+| 01-01-01 | 01   | 1    | CORE-01     | shell     | `pnpm exec pnpm ls -r` | ❌ W0       | ⬜ pending |
+| 01-01-02 | 01   | 1    | CORE-02     | vitest    | `pnpm test`            | ❌ W0       | ⬜ pending |
+| 01-01-03 | 01   | 1    | CORE-03     | shell     | `pnpm lint`            | ❌ W0       | ⬜ pending |
+| 01-01-04 | 01   | 1    | CORE-04     | shell     | `git commit -m "test"` | ❌ W0       | ⬜ pending |
+| 01-01-05 | 01   | 1    | CORE-05     | shell     | `pnpm build`           | ❌ W0       | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+_Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky_
 
 ---
 
@@ -59,10 +59,10 @@ created: 2026-03-17
 
 ## Manual-Only Verifications
 
-| Behavior | Requirement | Why Manual | Test Instructions |
-|----------|-------------|------------|-------------------|
-| Git Hooks intercept commits | CORE-04 | Requires interactive git action | Create a test commit and verify Husky runs lint-staged |
-| CI/CD pipeline triggers | CORE-05 | Requires GitHub push | Push to a test branch and verify GitHub Actions runs |
+| Behavior                    | Requirement | Why Manual                      | Test Instructions                                      |
+| --------------------------- | ----------- | ------------------------------- | ------------------------------------------------------ |
+| Git Hooks intercept commits | CORE-04     | Requires interactive git action | Create a test commit and verify Husky runs lint-staged |
+| CI/CD pipeline triggers     | CORE-05     | Requires GitHub push            | Push to a test branch and verify GitHub Actions runs   |
 
 ---
 

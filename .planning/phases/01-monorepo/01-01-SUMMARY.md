@@ -71,7 +71,7 @@ completed: 2026-03-17
 
 ## Accomplishments
 
-- pnpm workspace configured with apps/*, packages/*, themes/* directories
+- pnpm workspace configured with apps/_, packages/_, themes/\* directories
 - TypeScript base configuration with moderate strict mode (noImplicitAny, strictNullChecks)
 - 5 packages created: @my-blog/core, @my-blog/database, @my-blog/utils, @my-blog/types, @my-blog/cli
 - apps/site Nuxt 3 application skeleton with workspace package aliases
@@ -108,22 +108,24 @@ Each task was committed atomically:
 - Used pnpm 10.x with sharedWorkspaceLockfile and linkWorkspacePackages enabled
 - TypeScript config uses moderate strict mode (strict: false but noImplicitAny: true)
 - Each package uses tsup for building with CJS and ESM output formats
-- Package naming convention: @my-blog/* scoped packages
-- Path alias @/* maps to src/* within each package
+- Package naming convention: @my-blog/\* scoped packages
+- Path alias @/_ maps to src/_ within each package
 
 ## Deviations from Plan
 
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Added baseUrl to package tsconfig.json files**
+
 - **Found during:** Task 3 (Type-check verification)
 - **Issue:** TypeScript paths require baseUrl to be set when using non-relative paths
 - **Fix:** Added "baseUrl": "." to all 5 package tsconfig.json files
-- **Files modified:** packages/*/tsconfig.json (5 files)
+- **Files modified:** packages/\*/tsconfig.json (5 files)
 - **Verification:** pnpm -r exec tsc --noEmit passes after fix
 - **Committed in:** 3e814c4 (part of Task 3 commit)
 
 **2. [Rule 3 - Blocking] Fixed nuxt.config.ts defineNuxtConfig type error**
+
 - **Found during:** Task 4 (Type-check verification)
 - **Issue:** defineNuxtConfig is a global not available without Nuxt types context
 - **Fix:** Changed to use NuxtConfig type import and plain object export
@@ -149,7 +151,8 @@ Each task was committed atomically:
 - All workspace dependencies properly linked
 
 ---
-*Phase: 01-monorepo*
-*Completed: 2026-03-17*
+
+_Phase: 01-monorepo_
+_Completed: 2026-03-17_
 
 ## Self-Check: PASSED

@@ -9,9 +9,9 @@
 
 - [x] **CORE-01**: Monorepo 脚手架搭建（pnpm workspace）
 - [x] **CORE-02**: TypeScript 配置和类型定义
-- [ ] **CORE-03**: ESLint + Prettier 代码规范
-- [ ] **CORE-04**: Git Hooks 配置（Husky）
-- [ ] **CORE-05**: CI/CD 基础配置
+- [x] **CORE-03**: ESLint + Prettier 代码规范
+- [x] **CORE-04**: Git Hooks 配置（Husky）
+- [x] **CORE-05**: CI/CD 基础配置
 
 ### 数据库层 (DB)
 
@@ -90,16 +90,19 @@
 ## v2 Requirements
 
 ### 评论系统
+
 - **COMMENT-01**: 内置评论功能
 - **COMMENT-02**: 评论审核管理
 - **COMMENT-03**: 第三方评论集成（Twikoo）
 
 ### 数据统计
+
 - **ANALYTICS-01**: 访问量统计
 - **ANALYTICS-02**: 热门文章排行
 - **ANALYTICS-03**: 访问来源分析
 
 ### 高级功能
+
 - **ADVANCED-01**: 草稿预览功能
 - **ADVANCED-02**: 定时发布
 - **ADVANCED-03**: 版本历史/回滚
@@ -108,48 +111,50 @@
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
-| 移动端 App | 优先 Web，后续考虑 PWA |
-| 多语言国际化 | v1 仅支持中文 |
-| 付费订阅功能 | 基础博客功能优先 |
-| 实时协作编辑 | 高复杂度，非核心需求 |
-| 视频上传 | 存储/带宽成本高 |
+| Feature      | Reason                 |
+| ------------ | ---------------------- |
+| 移动端 App   | 优先 Web，后续考虑 PWA |
+| 多语言国际化 | v1 仅支持中文          |
+| 付费订阅功能 | 基础博客功能优先       |
+| 实时协作编辑 | 高复杂度，非核心需求   |
+| 视频上传     | 存储/带宽成本高        |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| CORE-01 | Phase 1 | Complete |
-| CORE-02 | Phase 1 | Complete |
-| CORE-03 | Phase 1 | Pending |
-| CORE-04 | Phase 1 | Pending |
-| CORE-05 | Phase 1 | Pending |
-| DB-01 | Phase 3 | Pending |
-| DB-02 | Phase 3 | Pending |
-| DB-03 | Phase 3 | Pending |
-| DB-04 | Phase 3 | Pending |
-| DB-05 | Phase 3 | Pending |
-| DB-06 | Phase 3 | Pending |
-| DB-07 | Phase 3 | Pending |
-| DB-08 | Phase 3 | Pending |
-| DB-09 | Phase 3 | Pending |
-| DB-10 | Phase 3 | Pending |
-| API-01 | Phase 4 | Pending |
-| API-02 | Phase 4 | Pending |
-| API-03 | Phase 4 | Pending |
-| API-04 | Phase 4 | Pending |
-| API-05 | Phase 4 | Pending |
-| API-06 | Phase 4 | Pending |
-| API-07 | Phase 4 | Pending |
-| API-08 | Phase 4 | Pending |
-| API-09 | Phase 4 | Pending |
+| Requirement | Phase   | Status   |
+| ----------- | ------- | -------- |
+| CORE-01     | Phase 1 | Complete |
+| CORE-02     | Phase 1 | Complete |
+| CORE-03     | Phase 1 | Pending  |
+| CORE-04     | Phase 1 | Pending  |
+| CORE-05     | Phase 1 | Pending  |
+| DB-01       | Phase 3 | Pending  |
+| DB-02       | Phase 3 | Pending  |
+| DB-03       | Phase 3 | Pending  |
+| DB-04       | Phase 3 | Pending  |
+| DB-05       | Phase 3 | Pending  |
+| DB-06       | Phase 3 | Pending  |
+| DB-07       | Phase 3 | Pending  |
+| DB-08       | Phase 3 | Pending  |
+| DB-09       | Phase 3 | Pending  |
+| DB-10       | Phase 3 | Pending  |
+| API-01      | Phase 4 | Pending  |
+| API-02      | Phase 4 | Pending  |
+| API-03      | Phase 4 | Pending  |
+| API-04      | Phase 4 | Pending  |
+| API-05      | Phase 4 | Pending  |
+| API-06      | Phase 4 | Pending  |
+| API-07      | Phase 4 | Pending  |
+| API-08      | Phase 4 | Pending  |
+| API-09      | Phase 4 | Pending  |
 
 **Coverage:**
+
 - v1 requirements: 58 total
 - Mapped to phases: 22 (Phase 1-4 初步映射)
 - Unmapped: 36 (待后续 Phase 5-11 映射)
 
 ---
-*Requirements defined: 2026-03-16*
-*Last updated: 2026-03-16 after initial definition*
+
+_Requirements defined: 2026-03-16_
+_Last updated: 2026-03-16 after initial definition_

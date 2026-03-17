@@ -48,13 +48,14 @@
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| 模块化单体架构 | 平衡开发效率和可维护性，避免过度微服务化 | — Pending |
+| Decision       | Rationale                                        | Outcome   |
+| -------------- | ------------------------------------------------ | --------- |
+| 模块化单体架构 | 平衡开发效率和可维护性，避免过度微服务化         | — Pending |
 | pnpm workspace | 优于 npm/yarn 的 monorepo 方案，依赖提升节省空间 | — Pending |
-| Drizzle ORM | 类型安全、轻量、SQL-like 查询 | — Pending |
-| Tailwind CSS | 原子化 CSS，快速开发，主题定制友好 | — Pending |
-| Nitro Server | Nuxt 3 内置，零配置 API 路由 | — Pending |
+| Drizzle ORM    | 类型安全、轻量、SQL-like 查询                    | — Pending |
+| Tailwind CSS   | 原子化 CSS，快速开发，主题定制友好               | — Pending |
+| Nitro Server   | Nuxt 3 内置，零配置 API 路由                     | — Pending |
 
 ---
-*Last updated: 2026-03-16 after project initialization*
+
+_Last updated: 2026-03-16 after project initialization_
