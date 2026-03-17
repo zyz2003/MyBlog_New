@@ -1,0 +1,8 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'themes/*'
+
+settings:
+  sharedWorkspaceLockfile: true
+  linkWorkspacePackages: true
