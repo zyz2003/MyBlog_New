@@ -5,4 +5,4 @@ packages:
 
 settings:
   sharedWorkspaceLockfile: true
-  linkWorkspacePackages: true
+  linkWorkspacePackages: false
