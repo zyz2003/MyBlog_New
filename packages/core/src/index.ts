@@ -20,3 +20,6 @@ export function initCore() {
     name: '@my-blog/core',
   }
 }
+
+// Export theme system
+export * from './theme'

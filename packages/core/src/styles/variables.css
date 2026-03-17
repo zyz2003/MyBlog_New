@@ -1,0 +1,107 @@
+/* =============================================
+   基础变量（所有主题共享）
+   ============================================= */
+
+:root {
+  /* 字体系列 */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', monospace;
+
+  /* 过渡 */
+  --transition-fast: 150ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+}
+
+/* =============================================
+   Classic 主题（默认）
+   ============================================= */
+
+[data-theme='classic'] {
+  /* 颜色 */
+  --color-primary: #2c5282;
+  --color-secondary: #4a5568;
+  --color-accent: #3182ce;
+  --color-background: #ffffff;
+  --color-surface: #f7fafc;
+  --color-text: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-border: #e2e8f0;
+  --color-error: #e53e3e;
+  --color-success: #38a169;
+  --color-warning: #dd6b20;
+
+  /* 排版 */
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+  --font-weight-base: 400;
+  --letter-spacing-base: normal;
+
+  /* 间距 */
+  --spacing-unit: 8px;
+  --spacing-xs: calc(var(--spacing-unit) * 0.5);
+  --spacing-sm: calc(var(--spacing-unit) * 1);
+  --spacing-md: calc(var(--spacing-unit) * 2);
+  --spacing-lg: calc(var(--spacing-unit) * 3);
+  --spacing-xl: calc(var(--spacing-unit) * 4);
+
+  /* 圆角 */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* =============================================
+   Minimal 主题
+   ============================================= */
+
+[data-theme='minimal'] {
+  /* 颜色 - 极简黑白 */
+  --color-primary: #000000;
+  --color-secondary: #333333;
+  --color-accent: #666666;
+  --color-background: #f5f5f5;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-border: #e0e0e0;
+  --color-error: #d32f2f;
+  --color-success: #388e3c;
+  --color-warning: #f57c00;
+
+  /* 排版 - 更紧凑 */
+  --font-size-base: 15px;
+  --line-height-base: 1.6;
+  --font-weight-base: 400;
+  --letter-spacing-base: 0.02em;
+
+  /* 间距 - 更小的单位 */
+  --spacing-unit: 4px;
+  --spacing-xs: calc(var(--spacing-unit) * 0.5);
+  --spacing-sm: calc(var(--spacing-unit) * 1);
+  --spacing-md: calc(var(--spacing-unit) * 2);
+  --spacing-lg: calc(var(--spacing-unit) * 3);
+  --spacing-xl: calc(var(--spacing-unit) * 4);
+
+  /* 圆角 - 无圆角 */
+  --radius-none: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-full: 9999px;
+
+  /* 阴影 - 更淡 */
+  --shadow-sm: 0 1px 1px 0 rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 8px -2px rgba(0, 0, 0, 0.1);
+}
