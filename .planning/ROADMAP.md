@@ -38,6 +38,12 @@
 
 **Wave:** 1
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 01-monorepo-01-PLAN.md — pnpm workspace + TypeScript 配置 + 5 个初始包骨架
+- [ ] 01-monorepo-02-PLAN.md — ESLint + Prettier + Husky + GitHub Actions CI
+
 ---
 
 ### Phase 2: 核心框架
@@ -230,5 +236,6 @@
 **Coverage:** 100% ✓
 
 ---
+
 *Roadmap created: 2026-03-16*
-*Last updated: 2026-03-16 after initial creation*
+*Last updated: 2026-03-17 after Phase 1 planning*
