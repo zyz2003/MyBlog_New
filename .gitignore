@@ -37,9 +37,7 @@ Thumbs.db
 *.temp
 
 # GSD workflow
-.claude/tasks/
-.claude/teams/
-*.pen
+.claude/
 
 # Test coverage
 coverage/
