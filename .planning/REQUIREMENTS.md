@@ -72,17 +72,17 @@
 
 ### 插件系统 (PLUGIN)
 
-- [ ] **PLUGIN-01**: 插件系统核心架构
-- [ ] **PLUGIN-02**: 16 个插件挂载点实现
-- [ ] **PLUGIN-03**: 插件生命周期管理
+- [x] **PLUGIN-01**: 插件系统核心架构
+- [x] **PLUGIN-02**: 16 个插件挂载点实现
+- [x] **PLUGIN-03**: 插件生命周期管理
 - [ ] **PLUGIN-04**: 插件配置 UI
 - [ ] **PLUGIN-05**: 官方插件：SEO 优化
 
 ### 主题系统 (THEME)
 
-- [ ] **THEME-01**: 主题系统核心架构
-- [ ] **THEME-02**: CSS Variables 主题变量
-- [ ] **THEME-03**: JSON 主题配置文件
+- [x] **THEME-01**: 主题系统核心架构
+- [x] **THEME-02**: CSS Variables 主题变量
+- [x] **THEME-03**: JSON 主题配置文件
 - [ ] **THEME-04**: 主题预览功能
 - [ ] **THEME-05**: 主题切换 API
 - [ ] **THEME-06**: 默认主题：Minimal

@@ -75,6 +75,13 @@ Plans:
 
 **Wave:** 1
 
+**Plans:** 2/2 plans complete
+
+Plans:
+
+- [x] 02-01-PLAN.md — 插件系统核心架构（PluginManager, HookRegistry, LifecycleEmitter）
+- [x] 02-02-PLAN.md — 主题系统核心架构（ThemeManager, CSS Variables, 示例主题）
+
 ---
 
 ### Phase 3: 数据库层
@@ -275,4 +282,4 @@ Plans:
 ---
 
 _Roadmap created: 2026-03-16_
-_Last updated: 2026-03-17 after Phase 1 Plan 02 completion_
+_Last updated: 2026-03-17 after Phase 2 Plan 02 completion_
