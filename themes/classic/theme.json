@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "name": "classic",
+    "displayName": "经典博客",
+    "version": "0.1.0",
+    "author": "My Blog Team",
+    "description": "经典博客风格 - 温暖、专业、易读"
+  },
+  "colors": {
+    "primary": "#2c5282",
+    "secondary": "#4a5568",
+    "accent": "#3182ce",
+    "background": "#ffffff",
+    "surface": "#f7fafc",
+    "text": "#1a202c",
+    "textSecondary": "#4a5568",
+    "border": "#e2e8f0",
+    "error": "#e53e3e",
+    "success": "#38a169",
+    "warning": "#dd6b20"
+  },
+  "typography": {
+    "fontFamily": "Inter, system-ui, sans-serif",
+    "fontSize": "16px",
+    "lineHeight": 1.5,
+    "fontWeight": "400"
+  },
+  "spacing": {
+    "unit": "8px",
+    "scale": 1.25
+  },
+  "radius": {
+    "sm": "2px",
+    "md": "4px",
+    "lg": "8px",
+    "xl": "12px",
+    "full": "9999px"
+  }
+}

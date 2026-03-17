@@ -1,0 +1,43 @@
+/* Classic Theme - CSS Variables */
+
+[data-theme='classic'] {
+  /* 颜色 */
+  --color-primary: #2c5282;
+  --color-secondary: #4a5568;
+  --color-accent: #3182ce;
+  --color-background: #ffffff;
+  --color-surface: #f7fafc;
+  --color-text: #1a202c;
+  --color-text-secondary: #4a5568;
+  --color-border: #e2e8f0;
+  --color-error: #e53e3e;
+  --color-success: #38a169;
+  --color-warning: #dd6b20;
+
+  /* 排版 */
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+  --font-weight-base: 400;
+  --letter-spacing-base: normal;
+
+  /* 间距 */
+  --spacing-unit: 8px;
+  --spacing-xs: calc(var(--spacing-unit) * 0.5);
+  --spacing-sm: calc(var(--spacing-unit) * 1);
+  --spacing-md: calc(var(--spacing-unit) * 2);
+  --spacing-lg: calc(var(--spacing-unit) * 3);
+  --spacing-xl: calc(var(--spacing-unit) * 4);
+
+  /* 圆角 */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
