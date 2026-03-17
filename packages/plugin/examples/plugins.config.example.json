@@ -1,0 +1,32 @@
+{
+  "plugins": [
+    {
+      "name": "example-plugin",
+      "path": "./examples/example-plugin.ts",
+      "enabled": true,
+      "config": {
+        "debug": false,
+        "logLevel": "info"
+      }
+    },
+    {
+      "name": "seo-plugin",
+      "path": "./examples/seo-plugin.ts",
+      "enabled": true,
+      "config": {
+        "siteName": "My Blog",
+        "defaultTitle": "Welcome to my blog",
+        "defaultDescription": "A personal blog built with Nuxt 3"
+      }
+    },
+    {
+      "name": "analytics-plugin",
+      "path": "./examples/analytics-plugin.ts",
+      "enabled": false,
+      "config": {
+        "trackingId": "UA-XXXXX-Y",
+        "anonymizeIp": true
+      }
+    }
+  ]
+}
