@@ -7,8 +7,8 @@
 
 ### 基础框架 (CORE)
 
-- [ ] **CORE-01**: Monorepo 脚手架搭建（pnpm workspace）
-- [ ] **CORE-02**: TypeScript 配置和类型定义
+- [x] **CORE-01**: Monorepo 脚手架搭建（pnpm workspace）
+- [x] **CORE-02**: TypeScript 配置和类型定义
 - [ ] **CORE-03**: ESLint + Prettier 代码规范
 - [ ] **CORE-04**: Git Hooks 配置（Husky）
 - [ ] **CORE-05**: CI/CD 基础配置
@@ -120,8 +120,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORE-01 | Phase 1 | Pending |
-| CORE-02 | Phase 1 | Pending |
+| CORE-01 | Phase 1 | Complete |
+| CORE-02 | Phase 1 | Complete |
 | CORE-03 | Phase 1 | Pending |
 | CORE-04 | Phase 1 | Pending |
 | CORE-05 | Phase 1 | Pending |

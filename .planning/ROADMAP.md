@@ -38,7 +38,7 @@
 
 **Wave:** 1
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 01-monorepo-01-PLAN.md — pnpm workspace + TypeScript 配置 + 5 个初始包骨架
