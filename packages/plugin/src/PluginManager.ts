@@ -2,12 +2,7 @@
 // Core plugin manager implementation
 
 import type { App } from 'vue'
-import type {
-  Plugin,
-  PluginContext,
-  PluginConfig,
-  PluginManagerOptions
-} from './types'
+import type { Plugin, PluginContext, PluginConfig, PluginManagerOptions } from './types'
 import { HookRegistry } from './HookRegistry'
 import { LifecycleEmitter, LifecycleEvent } from './lifecycle/events'
 
@@ -46,7 +41,7 @@ export class PluginManager {
   private config: PluginConfig[] = []
 
   /** Vue 应用实例 */
-  private appInstance: App<any> | null = null
+  private appInstance: App<unknown> | null = null
 
   /**
    * 创建插件管理器
@@ -112,7 +107,7 @@ export class PluginManager {
       const ctx: PluginContext = {
         app: this.getApp(),
         config: this.getPluginConfig(plugin.name),
-        hooks: this._hooks
+        hooks: this._hooks,
       }
       await plugin.onInit(ctx)
     }
@@ -143,7 +138,7 @@ export class PluginManager {
         const ctx: PluginContext = {
           app: this.getApp(),
           config: this.getPluginConfig(plugin.name),
-          hooks: this._hooks
+          hooks: this._hooks,
         }
         await plugin.onInit(ctx)
       }
@@ -250,7 +245,7 @@ export class PluginManager {
    * manager.setApp(app)
    * ```
    */
-  setApp(app: App<any>): void {
+  setApp(app: App<unknown>): void {
     this.appInstance = app
 
     // 触发应用创建事件
@@ -263,7 +258,7 @@ export class PluginManager {
    * @private
    * @returns Vue 应用实例
    */
-  private getApp(): App<any> {
+  private getApp(): App<unknown> {
     if (!this.appInstance) {
       // 返回一个模拟的 app 实例用于早期初始化
       return {
@@ -275,8 +270,8 @@ export class PluginManager {
         directive: () => this,
         mixin: () => this,
         compile: () => this,
-        version: '3.x'
-      } as unknown as App<any>
+        version: '3.x',
+      } as unknown as App<unknown>
     }
     return this.appInstance
   }
@@ -288,8 +283,8 @@ export class PluginManager {
    * @param pluginName 插件名称
    * @returns 插件配置对象
    */
-  private getPluginConfig(pluginName: string): Record<string, any> {
-    const config = this.config.find(p => p.name === pluginName)
+  private getPluginConfig(pluginName: string): Record<string, unknown> {
+    const config = this.config.find((p) => p.name === pluginName)
     return config?.config || {}
   }
 
@@ -302,7 +297,7 @@ export class PluginManager {
   notifyAppMounted(el?: Element): void {
     this._emitter.emit(LifecycleEvent.APP_MOUNT, {
       app: this.getApp(),
-      el
+      el,
     })
 
     // 调用所有插件的 onAppMounted 钩子
@@ -311,7 +306,7 @@ export class PluginManager {
         const ctx: PluginContext = {
           app: this.getApp(),
           config: this.getPluginConfig(plugin.name),
-          hooks: this._hooks
+          hooks: this._hooks,
         }
         await plugin.onAppMounted(ctx)
       }
@@ -325,11 +320,7 @@ export class PluginManager {
    * @param from 源路由
    * @param next 继续导航函数
    */
-  async notifyNavigationStart(
-    to: any,
-    from: any,
-    next: () => void
-  ): Promise<void> {
+  async notifyNavigationStart(to: unknown, from: unknown, next: () => void): Promise<void> {
     await this._emitter.emit(LifecycleEvent.NAVIGATION_START, { to, from, next })
 
     // 调用所有插件的 onNavigationStart 钩子
@@ -346,7 +337,7 @@ export class PluginManager {
    * @param to 目标路由
    * @param from 源路由
    */
-  async notifyNavigationEnd(to: any, from: any): Promise<void> {
+  async notifyNavigationEnd(to: unknown, from: unknown): Promise<void> {
     await this._emitter.emit(LifecycleEvent.NAVIGATION_END, { to, from })
 
     // 调用所有插件的 onNavigationEnd 钩子

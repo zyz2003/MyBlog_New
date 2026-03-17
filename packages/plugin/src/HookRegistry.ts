@@ -52,9 +52,10 @@ export class HookRegistry {
     fn: (ctx: HookContextMap[T]) => HookContextMap[T] | Promise<HookContextMap[T]>,
     type: 'sync' | 'async' = 'async'
   ): void {
-    const hook: Hook = type === 'sync'
-      ? { type: 'sync', fn: fn as (ctx: any) => any }
-      : { type: 'async', fn: fn as (ctx: any) => Promise<any> }
+    const hook: Hook =
+      type === 'sync'
+        ? { type: 'sync', fn: fn as unknown as (ctx: unknown) => unknown }
+        : { type: 'async', fn: fn as unknown as (ctx: unknown) => Promise<unknown> }
 
     if (!this.hooks.has(hookName)) {
       this.hooks.set(hookName, [])
@@ -86,7 +87,7 @@ export class HookRegistry {
       if (hook.type === 'sync') {
         ctx = hook.fn(ctx) as HookContextMap[T]
       } else {
-        ctx = await hook.fn(ctx) as HookContextMap[T]
+        ctx = (await hook.fn(ctx)) as HookContextMap[T]
       }
     }
 
@@ -111,7 +112,7 @@ export class HookRegistry {
     context: HookContextMap[T]
   ): Promise<void> {
     const hooks = this.hooks.get(hookName) || []
-    const promises = hooks.map(hook => hook.fn(context))
+    const promises = hooks.map((hook) => hook.fn(context))
     await Promise.all(promises)
   }
 

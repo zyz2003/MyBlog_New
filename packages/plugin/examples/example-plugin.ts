@@ -19,10 +19,14 @@ const examplePlugin: Plugin = {
     console.log('[ExamplePlugin] Initialized with config:', ctx.config)
 
     // 注册自定义挂载点
-    ctx.hooks.register('app:init' as any, (hookCtx) => {
-      console.log('[ExamplePlugin] App is initializing...')
-      return hookCtx
-    }, 'sync')
+    ctx.hooks.register(
+      'app:init' as unknown as never,
+      (hookCtx) => {
+        console.log('[ExamplePlugin] App is initializing...')
+        return hookCtx
+      },
+      'sync'
+    )
   },
 
   /**
@@ -41,25 +45,26 @@ const examplePlugin: Plugin = {
    * 在应用挂载到 DOM 后调用
    */
   onAppMounted(ctx: PluginContext) {
-    console.log('[ExamplePlugin] App mounted')
-
-    // 可以在这里执行需要 DOM 的操作
+    console.log('[ExamplePlugin] App mounted to DOM')
+    void ctx // used for type checking
   },
 
   /**
    * 导航开始钩子
    * 在路由切换前调用
    */
-  onNavigationStart(ctx) {
-    console.log('[ExamplePlugin] Navigating from', ctx.from.path, 'to', ctx.to.path)
+  onNavigationStart(ctx: PluginContext) {
+    console.log('[ExamplePlugin] Navigation started')
+    void ctx // used for type checking
   },
 
   /**
    * 导航结束钩子
    * 在路由切换完成后调用
    */
-  onNavigationEnd(ctx) {
-    console.log('[ExamplePlugin] Navigation completed:', ctx.to.path)
+  onNavigationEnd(ctx: PluginContext) {
+    console.log('[ExamplePlugin] Navigation completed')
+    void ctx // used for type checking
   },
 
   /**
@@ -68,7 +73,7 @@ const examplePlugin: Plugin = {
    */
   onDestroy() {
     console.log('[ExamplePlugin] Destroyed')
-  }
+  },
 }
 
 export default examplePlugin

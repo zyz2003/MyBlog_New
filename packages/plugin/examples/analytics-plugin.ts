@@ -24,12 +24,16 @@ const analyticsPlugin: Plugin = {
     console.log('[AnalyticsPlugin] Initialized with tracking ID:', this.privateConfig.trackingId)
 
     // 注册 API 请求监控
-    ctx.hooks.register('api:request' as any, (hookCtx) => {
-      if (this.privateConfig.debug) {
-        console.log('[AnalyticsPlugin] API Request:', hookCtx.url)
-      }
-      return hookCtx
-    }, 'sync')
+    ctx.hooks.register(
+      'api:request' as unknown as never,
+      (hookCtx) => {
+        if (this.privateConfig.debug) {
+          console.log('[AnalyticsPlugin] API Request:', (hookCtx as unknown as { url: string }).url)
+        }
+        return hookCtx
+      },
+      'sync'
+    )
   },
 
   onAppMounted() {
@@ -39,7 +43,7 @@ const analyticsPlugin: Plugin = {
 
   onNavigationEnd(ctx: NavigationContext) {
     // 发送页面浏览事件
-    ;(this as any).trackPageView(ctx.to.path)
+    this.trackPageView(ctx.to.path)
   },
 
   onDestroy() {
@@ -54,7 +58,7 @@ const analyticsPlugin: Plugin = {
       console.log('[AnalyticsPlugin] Tracking page view:', path)
     }
     // 在实际实现中，这里会调用 Google Analytics API
-  }
+  },
 }
 
 export default analyticsPlugin
