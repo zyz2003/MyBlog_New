@@ -6,7 +6,7 @@
  * Common utility functions used across the blog system.
  */
 
-export const VERSION = "0.0.0";
+export const VERSION = '0.0.0'
 
 /**
  * Format a date to ISO string
@@ -14,7 +14,7 @@ export const VERSION = "0.0.0";
  * @returns Formatted date string
  */
 export function formatDate(date: Date): string {
-  return date.toISOString();
+  return date.toISOString()
 }
 
 /**
@@ -22,5 +22,5 @@ export function formatDate(date: Date): string {
  * @returns Unique ID string
  */
 export function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  return Math.random().toString(36).substring(2) + Date.now().toString(36)
 }

@@ -1,11 +1,11 @@
-import globals from "globals"
-import tseslint from "typescript-eslint"
-import pluginVue from "eslint-plugin-vue"
-import eslintConfigPrettier from "eslint-config-prettier"
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
+import pluginVue from 'eslint-plugin-vue'
+import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default [
   {
-    name: "globals",
+    name: 'globals',
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -14,21 +14,21 @@ export default [
     },
   },
   {
-    name: "ignore",
+    name: 'ignore',
     ignores: [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/.nuxt/**",
-      "**/.output/**",
-      "**/*.min.*",
-      "**/pnpm-lock.yaml",
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.nuxt/**',
+      '**/.output/**',
+      '**/*.min.*',
+      '**/pnpm-lock.yaml',
     ],
   },
   ...tseslint.configs.recommended,
   {
-    name: "vue",
-    ...pluginVue.configs["flat/recommended"],
-    files: ["**/*.vue"],
+    name: 'vue',
+    ...pluginVue.configs['flat/recommended'],
+    files: ['**/*.vue'],
     languageOptions: {
       parserOptions: {
         parser: tseslint.parser,

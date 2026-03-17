@@ -7,16 +7,16 @@
  * Provides plugin system, theme system, and hook system.
  */
 
-export const VERSION = "0.0.0";
+export const VERSION = '0.0.0'
 
 /**
  * Initialize the blog core framework
  * @returns Core framework instance
  */
 export function initCore() {
-  console.log("[@my-blog/core] Core framework initialized");
+  console.log('[@my-blog/core] Core framework initialized')
   return {
     version: VERSION,
-    name: "@my-blog/core"
-  };
+    name: '@my-blog/core',
+  }
 }
