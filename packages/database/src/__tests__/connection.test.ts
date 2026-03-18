@@ -1,22 +1,22 @@
 import { describe, it, expect, vi } from 'vitest'
 
-// Mock better-sqlite3 (default export) and drizzle-orm
-vi.mock('better-sqlite3', () => {
-  const mockDbInstance = {
-    pragma: vi.fn(),
-    close: vi.fn(),
-    prepare: vi.fn(),
+// Mock @libsql/client
+vi.mock('@libsql/client', () => {
+  const mockClient = {
+    execute: vi.fn(),
+    batch: vi.fn(),
     transaction: vi.fn(),
+    close: vi.fn(),
   }
   return {
-    default: vi.fn().mockImplementation(() => mockDbInstance),
+    createClient: vi.fn().mockImplementation(() => mockClient),
   }
 })
 
-vi.mock('drizzle-orm/better-sqlite3', () => {
+vi.mock('drizzle-orm/libsql', () => {
   return {
-    drizzle: vi.fn().mockImplementation((db) => ({
-      _db: db,
+    drizzle: vi.fn().mockImplementation((client) => ({
+      _client: client,
       query: vi.fn(),
       select: vi.fn(),
       insert: vi.fn(),
@@ -29,7 +29,7 @@ vi.mock('drizzle-orm/better-sqlite3', () => {
 describe('Database Connection', () => {
   it('should create database connection with WAL mode and proper configuration', async () => {
     const { createDatabase } = await import('../db')
-    const Database = await import('better-sqlite3')
+    const libsql = await import('@libsql/client')
 
     // Create database connection
     const db = createDatabase({
@@ -38,11 +38,11 @@ describe('Database Connection', () => {
       slowQueryThreshold: 100,
     })
 
-    // Verify Database was instantiated (default export is the constructor)
-    expect(Database.default).toHaveBeenCalled()
+    // Verify createClient was called
+    expect(libsql.createClient).toHaveBeenCalled()
 
     // Verify drizzle ORM wrapper was called
-    const { drizzle } = await import('drizzle-orm/better-sqlite3')
+    const { drizzle } = await import('drizzle-orm/libsql')
     expect(drizzle).toHaveBeenCalled()
 
     // Verify db connection is defined
