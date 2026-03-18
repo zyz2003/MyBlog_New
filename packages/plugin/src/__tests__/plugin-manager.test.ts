@@ -3,7 +3,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { PluginManager } from '../PluginManager'
-import type { Plugin, PluginContext } from '../types'
+import type { App } from 'vue'
 import { LifecycleEvent } from '../lifecycle/events'
 
 // 模拟插件
@@ -13,11 +13,13 @@ const createMockPlugin = (name: string, version = '1.0.0'): Plugin => ({
   onInit: undefined,
   onAppCreated: undefined,
   onAppMounted: undefined,
-  onDestroy: undefined
+  onDestroy: undefined,
 })
 
 // 带钩子的模拟插件
-const createPluginWithHooks = (name: string): Plugin & {
+const createPluginWithHooks = (
+  name: string
+): Plugin & {
   initCalled: boolean
   destroyCalled: boolean
   mountCalled: boolean
@@ -27,15 +29,15 @@ const createPluginWithHooks = (name: string): Plugin & {
   initCalled: false,
   destroyCalled: false,
   mountCalled: false,
-  async onInit(ctx) {
-    ;(this as any).initCalled = true
+  async onInit() {
+    ;(this as unknown as Record<string, boolean>).initCalled = true
   },
   async onDestroy() {
-    ;(this as any).destroyCalled = true
+    ;(this as unknown as Record<string, boolean>).destroyCalled = true
   },
-  async onAppMounted(ctx) {
-    ;(this as any).mountCalled = true
-  }
+  async onAppMounted() {
+    ;(this as unknown as Record<string, boolean>).mountCalled = true
+  },
 })
 
 describe('PluginManager', () => {
@@ -56,7 +58,7 @@ describe('PluginManager', () => {
       // 注意：实际测试中配置文件可能不存在，这里只验证构造函数不抛出异常
       const newManager = new PluginManager({ configPath: './non-existent.json' })
       // 等待异步操作完成
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
       expect(newManager).toBeDefined()
     })
   })
@@ -136,7 +138,7 @@ describe('PluginManager', () => {
       const plugins = manager.getPlugins()
 
       expect(plugins).toHaveLength(3)
-      expect(plugins.map(p => p.name)).toEqual(['plugin-1', 'plugin-2', 'plugin-3'])
+      expect(plugins.map((p) => p.name)).toEqual(['plugin-1', 'plugin-2', 'plugin-3'])
     })
 
     it('should return empty array when no plugins registered', () => {
@@ -208,7 +210,7 @@ describe('PluginManager', () => {
 
   describe('setApp', () => {
     it('should set Vue app instance', () => {
-      const appMock = { use: () => {}, mount: () => {} } as any
+      const appMock = { use: () => {}, mount: () => {} } as unknown as App<unknown>
 
       manager.setApp(appMock)
 
@@ -217,9 +219,9 @@ describe('PluginManager', () => {
     })
 
     it('should trigger APP_CREATED event', async () => {
-      const appMock = { use: () => {}, mount: () => {} } as any
+      const appMock = { use: () => {}, mount: () => {} } as unknown as App<unknown>
       let eventTriggered = false
-      let eventData: any
+      let eventData: unknown
 
       manager.emitter.on(LifecycleEvent.APP_CREATED, (data) => {
         eventTriggered = true
@@ -229,7 +231,7 @@ describe('PluginManager', () => {
       manager.setApp(appMock)
 
       expect(eventTriggered).toBe(true)
-      expect(eventData?.app).toBe(appMock)
+      expect((eventData as { app: unknown })?.app).toBe(appMock)
     })
   })
 
@@ -240,7 +242,7 @@ describe('PluginManager', () => {
       manager.notifyAppMounted()
 
       // 事件是异步触发的，需要等待
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise((resolve) => setTimeout(resolve, 10))
       eventTriggered = true
 
       expect(eventTriggered).toBe(true)
@@ -255,7 +257,7 @@ describe('PluginManager', () => {
       manager.notifyAppMounted()
 
       // 等待异步执行
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise((resolve) => setTimeout(resolve, 50))
 
       expect(plugin.mountCalled).toBe(true)
     })
@@ -273,15 +275,17 @@ describe('PluginManager', () => {
 
     it('should clear config', () => {
       // 通过反射访问私有属性测试
-      ;(manager as any).config = [{ name: 'test', path: './test', enabled: true }]
+      ;(manager as unknown as { config: unknown[] }).config = [
+        { name: 'test', path: './test', enabled: true },
+      ]
 
       manager.clear()
 
-      expect((manager as any).config).toEqual([])
+      expect((manager as unknown as { config: unknown[] }).config).toEqual([])
     })
 
     it('should clear hooks and emitter', async () => {
-      manager.hooks.register('app:init' as any, (ctx) => ctx, 'sync')
+      manager.hooks.register('app:init' as unknown as never, (ctx) => ctx, 'sync')
       manager.emitter.on(LifecycleEvent.INIT, () => {})
 
       manager.clear()
@@ -324,9 +328,15 @@ describe('PluginManager', () => {
       const plugin: Plugin = {
         name: 'lifecycle-plugin',
         version: '1.0.0',
-        async onInit() { log.push('init') },
-        async onAppMounted() { log.push('mounted') },
-        async onDestroy() { log.push('destroy') }
+        async onInit() {
+          log.push('init')
+        },
+        async onAppMounted() {
+          log.push('mounted')
+        },
+        async onDestroy() {
+          log.push('destroy')
+        },
       }
 
       // 注册插件
@@ -334,12 +344,12 @@ describe('PluginManager', () => {
       expect(log).toContain('init')
 
       // 设置 app
-      const appMock = {} as any
+      const appMock = {} as unknown as App<unknown>
       manager.setApp(appMock)
 
       // 通知挂载
       manager.notifyAppMounted()
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise((resolve) => setTimeout(resolve, 50))
       expect(log).toContain('mounted')
 
       // 卸载插件

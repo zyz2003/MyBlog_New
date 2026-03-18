@@ -4,6 +4,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { HookRegistry } from '../HookRegistry'
 import { HookName } from '../types'
+import type { App } from 'vue'
 
 describe('HookRegistry', () => {
   let hooks: HookRegistry
@@ -52,15 +53,23 @@ describe('HookRegistry', () => {
     it('should execute sync hooks in order', async () => {
       const executionOrder: number[] = []
 
-      hooks.register(HookName.APP_INIT, (ctx) => {
-        executionOrder.push(1)
-        return { ...ctx, value: ctx.value + 1 }
-      }, 'sync')
+      hooks.register(
+        HookName.APP_INIT,
+        (ctx) => {
+          executionOrder.push(1)
+          return { ...ctx, value: ctx.value + 1 }
+        },
+        'sync'
+      )
 
-      hooks.register(HookName.APP_INIT, (ctx) => {
-        executionOrder.push(2)
-        return { ...ctx, value: ctx.value * 2 }
-      }, 'sync')
+      hooks.register(
+        HookName.APP_INIT,
+        (ctx) => {
+          executionOrder.push(2)
+          return { ...ctx, value: ctx.value * 2 }
+        },
+        'sync'
+      )
 
       const result = await hooks.executeSync(HookName.APP_INIT, { value: 1 })
 
@@ -71,15 +80,23 @@ describe('HookRegistry', () => {
     it('should execute async hooks in order', async () => {
       const executionOrder: number[] = []
 
-      hooks.register(HookName.APP_INIT, async (ctx) => {
-        executionOrder.push(1)
-        return { ...ctx, value: ctx.value + 1 }
-      }, 'async')
+      hooks.register(
+        HookName.APP_INIT,
+        async (ctx) => {
+          executionOrder.push(1)
+          return { ...ctx, value: ctx.value + 1 }
+        },
+        'async'
+      )
 
-      hooks.register(HookName.APP_INIT, async (ctx) => {
-        executionOrder.push(2)
-        return { ...ctx, value: ctx.value * 2 }
-      }, 'async')
+      hooks.register(
+        HookName.APP_INIT,
+        async (ctx) => {
+          executionOrder.push(2)
+          return { ...ctx, value: ctx.value * 2 }
+        },
+        'async'
+      )
 
       const result = await hooks.executeSync(HookName.APP_INIT, { value: 1 })
 
@@ -104,13 +121,15 @@ describe('HookRegistry', () => {
     })
 
     it('should handle hook that throws error', async () => {
-      hooks.register(HookName.APP_INIT, () => {
-        throw new Error('Hook error')
-      }, 'sync')
+      hooks.register(
+        HookName.APP_INIT,
+        () => {
+          throw new Error('Hook error')
+        },
+        'sync'
+      )
 
-      await expect(hooks.executeSync(HookName.APP_INIT, { value: 1 }))
-        .rejects
-        .toThrow('Hook error')
+      await expect(hooks.executeSync(HookName.APP_INIT, { value: 1 })).rejects.toThrow('Hook error')
     })
   })
 
@@ -118,17 +137,25 @@ describe('HookRegistry', () => {
     it('should execute hooks in parallel', async () => {
       const executionOrder: number[] = []
 
-      hooks.register(HookName.API_REQUEST, async (ctx) => {
-        await new Promise(resolve => setTimeout(resolve, 50))
-        executionOrder.push(1)
-        return ctx
-      }, 'async')
+      hooks.register(
+        HookName.API_REQUEST,
+        async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 50))
+          executionOrder.push(1)
+          return ctx
+        },
+        'async'
+      )
 
-      hooks.register(HookName.API_REQUEST, async (ctx) => {
-        await new Promise(resolve => setTimeout(resolve, 10))
-        executionOrder.push(2)
-        return ctx
-      }, 'async')
+      hooks.register(
+        HookName.API_REQUEST,
+        async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 10))
+          executionOrder.push(2)
+          return ctx
+        },
+        'async'
+      )
 
       await hooks.executeParallel(HookName.API_REQUEST, { url: '/api/test', options: {} })
 
@@ -140,19 +167,27 @@ describe('HookRegistry', () => {
     it('should execute all hooks even if one fails', async () => {
       const executionOrder: number[] = []
 
-      hooks.register(HookName.API_REQUEST, async () => {
-        executionOrder.push(1)
-        throw new Error('First hook error')
-      }, 'async')
+      hooks.register(
+        HookName.API_REQUEST,
+        async () => {
+          executionOrder.push(1)
+          throw new Error('First hook error')
+        },
+        'async'
+      )
 
-      hooks.register(HookName.API_REQUEST, async (ctx) => {
-        executionOrder.push(2)
-        return ctx
-      }, 'async')
+      hooks.register(
+        HookName.API_REQUEST,
+        async (ctx) => {
+          executionOrder.push(2)
+          return ctx
+        },
+        'async'
+      )
 
-      await expect(hooks.executeParallel(HookName.API_REQUEST, { url: '/api', options: {} }))
-        .rejects
-        .toThrow()
+      await expect(
+        hooks.executeParallel(HookName.API_REQUEST, { url: '/api', options: {} })
+      ).rejects.toThrow()
 
       // Both hooks should have been attempted
       expect(executionOrder).toContain(2)
@@ -229,44 +264,63 @@ describe('HookRegistry', () => {
 
   describe('type safety', () => {
     it('should accept correct context type for APP_INIT hook', async () => {
-      const appMock = { use: () => {}, mount: () => {} } as any
+      const appMock = { use: () => {}, mount: () => {} } as unknown as App<unknown>
 
-      hooks.register(HookName.APP_INIT, (ctx) => {
-        expect(ctx.app).toBeDefined()
-        return ctx
-      }, 'sync')
+      hooks.register(
+        HookName.APP_INIT,
+        (ctx) => {
+          expect(ctx.app).toBeDefined()
+          return ctx
+        },
+        'sync'
+      )
 
       await hooks.executeSync(HookName.APP_INIT, { app: appMock })
     })
 
     it('should accept correct context type for ROUTER_BEFORE_EACH hook', async () => {
-      const toRoute = { path: '/about', params: {}, query: {}, hash: '', fullPath: '/about', meta: {} }
+      const toRoute = {
+        path: '/about',
+        params: {},
+        query: {},
+        hash: '',
+        fullPath: '/about',
+        meta: {},
+      }
       const fromRoute = { path: '/', params: {}, query: {}, hash: '', fullPath: '/', meta: {} }
 
-      hooks.register(HookName.ROUTER_BEFORE_EACH, (ctx) => {
-        expect(ctx.to).toBeDefined()
-        expect(ctx.from).toBeDefined()
-        expect(typeof ctx.next).toBe('function')
-        return ctx
-      }, 'sync')
+      hooks.register(
+        HookName.ROUTER_BEFORE_EACH,
+        (ctx) => {
+          expect(ctx.to).toBeDefined()
+          expect(ctx.from).toBeDefined()
+          expect(typeof ctx.next).toBe('function')
+          return ctx
+        },
+        'sync'
+      )
 
       await hooks.executeSync(HookName.ROUTER_BEFORE_EACH, {
         to: toRoute,
         from: fromRoute,
-        next: () => {}
+        next: () => {},
       })
     })
 
     it('should accept correct context type for API_REQUEST hook', async () => {
-      hooks.register(HookName.API_REQUEST, (ctx) => {
-        expect(typeof ctx.url).toBe('string')
-        expect(ctx.options).toBeDefined()
-        return ctx
-      }, 'sync')
+      hooks.register(
+        HookName.API_REQUEST,
+        (ctx) => {
+          expect(typeof ctx.url).toBe('string')
+          expect(ctx.options).toBeDefined()
+          return ctx
+        },
+        'sync'
+      )
 
       await hooks.executeSync(HookName.API_REQUEST, {
         url: '/api/data',
-        options: { method: 'GET' }
+        options: { method: 'GET' },
       })
     })
   })

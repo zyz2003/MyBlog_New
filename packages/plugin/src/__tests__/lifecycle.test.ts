@@ -61,7 +61,7 @@ describe('LifecycleEmitter', () => {
     })
 
     it('should pass data to listeners', async () => {
-      const receivedData: any[] = []
+      const receivedData: unknown[] = []
 
       emitter.on(LifecycleEvent.APP_CREATED, (data) => {
         receivedData.push(data)
@@ -78,7 +78,7 @@ describe('LifecycleEmitter', () => {
       const callOrder: number[] = []
 
       emitter.on(LifecycleEvent.INIT, async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise((resolve) => setTimeout(resolve, 10))
         callOrder.push(1)
       })
       emitter.on(LifecycleEvent.INIT, () => {
@@ -262,7 +262,7 @@ describe('LifecycleEmitter', () => {
         'register: 3 plugins',
         'app:created',
         'app:mounted',
-        'plugin:destroy'
+        'plugin:destroy',
       ])
     })
 

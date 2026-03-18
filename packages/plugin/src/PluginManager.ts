@@ -2,7 +2,13 @@
 // Core plugin manager implementation
 
 import type { App } from 'vue'
-import type { Plugin, PluginContext, PluginConfig, PluginManagerOptions } from './types'
+import type {
+  Plugin,
+  PluginContext,
+  PluginConfig,
+  PluginManagerOptions,
+  RouteLocation,
+} from './types'
 import { HookRegistry } from './HookRegistry'
 import { LifecycleEmitter, LifecycleEvent } from './lifecycle/events'
 
@@ -320,7 +326,11 @@ export class PluginManager {
    * @param from 源路由
    * @param next 继续导航函数
    */
-  async notifyNavigationStart(to: unknown, from: unknown, next: () => void): Promise<void> {
+  async notifyNavigationStart(
+    to: RouteLocation,
+    from: RouteLocation,
+    next: () => void
+  ): Promise<void> {
     await this._emitter.emit(LifecycleEvent.NAVIGATION_START, { to, from, next })
 
     // 调用所有插件的 onNavigationStart 钩子
@@ -337,7 +347,7 @@ export class PluginManager {
    * @param to 目标路由
    * @param from 源路由
    */
-  async notifyNavigationEnd(to: unknown, from: unknown): Promise<void> {
+  async notifyNavigationEnd(to: RouteLocation, from: RouteLocation): Promise<void> {
     await this._emitter.emit(LifecycleEvent.NAVIGATION_END, { to, from })
 
     // 调用所有插件的 onNavigationEnd 钩子
