@@ -10,8 +10,8 @@ export * from './posts'
 export * from './tags'
 export * from './post_tags'
 
-// Plan 03-04: Media Schema (to be added)
-// export * from './media'
+// Plan 03-04: Media Schema
+export * from './media'
 
 // Note: schema object will be built incrementally as schemas are added
 // Import individual schemas for the schema object
@@ -20,6 +20,7 @@ import { categories } from './categories'
 import { posts } from './posts'
 import { tags } from './tags'
 import { postTags } from './post_tags'
+import { media } from './media'
 
 export const schema = {
   users,
@@ -27,4 +28,5 @@ export const schema = {
   posts,
   tags,
   postTags,
+  media,
 }

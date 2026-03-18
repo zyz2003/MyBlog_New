@@ -1,8 +1,7 @@
 import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
 import { posts } from './posts'
-
-// Note: media relations will be added in Plan 03-04
+import { media } from './media'
 
 export const users = sqliteTable(
   'users',
@@ -36,10 +35,9 @@ export const users = sqliteTable(
   })
 )
 
-// Note: media relations will be added in Plan 03-04
 export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
-  // media: many(media),  // Will be added in Plan 03-04
+  media: many(media),
 }))
 
 // Type exports
