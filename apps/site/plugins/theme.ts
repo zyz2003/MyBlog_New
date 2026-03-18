@@ -1,6 +1,6 @@
 import { ThemeManager, type ThemeConfig } from '@my-blog/core/theme'
-import classicThemeJson from '../../../../themes/classic/theme.json'
-import minimalThemeJson from '../../../../themes/minimal/theme.json'
+import classicThemeJson from '../../../themes/classic/theme.json'
+import minimalThemeJson from '../../../themes/minimal/theme.json'
 
 // Convert JSON to ThemeConfig type
 const classicTheme: ThemeConfig = classicThemeJson as unknown as ThemeConfig
