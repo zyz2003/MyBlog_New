@@ -102,13 +102,13 @@ Plans:
 
 **Wave:** 1
 
-**Plans:** 2/5 plans complete
+**Plans:** 3/5 plans complete
 
 Plans:
 
 - [x] 03-01-PLAN.md — Database Package Setup and Connection
 - [x] 03-02-PLAN.md — User and Category Schema
-- [ ] 03-03-PLAN.md — Posts and Tags Schema
+- [x] 03-03-PLAN.md — Posts and Tags Schema
 - [ ] 03-04-PLAN.md — Media Schema and Seed Data
 - [ ] 03-05-PLAN.md — Database Migration and Testing
 
@@ -292,4 +292,4 @@ Plans:
 ---
 
 _Roadmap created: 2026-03-16_
-_Last updated: 2026-03-18 after Phase 3 Plan 02 completion_
+_Last updated: 2026-03-18 after Phase 3 Plan 03 completion_
