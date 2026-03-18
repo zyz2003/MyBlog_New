@@ -31,10 +31,12 @@
 - [x] **DB-04**: 用户表 Schema 定义（users）
 - [x] **DB-05**: 分类标签表 Schema（categories, tags）
 - [x] **DB-06**: 媒体资源表 Schema（media）
-- [ ] **DB-07**: 插件配置表 Schema（plugins）
-- [ ] **DB-08**: 主题配置表 Schema（themes）
+- [x] **DB-07**: 插件配置表 Schema（plugins）
+- [x] **DB-08**: 主题配置表 Schema（themes）
 - [x] **DB-09**: 数据库迁移脚本生成
 - [x] **DB-10**: 数据库种子数据（seed）
+- [x] **DB-11**: 数据库迁移执行和验证
+- [x] **DB-12**: 数据库集成测试
 
 ### API 层 (API)
 
