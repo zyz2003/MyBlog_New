@@ -17,9 +17,11 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.29.0",
-    "better-sqlite3": "^9.0.0"
+    "better-sqlite3": "^9.0.0",
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.0",
     "drizzle-kit": "^0.20.0",
     "tsx": "^4.0.0",
