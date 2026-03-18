@@ -1,4 +1,4 @@
-import { ThemeManager, type ThemeConfig } from '@my-blog/core/theme'
+import { ThemeManager, type ThemeConfig } from '../../../packages/core/src/theme'
 import classicThemeJson from '../../../themes/classic/theme.json'
 import minimalThemeJson from '../../../themes/minimal/theme.json'
 
