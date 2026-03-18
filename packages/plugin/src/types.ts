@@ -23,7 +23,7 @@ export enum PluginLifecycleEvent {
   /** 渲染阶段 */
   RENDER = 'render',
   /** 插件销毁 */
-  DESTROY = 'plugin:destroy'
+  DESTROY = 'plugin:destroy',
 }
 
 /**
@@ -62,7 +62,7 @@ export enum HookName {
   /** 存储设置 */
   STORAGE_SET = 'storage:set',
   /** 存储获取 */
-  STORAGE_GET = 'storage:get'
+  STORAGE_GET = 'storage:get',
 }
 
 // Forward declaration for HookRegistry (defined in HookRegistry.ts)
@@ -70,17 +70,11 @@ export enum HookName {
 export interface HookRegistry {
   register<T extends HookName>(
     hookName: T,
-    fn: (ctx: any) => any,
+    fn: (ctx: unknown) => unknown,
     type?: 'sync' | 'async'
   ): void
-  executeSync<T extends HookName>(
-    hookName: T,
-    context: any
-  ): Promise<any>
-  executeParallel<T extends HookName>(
-    hookName: T,
-    context: any
-  ): Promise<void>
+  executeSync<T extends HookName>(hookName: T, context: unknown): Promise<unknown>
+  executeParallel<T extends HookName>(hookName: T, context: unknown): Promise<void>
   getCount(hookName: HookName): number
   clear(): void
 }
@@ -91,9 +85,9 @@ export interface HookRegistry {
  */
 export interface PluginContext {
   /** Vue 应用实例 */
-  app: App<any>
+  app: App<unknown>
   /** 插件配置 */
-  config: Record<string, any>
+  config: Record<string, unknown>
   /** 挂载点注册表 */
   hooks: HookRegistry
 }
@@ -104,11 +98,11 @@ export interface PluginContext {
 export interface RouteLocation {
   path: string
   name?: string | symbol
-  params: Record<string, any>
-  query: Record<string, any>
+  params: Record<string, unknown>
+  query: Record<string, unknown>
   hash: string
   fullPath: string
-  meta: Record<string, any>
+  meta: Record<string, unknown>
 }
 
 /**
@@ -128,13 +122,13 @@ export interface NavigationContext {
  * 挂载点函数类型
  * 通用钩子函数签名
  */
-export type HookFn<T = any> = (ctx: T) => Promise<T> | T
+export type HookFn<T = unknown> = (ctx: T) => Promise<T> | T
 
 /**
  * 同步挂载点
  * 同步执行的钩子函数
  */
-export interface SyncHook<T = any> {
+export interface SyncHook<T = unknown> {
   type: 'sync'
   fn: (ctx: T) => T
 }
@@ -143,7 +137,7 @@ export interface SyncHook<T = any> {
  * 异步挂载点
  * 异步执行的钩子函数
  */
-export interface AsyncHook<T = any> {
+export interface AsyncHook<T = unknown> {
   type: 'async'
   fn: (ctx: T) => Promise<T>
 }
@@ -165,7 +159,7 @@ export interface PluginConfig {
   /** 是否启用 */
   enabled: boolean
   /** 插件特定配置 */
-  config?: Record<string, any>
+  config?: Record<string, unknown>
 }
 
 /**
@@ -199,7 +193,7 @@ export interface Plugin {
   onNavigationEnd?(ctx: NavigationContext): Promise<void> | void
   /** 销毁钩子 */
   onDestroy?(): Promise<void> | void
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**
@@ -207,20 +201,20 @@ export interface Plugin {
  * 确保类型安全的挂载点调用
  */
 export interface HookContextMap {
-  [HookName.APP_INIT]: { app: App }
-  [HookName.APP_CREATED]: { app: App; nuxt: any }
-  [HookName.APP_MOUNTED]: { app: App; el: Element }
+  [HookName.APP_INIT]: { app: App<unknown> }
+  [HookName.APP_CREATED]: { app: App<unknown>; nuxt: unknown }
+  [HookName.APP_MOUNTED]: { app: App<unknown>; el: Element }
   [HookName.ROUTER_BEFORE_EACH]: { to: RouteLocation; from: RouteLocation; next: () => void }
   [HookName.ROUTER_AFTER_EACH]: { to: RouteLocation; from: RouteLocation }
   [HookName.PAGE_LOADING_START]: { url: string }
   [HookName.PAGE_LOADING_END]: { url: string }
   [HookName.PAGE_RENDER]: { html: string }
-  [HookName.COMPONENT_MOUNT]: { component: any; props: any }
-  [HookName.COMPONENT_UNMOUNT]: { component: any }
+  [HookName.COMPONENT_MOUNT]: { component: unknown; props: unknown }
+  [HookName.COMPONENT_UNMOUNT]: { component: unknown }
   [HookName.API_REQUEST]: { url: string; options: RequestInit }
   [HookName.API_RESPONSE]: { url: string; response: Response }
   [HookName.API_ERROR]: { url: string; error: Error }
   [HookName.THEME_CHANGE]: { theme: string }
-  [HookName.STORAGE_SET]: { key: string; value: any }
+  [HookName.STORAGE_SET]: { key: string; value: unknown }
   [HookName.STORAGE_GET]: { key: string }
 }

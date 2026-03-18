@@ -12,7 +12,7 @@ export { PluginLifecycleEvent as LifecycleEvent } from '../types'
 /**
  * 生命周期回调函数类型
  */
-export type LifecycleCallback = (data?: any) => void | Promise<void>
+export type LifecycleCallback = (data?: unknown) => void | Promise<void>
 
 /**
  * 生命周期事件发射器
@@ -70,7 +70,7 @@ export class LifecycleEmitter {
    * await emitter.emit(LifecycleEvent.APP_CREATED, { app, nuxt })
    * ```
    */
-  async emit(event: PluginLifecycleEvent, data?: any): Promise<void> {
+  async emit(event: PluginLifecycleEvent, data?: unknown): Promise<void> {
     const callbacks = this.listeners.get(event) || []
     for (const callback of callbacks) {
       await callback(data)
