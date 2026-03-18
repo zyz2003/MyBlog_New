@@ -1,12 +1,20 @@
 // Schema exports - to be populated by subsequent plans
 // This file serves as the central schema export point
 
-// Placeholder for schema exports
-// export { users } from './users'
-// export { categories } from './categories'
-// export { posts } from './posts'
-// export { tags } from './tags'
-// export { postTags } from './postTags'
-// export { media } from './media'
+// Plan 03-02: User and Category Schema
+export { users, usersRelations } from './users'
+export { categories, categoriesRelations } from './categories'
 
-export const schema = {}
+// Plan 03-03: Posts and Tags Schema (to be added)
+// export { posts, postsRelations } from './posts'
+// export { tags, tagsRelations } from './tags'
+// export { postTags, postTagsRelations } from './post_tags'
+
+// Plan 03-04: Media Schema (to be added)
+// export { media, mediaRelations } from './media'
+
+// Schema object for Drizzle Kit - updated as schemas are added
+export const schema = {
+  users,
+  categories,
+}
