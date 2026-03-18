@@ -1,5 +1,6 @@
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { createClient } from '@libsql/client'
+import { drizzle } from 'drizzle-orm/libsql'
+import { resolve } from 'path'
 import * as schema from './schema'
 
 interface DatabaseConfig {
@@ -11,24 +12,18 @@ interface DatabaseConfig {
 export function createDatabase(config: DatabaseConfig) {
   const { dbPath, enableSlowQueryLog = true, slowQueryThreshold = 100 } = config
 
-  const db = new Database(dbPath)
+  const client = createClient({
+    url: `file:${dbPath}`,
+  })
 
-  // Enable WAL mode for better concurrency
-  db.pragma('journal_mode = WAL')
-
-  // Increase cache size for better performance
-  db.pragma('cache_size = -64000') // 64MB cache
-
-  // Enable foreign keys
-  db.pragma('foreign_keys = ON')
+  const db = drizzle(client, { schema })
 
   // Slow query logging
   if (enableSlowQueryLog) {
-    db.pragma(`trusted_schema = ON`)
     console.log(`[Database] Slow query logging enabled (threshold: ${slowQueryThreshold}ms)`)
   }
 
-  return drizzle(db, { schema })
+  return db
 }
 
 // Default database instance with retry logic
@@ -36,7 +31,7 @@ let dbInstance: ReturnType<typeof createDatabase> | null = null
 
 export function getDatabase(dbPath?: string): ReturnType<typeof createDatabase> {
   if (!dbInstance) {
-    const path = dbPath || './apps/site/data/blog.db'
+    const path = dbPath || resolve(__dirname, '../../../apps/site/data/blog.db')
     const maxRetries = 3
     let attempts = 0
 

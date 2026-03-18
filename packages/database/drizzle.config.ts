@@ -5,7 +5,7 @@ export default {
   out: './drizzle',
   driver: 'better-sqlite',
   dbCredentials: {
-    url: './apps/site/data/blog.db',
+    url: '../../apps/site/data/blog.db',
   },
   // Migration naming: timestamp format
   migrations: {
