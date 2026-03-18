@@ -1,28 +1,33 @@
 {
   "name": "@my-blog/database",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
+    "db:generate": "drizzle-kit generate:sqlite",
+    "db:push": "drizzle-kit push:sqlite",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/seed/index.ts",
+    "test": "vitest run"
   },
   "dependencies": {
-    "@my-blog/types": "workspace:*"
+    "drizzle-orm": "^0.29.0",
+    "better-sqlite3": "^9.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "tsup": "^8.0.0",
-    "drizzle-orm": "^0.38.0",
-    "better-sqlite3": "^11.0.0"
+    "@types/better-sqlite3": "^7.6.0",
+    "drizzle-kit": "^0.20.0",
+    "tsx": "^4.0.0",
+    "vitest": "^1.0.0"
+  },
+  "vitest": {
+    "test": {
+      "environment": "node"
+    }
   }
 }
