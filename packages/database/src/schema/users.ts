@@ -1,8 +1,8 @@
 import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
+import { posts } from './posts'
 
-// Note: posts and media relations will be added in subsequent plans
-// to avoid circular dependency issues during schema generation
+// Note: media relations will be added in Plan 03-04
 
 export const users = sqliteTable(
   'users',
@@ -36,10 +36,9 @@ export const users = sqliteTable(
   })
 )
 
-// Note: usersRelations will be defined in subsequent plans
-// after posts and media schemas are created
-export const usersRelations = relations(users, () => ({
-  // posts: many(posts),  // Will be added in Plan 03-03
+// Note: media relations will be added in Plan 03-04
+export const usersRelations = relations(users, ({ many }) => ({
+  posts: many(posts),
   // media: many(media),  // Will be added in Plan 03-04
 }))
 

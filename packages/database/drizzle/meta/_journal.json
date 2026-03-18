@@ -8,6 +8,13 @@
       "when": 1773812785331,
       "tag": "0000_slippery_doctor_strange",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1773813549064,
+      "tag": "0001_whole_stick",
+      "breakpoints": true
     }
   ]
 }

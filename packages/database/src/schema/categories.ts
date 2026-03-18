@@ -1,8 +1,6 @@
 import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
-
-// Note: posts relation will be added in Plan 03-03
-// to avoid circular dependency issues during schema generation
+import { posts } from './posts'
 
 export const categories = sqliteTable(
   'categories',
@@ -23,16 +21,14 @@ export const categories = sqliteTable(
   })
 )
 
-// Note: categoriesRelations will be fully defined in subsequent plans
-// after posts schema is created
-export const categoriesRelations = relations(categories, ({ one }) => ({
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
   parent: one(categories, {
     fields: [categories.parentId],
     references: [categories.id],
     relationName: 'categoryHierarchy',
   }),
+  posts: many(posts),
   // children: many(categories, { relationName: 'categoryHierarchy' }),  // Will be added later
-  // posts: many(posts),  // Will be added in Plan 03-03
 }))
 
 // Type exports
