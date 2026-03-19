@@ -9,7 +9,8 @@ export const categories = sqliteTable(
     name: text('name').notNull(),
     slug: text('slug').notNull().unique(),
     description: text('description'),
-    parentId: text('parent_id').references((): ReturnType<typeof categories.id> => categories.id, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    parentId: text('parent_id').references((): any => categories.id, {
       onDelete: 'set null', // Per CONTEXT.md: parent deleted → children become top-level
     }),
     createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
