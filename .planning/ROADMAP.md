@@ -134,6 +134,17 @@ Plans:
 
 **Wave:** 1
 
+**Plans:** 6 plans (Wave 1: 00, Wave 2: 01-05)
+
+Plans:
+
+- [ ] 04-00-PLAN.md — Test infrastructure (Vitest, helpers, test DB)
+- [ ] 04-01-PLAN.md — Core middleware (auth, error, logger, rate-limit) + validation utilities
+- [ ] 04-02-PLAN.md — Auth API (login, logout, me, register)
+- [ ] 04-03-PLAN.md — Posts CRUD API with pagination and filters
+- [ ] 04-04-PLAN.md — Categories and Tags CRUD API
+- [ ] 04-05-PLAN.md — Media upload API + storage abstraction + plugin/theme stubs
+
 ---
 
 ### Phase 5: 后台管理
