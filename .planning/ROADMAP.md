@@ -131,19 +131,31 @@ Plans:
 3. 认证 API 可用（JWT）
 4. 中间件正常运作
 5. API 验证通过
+6. Swagger 文档可用
 
 **Wave:** 1
 
-**Plans:** 6 plans (Wave 1: 00, Wave 2: 01-05)
+**Plans:** 17 plans (Wave 1: 00-07, Wave 2: 08-16)
 
 Plans:
 
-- [ ] 04-00-PLAN.md — Test infrastructure (Vitest, helpers, test DB)
-- [ ] 04-01-PLAN.md — Core middleware (auth, error, logger, rate-limit) + validation utilities
-- [ ] 04-02-PLAN.md — Auth API (login, logout, me, register)
-- [ ] 04-03-PLAN.md — Posts CRUD API with pagination and filters
-- [ ] 04-04-PLAN.md — Categories and Tags CRUD API
-- [ ] 04-05-PLAN.md — Media upload API + storage abstraction + plugin/theme stubs
+- [x] 04-00-PLAN.md — Test infrastructure (Vitest, helpers, test DB) ✅
+- [ ] 04-01-PLAN.md — Unified response format + error utilities
+- [ ] 04-02-PLAN.md — Zod validation utilities + schemas
+- [ ] 04-03-PLAN.md — JWT authentication middleware
+- [ ] 04-04-PLAN.md — Error handler + logger + rate-limit middleware
+- [ ] 04-05-PLAN.md — Swagger/OpenAPI documentation
+- [ ] 04-06-PLAN.md — Auth API: login, logout
+- [ ] 04-07-PLAN.md — Auth API: me, register
+- [ ] 04-08-PLAN.md — Post service + slug/markdown utilities
+- [ ] 04-09-PLAN.md — Posts API: list, get
+- [ ] 04-10-PLAN.md — Posts API: create, update, delete, bulk delete
+- [ ] 04-11-PLAN.md — Categories API: service + list, create
+- [ ] 04-12-PLAN.md — Categories API: get, update, delete
+- [ ] 04-13-PLAN.md — Tags API: full CRUD
+- [ ] 04-14-PLAN.md — Storage + Media services
+- [ ] 04-15-PLAN.md — Media API: upload, list, get, delete
+- [ ] 04-16-PLAN.md — Plugin and Theme management API
 
 ---
 
