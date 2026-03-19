@@ -146,8 +146,8 @@
 | DB-04       | Phase 3 | Complete |
 | DB-05       | Phase 3 | Complete |
 | DB-06       | Phase 3 | Complete |
-| DB-07       | Phase 3 | Pending  |
-| DB-08       | Phase 3 | Pending  |
+| DB-07       | Phase 3 | Complete |
+| DB-08       | Phase 3 | Complete |
 | DB-09       | Phase 3 | Complete |
 | DB-10       | Phase 3 | Complete |
 | API-01      | Phase 4 | Pending  |
@@ -164,10 +164,10 @@
 
 - v1 requirements: 58 total
 - Mapped to phases: 22 (Phase 1-4 初步映射)
-- Complete: 13 (CORE-01~05, DB-01~06, DB-09~10, PLUGIN-01~03, THEME-01~03)
+- Complete: 15 (CORE-01~05, DB-01~12, PLUGIN-01~03, THEME-01~03)
 - Unmapped: 36 (待后续 Phase 5-11 映射)
 
 ---
 
 _Requirements defined: 2026-03-16_
-_Last updated: 2026-03-18 after Phase 3 Plan 04 completion_
+_Last updated: 2026-03-19 - Phase 3 complete (all DB-01~12 verified, CI/CD passed)_
