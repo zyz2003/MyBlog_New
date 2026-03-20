@@ -21,6 +21,7 @@
     "@my-blog/database": "workspace:*",
     "@my-blog/types": "workspace:*",
     "@my-blog/utils": "workspace:*",
+    "bcryptjs": "^2.4.3",
     "drizzle-orm": "0.29.5",
     "jose": "^6.2.2",
     "nuxt": "^3.11.0",

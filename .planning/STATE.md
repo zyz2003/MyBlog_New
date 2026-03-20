@@ -9,7 +9,7 @@ progress:
   total_phases: 11
   completed_phases: 3
   total_plans: 18
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # State: My Blog System
@@ -32,7 +32,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done | 5/5   | 100%     |
-| 4     | API 层          | ○      | 6/17  | 35%      |
+| 4     | API 层          | ○      | 7/17  | 41%      |
 | 5     | 后台管理        | ○      | 0/0   | 0%       |
 | 6     | 前台博客        | ○      | 0/0   | 0%       |
 | 7     | 主题系统        | ○      | 0/0   | 0%       |
@@ -87,9 +87,25 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 3 Plan 03: Posts and Tags Schema (COMPLETE)
 - [x] Execute Phase 3 Plan 04: Media Schema and Seed Data (COMPLETE)
 - [x] Execute Phase 3 Plan 05: Database Migration and Testing (COMPLETE)
-- [ ] Execute Phase 4 plans: API 层 (Nitro 路由、中间件、服务层)
+- [x] Execute Phase 4 Plan 01: Unified response format + error utilities (COMPLETE)
+- [x] Execute Phase 4 Plan 02: Zod validation utilities + schemas (COMPLETE)
+- [x] Execute Phase 4 Plan 03: JWT authentication middleware (COMPLETE)
+- [x] Execute Phase 4 Plan 04: Error handler + logger + rate-limit middleware (COMPLETE)
+- [x] Execute Phase 4 Plan 05: Swagger/OpenAPI documentation (COMPLETE)
+- [x] Execute Phase 4 Plan 06: Authentication API (login/logout) (COMPLETE)
+- [ ] Execute remaining Phase 4 plans: API 层 (Nitro 路由、中间件、服务层)
 
 ## Changelog
+
+### 2026-03-20 - Phase 4 Plan 06 Complete
+
+- 04-06-PLAN.md executed: 认证 API（登录、登出）
+- 04-06-SUMMARY.md created with execution details
+- Created auth.service.ts with login, logout, hashPassword, verifyPassword functions
+- Created login.post.ts and logout.post.ts API endpoints
+- 25 new tests added, all 105 tests passing (100% pass rate)
+- pnpm type-check verification passed
+- API-05 requirements complete
 
 ### 2026-03-20 - Phase 4 Plan 05 Complete
 

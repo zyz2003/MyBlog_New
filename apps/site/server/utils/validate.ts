@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { readBody } from 'h3'
 import { z } from 'zod'
 import { HTTPError } from './error'
 import type { ErrorDetail } from './error'
@@ -97,13 +98,4 @@ function getQuery(event: H3Event): Record<string, unknown> {
 export async function validateRequestBody<T>(event: H3Event, schema: z.ZodType<T>): Promise<T> {
   const body = await readBody(event)
   return validate(body, schema, 'request body')
-}
-
-/**
- * Read body from H3 event (helper for internal use)
- */
-async function readBody(event: H3Event): Promise<unknown> {
-  // For Nitro/H3, use readBody from h3
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (event as any)._request?.body ?? (event as any).body
 }
