@@ -5,7 +5,13 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts"
+    "./schema": "./src/schema/index.ts",
+    "./schema/users": "./src/schema/users.ts",
+    "./schema/posts": "./src/schema/posts.ts",
+    "./schema/categories": "./src/schema/categories.ts",
+    "./schema/tags": "./src/schema/tags.ts",
+    "./schema/post_tags": "./src/schema/post_tags.ts",
+    "./schema/media": "./src/schema/media.ts"
   },
   "scripts": {
     "db:generate": "drizzle-kit generate:sqlite",
