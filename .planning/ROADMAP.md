@@ -140,7 +140,7 @@ Plans:
 Plans:
 
 - [x] 04-00-PLAN.md — Test infrastructure (Vitest, helpers, test DB) ✅
-- [ ] 04-01-PLAN.md — Unified response format + error utilities
+- [x] 04-01-PLAN.md — Unified response format + error utilities ✅
 - [ ] 04-02-PLAN.md — Zod validation utilities + schemas
 - [ ] 04-03-PLAN.md — JWT authentication middleware
 - [ ] 04-04-PLAN.md — Error handler + logger + rate-limit middleware
