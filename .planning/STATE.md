@@ -8,8 +8,8 @@ last_updated: '2026-03-20T00:00:00.000Z'
 progress:
   total_phases: 11
   completed_phases: 3
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 18
+  completed_plans: 18
 ---
 
 # State: My Blog System
@@ -32,7 +32,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done | 5/5   | 100%     |
-| 4     | API 层          | ○      | 5/17  | 29%      |
+| 4     | API 层          | ○      | 6/17  | 35%      |
 | 5     | 后台管理        | ○      | 0/0   | 0%       |
 | 6     | 前台博客        | ○      | 0/0   | 0%       |
 | 7     | 主题系统        | ○      | 0/0   | 0%       |
@@ -90,6 +90,18 @@ CI/CD verified: GitHub Actions passed
 - [ ] Execute Phase 4 plans: API 层 (Nitro 路由、中间件、服务层)
 
 ## Changelog
+
+### 2026-03-20 - Phase 4 Plan 05 Complete
+
+- 04-05-PLAN.md executed: Swagger/OpenAPI documentation
+- 04-05-SUMMARY.md created with execution details
+- Created openapi/schemas.ts with OpenAPI schema definitions
+- Created server/plugins/swagger.ts with Swagger UI plugin
+- Swagger UI accessible at /docs (dev only)
+- OpenAPI JSON available at /api/docs/json
+- 16 API endpoints documented with tags: Auth, Posts, Categories, Tags, Media
+- JWT Bearer authentication scheme configured
+- API-01 requirement complete
 
 ### 2026-03-20 - Phase 4 Plan 04 Complete
 
