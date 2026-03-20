@@ -218,6 +218,60 @@ export function clearTokenBlacklist(): void {
 }
 
 /**
+ * Register a new user
+ *
+ * @param username - User's username
+ * @param password - User's password
+ * @param email - User's email
+ * @returns Created user object (without password)
+ * @throws HTTPError 409 if username already exists
+ */
+export async function register(
+  username: string,
+  password: string,
+  email: string
+): Promise<UserObject> {
+  const db = await getDatabase()
+
+  // Check if username already exists
+  const existingUsers = await db.select().from(users).where(eq(users.username, username)).limit(1)
+
+  if (existingUsers.length > 0) {
+    throw HTTPError.CONFLICT('Username already exists')
+  }
+
+  // Check if email already exists
+  const existingEmails = await db.select().from(users).where(eq(users.email, email)).limit(1)
+
+  if (existingEmails.length > 0) {
+    throw HTTPError.CONFLICT('Email already exists')
+  }
+
+  // Hash password
+  const passwordHash = await hashPassword(password)
+
+  // Create user
+  const newUser = {
+    id: crypto.randomUUID(),
+    username,
+    email,
+    passwordHash,
+    role: 'author' as const,
+    status: 'active' as const,
+  }
+
+  await db.insert(users).values(newUser).run()
+
+  // Return user object without sensitive fields
+  return {
+    id: newUser.id,
+    username: newUser.username,
+    email: newUser.email,
+    role: newUser.role,
+  }
+}
+
+/**
  * Reset database instance (useful for testing)
  */
 export function resetDatabaseInstance(): void {

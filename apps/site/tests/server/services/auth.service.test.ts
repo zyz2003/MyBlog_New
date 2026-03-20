@@ -13,10 +13,12 @@ import {
   clearTokenBlacklist,
   setDatabaseInstance,
   resetDatabaseInstance,
+  register,
 } from '../../../server/services/auth.service'
 import { users } from '@my-blog/database/schema'
 import { getTestDatabase, resetTestDatabase } from '../../db'
 import { HTTPError } from '../../../server/utils/error'
+import { eq } from 'drizzle-orm'
 
 describe('auth.service', () => {
   beforeEach(async () => {
@@ -207,6 +209,97 @@ describe('auth.service', () => {
       await logout(token)
 
       expect(isTokenBlacklisted(token)).toBe(true)
+    })
+  })
+
+  describe('register', () => {
+    it('creates new user with valid credentials', async () => {
+      const result = await register('newuser', 'password123', 'new@example.com')
+
+      expect(result).toHaveProperty('id')
+      expect(result.username).toBe('newuser')
+      expect(result.email).toBe('new@example.com')
+      expect(result.role).toBe('author')
+      expect(result).not.toHaveProperty('passwordHash')
+
+      // Verify user was created in database
+      const testDb = getTestDatabase()
+      const userInDb = await testDb.select().from(users).where(eq(users.username, 'newuser')).get()
+      expect(userInDb).toBeDefined()
+      expect(userInDb?.email).toBe('new@example.com')
+    })
+
+    it('hashes password before storing', async () => {
+      await register('testuser', 'password123', 'test@example.com')
+
+      const testDb = getTestDatabase()
+      const userInDb = await testDb.select().from(users).where(eq(users.username, 'testuser')).get()
+
+      expect(userInDb).toBeDefined()
+      expect(userInDb?.passwordHash).not.toBe('password123')
+      expect(userInDb?.passwordHash).toMatch(/^\$2[aby]\$\d+\$/)
+    })
+
+    it('throws 409 for duplicate username', async () => {
+      const testDb = getTestDatabase()
+
+      // Create existing user
+      await testDb.insert(users).values({
+        id: 'existing-user',
+        username: 'existinguser',
+        email: 'existing@example.com',
+        passwordHash: await hashPassword('password123'),
+        role: 'author',
+        status: 'active',
+      })
+
+      await expect(
+        register('existinguser', 'password456', 'different@example.com')
+      ).rejects.toThrow(HTTPError)
+      await expect(
+        register('existinguser', 'password456', 'different@example.com')
+      ).rejects.toThrow('Username already exists')
+    })
+
+    it('throws 409 for duplicate email', async () => {
+      const testDb = getTestDatabase()
+
+      // Create existing user
+      await testDb.insert(users).values({
+        id: 'existing-user',
+        username: 'uniqueuser',
+        email: 'existing@example.com',
+        passwordHash: await hashPassword('password123'),
+        role: 'author',
+        status: 'active',
+      })
+
+      await expect(
+        register('differentuser', 'password456', 'existing@example.com')
+      ).rejects.toThrow(HTTPError)
+      await expect(
+        register('differentuser', 'password456', 'existing@example.com')
+      ).rejects.toThrow('Email already exists')
+    })
+
+    it('sets default role to author', async () => {
+      const result = await register('newuser2', 'password123', 'new2@example.com')
+
+      expect(result.role).toBe('author')
+
+      const testDb = getTestDatabase()
+      const userInDb = await testDb.select().from(users).where(eq(users.username, 'newuser2')).get()
+
+      expect(userInDb?.role).toBe('author')
+    })
+
+    it('sets default status to active', async () => {
+      await register('newuser3', 'password123', 'new3@example.com')
+
+      const testDb = getTestDatabase()
+      const userInDb = await testDb.select().from(users).where(eq(users.username, 'newuser3')).get()
+
+      expect(userInDb?.status).toBe('active')
     })
   })
 })

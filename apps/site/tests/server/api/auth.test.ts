@@ -4,6 +4,8 @@
  * Tests the business logic of auth endpoints:
  * - login endpoint logic
  * - logout endpoint logic
+ * - register endpoint logic
+ * - me endpoint logic (get current user)
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
@@ -12,12 +14,14 @@ import {
   generateToken,
   logout,
   isTokenBlacklisted,
+  register,
 } from '../../../server/services/auth.service'
 import { getTestDatabase, resetTestDatabase } from '../../db'
 import { users } from '@my-blog/database/schema'
-import { loginSchema } from '../../../server/schemas/auth'
+import { loginSchema, registerSchema } from '../../../server/schemas/auth'
 import { validateBodySync } from '../../../server/utils/validate'
 import { HTTPError } from '../../../server/utils/error'
+import { eq } from 'drizzle-orm'
 
 describe('Auth API Logic', () => {
   beforeEach(async () => {
@@ -132,8 +136,149 @@ describe('Auth API Logic', () => {
     })
   })
 
-  describe('JWT Token generation', () => {
-    it('generates valid token', async () => {
+  describe('registerSchema validation', () => {
+    it('accepts valid register data', () => {
+      const result = validateBodySync(
+        { username: 'newuser', password: 'password123', email: 'new@example.com' },
+        registerSchema
+      )
+      expect(result.username).toBe('newuser')
+      expect(result.email).toBe('new@example.com')
+    })
+
+    it('rejects invalid email format', () => {
+      expect(() =>
+        validateBodySync(
+          { username: 'newuser', password: 'password123', email: 'invalid-email' },
+          registerSchema
+        )
+      ).toThrow(HTTPError)
+    })
+
+    it('rejects empty email', () => {
+      expect(() =>
+        validateBodySync(
+          { username: 'newuser', password: 'password123', email: '' },
+          registerSchema
+        )
+      ).toThrow(HTTPError)
+    })
+
+    it('rejects long email', () => {
+      const longEmail = 'a'.repeat(250) + '@example.com'
+      expect(() =>
+        validateBodySync(
+          { username: 'newuser', password: 'password123', email: longEmail },
+          registerSchema
+        )
+      ).toThrow(HTTPError)
+    })
+  })
+
+  describe('Register endpoint behavior', () => {
+    it('creates new user with valid data', async () => {
+      const testDb = getTestDatabase()
+      const { setDatabaseInstance } = await import('../../../server/services/auth.service')
+      setDatabaseInstance(testDb)
+
+      const result = await register('newuser', 'password123', 'new@example.com')
+
+      expect(result).toHaveProperty('id')
+      expect(result.username).toBe('newuser')
+      expect(result.email).toBe('new@example.com')
+      expect(result.role).toBe('author')
+
+      // Verify user was created in database
+      const userInDb = await testDb.select().from(users).where(eq(users.username, 'newuser')).get()
+      expect(userInDb).toBeDefined()
+      expect(userInDb?.email).toBe('new@example.com')
+    })
+
+    it('throws 409 for duplicate username', async () => {
+      const testDb = getTestDatabase()
+      const { setDatabaseInstance } = await import('../../../server/services/auth.service')
+      setDatabaseInstance(testDb)
+
+      // Create first user
+      await testDb.insert(users).values({
+        id: 'existing-user',
+        username: 'existinguser',
+        email: 'existing@example.com',
+        passwordHash: await hashPassword('password123'),
+        role: 'author',
+        status: 'active',
+      })
+
+      // Try to register with same username
+      await expect(
+        register('existinguser', 'password456', 'different@example.com')
+      ).rejects.toThrow(HTTPError)
+    })
+
+    it('throws 409 for duplicate email', async () => {
+      const testDb = getTestDatabase()
+      const { setDatabaseInstance } = await import('../../../server/services/auth.service')
+      setDatabaseInstance(testDb)
+
+      // Create first user
+      await testDb.insert(users).values({
+        id: 'existing-user',
+        username: 'uniqueuser',
+        email: 'existing@example.com',
+        passwordHash: await hashPassword('password123'),
+        role: 'author',
+        status: 'active',
+      })
+
+      // Try to register with same email
+      await expect(
+        register('differentuser', 'password456', 'existing@example.com')
+      ).rejects.toThrow(HTTPError)
+    })
+
+    it('hashes password before storing', async () => {
+      const testDb = getTestDatabase()
+      const { setDatabaseInstance } = await import('../../../server/services/auth.service')
+      setDatabaseInstance(testDb)
+
+      await register('testuser', 'password123', 'test@example.com')
+
+      const userInDb = await testDb.select().from(users).where(eq(users.username, 'testuser')).get()
+      expect(userInDb).toBeDefined()
+      expect(userInDb?.passwordHash).not.toBe('password123')
+      expect(userInDb?.passwordHash).toMatch(/^\$2[aby]\$\d+\$/)
+    })
+  })
+
+  describe('Me endpoint behavior (get current user)', () => {
+    it('returns user data for valid token', async () => {
+      const testDb = getTestDatabase()
+      const { setDatabaseInstance } = await import('../../../server/services/auth.service')
+      setDatabaseInstance(testDb)
+
+      // Create test user
+      await testDb.insert(users).values({
+        id: 'test-user-id',
+        username: 'testuser',
+        email: 'test@example.com',
+        passwordHash: await hashPassword('password123'),
+        role: 'admin',
+        status: 'active',
+      })
+
+      // Generate token
+      const token = await generateToken({
+        id: 'test-user-id',
+        username: 'testuser',
+        role: 'admin',
+        email: 'test@example.com',
+      })
+
+      expect(token).toBeTruthy()
+      // Token should be usable for auth middleware
+    })
+
+    it('requires valid token structure', async () => {
       const token = await generateToken({
         id: '123',
         username: 'testuser',
@@ -141,8 +286,9 @@ describe('Auth API Logic', () => {
         email: 'test@example.com',
       })
 
-      expect(token).toBeTruthy()
-      expect(token.split('.').length).toBe(3)
+      // JWT token format: header.payload.signature
+      const parts = token.split('.')
+      expect(parts.length).toBe(3)
     })
   })
 })

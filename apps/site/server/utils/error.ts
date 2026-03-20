@@ -24,6 +24,9 @@ export const ERROR_CODES = {
   NOT_FOUND: 'NOT_FOUND',
   RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
 
+  // Conflict (409)
+  CONFLICT: 'CONFLICT',
+
   // Rate limiting (429)
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
 
@@ -147,6 +150,13 @@ export class HTTPError extends Error {
    */
   static DATABASE_ERROR(message = 'Database error'): HTTPError {
     return new HTTPError(500, ERROR_CODES.DATABASE_ERROR, message)
+  }
+
+  /**
+   * Create a CONFLICT error (409)
+   */
+  static CONFLICT(message = 'Resource already exists'): HTTPError {
+    return new HTTPError(409, ERROR_CODES.VALIDATION_ERROR, message)
   }
 }
 

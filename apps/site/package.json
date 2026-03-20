@@ -31,6 +31,8 @@
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.0",
     "happy-dom": "^20.8.4",
+    "pinyin-pro": "^3.28.0",
+    "shiki": "^4.0.2",
     "typescript": "^5.7.0",
     "vitest": "^4.1.0",
     "vue-tsc": "^2.0.0"
