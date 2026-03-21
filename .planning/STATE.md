@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 4
 status: in_progress
-last_updated: '2026-03-20T00:00:00.000Z'
+last_updated: '2026-03-21T18:53:00.000Z'
 progress:
   total_phases: 11
   completed_phases: 3
   total_plans: 18
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # State: My Blog System
@@ -97,6 +97,19 @@ CI/CD verified: GitHub Actions passed
 - [ ] Execute remaining Phase 4 plans: API 层 (Nitro 路由、中间件、服务层)
 
 ## Changelog
+
+### 2026-03-21 - Phase 00 Plan 02 Complete (Test Audit - Phase 2 Core Framework)
+
+- 00-02-PLAN.md executed: Phase 2 核心框架测试审查
+- 00-02-AUDIT.md created: Detailed audit report with findings
+- 00-02-SUMMARY.md created: Execution summary
+- **Bug Fixed:** ThemeManager.apply() was not applying CSS variables from theme config
+- **Bug Fixed:** Constructor called apply() before themes were registered (caused warnings)
+- **Bug Fixed:** Test isolation issue - localStorage state not cleared between tests
+- Added 3 new tests verifying CSS variable application (colors, typography, spacing)
+- Test count: 23 → 26 tests (100% pass rate)
+- Requirements verified: PLUGIN-01/02/03 (no issues), THEME-01/02/03 (fixed THEME-02 implementation)
+- Commit: ace291e fix(theme): apply CSS variables from theme config in apply() method
 
 ### 2026-03-21 - Phase 00 Plan 01 Complete (Test Architecture)
 
@@ -316,7 +329,7 @@ CI/CD verified: GitHub Actions passed
 
 ---
 
-_Last updated: 2026-03-20 - Phase 4 Plan 03 complete (JWT authentication)_
+_Last updated: 2026-03-21 - Phase 00 Plan 02 complete (Phase 2 Core Framework Test Audit)_
 
 ### 2026-03-19 - Phase 3 Complete (CI/CD Verified)
 
