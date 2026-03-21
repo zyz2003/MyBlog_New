@@ -98,6 +98,57 @@ CI/CD verified: GitHub Actions passed
 
 ## Changelog
 
+### 2026-03-21 - Phase 00 Plan 01 Complete (Test Architecture)
+
+- 00-01-PLAN.md executed: Phase 1 Configuration Verification Test Creation
+- 00-01-SUMMARY.md created with execution details
+- Created workspace-config.test.ts (12 tests), tsconfig-heritage.test.ts (32 tests), ci-config-verification.test.ts (25 tests)
+- All 69 tests passing (100% pass rate)
+- Established configuration verification pattern: when tests fail, fix configuration files NOT test files
+
+### 2026-03-21 - Test Architecture Systemic Fix (Phase 00-TEST-ARCH)
+
+**系统性整改：测试架构重构**
+
+**核心原则：**
+
+> 测试是验证者，不是迁就者。当测试失败时，修复的是正式文件的错误，而不是测试文件去迁就错误。
+
+**已完成整改：**
+
+- Created `scripts/verify-schema.ts` for automated schema verification
+- Created `apps/site/tests/schema-sync.test.ts` with 43 schema validation tests
+- Fixed `apps/site/tests/db.ts` - Updated CREATE TABLE statements to match formal schema
+- Fixed `apps/site/tests/server/services/post.service.test.ts` - Now uses shared db.ts utilities
+- Fixed `apps/site/server/services/post.service.ts` - Added `crypto.randomUUID()` for ID generation
+- Created `.planning/phases/00-global/TEST-ARCHITECTURE-FIX.md` - Full systemic fix plan
+
+**Test Results:**
+
+- Before: 120/120 tests (missing post.service tests)
+- After: 227/228 tests passing (99.6%)
+- Schema-sync tests: 43/43 passing
+
+**Remaining Issue:**
+
+- 1 test failing in `updatePost` - pre-existing bug in update logic (not introduced by this fix)
+- Will be fixed in Phase 4 completion or Phase 5 preparation
+
+**整改范围：**
+
+- Phase 1 (Monorepo): 创建配置验证测试
+- Phase 2 (核心框架): 审查单元测试基于规范
+- Phase 3 (数据库层): 保持 schema-sync 验证，创建迁移幂等性测试
+- Phase 4 (API 层): 创建 API 契约测试，审查服务层测试
+- Phase 5-11: 前置要求 - 所有测试必须基于规范/契约
+
+**四层测试架构：**
+
+1. 契约验证层 - 验证 Schema 完整性、API 响应格式、类型安全
+2. 单元测试层 - 验证单一函数/类的行为
+3. 集成测试层 - 验证模块间协作
+4. E2E 测试层 - 验证完整用户流程
+
 ### 2026-03-20 - Phase 4 Plan 07 Complete
 
 - 04-07-PLAN.md executed: 认证 API（获取当前用户、用户注册）
