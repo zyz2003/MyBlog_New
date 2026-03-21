@@ -7,13 +7,18 @@
  * - deletePost
  * - getPostById with relations
  * - listPosts with pagination and filters
+ *
+ * Database: Uses isolated test database to avoid cross-file interference
+ * Schema: Table structures defined in packages/database/src/schema/*.ts
  */
 
 import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest'
-import { drizzle } from 'drizzle-orm/libsql'
-import { createClient } from '@libsql/client'
-import { sql } from 'drizzle-orm'
-import * as schema from '@my-blog/database/schema'
+import {
+  createIsolatedTestDatabase,
+  initializeTestDatabase,
+  clearAllData,
+  seedTestData,
+} from '../../../tests/db'
 import {
   createPost,
   updatePost,
@@ -22,137 +27,37 @@ import {
   listPosts,
   setDatabaseInstance,
   resetDatabaseInstance,
-} from '../../server/services/post.service'
-import { hashPassword } from '../../server/services/auth.service'
+} from '../../../server/services/post.service'
+import { hashPassword } from '../../../server/services/auth.service'
 
-let testDb: ReturnType<typeof drizzle<typeof schema>>
-let testClient: ReturnType<typeof createClient>
+// Isolated database for this test file
+const { db: testDb, cleanup } = createIsolatedTestDatabase()
 
 /**
- * Initialize test database before all tests
+ * Initialize isolated test database before all tests
  */
 beforeAll(async () => {
-  testClient = createClient({
-    url: 'file::memory:?cache=shared',
-  })
-  testDb = drizzle(testClient, { schema })
+  await initializeTestDatabase(testDb)
   setDatabaseInstance(testDb)
-
-  // Create tables
-  await testDb.run(sql`DROP TABLE IF EXISTS posts_tags`)
-  await testDb.run(sql`DROP TABLE IF EXISTS posts`)
-  await testDb.run(sql`DROP TABLE IF EXISTS tags`)
-  await testDb.run(sql`DROP TABLE IF EXISTS categories`)
-  await testDb.run(sql`DROP TABLE IF EXISTS users`)
-
-  await testDb.run(sql`
-    CREATE TABLE users (
-      id TEXT PRIMARY KEY,
-      username TEXT NOT NULL UNIQUE,
-      email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      role TEXT DEFAULT 'author' NOT NULL,
-      status TEXT DEFAULT 'active' NOT NULL,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  `)
-
-  await testDb.run(sql`
-    CREATE TABLE categories (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      slug TEXT NOT NULL UNIQUE,
-      description TEXT,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  `)
-
-  await testDb.run(sql`
-    CREATE TABLE posts (
-      id TEXT PRIMARY KEY,
-      title TEXT NOT NULL,
-      slug TEXT NOT NULL UNIQUE,
-      content TEXT NOT NULL,
-      content_html TEXT,
-      excerpt TEXT,
-      cover_image TEXT,
-      seo_title TEXT,
-      seo_description TEXT,
-      status TEXT DEFAULT 'draft' NOT NULL,
-      author_id TEXT NOT NULL REFERENCES users(id),
-      category_id TEXT REFERENCES categories(id),
-      view_count INTEGER DEFAULT 0,
-      like_count INTEGER DEFAULT 0,
-      published_at INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  `)
-
-  await testDb.run(sql`
-    CREATE TABLE tags (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      slug TEXT NOT NULL UNIQUE,
-      color TEXT,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  `)
-
-  await testDb.run(sql`
-    CREATE TABLE posts_tags (
-      post_id TEXT NOT NULL REFERENCES posts(id),
-      tag_id TEXT NOT NULL REFERENCES tags(id),
-      PRIMARY KEY (post_id, tag_id)
-    )
-  `)
 })
 
 /**
- * Clean up after all tests
+ * Clean up isolated database after all tests
  */
 afterAll(async () => {
-  await testClient?.close()
   resetDatabaseInstance()
+  await cleanup()
 })
 
 /**
- * Reset database between tests
+ * Clear all data between tests for isolation
  */
 beforeEach(async () => {
-  await testDb.run(sql`DELETE FROM posts_tags`)
-  await testDb.run(sql`DELETE FROM posts`)
-  await testDb.run(sql`DELETE FROM tags`)
-  await testDb.run(sql`DELETE FROM categories`)
-  await testDb.run(sql`DELETE FROM users`)
+  await clearAllData(testDb)
 
   // Insert test user
   const passwordHash = await hashPassword('password123')
-  await testDb.insert(schema.users).values({
-    id: 'user-1',
-    username: 'testuser',
-    email: 'test@example.com',
-    passwordHash: passwordHash,
-    role: 'admin',
-    status: 'active',
-  })
-
-  // Insert test category
-  await testDb.insert(schema.categories).values({
-    id: 'cat-1',
-    name: 'Test Category',
-    slug: 'test-category',
-  })
-
-  // Insert test tags
-  await testDb.insert(schema.tags).values([
-    { id: 'tag-1', name: 'Vue', slug: 'vue' },
-    { id: 'tag-2', name: 'Nuxt', slug: 'nuxt' },
-    { id: 'tag-3', name: 'TypeScript', slug: 'typescript' },
-  ])
+  await seedTestData(testDb, passwordHash)
 })
 
 describe('Post Service', () => {

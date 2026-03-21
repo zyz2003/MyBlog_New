@@ -256,7 +256,7 @@ describe('Schema Backward Compatibility', () => {
       for (let i = 1; i <= 5; i++) {
         await db.run(sql`
           INSERT INTO posts (id, title, slug, content, author_id, category_id, status)
-          VALUES ('post-${i}', 'Post ${i}', 'post-${i}', 'Content ${i}', 'query-test-author', 'cat-1', 'published')
+          VALUES (${`post-${i}`}, ${`Post ${i}`}, ${`post-${i}`}, ${`Content ${i}`}, 'query-test-author', 'cat-1', 'published')
         `)
       }
     })
