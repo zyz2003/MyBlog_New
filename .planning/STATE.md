@@ -98,7 +98,17 @@ CI/CD verified: GitHub Actions passed
 
 ## Changelog
 
-### 2026-03-21 - Phase 00 Plan 03 Complete (Test Audit - Phase 3 Database Layer)
+### 2026-03-21 - Phase 00 Plan 04 Complete (Phase 4 API Test Audit)
+
+- 00-04-PLAN.md executed: Phase 4 API 层已完成计划审查
+- 00-04-AUDIT.md created: Comprehensive audit report with findings
+- 00-04-SUMMARY.md created: Execution summary
+- **Test Isolation Fix:** Created `createIsolatedTestDatabase()` for per-file database isolation
+- **Bug Fixed:** `schema-backward-compat.test.ts` SQL template interpolation bug
+- **Bug Fixed:** `post.service.test.ts` CLIENT_CLOSED error (test isolation issue)
+- Test results: 324/325 passing (99.7%), up from 303/325 (93.2%)
+- Remaining issue: 1 post.service test has drizzle-orm transaction metadata issue (not a code bug)
+- Phase 4 API layer code verified: All implementations correct, no bugs found
 
 - 00-03-PLAN.md executed: Phase 3 数据库层测试审查与增强
 - 00-03-AUDIT.md created: Comprehensive audit report with findings
