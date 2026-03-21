@@ -70,6 +70,7 @@ describe('ThemeManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorageMock.clear() // Clear localStorage state between tests
     themeManager = new ThemeManager('classic')
   })
 
@@ -153,6 +154,25 @@ describe('ThemeManager', () => {
       themeManager.onChange(callback)
       themeManager.apply('test')
       expect(callback).toHaveBeenCalledWith('test')
+    })
+
+    it('should apply theme colors to CSS variables', () => {
+      themeManager.apply('test')
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith('--color-primary', '#ff0000')
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith('--color-background', '#ffffff')
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith('--color-text', '#000000')
+    })
+
+    it('should apply theme typography to CSS variables', () => {
+      themeManager.apply('test')
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith('--font-family', 'Arial')
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith('--font-size', '16px')
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith('--line-height', '1.5')
+    })
+
+    it('should apply theme spacing to CSS variables', () => {
+      themeManager.apply('test')
+      expect(mockElement.style.setProperty).toHaveBeenCalledWith('--spacing-unit', '8px')
     })
   })
 

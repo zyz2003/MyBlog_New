@@ -22,12 +22,12 @@ export class ThemeManager {
 
     // 从 localStorage 恢复主题
     const savedTheme = this.getSavedTheme()
-    if (savedTheme && this.themes.has(savedTheme)) {
+    if (savedTheme) {
       this.currentTheme = savedTheme
     }
 
-    // 应用初始主题
-    this.apply(this.currentTheme, { transition: false })
+    // 注意：不在构造函数中应用主题，因为此时主题还未注册
+    // 主题会在 register() 时自动应用（如果注册的主题 matches currentTheme）
   }
 
   /**
@@ -57,6 +57,8 @@ export class ThemeManager {
       return
     }
 
+    const theme = this.themes.get(themeName)!
+
     // 添加过渡效果
     if (transition) {
       document.documentElement.style.transition = 'background-color 0.3s, color 0.3s'
@@ -69,6 +71,9 @@ export class ThemeManager {
     document.documentElement.setAttribute('data-theme', themeName)
     this.currentTheme = themeName
 
+    // 应用主题配置到 CSS Variables
+    this.applyThemeVariables(theme)
+
     // 持久化
     if (persist) {
       this.saveTheme(themeName)
@@ -78,6 +83,109 @@ export class ThemeManager {
     this.hooks.onChange.forEach((fn) => fn(themeName))
 
     console.log(`[ThemeManager] Applied theme: ${themeName}`)
+  }
+
+  /**
+   * 应用主题配置到 CSS Variables
+   * @param theme - 主题配置
+   * @private
+   */
+  private applyThemeVariables(theme: ThemeConfig): void {
+    // 应用颜色变量
+    if (theme.colors) {
+      this.setCSSVariable('--color-primary', theme.colors.primary)
+      if (theme.colors.secondary) {
+        this.setCSSVariable('--color-secondary', theme.colors.secondary)
+      }
+      if (theme.colors.accent) {
+        this.setCSSVariable('--color-accent', theme.colors.accent)
+      }
+      this.setCSSVariable('--color-background', theme.colors.background)
+      if (theme.colors.surface) {
+        this.setCSSVariable('--color-surface', theme.colors.surface)
+      }
+      this.setCSSVariable('--color-text', theme.colors.text)
+      if (theme.colors.textSecondary) {
+        this.setCSSVariable('--color-text-secondary', theme.colors.textSecondary)
+      }
+      if (theme.colors.border) {
+        this.setCSSVariable('--color-border', theme.colors.border)
+      }
+      if (theme.colors.error) {
+        this.setCSSVariable('--color-error', theme.colors.error)
+      }
+      if (theme.colors.success) {
+        this.setCSSVariable('--color-success', theme.colors.success)
+      }
+      if (theme.colors.warning) {
+        this.setCSSVariable('--color-warning', theme.colors.warning)
+      }
+    }
+
+    // 应用排版变量
+    if (theme.typography) {
+      this.setCSSVariable('--font-family', theme.typography.fontFamily)
+      if (theme.typography.fontFamilyMono) {
+        this.setCSSVariable('--font-family-mono', theme.typography.fontFamilyMono)
+      }
+      this.setCSSVariable('--font-size', theme.typography.fontSize)
+      this.setCSSVariable('--line-height', String(theme.typography.lineHeight))
+      if (theme.typography.fontWeight) {
+        this.setCSSVariable('--font-weight', theme.typography.fontWeight)
+      }
+      if (theme.typography.letterSpacing) {
+        this.setCSSVariable('--letter-spacing', theme.typography.letterSpacing)
+      }
+    }
+
+    // 应用间距变量
+    if (theme.spacing) {
+      this.setCSSVariable('--spacing-unit', theme.spacing.unit)
+      if (theme.spacing.xs) {
+        this.setCSSVariable('--spacing-xs', theme.spacing.xs)
+      }
+      if (theme.spacing.sm) {
+        this.setCSSVariable('--spacing-sm', theme.spacing.sm)
+      }
+      if (theme.spacing.md) {
+        this.setCSSVariable('--spacing-md', theme.spacing.md)
+      }
+      if (theme.spacing.lg) {
+        this.setCSSVariable('--spacing-lg', theme.spacing.lg)
+      }
+      if (theme.spacing.xl) {
+        this.setCSSVariable('--spacing-xl', theme.spacing.xl)
+      }
+    }
+
+    // 应用圆角变量
+    if (theme.radius) {
+      if (theme.radius.none) {
+        this.setCSSVariable('--radius-none', theme.radius.none)
+      }
+      if (theme.radius.sm) {
+        this.setCSSVariable('--radius-sm', theme.radius.sm)
+      }
+      if (theme.radius.md) {
+        this.setCSSVariable('--radius-md', theme.radius.md)
+      }
+      if (theme.radius.lg) {
+        this.setCSSVariable('--radius-lg', theme.radius.lg)
+      }
+      if (theme.radius.xl) {
+        this.setCSSVariable('--radius-xl', theme.radius.xl)
+      }
+      if (theme.radius.full) {
+        this.setCSSVariable('--radius-full', theme.radius.full)
+      }
+    }
+
+    // 应用阴影变量
+    if (theme.shadows) {
+      Object.entries(theme.shadows).forEach(([key, value]) => {
+        this.setCSSVariable(`--shadow-${key}`, value)
+      })
+    }
   }
 
   /**
