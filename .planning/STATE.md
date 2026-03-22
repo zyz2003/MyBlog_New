@@ -9,7 +9,7 @@ progress:
   total_phases: 13
   completed_phases: 4
   total_plans: 39
-  completed_plans: 29
+  completed_plans: 23
 ---
 
 # State: My Blog System
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 17/18 | 94%      |
+| 4     | API 层          | ◆ Active | 8/18  | 44%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
