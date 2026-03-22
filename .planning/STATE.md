@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 14/18 | 78%      |
+| 4     | API 层          | ◆ Active | 15/18 | 83%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
@@ -102,9 +102,24 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 4 Plan 12: Category Detail/Update/Delete API (COMPLETE)
 - [x] Execute Phase 4 Plan 13: Tag API - Full CRUD (COMPLETE)
 - [x] Execute Phase 4 Plan 14: Storage + Media services (COMPLETE)
-- [ ] Execute remaining Phase 4 plans: API 层 (4 plans remaining)
+- [x] Execute Phase 4 Plan 15: Media API - upload, list, get, delete (COMPLETE)
+- [ ] Execute remaining Phase 4 plans: API 层 (3 plans remaining)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 15 Complete (Media API - Upload/List/Get/Delete)
+
+- 04-15-PLAN.md executed: 实现媒体管理 API：上传、查询、删除
+- 04-15-SUMMARY.md created: Media API with 4 endpoints (GET list, POST upload, GET by ID, DELETE)
+- Test results: 13/13 API contract tests passing + 10/10 service tests passing
+- API-04 requirement complete
+- Commits: b8ae055 (test), 4e497d4 (feat), 64e0648 (refactor)
+- Files created: index.get.ts, index.post.ts, [id].get.ts, [id].delete.ts, media.test.ts
+- Files modified: media.service.ts (db injection), media.service.test.ts (signatures)
+- **Auto-fixed:** Media service function signatures to not require db parameter (Rule 3)
+- **Auto-fixed:** Multipart form data parsing using readMultipartFormData from h3 (Rule 3)
+- **Auto-fixed:** Test mock data injection for \_query and \_parts (Rule 3)
+- Pattern established: Follows same API handler → service layer pattern as posts/categories/tags
 
 ### 2026-03-22 - Phase 04 Plan 14 Complete (Storage and Media Services)
 
