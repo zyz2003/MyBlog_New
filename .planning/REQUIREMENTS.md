@@ -45,8 +45,8 @@
 - [x] **API-03**: 分类标签 API
 - [x] **API-04**: 媒体上传 API
 - [ ] **API-05**: 用户认证 API（JWT）
-- [ ] **API-06**: 插件管理 API
-- [ ] **API-07**: 主题切换 API
+- [x] **API-06**: 插件管理 API
+- [x] **API-07**: 主题切换 API
 - [ ] **API-08**: API 错误处理中间件
 - [ ] **API-09**: API 请求验证（Zod）
 
@@ -155,8 +155,8 @@
 | API-03      | Phase 4 | Complete |
 | API-04      | Phase 4 | Complete |
 | API-05      | Phase 4 | Pending  |
-| API-06      | Phase 4 | Pending  |
-| API-07      | Phase 4 | Pending  |
+| API-06      | Phase 4 | Complete |
+| API-07      | Phase 4 | Complete |
 | API-08      | Phase 4 | Pending  |
 | API-09      | Phase 4 | Pending  |
 
