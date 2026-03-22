@@ -98,7 +98,16 @@ CI/CD verified: GitHub Actions passed
 
 ## Changelog
 
-### 2026-03-21 - Phase 00 Plan 04 Complete (Phase 4 API Test Audit)
+### 2026-03-22 - Phase 00 Plan 05 Complete (API Contract Test Framework)
+
+- 00-05-PLAN.md executed: API 契约测试框架创建
+- 00-05-SUMMARY.md created: API contract test framework summary
+- Created api-contract.template.ts: Reusable API contract test structure
+- Created helpers/api-test.ts: Test utilities (makeAuthenticatedRequest, assertStandardResponse, etc.)
+- Created api/auth-contract.test.ts: 48 auth API contract tests (100% passing)
+- **Bug Fixed:** `HTTPError.CONFLICT()` was using wrong error code constant
+- Test results: 358/359 tests passing (99.7%) - 1 pre-existing drizzle-orm issue
+- Pattern established for Phase 4 remaining API endpoints
 
 - 00-04-PLAN.md executed: Phase 4 API 层已完成计划审查
 - 00-04-AUDIT.md created: Comprehensive audit report with findings
