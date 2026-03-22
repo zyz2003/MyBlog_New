@@ -186,11 +186,11 @@ Plans:
 - [x] 04-02-PLAN.md — Zod validation utilities + schemas ✅
 - [x] 04-03-PLAN.md — JWT authentication middleware ✅
 - [x] 04-04-PLAN.md — Error handler + logger + rate-limit middleware ✅
-- [ ] 04-05-PLAN.md — Swagger/OpenAPI documentation
-- [ ] 04-06-PLAN.md — Auth API: login, logout
-- [ ] 04-07-PLAN.md — Auth API: me, register
+- [x] 04-05-PLAN.md — Swagger/OpenAPI documentation ✅
+- [x] 04-06-PLAN.md — Auth API: login, logout ✅
+- [x] 04-07-PLAN.md — Auth API: me, register ✅
 - [x] 04-08-PLAN.md — Post service + slug/markdown utilities ✅
-- [ ] 04-09-PLAN.md — Posts API: list, get
+- [x] 04-09-PLAN.md — Posts API: list, get ✅
 - [ ] 04-10-PLAN.md — Posts API: create, update, delete, bulk delete
 - [ ] 04-11-PLAN.md — Categories API: service + list, create
 - [ ] 04-12-PLAN.md — Categories API: get, update, delete

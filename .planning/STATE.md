@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 9/18  | 50%      |
+| 4     | API 层          | ◆ Active | 10/18 | 56%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
@@ -95,9 +95,22 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 4 Plan 05: Swagger/OpenAPI documentation (COMPLETE)
 - [x] Execute Phase 4 Plan 06: Authentication API (login/logout) (COMPLETE)
 - [x] Execute Phase 4 Plan 07: Auth API (me, register) (COMPLETE)
-- [ ] Execute remaining Phase 4 plans: API 层 (Nitro 路由、中间件、服务层)
+- [x] Execute Phase 4 Plan 09: Posts API - list and get endpoints (COMPLETE)
+- [ ] Execute remaining Phase 4 plans: API 层 (8 plans remaining)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 09 Complete (Posts API - List and Get Endpoints)
+
+- 04-09-PLAN.md executed: 实现文章查询 API（列表、详情）
+- 04-09-SUMMARY.md created: GET /api/v1/posts list and GET /api/v1/posts/:id detail endpoints
+- **Bug Fixed:** listPosts total count was not applying filters - fixed to use same WHERE conditions
+- **Test Fix:** Mock event structure updated to include path for h3 getQuery() compatibility
+- Test results: 12/12 contract tests passing (100%)
+- API-02 requirement complete
+- Commits: f974bf8 (test fixes + service bug fix)
+- Files created: index.get.ts, [id].get.ts, posts.test.ts
+- Pattern established: API handler → service layer, validateQuery for schema validation
 
 ### 2026-03-22 - Phase 04 Plan 08 Complete (Post Service + Slug/Markdown Utilities)
 
@@ -386,7 +399,7 @@ CI/CD verified: GitHub Actions passed
 
 ---
 
-_Last updated: 2026-03-22 - Phase 00 Plan 06 complete (Test Architecture Constraints & Phase 5+ Requirements)_
+_Last updated: 2026-03-22 - Phase 04 Plan 09 complete (Posts API - List and Get Endpoints)_
 
 ### 2026-03-19 - Phase 3 Complete (CI/CD Verified)
 
