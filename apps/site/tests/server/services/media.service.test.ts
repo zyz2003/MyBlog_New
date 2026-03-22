@@ -32,6 +32,8 @@ vi.mock('../../../server/services/storage.service', () => ({
 
 // Import after mocking
 import {
+  setDatabaseInstance,
+  resetDatabaseInstance,
   uploadMedia,
   listMedia,
   getMediaById,
@@ -56,12 +58,18 @@ describe('Media Service', () => {
     const testPassword = await bcrypt.hash('password', 10)
     await seedTestData(db, testPassword)
 
+    // Set database instance for service
+    setDatabaseInstance(db)
+
     // Create test upload directory
     await fs.mkdir(testUploadDir, { recursive: true })
     process.env.STORAGE_PATH = testUploadDir
   })
 
   afterEach(async () => {
+    // Reset database instance
+    resetDatabaseInstance()
+
     // Clean up test files
     try {
       await fs.rm(testUploadDir, { recursive: true, force: true })
@@ -86,7 +94,7 @@ describe('Media Service', () => {
         size: fileBuffer.length,
       }
 
-      const result = await uploadMedia(db, fileBuffer, metadata)
+      const result = await uploadMedia(fileBuffer, metadata)
 
       expect(result).toHaveProperty('id')
       expect(result.filename).toBe('test-image.png')
@@ -119,7 +127,7 @@ describe('Media Service', () => {
         size: pngHeader.length,
       }
 
-      const result = await uploadMedia(db, pngHeader, metadata)
+      const result = await uploadMedia(pngHeader, metadata)
 
       expect(result).toBeDefined()
       // Note: width/height extraction requires sharp, which we test separately
@@ -134,7 +142,7 @@ describe('Media Service', () => {
         size: fileBuffer.length,
       }
 
-      const result = await uploadMedia(db, fileBuffer, metadata, 'user-1')
+      const result = await uploadMedia(fileBuffer, metadata, 'user-1')
 
       expect(result.uploadedBy).toBe('user-1')
 
@@ -152,19 +160,19 @@ describe('Media Service', () => {
     beforeEach(async () => {
       // Seed some media records
       const fileBuffer = Buffer.from('test')
-      await uploadMedia(db, fileBuffer, {
+      await uploadMedia(fileBuffer, {
         filename: 'image1.png',
         originalName: 'image1.png',
         mimeType: 'image/png',
         size: 4,
       })
-      await uploadMedia(db, fileBuffer, {
+      await uploadMedia(fileBuffer, {
         filename: 'image2.jpg',
         originalName: 'image2.jpg',
         mimeType: 'image/jpeg',
         size: 4,
       })
-      await uploadMedia(db, fileBuffer, {
+      await uploadMedia(fileBuffer, {
         filename: 'document.pdf',
         originalName: 'document.pdf',
         mimeType: 'application/pdf',
@@ -173,7 +181,7 @@ describe('Media Service', () => {
     })
 
     it('should return paginated list of media', async () => {
-      const result = await listMedia(db, { limit: 2, offset: 0 })
+      const result = await listMedia({ limit: 2, offset: 0 })
 
       expect(result.data).toHaveLength(2)
       expect(result.meta.total).toBe(3)
@@ -182,7 +190,7 @@ describe('Media Service', () => {
     })
 
     it('should filter by mime type', async () => {
-      const result = await listMedia(db, {
+      const result = await listMedia({
         limit: 10,
         offset: 0,
         mimeType: 'image/png',
@@ -193,7 +201,7 @@ describe('Media Service', () => {
     })
 
     it('should sort by uploadedAt descending by default', async () => {
-      const result = await listMedia(db, {
+      const result = await listMedia({
         limit: 10,
         offset: 0,
         sort: 'uploadedAt',
@@ -210,7 +218,7 @@ describe('Media Service', () => {
 
     beforeEach(async () => {
       const fileBuffer = Buffer.from('test file')
-      const result = await uploadMedia(db, fileBuffer, {
+      const result = await uploadMedia(fileBuffer, {
         filename: 'get-test.png',
         originalName: 'get-test.png',
         mimeType: 'image/png',
@@ -220,7 +228,7 @@ describe('Media Service', () => {
     })
 
     it('should return media record by id', async () => {
-      const result = await getMediaById(db, mediaId)
+      const result = await getMediaById(mediaId)
 
       expect(result).toBeDefined()
       expect(result.id).toBe(mediaId)
@@ -228,7 +236,7 @@ describe('Media Service', () => {
     })
 
     it('should return null for non-existent id', async () => {
-      const result = await getMediaById(db, 'non-existent-id')
+      const result = await getMediaById('non-existent-id')
 
       expect(result).toBeNull()
     })
@@ -239,7 +247,7 @@ describe('Media Service', () => {
 
     beforeEach(async () => {
       const fileBuffer = Buffer.from('test file')
-      const result = await uploadMedia(db, fileBuffer, {
+      const result = await uploadMedia(fileBuffer, {
         filename: 'delete-test.png',
         originalName: 'delete-test.png',
         mimeType: 'image/png',
@@ -249,7 +257,7 @@ describe('Media Service', () => {
     })
 
     it('should delete media record and file', async () => {
-      await deleteMedia(db, mediaId)
+      await deleteMedia(mediaId)
 
       // Verify database record is deleted
       const record = await db.select().from(schema.media).where(eq(schema.media.id, mediaId)).get()
@@ -261,7 +269,7 @@ describe('Media Service', () => {
     })
 
     it('should not throw for non-existent id', async () => {
-      await expect(deleteMedia(db, 'non-existent-id')).resolves.not.toThrow()
+      await expect(deleteMedia('non-existent-id')).resolves.not.toThrow()
     })
   })
 })

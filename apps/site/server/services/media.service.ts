@@ -13,6 +13,37 @@ import { media, type NewMedia, type Media } from '@my-blog/database/schema'
 import { getStorageProvider } from './storage.service'
 
 /**
+ * Database instance - uses default db in production, can be overridden for tests
+ */
+let databaseInstance: LibSQLDatabase | null = null
+
+/**
+ * Set the database instance (used for testing)
+ */
+export function setDatabaseInstance(db: LibSQLDatabase): void {
+  databaseInstance = db
+}
+
+/**
+ * Reset the database instance (used for testing cleanup)
+ */
+export function resetDatabaseInstance(): void {
+  databaseInstance = null
+}
+
+/**
+ * Get the database instance
+ */
+async function getDatabase(): Promise<LibSQLDatabase> {
+  if (databaseInstance) {
+    return databaseInstance
+  }
+  // Lazy load default database
+  const { db } = await import('@my-blog/database')
+  return db
+}
+
+/**
  * Media upload metadata
  */
 export interface UploadMediaMetadata {
@@ -53,18 +84,18 @@ export interface PaginationResponse<T> {
 /**
  * Upload a file and create media record
  *
- * @param db - Database instance
  * @param buffer - File buffer
  * @param metadata - File metadata
  * @param userId - Optional user ID of uploader
  * @returns Created media record
  */
 export async function uploadMedia(
-  db: LibSQLDatabase,
   buffer: Buffer,
   metadata: UploadMediaMetadata,
   userId?: string
 ): Promise<Media> {
+  const db = await getDatabase()
+
   // Get storage provider
   const storageProvider = getStorageProvider()
 
@@ -124,14 +155,11 @@ export async function uploadMedia(
 /**
  * List media with pagination and filtering
  *
- * @param db - Database instance
  * @param query - Query parameters
  * @returns Paginated list of media records
  */
-export async function listMedia(
-  db: LibSQLDatabase,
-  query: ListMediaQuery = {}
-): Promise<PaginationResponse<Media>> {
+export async function listMedia(query: ListMediaQuery = {}): Promise<PaginationResponse<Media>> {
+  const db = await getDatabase()
   const { limit = 10, offset = 0, mimeType, search, sort = 'uploadedAt', order = 'desc' } = query
 
   // Build WHERE conditions
@@ -195,11 +223,11 @@ export async function listMedia(
 /**
  * Get media record by ID
  *
- * @param db - Database instance
  * @param id - Media ID
  * @returns Media record or null if not found
  */
-export async function getMediaById(db: LibSQLDatabase, id: string): Promise<Media | null> {
+export async function getMediaById(id: string): Promise<Media | null> {
+  const db = await getDatabase()
   const record = await db.select().from(media).where(eq(media.id, id)).get()
 
   return (record as Media) || null
@@ -208,16 +236,18 @@ export async function getMediaById(db: LibSQLDatabase, id: string): Promise<Medi
 /**
  * Delete media record and associated file
  *
- * @param db - Database instance
  * @param id - Media ID
+ * @returns The deleted media record if found, null otherwise
  */
-export async function deleteMedia(db: LibSQLDatabase, id: string): Promise<void> {
+export async function deleteMedia(id: string): Promise<Media | null> {
+  const db = await getDatabase()
+
   // Get media record
-  const record = await getMediaById(db, id)
+  const record = await getMediaById(id)
 
   if (!record) {
     // Already deleted or never existed
-    return
+    return null
   }
 
   // Delete file from storage
@@ -235,4 +265,6 @@ export async function deleteMedia(db: LibSQLDatabase, id: string): Promise<void>
 
   // Delete database record
   await db.delete(media).where(eq(media.id, id)).run()
+
+  return record
 }
