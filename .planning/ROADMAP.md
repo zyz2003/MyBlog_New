@@ -189,7 +189,7 @@ Plans:
 - [ ] 04-05-PLAN.md — Swagger/OpenAPI documentation
 - [ ] 04-06-PLAN.md — Auth API: login, logout
 - [ ] 04-07-PLAN.md — Auth API: me, register
-- [ ] 04-08-PLAN.md — Post service + slug/markdown utilities
+- [x] 04-08-PLAN.md — Post service + slug/markdown utilities ✅
 - [ ] 04-09-PLAN.md — Posts API: list, get
 - [ ] 04-10-PLAN.md — Posts API: create, update, delete, bulk delete
 - [ ] 04-11-PLAN.md — Categories API: service + list, create

@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 status: in_progress
-last_updated: '2026-03-22T07:00:00.000Z'
+last_updated: '2026-03-22T07:15:57.000Z'
 progress:
   total_phases: 13
   completed_phases: 4
   total_plans: 39
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # State: My Blog System
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 8/18  | 44%      |
+| 4     | API 层          | ◆ Active | 9/18  | 50%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
@@ -98,6 +98,16 @@ CI/CD verified: GitHub Actions passed
 - [ ] Execute remaining Phase 4 plans: API 层 (Nitro 路由、中间件、服务层)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 08 Complete (Post Service + Slug/Markdown Utilities)
+
+- 04-08-PLAN.md executed: 创建文章服务层和工具类
+- 04-08-SUMMARY.md created: Post service with transaction support, slug generation, markdown rendering
+- **Bug Fixed:** `updatePost` had drizzle-orm compatibility issue - spreading undefined values into update query
+- **Fix Applied:** Explicitly filter defined fields, removed contentHtml (field not in schema)
+- Test results: 65 tests passing (15 post service + 26 slug + 24 markdown)
+- API-02 requirement complete
+- contentHtml caching feature deferred pending schema migration
 
 ### 2026-03-22 - Phase 00 Plan 06 Complete (Test Architecture Constraints & Phase 5+ Requirements)
 
