@@ -177,7 +177,7 @@ Plans:
 
 **Wave:** 1
 
-**Plans:** 18 plans (Wave 1: 00-07, Wave 2: 08-16)
+**Plans:** 18/18 plans complete
 
 Plans: 14/18 complete
 

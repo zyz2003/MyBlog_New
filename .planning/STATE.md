@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 01
 status: unknown
-last_updated: '2026-03-22T13:25:08.098Z'
+last_updated: '2026-03-22T13:37:57.270Z'
 progress:
   total_phases: 12
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 33
-  completed_plans: 32
+  completed_plans: 33
 ---
 
 # State: My Blog System
@@ -23,30 +23,30 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** 用户可以专注于内容创作，同时享受灵活的博客定制能力和简洁高效的管理体验
 
-**Current focus:** Phase 3 - 数据库层 (Schema 定义 + Drizzle ORM + SQLite + 迁移脚本)
+**Current focus:** Phase 5 - 后台管理 (Admin Panel)
 
 ## Phase Status
 
-| Phase | Name            | Status   | Plans | Progress |
-| ----- | --------------- | -------- | ----- | -------- |
-| 00    | 测试架构整改    | ● Done   | 6/6   | 100%     |
-| 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
-| 2     | 核心框架        | ● Done   | 2/2   | 100%     |
-| 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 16/18 | 89%      |
-| 5     | 后台管理        | ○        | 0/0   | 0%       |
-| 6     | 前台博客        | ○        | 0/0   | 0%       |
-| 7     | 主题系统        | ○        | 0/0   | 0%       |
-| 8     | 插件系统        | ○        | 0/0   | 0%       |
-| 9     | 双编辑器        | ○        | 0/0   | 0%       |
-| 10    | 测试优化        | ○        | 0/0   | 0%       |
-| 11    | 部署文档        | ○        | 0/0   | 0%       |
+| Phase | Name            | Status | Plans | Progress |
+| ----- | --------------- | ------ | ----- | -------- |
+| 00    | 测试架构整改    | ● Done | 6/6   | 100%     |
+| 1     | Monorepo 脚手架 | ● Done | 2/2   | 100%     |
+| 2     | 核心框架        | ● Done | 2/2   | 100%     |
+| 3     | 数据库层        | ● Done | 5/5   | 100%     |
+| 4     | API 层          | ● Done | 18/18 | 100%     |
+| 5     | 后台管理        | ○      | 0/0   | 0%       |
+| 6     | 前台博客        | ○      | 0/0   | 0%       |
+| 7     | 主题系统        | ○      | 0/0   | 0%       |
+| 8     | 插件系统        | ○      | 0/0   | 0%       |
+| 9     | 双编辑器        | ○      | 0/0   | 0%       |
+| 10    | 测试优化        | ○      | 0/0   | 0%       |
+| 11    | 部署文档        | ○      | 0/0   | 0%       |
 
 ## Current Wave
 
-**Phase 3 Complete** ✅
+**Phase 4 Complete** ✅
 
-CI/CD verified: GitHub Actions passed
+All 18 plans completed. Test architecture fixes applied. CI/CD verified.
 
 ## Session Context
 
@@ -104,9 +104,22 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 4 Plan 14: Storage + Media services (COMPLETE)
 - [x] Execute Phase 4 Plan 15: Media API - upload, list, get, delete (COMPLETE)
 - [x] Execute Phase 4 Plan 16: Plugin and Theme Management API (COMPLETE)
-- [ ] Execute remaining Phase 4 plans: API 层 (2 plans remaining)
+- [x] Execute Phase 4 Plan 17: Global Test Architecture Fix (COMPLETE)
+- Phase 04: API 层 18/18 plans complete (100%)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 17 Complete (Global Test Architecture Fix)
+
+- 04-17-PLAN.md executed: 全局测试架构修复
+- 04-17-SUMMARY.md created: Test architecture fixes and schema validation
+- All tasks were completed during Phase 00, this plan confirms and archives work
+- Test results: 43/43 schema-sync tests passing, verify-schema.ts verification passed
+- Files created: scripts/verify-schema.ts, apps/site/tests/schema-sync.test.ts
+- Files modified: apps/site/tests/db.ts, apps/site/tests/server/services/post.service.test.ts
+- **Key decision:** Test architecture principle - "Tests are verifiers, not accommodators"
+- **Key decision:** Schema-driven test architecture - test DB structure auto-generated from formal schema
+- Phase 04: API 层 now 18/18 plans complete (100%)
 
 ### 2026-03-22 - Phase 04 Plan 16 Complete (Plugin and Theme Management API)
 
@@ -486,7 +499,7 @@ CI/CD verified: GitHub Actions passed
 
 ---
 
-_Last updated: 2026-03-22 - Phase 04 Plan 11 complete (Category API - Service and List/Create Endpoints)_
+_Last updated: 2026-03-22 - Phase 04 Plan 17 complete (Phase 04: API 层 100% complete)_
 
 ### 2026-03-19 - Phase 3 Complete (CI/CD Verified)
 
