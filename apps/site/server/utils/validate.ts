@@ -96,6 +96,8 @@ function getQuery(event: H3Event): Record<string, unknown> {
  * Usage: const data = await validateRequestBody(event, loginSchema)
  */
 export async function validateRequestBody<T>(event: H3Event, schema: z.ZodType<T>): Promise<T> {
-  const body = await readBody(event)
+  // Try to read from event.node.req.body first (for test mocks)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body = (event as any)._body || (event.node?.req as any)?.body || (await readBody(event))
   return validate(body, schema, 'request body')
 }

@@ -607,6 +607,24 @@ export async function getPostBySlug(
 }
 
 /**
+ * Delete multiple posts by IDs
+ * Uses transaction for atomic bulk delete
+ *
+ * @param ids - Array of post IDs to delete
+ * @returns Number of posts deleted
+ */
+export async function deleteMany(ids: string[]): Promise<number> {
+  const db = await getDatabase()
+
+  return db.transaction(async (tx) => {
+    // Use inArray for batch delete
+    const { inArray } = await import('drizzle-orm')
+    await tx.delete(posts).where(inArray(posts.id, ids))
+    return ids.length
+  })
+}
+
+/**
  * Reset database instance (useful for testing)
  */
 export function resetDatabaseInstance(): void {

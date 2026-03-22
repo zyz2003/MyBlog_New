@@ -188,18 +188,18 @@ export async function seedTestData(
     status: 'active',
   })
 
-  // Insert test category
+  // Insert test category (using UUID format for schema validation compatibility)
   await db.insert(schema.categories).values({
-    id: 'cat-1',
+    id: 'cat-00000000-0000-0000-0000-000000000001',
     name: 'Test Category',
     slug: 'test-category',
   })
 
-  // Insert test tags
+  // Insert test tags (using UUID format for schema validation compatibility)
   await db.insert(schema.tags).values([
-    { id: 'tag-1', name: 'Vue', slug: 'vue' },
-    { id: 'tag-2', name: 'Nuxt', slug: 'nuxt' },
-    { id: 'tag-3', name: 'TypeScript', slug: 'typescript' },
+    { id: 'tag-00000000-0000-0000-0000-000000000001', name: 'Vue', slug: 'vue' },
+    { id: 'tag-00000000-0000-0000-0000-000000000002', name: 'Nuxt', slug: 'nuxt' },
+    { id: 'tag-00000000-0000-0000-0000-000000000003', name: 'TypeScript', slug: 'typescript' },
   ])
 }
 

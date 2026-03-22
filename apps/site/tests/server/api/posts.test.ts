@@ -67,10 +67,10 @@ describe('Posts API Contract', () => {
           content: `Content for post ${i}`,
           excerpt: `Excerpt ${i}`,
           authorId: 'user-1',
-          categoryId: 'cat-1',
+          categoryId: 'cat-00000000-0000-0000-0000-000000000001',
           status: 'published',
         },
-        ['tag-1', 'tag-2']
+        ['tag-00000000-0000-0000-0000-000000000001', 'tag-00000000-0000-0000-0000-000000000002']
       )
     }
   }

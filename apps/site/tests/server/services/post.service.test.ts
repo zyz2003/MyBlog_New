@@ -68,11 +68,14 @@ describe('Post Service', () => {
         content: '# Hello World\n\nThis is a test post.',
         excerpt: 'Test excerpt',
         authorId: 'user-1',
-        categoryId: 'cat-1',
+        categoryId: 'cat-00000000-0000-0000-0000-000000000001',
         status: 'published' as const,
       }
 
-      const result = await createPost(postData, ['tag-1', 'tag-2'])
+      const result = await createPost(postData, [
+        'tag-00000000-0000-0000-0000-000000000001',
+        'tag-00000000-0000-0000-0000-000000000002',
+      ])
 
       expect(result).toBeDefined()
       expect(result.id).toBeDefined()
@@ -123,13 +126,13 @@ describe('Post Service', () => {
         authorId: 'user-1',
         status: 'draft' as const,
       }
-      const created = await createPost(postData, ['tag-1'])
+      const created = await createPost(postData, ['tag-00000000-0000-0000-0000-000000000001'])
 
       // Update post
       const updated = await updatePost(
         created.id,
         { title: 'Updated Title', content: 'Updated content' },
-        ['tag-2', 'tag-3']
+        ['tag-00000000-0000-0000-0000-000000000002', 'tag-00000000-0000-0000-0000-000000000003']
       )
 
       expect(updated.title).toBe('Updated Title')
@@ -173,10 +176,13 @@ describe('Post Service', () => {
         title: 'Get Post Test',
         content: 'Content',
         authorId: 'user-1',
-        categoryId: 'cat-1',
+        categoryId: 'cat-00000000-0000-0000-0000-000000000001',
         status: 'published' as const,
       }
-      const created = await createPost(postData, ['tag-1', 'tag-2'])
+      const created = await createPost(postData, [
+        'tag-00000000-0000-0000-0000-000000000001',
+        'tag-00000000-0000-0000-0000-000000000002',
+      ])
 
       const found = await getPostById(created.id, {
         includeCategory: true,
@@ -244,7 +250,7 @@ describe('Post Service', () => {
         title: 'Category Post',
         content: 'Content',
         authorId: 'user-1',
-        categoryId: 'cat-1',
+        categoryId: 'cat-00000000-0000-0000-0000-000000000001',
         status: 'published' as const,
       })
 
@@ -262,7 +268,7 @@ describe('Post Service', () => {
           authorId: 'user-1',
           status: 'published' as const,
         },
-        ['tag-1']
+        ['tag-00000000-0000-0000-0000-000000000001']
       )
 
       const result = await listPosts({ tag: 'vue' })
