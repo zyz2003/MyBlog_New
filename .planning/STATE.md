@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 status: in_progress
-last_updated: '2026-03-22T18:15:00.000Z'
+last_updated: '2026-03-22T19:40:00.000Z'
 progress:
   total_phases: 13
   completed_phases: 4
   total_plans: 39
-  completed_plans: 26
+  completed_plans: 27
 ---
 
 # State: My Blog System
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 12/18 | 67%      |
+| 4     | API 层          | ◆ Active | 13/18 | 72%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
@@ -100,9 +100,20 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 4 Plan 10: Posts API - create, update, delete, bulk delete (COMPLETE)
 - [x] Execute Phase 4 Plan 11: Category API - Service and List/Create Endpoints (COMPLETE)
 - [x] Execute Phase 4 Plan 12: Category Detail/Update/Delete API (COMPLETE)
-- [ ] Execute remaining Phase 4 plans: API 层 (6 plans remaining)
+- [x] Execute Phase 4 Plan 13: Tag API - Full CRUD (COMPLETE)
+- [ ] Execute remaining Phase 4 plans: API 层 (5 plans remaining)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 13 Complete (Tag API - Full CRUD)
+
+- 04-13-PLAN.md executed: 实现标签 API：完整 CRUD
+- 04-13-SUMMARY.md created: Tag service + 5 API endpoints (GET/POST/PUT/DELETE)
+- Test results: 29/29 tests passing (12 service + 8 list/create + 9 detail/update/delete)
+- API-03 requirement complete
+- Commits: 6e54775 (feat: implement tag API with full CRUD operations)
+- Files created: tag.service.ts, tags.ts (schema), index.get.ts, index.post.ts, [id].get.ts, [id].put.ts, [id].delete.ts, tag.service.test.ts, tags.test.ts, tags-id.test.ts
+- Pattern established: Follows same service layer pattern as category API
 
 ### 2026-03-22 - Phase 04 Plan 12 Complete (Category Detail/Update/Delete API)
 
