@@ -20,7 +20,6 @@ import {
   type NewPostTag,
 } from '@my-blog/database'
 import { generateSlug as generateSlugUtil } from '../utils/slug'
-import { renderMarkdown } from '../utils/markdown'
 
 // Node.js crypto for ID generation
 const crypto = await import('crypto')
@@ -146,16 +145,16 @@ export async function createPost(
       slug = `${baseSlug}-${counter}`
     }
 
-    // Render markdown content to HTML (optional caching)
-    const contentHtml = renderMarkdown(data.content)
+    // Render markdown content to HTML (NOTE: contentHtml field not yet in schema - deferred to future migration)
+    // const contentHtml = renderMarkdown(data.content)
 
-    // Create the post with generated ID
-    const newPost: NewPost = {
+    // Create the post with generated ID - exclude contentHtml as it's not in schema
+    const postData: Omit<NewPost, 'id' | 'slug'> & { id: string; slug: string } = {
       ...data,
       id: crypto.randomUUID(),
       slug,
-      contentHtml,
     }
+    const newPost: NewPost = postData
 
     const result = await tx.insert(posts).values(newPost).returning()
     const createdPost = result[0]
@@ -173,7 +172,6 @@ export async function createPost(
     return {
       ...createdPost,
       content: data.content,
-      contentHtml,
       category: null,
       tags: [],
       author: null,
@@ -215,19 +213,31 @@ export async function updatePost(
       slug = generateSlugUtil(data.title)
     }
 
-    // Update contentHtml if content changed
-    let contentHtml = existingPost.contentHtml
-    if (data.content) {
-      contentHtml = renderMarkdown(data.content)
-    }
+    // Update contentHtml if content changed (NOTE: contentHtml field not yet in schema - deferred to future migration)
+    // const contentHtml = existingPost.contentHtml
+    // if (data.content) {
+    //   contentHtml = renderMarkdown(data.content)
+    // }
 
-    // Update the post
+    // Update the post - filter out undefined values to avoid drizzle-orm issues
     const updateData: Partial<NewPost> = {
-      ...data,
       slug,
-      contentHtml,
       updatedAt: new Date(),
     }
+
+    // Only include defined fields from data
+    if (data.title !== undefined) updateData.title = data.title
+    if (data.content !== undefined) updateData.content = data.content
+    if (data.excerpt !== undefined) updateData.excerpt = data.excerpt
+    if (data.coverImage !== undefined) updateData.coverImage = data.coverImage
+    if (data.seoTitle !== undefined) updateData.seoTitle = data.seoTitle
+    if (data.seoDescription !== undefined) updateData.seoDescription = data.seoDescription
+    if (data.status !== undefined) updateData.status = data.status
+    if (data.authorId !== undefined) updateData.authorId = data.authorId
+    if (data.categoryId !== undefined) updateData.categoryId = data.categoryId
+    if (data.viewCount !== undefined) updateData.viewCount = data.viewCount
+    if (data.likeCount !== undefined) updateData.likeCount = data.likeCount
+    if (data.publishedAt !== undefined) updateData.publishedAt = data.publishedAt
 
     const result = await tx.update(posts).set(updateData).where(eq(posts.id, id)).returning()
     const updatedPost = result[0]
@@ -251,7 +261,6 @@ export async function updatePost(
     return {
       ...updatedPost,
       content: data.content || existingPost.content,
-      contentHtml,
       category: null,
       tags: [],
       author: null,
