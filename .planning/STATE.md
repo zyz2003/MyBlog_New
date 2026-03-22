@@ -50,12 +50,13 @@ CI/CD verified: GitHub Actions passed
 
 ## Session Context
 
-### 2026-03-19 - Phase 4 Context Complete
+### 2026-03-22 - Phase 04 Context Complete
 
 - 04-CONTEXT.md created: Phase 4 API 层上下文和设计决策
 - 36+ 关键决策已捕获
 - 归档功能已记录为 todo
-- 准备进行 Phase 4 规划
+- 04-11-PLAN.md complete: Category API with hierarchy support
+- 准备进行 Phase 4 继续执行
 
 ### 2026-03-17 - Phase 3 Complete
 
@@ -100,6 +101,16 @@ CI/CD verified: GitHub Actions passed
 - [ ] Execute remaining Phase 4 plans: API 层 (7 plans remaining)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 11 Complete (Category API - Service and List/Create Endpoints)
+
+- 04-11-PLAN.md executed: 实现分类 API：服务层和查询端点
+- 04-11-SUMMARY.md created: Category service with hierarchy support, GET/POST endpoints
+- Test results: 27/27 tests passing (18 service + 9 API contract)
+- API-03 requirement progress
+- Commits: 67b8dda (feat: implement category service and API endpoints)
+- Files created: category.service.ts, categories.ts (schema), index.get.ts, index.post.ts, category.service.test.ts, categories.test.ts
+- Pattern established: Tree structure building with map-based parent-child relationships
 
 ### 2026-03-22 - Phase 04 Plan 10 Complete (Posts Write API - Create, Update, Delete, Bulk Delete)
 
@@ -412,7 +423,7 @@ CI/CD verified: GitHub Actions passed
 
 ---
 
-_Last updated: 2026-03-22 - Phase 04 Plan 09 complete (Posts API - List and Get Endpoints)_
+_Last updated: 2026-03-22 - Phase 04 Plan 11 complete (Category API - Service and List/Create Endpoints)_
 
 ### 2026-03-19 - Phase 3 Complete (CI/CD Verified)
 
