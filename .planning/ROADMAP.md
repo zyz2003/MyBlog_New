@@ -177,7 +177,7 @@ Plans:
 
 **Wave:** 1
 
-**Plans:** 17 plans (Wave 1: 00-07, Wave 2: 08-16)
+**Plans:** 18 plans (Wave 1: 00-07, Wave 2: 08-16)
 
 Plans:
 
@@ -191,7 +191,7 @@ Plans:
 - [x] 04-07-PLAN.md — Auth API: me, register ✅
 - [x] 04-08-PLAN.md — Post service + slug/markdown utilities ✅
 - [x] 04-09-PLAN.md — Posts API: list, get ✅
-- [ ] 04-10-PLAN.md — Posts API: create, update, delete, bulk delete
+- [x] 04-10-PLAN.md — Posts API: create, update, delete, bulk delete ✅
 - [ ] 04-11-PLAN.md — Categories API: service + list, create
 - [ ] 04-12-PLAN.md — Categories API: get, update, delete
 - [ ] 04-13-PLAN.md — Tags API: full CRUD

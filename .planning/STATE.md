@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 status: in_progress
-last_updated: '2026-03-22T07:15:57.000Z'
+last_updated: '2026-03-22T17:15:00.000Z'
 progress:
   total_phases: 13
   completed_phases: 4
   total_plans: 39
-  completed_plans: 24
+  completed_plans: 25
 ---
 
 # State: My Blog System
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 10/18 | 56%      |
+| 4     | API 层          | ◆ Active | 11/18 | 61%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
@@ -96,9 +96,22 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 4 Plan 06: Authentication API (login/logout) (COMPLETE)
 - [x] Execute Phase 4 Plan 07: Auth API (me, register) (COMPLETE)
 - [x] Execute Phase 4 Plan 09: Posts API - list and get endpoints (COMPLETE)
-- [ ] Execute remaining Phase 4 plans: API 层 (8 plans remaining)
+- [x] Execute Phase 4 Plan 10: Posts API - create, update, delete, bulk delete (COMPLETE)
+- [ ] Execute remaining Phase 4 plans: API 层 (7 plans remaining)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 10 Complete (Posts Write API - Create, Update, Delete, Bulk Delete)
+
+- 04-10-PLAN.md executed: 实现文章写操作 API（创建、更新、删除、批量删除）
+- 04-10-SUMMARY.md created: POST/PUT/DELETE /api/v1/posts endpoints with full validation
+- **Auto-fixed:** Test seed data ID format updated for foreign key compatibility
+- **Auto-fixed:** validateRequestBody extended for test mocking support
+- Test results: 18/18 contract tests passing (100%)
+- API-02 requirement complete
+- Commits: ea26497 (feat: implement posts write API)
+- Files created: index.post.ts, [id].put.ts, [id].delete.ts, bulk.delete.ts, posts.ts (schema), posts-write.test.ts
+- Pattern established: requireAuth → validateRequestBody → service call → createSuccessResponse
 
 ### 2026-03-22 - Phase 04 Plan 09 Complete (Posts API - List and Get Endpoints)
 
