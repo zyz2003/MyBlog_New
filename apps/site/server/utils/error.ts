@@ -156,7 +156,7 @@ export class HTTPError extends Error {
    * Create a CONFLICT error (409)
    */
   static CONFLICT(message = 'Resource already exists'): HTTPError {
-    return new HTTPError(409, ERROR_CODES.VALIDATION_ERROR, message)
+    return new HTTPError(409, ERROR_CODES.CONFLICT, message)
   }
 }
 
