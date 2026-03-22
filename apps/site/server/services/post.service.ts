@@ -444,8 +444,11 @@ export async function listPosts(
     conditions.push(eq(posts.authorId, authorId))
   }
 
-  // Get total count
-  const countResult = await db.select({ count: posts.id }).from(posts)
+  // Get total count with filters applied
+  const countResult = await db
+    .select({ count: posts.id })
+    .from(posts)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
   const total = countResult.length
 
   // Build ORDER BY
@@ -526,6 +529,80 @@ export async function listPosts(
     total,
     limit,
     offset,
+  }
+}
+
+/**
+ * Get post by slug with optional relations
+ *
+ * @param slug - Post slug
+ * @param options - Options for including relations
+ * @returns Post with requested relations, or null if not found
+ */
+export async function getPostBySlug(
+  slug: string,
+  options: GetPostOptions = {}
+): Promise<PostWithRelations | null> {
+  const db = await getDatabase()
+
+  const { includeCategory = true, includeTags = true, includeAuthor = true } = options
+
+  // Fetch post by slug
+  const query = db.select().from(posts).where(eq(posts.slug, slug))
+  const postRecords = await query
+
+  if (postRecords.length === 0) {
+    return null
+  }
+
+  const post = postRecords[0]
+
+  // Fetch relations
+  let category = null
+  let tagsList: { id: string; name: string; slug: string }[] = []
+  let author = null
+
+  if (includeCategory && post.categoryId) {
+    const categoryRecords = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.id, post.categoryId))
+      .limit(1)
+    category = categoryRecords[0] || null
+  }
+
+  if (includeTags) {
+    const postTagRecords = await db
+      .select({ tagId: postTags.tagId })
+      .from(postTags)
+      .where(eq(postTags.postId, post.id))
+
+    if (postTagRecords.length > 0) {
+      const tagIds = postTagRecords.map((pt) => pt.tagId)
+      const tagRecords = await db
+        .select()
+        .from(tags)
+        .where(or(...tagIds.map((tid) => eq(tags.id, tid))))
+      tagsList = tagRecords
+    }
+  }
+
+  if (includeAuthor) {
+    const authorRecords = await db.select().from(users).where(eq(users.id, post.authorId))
+    author = authorRecords[0] || null
+  }
+
+  return {
+    ...post,
+    category,
+    tags: tagsList,
+    author: author
+      ? {
+          id: author.id,
+          username: author.username,
+          email: author.email,
+        }
+      : null,
   }
 }
 
