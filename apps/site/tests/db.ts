@@ -143,18 +143,23 @@ export async function initializeTestDatabase(db: LibSQLDatabase<typeof schema>):
     )
   `)
 
-  // Create media table
+  // Create media table (matching formal schema in packages/database/src/schema/media.ts)
   await db.run(sql`
     CREATE TABLE media (
       id TEXT PRIMARY KEY,
       filename TEXT NOT NULL,
       original_name TEXT,
-      mime_type TEXT,
-      size INTEGER,
+      path TEXT NOT NULL,
       url TEXT NOT NULL,
-      thumbnail_url TEXT,
-      uploaded_by TEXT REFERENCES users(id),
-      created_at INTEGER DEFAULT (unixepoch())
+      mime_type TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      width INTEGER,
+      height INTEGER,
+      alt_text TEXT,
+      thumbnail_path TEXT,
+      folder_id TEXT,
+      uploaded_by TEXT REFERENCES users(id) ON DELETE SET NULL,
+      uploaded_at INTEGER DEFAULT (unixepoch())
     )
   `)
 }
