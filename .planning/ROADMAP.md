@@ -179,7 +179,7 @@ Plans:
 
 **Plans:** 18 plans (Wave 1: 00-07, Wave 2: 08-16)
 
-Plans: 11/18 complete
+Plans: 12/18 complete
 
 - [x] 04-00-PLAN.md — Test infrastructure (Vitest, helpers, test DB) ✅
 - [x] 04-01-PLAN.md — Unified response format + error utilities ✅
@@ -193,7 +193,7 @@ Plans: 11/18 complete
 - [x] 04-09-PLAN.md — Posts API: list, get ✅
 - [x] 04-10-PLAN.md — Posts API: create, update, delete, bulk delete ✅
 - [x] 04-11-PLAN.md — Categories API: service + list, create ✅
-- [ ] 04-12-PLAN.md — Categories API: get, update, delete
+- [x] 04-12-PLAN.md — Categories API: get, update, delete ✅
 - [ ] 04-13-PLAN.md — Tags API: full CRUD
 - [ ] 04-14-PLAN.md — Storage + Media services
 - [ ] 04-15-PLAN.md — Media API: upload, list, get, delete

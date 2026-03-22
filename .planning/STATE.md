@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 status: in_progress
-last_updated: '2026-03-22T17:15:00.000Z'
+last_updated: '2026-03-22T18:15:00.000Z'
 progress:
   total_phases: 13
   completed_phases: 4
   total_plans: 39
-  completed_plans: 25
+  completed_plans: 26
 ---
 
 # State: My Blog System
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 11/18 | 61%      |
+| 4     | API 层          | ◆ Active | 12/18 | 67%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
@@ -98,9 +98,21 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 4 Plan 07: Auth API (me, register) (COMPLETE)
 - [x] Execute Phase 4 Plan 09: Posts API - list and get endpoints (COMPLETE)
 - [x] Execute Phase 4 Plan 10: Posts API - create, update, delete, bulk delete (COMPLETE)
-- [ ] Execute remaining Phase 4 plans: API 层 (7 plans remaining)
+- [x] Execute Phase 4 Plan 11: Category API - Service and List/Create Endpoints (COMPLETE)
+- [x] Execute Phase 4 Plan 12: Category Detail/Update/Delete API (COMPLETE)
+- [ ] Execute remaining Phase 4 plans: API 层 (6 plans remaining)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 12 Complete (Category Detail/Update/Delete API)
+
+- 04-12-PLAN.md executed: 实现分类 API：详情、更新、删除端点
+- 04-12-SUMMARY.md created: GET/PUT/DELETE /api/v1/categories/:id endpoints with auth
+- Test results: 39/39 category tests passing (12 new detail endpoint tests + 27 existing)
+- API-03 requirement complete
+- Commits: 23002a9 (feat: implement category detail/update/delete endpoints)
+- Files created: [id].get.ts, [id].put.ts, [id].delete.ts, categories-id.test.ts
+- Pattern established: Detail endpoint pattern with getRouterParam -> service.get() -> 404 check
 
 ### 2026-03-22 - Phase 04 Plan 11 Complete (Category API - Service and List/Create Endpoints)
 

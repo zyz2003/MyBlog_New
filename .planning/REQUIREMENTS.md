@@ -42,7 +42,7 @@
 
 - [ ] **API-01**: Nitro Server 路由配置
 - [x] **API-02**: 文章 CRUD API
-- [ ] **API-03**: 分类标签 API
+- [x] **API-03**: 分类标签 API
 - [ ] **API-04**: 媒体上传 API
 - [ ] **API-05**: 用户认证 API（JWT）
 - [ ] **API-06**: 插件管理 API
@@ -152,7 +152,7 @@
 | DB-10       | Phase 3 | Complete |
 | API-01      | Phase 4 | Pending  |
 | API-02      | Phase 4 | Complete |
-| API-03      | Phase 4 | Pending  |
+| API-03      | Phase 4 | Complete |
 | API-04      | Phase 4 | Pending  |
 | API-05      | Phase 4 | Pending  |
 | API-06      | Phase 4 | Pending  |
@@ -164,10 +164,10 @@
 
 - v1 requirements: 58 total
 - Mapped to phases: 22 (Phase 1-4 初步映射)
-- Complete: 16 (CORE-01~05, DB-01~12, PLUGIN-01~03, THEME-01~03, API-02)
+- Complete: 17 (CORE-01~05, DB-01~12, PLUGIN-01~03, THEME-01~03, API-02, API-03)
 - Unmapped: 36 (待后续 Phase 5-11 映射)
 
 ---
 
 _Requirements defined: 2026-03-16_
-_Last updated: 2026-03-19 - Phase 3 complete (all DB-01~12 verified, CI/CD passed)_
+_Last updated: 2026-03-22 - Phase 04 Plan 12 complete (API-03 Categories API)_
