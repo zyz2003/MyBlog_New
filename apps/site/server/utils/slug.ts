@@ -22,6 +22,7 @@ export interface SlugOptions {
 /**
  * Generate a URL-friendly slug from a title
  * Supports Chinese characters (converts to pinyin) and Latin characters
+ * Uses pinyin-pro only for Chinese characters, keeps Latin characters intact
  *
  * @param title - The title to convert to slug
  * @param options - Slug generation options
@@ -36,37 +37,65 @@ export function generateSlug(title: string, options: SlugOptions = {}): string {
   const { separator = '-', lowercase = true, clean = true } = options
 
   if (!title || typeof title !== 'string') {
-    return ''
+    return 'untitled'
   }
 
-  // Convert Chinese characters to pinyin
-  // pinyin-pro handles mixed Chinese and Latin characters
-  let pinyinText = pinyin(title, {
-    separator: ' ',
-    toneType: 'none', // Remove tone marks
-  })
+  // Process the title character by character
+  // - Chinese characters: convert to pinyin using pinyin-pro
+  // - Latin characters and numbers: keep as-is (grouped into words)
+  // - Spaces and separators: normalize to single separator
 
-  // Clean the text
-  if (clean) {
-    // Remove special characters except spaces and hyphens
-    pinyinText = pinyinText.replace(/[^\w\s-]/gu, '')
+  let result = ''
+  let currentWord = ''
+
+  for (const char of title) {
+    const charCode = char.charCodeAt(0)
+
+    // Check if character is Chinese (CJK Unified Ideographs)
+    const isChinese = charCode >= 0x4e00 && charCode <= 0x9fff
+
+    if (isChinese) {
+      // Flush current Latin word
+      if (currentWord) {
+        result += (result ? separator : '') + currentWord
+        currentWord = ''
+      }
+      // Convert Chinese to pinyin (single character)
+      const pinyinChar = pinyin(char, { toneType: 'none' }).trim()
+      if (pinyinChar) {
+        result += (result ? separator : '') + pinyinChar
+      }
+    } else if (/[\w]/.test(char)) {
+      // Latin letter or number - accumulate
+      currentWord += char
+    } else {
+      // Space or special character - treat as word separator
+      if (currentWord) {
+        result += (result ? separator : '') + currentWord
+        currentWord = ''
+      }
+    }
   }
 
-  // Replace spaces and underscores with separator
-  let slug = pinyinText.trim().split(/\s+/).filter(Boolean).join(separator)
+  // Flush any remaining word
+  if (currentWord) {
+    result += (result ? separator : '') + currentWord
+  }
 
   // Convert to lowercase if requested
   if (lowercase) {
-    slug = slug.toLowerCase()
+    result = result.toLowerCase()
   }
 
-  // Replace multiple consecutive separators with single one
-  slug = slug.replace(new RegExp(`${separator}+`, 'g'), separator)
+  // Clean: remove consecutive separators
+  if (clean) {
+    result = result.replace(new RegExp(`${separator}+`, 'g'), separator)
+  }
 
   // Remove leading/trailing separators
-  slug = slug.replace(new RegExp(`^${separator}|${separator}$`, 'g'), '')
+  result = result.replace(new RegExp(`^${separator}+|${separator}+$`, 'g'), '')
 
-  return slug || 'untitled'
+  return result || 'untitled'
 }
 
 /**

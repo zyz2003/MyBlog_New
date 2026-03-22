@@ -1,10 +1,14 @@
 # Roadmap: My Blog System
 
 **Created:** 2026-03-16
-**Total Phases:** 11
+**Total Phases:** 12 (including Phase 00-TEST-ARCH)
 **Requirements Mapped:** 58
 
 ## Milestones
+
+### Milestone 0: 测试架构整改 (Phase 00)
+
+**Goal:** 建立可靠的测试架构，确保测试验证的是正式代码而非迁就错误
 
 ### Milestone 1: 基础框架 (Phase 1-4)
 
@@ -21,6 +25,44 @@
 ---
 
 ## Phases
+
+### Phase 00: 测试架构系统性整改
+
+**Goal:** 建立四层测试架构，确保测试是验证者而非迁就者
+
+**核心原则:**
+
+> 当测试失败时，修复的是正式文件的错误，而不是测试文件去迁就错误。
+
+**整改范围:**
+
+- Phase 1 (Monorepo): 创建配置验证测试
+- Phase 2 (核心框架): 审查单元测试基于规范
+- Phase 3 (数据库层): 增强迁移和向后兼容测试
+- Phase 4 (API 层): 创建 API 契约测试，审查服务层测试
+- Phase 5-11: 建立前置测试要求
+
+**Success Criteria:**
+
+1. 四层测试架构建立 (契约验证→单元测试→集成测试→E2E)
+2. 所有测试基于规范/契约，而非实现细节
+3. CI/CD 包含完整验证流程
+4. 无"测试通过但功能有 bug"的情况
+
+**Wave:** 0 (优先于所有阶段)
+
+**Plans:** 6/6 plans complete
+
+- [x] 00-test-arch/TEST-ARCHITECTURE-FIX.md — 全局测试架构整改计划
+- [x] 00-test-arch/TEST-ARCH-EXECUTION.md — 详细执行清单
+- [x] 00-01-PLAN.md — Wave 1: Phase 1 配置验证测试创建
+- [x] 00-02-PLAN.md — Wave 2: Phase 2 核心框架测试审查
+- [x] 00-03-PLAN.md — Wave 3: Phase 3 数据库层测试增强
+- [x] 00-04-PLAN.md — Wave 4: Phase 4 API 层已完成计划审查
+- [x] 00-05-PLAN.md — Wave 5: API 契约测试框架创建
+- [x] 00-06-PLAN.md — Wave 6: 测试架构约束与后续阶段规范
+
+---
 
 ### Phase 1: Monorepo 脚手架
 

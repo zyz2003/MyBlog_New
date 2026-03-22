@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { generateSlug, ensureUniqueSlug, isValidSlug, parseSlug } from '../../server/utils/slug'
+import { generateSlug, ensureUniqueSlug, isValidSlug, parseSlug } from '../../../server/utils/slug'
 
 describe('Slug Utility', () => {
   describe('generateSlug', () => {

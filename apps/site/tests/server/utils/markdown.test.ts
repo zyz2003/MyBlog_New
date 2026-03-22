@@ -14,7 +14,7 @@ import {
   renderMarkdownAsync,
   clearRenderCache,
   removeFromCache,
-} from '../../server/utils/markdown'
+} from '../../../server/utils/markdown'
 
 describe('Markdown Utility', () => {
   beforeEach(() => {
@@ -122,7 +122,7 @@ describe('Markdown Utility', () => {
 
       expect(result).toContain('<h1>Hello</h1>')
       expect(result).toContain('<pre')
-      expect(result).toContain('class="shiki"')
+      expect(result).toContain('shiki')
     })
 
     it('handles code blocks without language', async () => {

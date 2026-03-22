@@ -22,6 +22,9 @@ import {
 import { generateSlug as generateSlugUtil } from '../utils/slug'
 import { renderMarkdown } from '../utils/markdown'
 
+// Node.js crypto for ID generation
+const crypto = await import('crypto')
+
 /**
  * Database instance - uses default db in production, can be overridden for tests
  */
@@ -146,9 +149,10 @@ export async function createPost(
     // Render markdown content to HTML (optional caching)
     const contentHtml = renderMarkdown(data.content)
 
-    // Create the post
+    // Create the post with generated ID
     const newPost: NewPost = {
       ...data,
+      id: crypto.randomUUID(),
       slug,
       contentHtml,
     }

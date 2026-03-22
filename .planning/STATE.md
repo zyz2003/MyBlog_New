@@ -2,20 +2,20 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 4
-status: in_progress
-last_updated: '2026-03-21T22:30:00.000Z'
+current_phase: 01
+status: unknown
+last_updated: '2026-03-22T06:34:36.701Z'
 progress:
-  total_phases: 11
-  completed_phases: 3
-  total_plans: 19
-  completed_plans: 21
+  total_phases: 12
+  completed_phases: 4
+  total_plans: 33
+  completed_plans: 23
 ---
 
 # State: My Blog System
 
 **Initialized:** 2026-03-16
-**Current Phase:** 4
+**Current Phase:** 01
 
 ## Project Reference
 
@@ -97,6 +97,22 @@ CI/CD verified: GitHub Actions passed
 - [ ] Execute remaining Phase 4 plans: API 层 (Nitro 路由、中间件、服务层)
 
 ## Changelog
+
+### 2026-03-22 - Phase 00 Plan 06 Complete (Test Architecture Constraints & Phase 5+ Requirements)
+
+- 00-06-PLAN.md executed: 测试架构约束与后续阶段规范
+- 00-06-SUMMARY.md created: Test architecture constraints and Phase 5+ test requirements
+- Created TEST-ARCH-CONSTRAINTS.md: Four-layer test architecture (Contract, Unit, Integration, E2E)
+- Created unit.template.test.ts: Unit test template with standard patterns
+- Created integration.template.test.ts: Integration test template with database setup
+- Created PHASE-5-TEST-REQUIREMENTS.md: Component, E2E, SSR testing requirements for Phase 5-11
+- Created CI-CD-RECOMMENDATIONS.md: Five-stage CI/CD pipeline specification
+- Updated .github/workflows/ci.yml: Added contract verification, unit, integration, coverage stages
+- Test architecture principle: "Tests are verifiers, not accommodators"
+- Coverage thresholds defined: 80% for service layer, 60% for components
+- SSR testing required for public pages (homepage, article list, detail, category/tag)
+- E2E testing deferred to Phase 5 (Playwright setup)
+- Phase 00 (Test Architecture) complete - Ready for Phase 4 continuation
 
 ### 2026-03-22 - Phase 00 Plan 05 Complete (API Contract Test Framework)
 
@@ -359,7 +375,7 @@ CI/CD verified: GitHub Actions passed
 
 ---
 
-_Last updated: 2026-03-21 - Phase 00 Plan 02 complete (Phase 2 Core Framework Test Audit)_
+_Last updated: 2026-03-22 - Phase 00 Plan 06 complete (Test Architecture Constraints & Phase 5+ Requirements)_
 
 ### 2026-03-19 - Phase 3 Complete (CI/CD Verified)
 
