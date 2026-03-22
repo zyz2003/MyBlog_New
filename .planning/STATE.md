@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 status: in_progress
-last_updated: '2026-03-22T19:40:00.000Z'
+last_updated: '2026-03-22T20:10:00.000Z'
 progress:
   total_phases: 13
   completed_phases: 4
   total_plans: 39
-  completed_plans: 27
+  completed_plans: 31
 ---
 
 # State: My Blog System
@@ -33,7 +33,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 1     | Monorepo 脚手架 | ● Done   | 2/2   | 100%     |
 | 2     | 核心框架        | ● Done   | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done   | 5/5   | 100%     |
-| 4     | API 层          | ◆ Active | 13/18 | 72%      |
+| 4     | API 层          | ◆ Active | 14/18 | 78%      |
 | 5     | 后台管理        | ○        | 0/0   | 0%       |
 | 6     | 前台博客        | ○        | 0/0   | 0%       |
 | 7     | 主题系统        | ○        | 0/0   | 0%       |
@@ -101,9 +101,21 @@ CI/CD verified: GitHub Actions passed
 - [x] Execute Phase 4 Plan 11: Category API - Service and List/Create Endpoints (COMPLETE)
 - [x] Execute Phase 4 Plan 12: Category Detail/Update/Delete API (COMPLETE)
 - [x] Execute Phase 4 Plan 13: Tag API - Full CRUD (COMPLETE)
-- [ ] Execute remaining Phase 4 plans: API 层 (5 plans remaining)
+- [x] Execute Phase 4 Plan 14: Storage + Media services (COMPLETE)
+- [ ] Execute remaining Phase 4 plans: API 层 (4 plans remaining)
 
 ## Changelog
+
+### 2026-03-22 - Phase 04 Plan 14 Complete (Storage and Media Services)
+
+- 04-14-PLAN.md executed: 创建存储服务和媒体服务层
+- 04-14-SUMMARY.md created: Storage provider abstraction + media CRUD service
+- Test results: 19/19 tests passing (9 storage + 10 media)
+- API-04 requirement complete
+- Commits: 3bea46b (storage service), f7dc199 (media service)
+- Files created: storage.service.ts, media.service.ts, storage.service.test.ts, media.service.test.ts
+- **Auto-fixed:** Test database media schema updated to match formal schema (path, thumbnailPath, width, height, etc.)
+- Pattern established: Storage provider interface with LocalStorageProvider and S3StorageProvider implementations
 
 ### 2026-03-22 - Phase 04 Plan 13 Complete (Tag API - Full CRUD)
 
