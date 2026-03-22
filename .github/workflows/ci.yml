@@ -10,8 +10,13 @@ on:
       - master
 
 jobs:
-  build:
+  # ─────────────────────────────────────────────────────────────────────
+  # Stage 1: Contract Verification
+  # ─────────────────────────────────────────────────────────────────────
+  contract-verification:
+    name: Contract Verification
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -36,6 +41,182 @@ jobs:
 
       - name: Run type check
         run: pnpm type-check
+
+      - name: Schema verification
+        run: pnpm tsx scripts/verify-schema.ts
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Stage 2: Unit Tests
+  # ─────────────────────────────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: contract-verification
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.32.1'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run unit tests
+        run: pnpm test -- --group=unit
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Stage 3: Integration Tests
+  # ─────────────────────────────────────────────────────────────────────
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: contract-verification
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.32.1'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run integration tests
+        run: pnpm test -- --group=integration
+
+      - name: Run API contract tests
+        run: pnpm test -- --group=api-contract
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Stage 4: E2E Tests (Phase 5+)
+  # Note: Currently skipped until Phase 5
+  # ─────────────────────────────────────────────────────────────────────
+  e2e-tests:
+    name: E2E Tests (Phase 5+)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [unit-tests, integration-tests]
+    if: false # Disabled until Phase 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.32.1'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Run E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload E2E report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Stage 5: Coverage Check
+  # ─────────────────────────────────────────────────────────────────────
+  coverage-check:
+    name: Coverage Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [unit-tests, integration-tests]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.32.1'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: apps/site/coverage/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Build (runs after all tests pass)
+  # ─────────────────────────────────────────────────────────────────────
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [contract-verification, unit-tests, integration-tests]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10.32.1'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Build
         run: pnpm build
