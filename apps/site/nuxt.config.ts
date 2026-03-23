@@ -7,6 +7,15 @@ const config: NuxtConfig = {
   typescript: {
     strict: false,
   },
+  modules: ['shadcn-nuxt', '@nuxtjs/tailwindcss'],
+  tailwindcss: {
+    cssPath: '~/assets/css/main.css',
+    configPath: 'tailwind.config.js',
+  },
+  shadcn: {
+    prefix: '',
+    componentDir: './components/ui',
+  },
   // Workspace package aliases
   alias: {
     '@my-blog/core': '../../packages/core/src/index.ts',
