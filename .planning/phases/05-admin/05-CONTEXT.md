@@ -141,11 +141,16 @@
 
 ### 设计流程
 
-- **Pencil + Skill 组合**：
-  1. 使用 `mcp__pencil__batch_design` 创建整体布局线框图
-  2. 使用 `ui-ux-pro-max` skill 获取具体组件设计灵感
-  3. 按设计稿编码实现
-  4. 使用 `mcp__pencil__get_screenshot` 截图对比验证
+- **Pencil + Skills 组合工作流程**：
+
+  | 步骤        | 工具                          | 用途                                 |
+  | ----------- | ----------------------------- | ------------------------------------ |
+  | 1. 整体布局 | `mcp__pencil__batch_design`   | 创建侧边栏 + 主内容区线框图          |
+  | 2. 设计灵感 | `ui-ux-pro-max`               | 获取组件设计灵感、交互模式参考       |
+  | 3. 代码实现 | `frontend-design`             | 生成高质量 Vue 3 + Tailwind 组件代码 |
+  | 4. 主题配色 | `theme-factory`               | 定义后台配色方案、CSS 变量           |
+  | 5. 截图验证 | `mcp__pencil__get_screenshot` | 对比设计稿和实现效果                 |
+  | 6. 代码审查 | `simplify`                    | 审查组件代码质量、优化复用           |
 
 - **设计文件位置**：`docs/design/phase-05/` 目录存放 .pen 设计文件
 
