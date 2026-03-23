@@ -33,7 +33,9 @@ describe('CI/CD Configuration Verification', () => {
     })
 
     it('should have build job', () => {
-      expect(ciWorkflow).toMatch(/build:\s*\n\s*runs-on:\s*ubuntu-latest/)
+      expect(ciWorkflow).toMatch(
+        /build:\s*\n\s*name:\s*Production Build\s*\n\s*runs-on:\s*ubuntu-latest/
+      )
     })
 
     it('should have Checkout step', () => {
@@ -129,7 +131,7 @@ describe('CI/CD Configuration Verification', () => {
   })
 
   describe('Root package.json Scripts', () => {
-    let rootPackage: Record<string, unknown>
+    let rootPackage: { scripts?: Record<string, string> }
 
     beforeAll(() => {
       const packagePath = join(rootDir, 'package.json')

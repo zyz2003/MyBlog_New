@@ -24,7 +24,7 @@
  */
 
 import { describe, it, beforeEach, afterEach } from 'vitest'
-import { createIsolatedTestDatabase } from '../db'
+import { createIsolatedTestDatabase } from './db'
 import type { LibSQLDatabase } from 'drizzle-orm'
 import * as schema from '@my-blog/database/schema'
 
