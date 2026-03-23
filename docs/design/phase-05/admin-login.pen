@@ -1,0 +1,80 @@
+{
+  "version": "1.0",
+  "children": [
+    {
+      "type": "frame",
+      "id": "wxQuT",
+      "name": "Admin Login Page",
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900,
+      "fill": "#F8FAFC",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "krPoj",
+          "name": "Center Container",
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 900,
+          "layout": "vertical",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "wbBax",
+              "name": "Login Card",
+              "width": 420,
+              "height": "fit_content(500)",
+              "fill": "#FFFFFF",
+              "cornerRadius": 12,
+              "effect": [
+                {
+                  "type": "shadow",
+                  "shadowType": "outer",
+                  "offset": {
+                    "x": 0,
+                    "y": 4
+                  },
+                  "blur": 20,
+                  "color": "#00000020"
+                }
+              ],
+              "padding": 40,
+              "gap": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "PbSTd",
+                  "name": "Logo",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "gap": 8
+                },
+                {
+                  "type": "frame",
+                  "id": "jLEvd",
+                  "name": "Header",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "gap": 8
+                },
+                {
+                  "type": "frame",
+                  "id": "G9lwg",
+                  "name": "Form Container",
+                  "layout": "vertical",
+                  "gap": 20
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
