@@ -6,9 +6,9 @@
  */
 
 import { defineEventHandler } from 'h3'
-import { requireAuth } from '../../middleware/auth'
-import { logout } from '../../services/auth.service'
-import { createSuccessResponse } from '../../utils/response'
+import { requireAuth } from '../../../middleware/auth'
+import { logout } from '../../../services/auth.service'
+import { createSuccessResponse } from '../../../utils/response'
 
 export default defineEventHandler(async (event) => {
   // Require authentication

@@ -11,7 +11,7 @@
 import bcrypt from 'bcryptjs'
 import { SignJWT } from 'jose'
 import { eq, type LibSQLDatabase } from 'drizzle-orm'
-import { users } from '@my-blog/database/schema'
+import { users } from '@my-blog/database'
 import { HTTPError } from '../utils/error'
 
 /**

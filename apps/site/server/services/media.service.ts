@@ -9,7 +9,7 @@
 
 import type { LibSQLDatabase } from 'drizzle-orm'
 import { eq, desc, asc, sql, like, or, and } from 'drizzle-orm'
-import { media, type NewMedia, type Media } from '@my-blog/database/schema'
+import { media, type NewMedia, type Media } from '@my-blog/database'
 import { getStorageProvider } from './storage.service'
 
 /**

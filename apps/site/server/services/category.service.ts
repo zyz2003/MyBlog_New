@@ -11,9 +11,7 @@
 
 import { eq, type LibSQLDatabase } from 'drizzle-orm'
 import { categories, type Category as DbCategory } from '@my-blog/database'
-
-// Node.js crypto for ID generation
-const crypto = await import('crypto')
+import crypto from 'node:crypto'
 
 /**
  * Database instance - uses default db in production, can be overridden for tests

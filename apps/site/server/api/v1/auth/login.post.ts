@@ -6,10 +6,10 @@
  */
 
 import { defineEventHandler, readBody } from 'h3'
-import { loginSchema } from '../../schemas/auth'
-import { validateBodySync } from '../../utils/validate'
-import { login } from '../../services/auth.service'
-import { createSuccessResponse } from '../../utils/response'
+import { loginSchema } from '../../../schemas/auth'
+import { validateBodySync } from '../../../utils/validate'
+import { login } from '../../../services/auth.service'
+import { createSuccessResponse } from '../../../utils/response'
 
 export default defineEventHandler(async (event) => {
   // Parse and validate request body
