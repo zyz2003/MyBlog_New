@@ -344,8 +344,7 @@ Plans: 14/18 complete
 
 | Category  | Total  | Mapped |
 | --------- | ------ | ------ |
-| CORE      | 5      | 5      |
-| DB        | 10     | 10     |
+| CORE      | 5      | 1/8 | In Progress|  | 10     | 10     |
 | API       | 9      | 9      |
 | ADMIN     | 8      | 8      |
 | BLOG      | 8      | 8      |
