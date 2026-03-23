@@ -7,7 +7,7 @@ const config: NuxtConfig = {
   typescript: {
     strict: false,
   },
-  modules: ['shadcn-nuxt', '@nuxtjs/tailwindcss'],
+  modules: ['shadcn-nuxt', '@nuxtjs/tailwindcss', '@pinia/nuxt'],
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
     configPath: 'tailwind.config.js',
