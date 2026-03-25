@@ -22,12 +22,13 @@ export default [
       '**/.output/**',
       '**/*.min.*',
       '**/pnpm-lock.yaml',
+      '**/vendor/**',
     ],
   },
   ...tseslint.configs.recommended,
+  ...pluginVue.configs['flat/recommended'],
   {
-    name: 'vue',
-    ...pluginVue.configs['flat/recommended'],
+    name: 'vue-setup',
     files: ['**/*.vue'],
     languageOptions: {
       parserOptions: {
