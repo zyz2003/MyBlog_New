@@ -28,7 +28,8 @@ import { media } from '@my-blog/database'
 import { eq } from 'drizzle-orm'
 
 // Isolated database for this test file
-const { db: testDb, cleanup } = createIsolatedTestDatabase()
+let testDb: ReturnType<typeof createIsolatedTestDatabase>['db']
+let cleanup: () => Promise<void>
 
 // Mock storage provider
 const mockStorageProvider = {
@@ -52,6 +53,9 @@ vi.mock('../../../server/services/storage.service', () => ({
  * Initialize isolated test database before all tests
  */
 beforeAll(async () => {
+  const isolated = await createIsolatedTestDatabase()
+  testDb = isolated.db
+  cleanup = isolated.cleanup
   await initializeTestDatabase(testDb)
   setDatabaseInstance(testDb)
 })

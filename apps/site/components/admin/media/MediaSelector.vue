@@ -71,7 +71,6 @@ const handleUploadComplete = (results: Media[]) => {
   activeTab.value = 'library'
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const toggleSelection = (url: string) => {
   if (!props.multiple) {
     selectedMedia.value = [url]
@@ -119,6 +118,14 @@ const fetchFolders = async () => {
   // Mock implementation
   folders.value = []
 }
+
+// Expose methods for testing
+defineExpose({
+  toggleSelection,
+  handleUploadComplete,
+  insertUrl,
+  confirmSelection,
+})
 </script>
 
 <template>

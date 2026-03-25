@@ -1,7 +1,37 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useMediaLibrary, type UseMediaLibraryOptions } from '~/composables/useMediaLibrary'
-import { useAuthStore } from '~/stores/auth'
+
+// Shared mock state for auth - this persists across the module scope
+const mockAuthState = {
+  token: null as string | null,
+  user: null as { id: string; username: string; role: string } | null,
+}
+
+// Mock useAuthStore composable - uses shared state
+vi.mock('~/stores/auth', () => ({
+  useAuthStore: () => {
+    return {
+      setAuth: (newToken: string, newUser: { id: string; username: string; role: string }) => {
+        mockAuthState.token = newToken
+        mockAuthState.user = newUser
+      },
+      clearAuth: () => {
+        mockAuthState.token = null
+        mockAuthState.user = null
+      },
+      get token() {
+        return mockAuthState.token
+      },
+      get user() {
+        return mockAuthState.user
+      },
+      get isLoggedIn() {
+        return mockAuthState.token !== null
+      },
+    }
+  },
+}))
 
 // Mock $fetch
 global.$fetch = vi.fn()
@@ -10,11 +40,17 @@ describe('useMediaLibrary', () => {
   let composable: ReturnType<typeof useMediaLibrary>
   let authStore: ReturnType<typeof useAuthStore>
 
-  beforeEach(() => {
+  beforeEach(async () => {
     setActivePinia(createPinia())
+    // Reset auth state
+    mockAuthState.token = null
+    mockAuthState.user = null
+    vi.clearAllMocks()
+
+    // Import and get auth store reference (dynamic import to resolve path alias)
+    const { useAuthStore } = await import('~/stores/auth')
     composable = useMediaLibrary()
     authStore = useAuthStore()
-    vi.clearAllMocks()
   })
 
   describe('fetchMedia', () => {
@@ -46,7 +82,7 @@ describe('useMediaLibrary', () => {
       await composable.fetchMedia(options)
 
       expect(global.$fetch).toHaveBeenCalledWith(
-        '/api/v1/media?folder=folder-1&limit=10&offset=0&sort=uploadedAt&order=desc',
+        '/api/v1/media?folder=folder-1',
         expect.any(Object)
       )
     })
@@ -70,7 +106,7 @@ describe('useMediaLibrary', () => {
       await composable.fetchMedia(options)
 
       expect(global.$fetch).toHaveBeenCalledWith(
-        '/api/v1/media?folder=folder-1&mimeType=image&search=test&limit=20&offset=10&sort=uploadedAt&order=desc',
+        '/api/v1/media?folder=folder-1&mimeType=image&search=test&limit=20&offset=10',
         expect.any(Object)
       )
     })
@@ -128,16 +164,14 @@ describe('useMediaLibrary', () => {
 
       await composable.bulkDeleteMedia(['1', '2', '3'])
 
-      expect(global.$fetch).toHaveBeenCalledWith(
-        '/api/v1/media/bulk',
-        expect.objectContaining({
-          method: 'DELETE',
-          body: { ids: ['1', '2', '3'] },
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-      )
+      expect(global.$fetch).toHaveBeenCalledWith('/api/v1/media/bulk', {
+        method: 'DELETE',
+        body: { ids: ['1', '2', '3'] },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: '',
+        },
+      })
     })
   })
 

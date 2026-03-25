@@ -29,7 +29,8 @@ import {
 import { generateToken } from '../../../server/middleware/auth'
 
 // Isolated database for this test file
-const { db: testDb, cleanup } = createIsolatedTestDatabase()
+let testDb: ReturnType<typeof createIsolatedTestDatabase>['db']
+let cleanup: () => Promise<void>
 
 // Auth token for protected routes
 let authToken: string
@@ -38,6 +39,9 @@ let authToken: string
  * Initialize isolated test database before all tests
  */
 beforeAll(async () => {
+  const isolated = await createIsolatedTestDatabase()
+  testDb = isolated.db
+  cleanup = isolated.cleanup
   await initializeTestDatabase(testDb)
   setDatabaseInstance(testDb)
 

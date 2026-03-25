@@ -47,7 +47,7 @@ describe('Media Service', () => {
 
   beforeEach(async () => {
     // Set up test database
-    const isolated = createIsolatedTestDatabase()
+    const isolated = await createIsolatedTestDatabase()
     db = isolated.db
     cleanup = isolated.cleanup
 

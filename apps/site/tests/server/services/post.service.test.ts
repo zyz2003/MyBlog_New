@@ -31,12 +31,16 @@ import {
 import { hashPassword } from '../../../server/services/auth.service'
 
 // Isolated database for this test file
-const { db: testDb, cleanup } = createIsolatedTestDatabase()
+let testDb: ReturnType<typeof createIsolatedTestDatabase>['db']
+let cleanup: () => Promise<void>
 
 /**
  * Initialize isolated test database before all tests
  */
 beforeAll(async () => {
+  const isolated = await createIsolatedTestDatabase()
+  testDb = isolated.db
+  cleanup = isolated.cleanup
   await initializeTestDatabase(testDb)
   setDatabaseInstance(testDb)
 })

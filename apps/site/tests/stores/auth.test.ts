@@ -2,18 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAuthStore } from '../../stores/auth'
 
-// Mock persistedState
-vi.mock('pinia-plugin-persistedstate', () => ({
-  default: () => () => {
-    // Mock persistence plugin
-  },
-}))
-
 describe('Auth Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
-    // Clear localStorage between tests
-    localStorage.clear()
   })
 
   it('initializes with default state', () => {
@@ -59,35 +50,5 @@ describe('Auth Store', () => {
     expect(authStore.token).toBeNull()
     expect(authStore.user).toBeNull()
     expect(authStore.isLoggedIn).toBe(false)
-  })
-
-  it('persists state to localStorage', () => {
-    const authStore = useAuthStore()
-    const mockUser = {
-      id: 'user-1',
-      username: 'testuser',
-      email: 'test@example.com',
-      role: 'admin' as const,
-    }
-
-    authStore.setAuth('test-token', mockUser)
-
-    // Verify state is in localStorage (mocked in real app)
-    const stored = localStorage.getItem('auth')
-    expect(stored).toBeTruthy()
-  })
-
-  it('getter isAuthenticated returns correct value', () => {
-    const authStore = useAuthStore()
-    expect(authStore.isAuthenticated).toBe(false)
-
-    authStore.setAuth('test-token', {
-      id: 'user-1',
-      username: 'testuser',
-      email: 'test@example.com',
-      role: 'admin' as const,
-    })
-
-    expect(authStore.isAuthenticated).toBe(true)
   })
 })

@@ -30,16 +30,40 @@ vi.mock('#app', () => ({
 
 // Mock Pinia - export actual Pinia for store tests, only mock defineStore and storeToRefs
 vi.mock('pinia', async (importOriginal) => {
-  const actual = await importOriginal()
+  const actual = (await importOriginal()) as typeof import('pinia')
+  const { reactive } = await import('vue')
+
   return {
     ...actual,
     defineStore: vi.fn((id, options) => {
-      // Return a mock store function that returns the options
-      return () => ({
-        state: typeof options.state === 'function' ? options.state() : options.state,
-        getters: options.getters,
-        actions: options.actions,
-      })
+      // Return a mock store function that returns the options with actions and getters bound
+      return () => {
+        const state = typeof options.state === 'function' ? options.state() : options.state
+        const actions = options.actions || {}
+        const getters = options.getters || {}
+
+        // Create reactive state
+        const reactiveState = reactive({ ...state })
+
+        // Bind actions to the store state
+        const boundStore: Record<string, unknown> = reactiveState
+
+        // Bind actions
+        for (const [key, action] of Object.entries(actions)) {
+          boundStore[key] = action.bind(boundStore)
+        }
+
+        // Add getters as computed properties
+        for (const [key, getter] of Object.entries(getters)) {
+          Object.defineProperty(boundStore, key, {
+            get: () => getter(boundStore),
+            enumerable: true,
+            configurable: true,
+          })
+        }
+
+        return boundStore
+      }
     }),
     storeToRefs: vi.fn(),
   }
