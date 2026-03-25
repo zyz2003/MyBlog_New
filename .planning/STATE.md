@@ -34,7 +34,7 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 | 2     | 核心框架        | ● Done | 2/2   | 100%     |
 | 3     | 数据库层        | ● Done | 5/5   | 100%     |
 | 4     | API 层          | ● Done | 18/18 | 100%     |
-| 5     | 后台管理        | ○      | 1/8   | 12.5%    |
+| 5     | 后台管理        | ○      | 2/8   | 25%      |
 | 6     | 前台博客        | ○      | 0/0   | 0%       |
 | 7     | 主题系统        | ○      | 0/0   | 0%       |
 | 8     | 插件系统        | ○      | 0/0   | 0%       |
@@ -544,7 +544,19 @@ All 18 plans completed. Test architecture fixes applied. CI/CD verified.
 
 ---
 
-_Last updated: 2026-03-22 - Phase 04 Plan 17 complete (Phase 04: API 层 100% complete)_
+_Last updated: 2026-03-25 - Phase 05 Plan 06 complete (Category & Tag Management)
+
+### 2026-03-25 - Phase 05 Plan 06 Complete
+
+- 05-06-PLAN.md executed: Category & Tag Management
+- 05-06-SUMMARY.md created: Complete category and tag management system
+- All 8 tasks completed with atomic commits
+- Components created: CategoryTreeTable, CategoryTreeRow, CategoryForm, TagList, TagForm, TagCloud
+- Pages created: /admin/categories, /admin/tags
+- Stores created: categoryAdmin, tagAdmin
+- Composables created: useCategoryAdmin, useTagAdmin
+- Dependencies installed: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
+- Commit: 40a3548 feat(phase-05-06): implement category and tag management_
 
 ### 2026-03-19 - Phase 3 Complete (CI/CD Verified)
 
