@@ -5,12 +5,12 @@ defineProps<{
   rows?: number
   delay?: number
   skeleton?: boolean
-  class?: string
+  containerClass?: string
 }>()
 </script>
 
 <template>
-  <div :class="cn('animate-fade-in', class)">
+  <div :class="cn('animate-fade-in', containerClass)">
     <div
       v-for="i in rows || 1"
       :key="i"

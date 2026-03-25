@@ -105,7 +105,7 @@ export const useMediaLibraryStore = defineStore('mediaLibrary', {
     // Reset to initial state
     reset() {
       this.currentFolderId = null
-      this.viewMode: 'grid'
+      this.viewMode = 'grid'
       this.searchQuery = ''
       this.filterType = 'all'
       this.selectedMedia = []

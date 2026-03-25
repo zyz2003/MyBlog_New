@@ -104,18 +104,9 @@ const formatDate = (date: Date | number | null | undefined): string => {
     day: 'numeric',
   })
 }
-
-// Empty state illustration component
-const EmptyState = () => (
-  <div class="flex flex-col items-center justify-center py-12 text-center">
-    <div class="w-24 h-24 mb-4 rounded-full bg-muted flex items-center justify-center">
-      <Image class="w-12 h-12 text-muted-foreground" />
-    </div>
-    <h3 class="text-lg font-semibold mb-1">暂无媒体文件</h3>
-    <p class="text-sm text-muted-foreground mb-4">上传您的第一张图片、视频或文档</p>
-  </div>
-)
 </script>
+
+<template>
 
 <template>
   <div class="media-grid">
@@ -148,8 +139,12 @@ const EmptyState = () => (
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="media.length === 0">
-      <EmptyState />
+    <div v-else-if="media.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+      <div class="w-24 h-24 mb-4 rounded-full bg-muted flex items-center justify-center">
+        <Image class="w-12 h-12 text-muted-foreground" />
+      </div>
+      <h3 class="text-lg font-semibold mb-1">暂无媒体文件</h3>
+      <p class="text-sm text-muted-foreground mb-4">上传您的第一张图片、视频或文档</p>
     </div>
 
     <!-- Grid View -->

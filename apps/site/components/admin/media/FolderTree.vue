@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog'
@@ -141,155 +141,13 @@ const isExpanded = (folderId: string) => {
   return expandedFolders.value.has(folderId)
 }
 
-// Recursive folder tree item component
-const FolderTreeItem = (props: {
-  folder: MediaFolder
-  level: number
-  selectedFolderId: string | null
-}) => {
-  const { folder, level, selectedFolderId } = props
-  const isSelected = selectedFolderId === folder.id
-  const hasChild = hasChildren(folder)
-  const expanded = isExpanded(folder.id)
-
-  return (
-    <div class="folder-tree-item">
-      <div
-        class={[
-          'flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer transition-colors',
-          isSelected
-            ? 'bg-primary text-primary-foreground'
-            : 'hover:bg-muted',
-        ]}
-        style={{ paddingLeft: `${level * 12 + 8}px` }}
-        onClick={(e: MouseEvent) => selectFolder(folder.id, e)}
-      >
-        {/* Expand/Collapse arrow */}
-        <button
-          class={[
-            'p-0.5 rounded hover:bg-muted-foreground/20 transition-colors',
-            !hasChild && 'invisible',
-          ]}
-          onClick={(e: MouseEvent) => toggleExpand(folder.id, e)}
-        >
-          {expanded ? (
-            <ChevronDown class="w-4 h-4" />
-          ) : (
-            <ChevronRight class="w-4 h-4" />
-          )}
-        </button>
-
-        {/* Folder icon */}
-        {expanded ? (
-          <FolderOpen class="w-4 h-4 flex-shrink-0" />
-        ) : (
-          <Folder class="w-4 h-4 flex-shrink-0" />
-        )}
-
-        {/* Folder name */}
-        <span class="text-sm truncate flex-1">{folder.name}</span>
-
-        {/* Media count badge */}
-        {folder.mediaCount > 0 && (
-          <span
-            class={[
-              'text-xs px-1.5 py-0.5 rounded-full',
-              isSelected
-                ? 'bg-primary-foreground/20'
-                : 'bg-muted-foreground/20',
-            ]}
-          >
-            {folder.mediaCount}
-          </span>
-        )}
-
-        {/* Context menu trigger */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              class="h-6 w-6 opacity-0 hover:opacity-100 transition-opacity"
-              onClick={(e: MouseEvent) => e.stopPropagation()}
-            >
-              <MoreVertical class="w-3 h-3" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => openCreateDialog(folder.id)}>
-              <Plus class="w-4 h-4 mr-2" />
-              新建子文件夹
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openRenameDialog(folder)}>
-              <Pencil class="w-4 h-4 mr-2" />
-              重命名
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              class="text-destructive focus:text-destructive"
-              onClick={() => openDeleteDialog(folder)}
-            >
-              <Trash2 class="w-4 h-4 mr-2" />
-              删除
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      {/* Children */}
-      {hasChild && expanded && (
-        <div class="folder-children">
-          {folder.children!.map((child) => (
-            <FolderTreeItem
-              key={child.id}
-              folder={child}
-              level={level + 1}
-              selectedFolderId={selectedFolderId}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// "All Media" root item
-const AllMediaItem = () => {
-  const isSelected = props.selectedFolderId === null
-  const totalMediaCount = computed(() => {
-    const countMedia = (folders: MediaFolder[]): number => {
-      return folders.reduce((sum, f) => sum + f.mediaCount + countMedia(f.children || []), 0)
-    }
-    return countMedia(props.folders)
-  })
-
-  return (
-    <div
-      class={[
-        'flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer transition-colors mb-1',
-        isSelected
-          ? 'bg-primary text-primary-foreground'
-          : 'hover:bg-muted',
-      ]}
-      onClick={(e: MouseEvent) => selectFolder(null, e)}
-    >
-      <FileBox class="w-4 h-4 flex-shrink-0" />
-      <span class="text-sm truncate flex-1">所有媒体</span>
-      {totalMediaCount.value > 0 && (
-        <span
-          class={[
-            'text-xs px-1.5 py-0.5 rounded-full',
-            isSelected
-              ? 'bg-primary-foreground/20'
-              : 'bg-muted-foreground/20',
-          ]}
-        >
-          {totalMediaCount.value}
-        </span>
-      )}
-    </div>
-  )
-}
+// Calculate total media count
+const totalMediaCount = computed(() => {
+  const countMedia = (folders: MediaFolder[]): number => {
+    return folders.reduce((sum, f) => sum + f.mediaCount + countMedia(f.children || []), 0)
+  }
+  return countMedia(props.folders)
+})
 </script>
 
 <template>
@@ -302,17 +160,44 @@ const AllMediaItem = () => {
     <!-- Folder tree -->
     <template v-else>
       <!-- Root: All Media -->
-      <AllMediaItem />
+      <div
+        :class="[
+          'flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer transition-colors mb-1',
+          selectedFolderId === null
+            ? 'bg-primary text-primary-foreground'
+            : 'hover:bg-muted',
+        ]"
+        @click="selectFolder(null)"
+      >
+        <FileBox class="w-4 h-4 flex-shrink-0" />
+        <span class="text-sm truncate flex-1">所有媒体</span>
+        <span
+          v-if="totalMediaCount > 0"
+          :class="[
+            'text-xs px-1.5 py-0.5 rounded-full',
+            selectedFolderId === null
+              ? 'bg-primary-foreground/20'
+              : 'bg-muted-foreground/20',
+          ]"
+        >
+          {{ totalMediaCount }}
+        </span>
+      </div>
 
       <!-- Folder list -->
       <div class="space-y-0.5">
-        <FolderTreeItem
-          v-for="folder in folders"
-          :key="folder.id"
-          :folder="folder"
-          :level="0"
-          :selected-folder-id="selectedFolderId"
-        />
+        <template v-for="folder in folders" :key="folder.id">
+          <FolderTreeItem
+            :folder="folder"
+            :level="0"
+            :selected-folder-id="selectedFolderId"
+            @select="selectFolder"
+            @create="openCreateDialog"
+            @rename="openRenameDialog"
+            @delete="openDeleteDialog"
+            @toggle-expand="toggleExpand"
+          />
+        </template>
       </div>
     </template>
 
@@ -393,6 +278,236 @@ const AllMediaItem = () => {
     </Dialog>
   </div>
 </template>
+
+<!-- Recursive Folder Tree Item Component -->
+<script lang="ts">
+import { defineComponent, h, computed } from 'vue'
+import type { PropType } from 'vue'
+import {
+  Folder as FolderIcon,
+  FolderOpen as FolderOpenIcon,
+  ChevronRight as ChevronRightIcon,
+  ChevronDown as ChevronDownIcon,
+  MoreVertical,
+  Plus,
+  Pencil,
+  Trash2,
+} from 'lucide-vue-next'
+import { Button } from '~/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '~/components/ui/dropdown-menu'
+
+interface MediaFolder {
+  id: string
+  name: string
+  parentId: string | null
+  children?: MediaFolder[]
+  mediaCount: number
+}
+
+export default defineComponent({
+  name: 'FolderTreeItem',
+  props: {
+    folder: {
+      type: Object as PropType<MediaFolder>,
+      required: true,
+    },
+    level: {
+      type: Number,
+      default: 0,
+    },
+    selectedFolderId: {
+      type: String as PropType<string | null>,
+      default: null,
+    },
+  },
+  emits: ['select', 'create', 'rename', 'delete', 'toggle-expand'],
+  setup(props, { emit }) {
+    const isSelected = computed(() => props.selectedFolderId === props.folder.id)
+    const hasChild = computed(() => props.folder.children && props.folder.children.length > 0)
+    const expanded = computed(() => (props.folder as any).expanded || false)
+
+    const handleSelect = (event: Event) => {
+      event.stopPropagation()
+      emit('select', props.folder.id)
+    }
+
+    const handleToggle = (event: Event) => {
+      event.stopPropagation()
+      emit('toggle-expand', props.folder.id)
+    }
+
+    const handleCreate = (event: Event) => {
+      event.stopPropagation()
+      emit('create', null, props.folder.id)
+    }
+
+    const handleRename = (event: Event) => {
+      event.stopPropagation()
+      emit('rename', props.folder.id)
+    }
+
+    const handleDelete = (event: Event) => {
+      event.stopPropagation()
+      emit('delete', props.folder.id)
+    }
+
+    return () => [
+      h(
+        'div',
+        {
+          class: [
+            'flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer transition-colors',
+            isSelected.value
+              ? 'bg-primary text-primary-foreground'
+              : 'hover:bg-muted',
+          ].join(' '),
+          style: { paddingLeft: `${props.level * 12 + 8}px` },
+          onClick: handleSelect,
+        },
+        [
+          h(
+            'button',
+            {
+              class: [
+                'p-0.5 rounded hover:bg-muted-foreground/20 transition-colors',
+                !hasChild.value && 'invisible',
+              ].join(' '),
+              onClick: handleToggle,
+            },
+            [
+              expanded.value
+                ? h(ChevronDownIcon, { class: 'w-4 h-4' })
+                : h(ChevronRightIcon, { class: 'w-4 h-4' }),
+            ]
+          ),
+          expanded.value
+            ? h(FolderOpenIcon, { class: 'w-4 h-4 flex-shrink-0' })
+            : h(FolderIcon, { class: 'w-4 h-4 flex-shrink-0' }),
+          h(
+            'span',
+            { class: 'text-sm truncate flex-1' },
+            props.folder.name
+          ),
+          props.folder.mediaCount > 0
+            ? h(
+                'span',
+                {
+                  class: [
+                    'text-xs px-1.5 py-0.5 rounded-full',
+                    isSelected.value
+                      ? 'bg-primary-foreground/20'
+                      : 'bg-muted-foreground/20',
+                  ].join(' '),
+                },
+                String(props.folder.mediaCount)
+              )
+            : null,
+          h(
+            DropdownMenu,
+            {},
+            {
+              default: () => [
+                h(
+                  DropdownMenuTrigger,
+                  { asChild: true },
+                  {
+                    default: () => [
+                      h(
+                        Button,
+                        {
+                          variant: 'ghost',
+                          size: 'icon',
+                          class: 'h-6 w-6 opacity-0 hover:opacity-100 transition-opacity',
+                          onClick: (e: Event) => e.stopPropagation(),
+                        },
+                        {
+                          default: () => [h(MoreVertical, { class: 'w-3 h-3' })],
+                        }
+                      ),
+                    ],
+                  }
+                ),
+                h(
+                  DropdownMenuContent,
+                  { align: 'end' },
+                  {
+                    default: () => [
+                      h(
+                        DropdownMenuItem,
+                        { onClick: handleCreate },
+                        {
+                          default: () => [
+                            h(Plus, { class: 'w-4 h-4 mr-2' }),
+                            ' 新建子文件夹',
+                          ],
+                        }
+                      ),
+                      h(
+                        DropdownMenuItem,
+                        { onClick: handleRename },
+                        {
+                          default: () => [
+                            h(Pencil, { class: 'w-4 h-4 mr-2' }),
+                            ' 重命名',
+                          ],
+                        }
+                      ),
+                      h(DropdownMenuSeparator),
+                      h(
+                        DropdownMenuItem,
+                        {
+                          class: 'text-destructive focus:text-destructive',
+                          onClick: handleDelete,
+                        },
+                        {
+                          default: () => [
+                            h(Trash2, { class: 'w-4 h-4 mr-2' }),
+                            ' 删除',
+                          ],
+                        }
+                      ),
+                    ],
+                  }
+                ),
+              ],
+            }
+          ),
+        ]
+      ),
+      hasChild.value && expanded.value
+        ? h(
+            'div',
+            { class: 'folder-children ml-2' },
+            props.folder.children!.map((child) =>
+              h(FolderTreeItem, {
+                key: child.id,
+                folder: child,
+                level: props.level + 1,
+                selectedFolderId: props.selectedFolderId,
+                onVnodeMounted(vnode) {
+                  // Pass expanded state via props
+                  vnode.props = vnode.props || {}
+                  ;(vnode.props as any).expanded = expanded.value
+                },
+                onSelect: (id: string | null) => emit('select', id),
+                onCreate: (name: string, parentId: string | null) => emit('create', name, parentId),
+                onRename: (id: string) => emit('rename', id),
+                onDelete: (id: string) => emit('delete', id),
+                onToggleExpand: (id: string) => emit('toggle-expand', id),
+              })
+            )
+          )
+        : null,
+    ]
+  },
+})
+</script>
 
 <style scoped>
 .folder-tree {
