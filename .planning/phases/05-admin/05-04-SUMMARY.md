@@ -2,13 +2,13 @@
 
 **Plan 名称**: 文章管理功能
 **执行日期**: 2026-03-25
-**状态**: ⚠️ 部分完成
+**状态**: ✅ 已完成（含样式优化）
 
 ---
 
 ## 一、执行概述
 
-本 Plan 完成了文章管理的核心页面开发，包括文章列表页和文章编辑/新建页。部分子组件尚未拆分，功能已在页面中直接实现。
+本 Plan 完成了文章管理的核心页面开发和所有子组件的创建与美化。所有组件都已按照现代化管理后台设计标准进行了样式优化。
 
 ### 交付物清单
 
@@ -22,12 +22,12 @@
 
 | 组件 | 文件 | 状态 | 备注 |
 |------|------|------|------|
-| PostList | `components/admin/posts/PostList.vue` | ⚠️ 已在页面内实现 | 可后续拆分 |
-| SimpleEditor | `components/admin/posts/SimpleEditor.vue` | ❌ 未创建 | 使用 Textarea 替代 |
-| PostForm | `components/admin/posts/PostForm.vue` | ⚠️ 已在页面内实现 | 可后续拆分 |
-| BulkActions | `components/admin/posts/BulkActions.vue` | ⚠️ 已在页面内实现 | 可后续拆分 |
-| CategoryTagSelector | `components/admin/posts/CategoryTagSelector.vue` | ❌ 未创建 | 使用 Select 直接实现 |
-| CoverImageUploader | `components/admin/posts/CoverImageUploader.vue` | ❌ 未创建 | 使用 Input 直接实现 |
+| PostList | `components/admin/posts/PostList.vue` | ✅ 完成 | 已美化 |
+| SimpleEditor | `components/admin/posts/SimpleEditor.vue` | ✅ 完成 | 已美化 |
+| PostForm | `components/admin/posts/PostForm.vue` | ✅ 完成 | 已美化 |
+| BulkActions | `components/admin/posts/BulkActions.vue` | ✅ 完成 | 已美化 |
+| CategoryTagSelector | `components/admin/posts/CategoryTagSelector.vue` | ✅ 完成 | 已美化 |
+| CoverImageUploader | `components/admin/posts/CoverImageUploader.vue` | ✅ 完成 | 已美化 |
 
 ---
 
@@ -39,7 +39,7 @@
 
 | 功能 | 状态 | 说明 |
 |------|------|------|
-| 表格展示 | ✅ | 使用 shadcn-vue Table 组件 |
+| 表格展示 | ✅ | 使用 shadcn-vue Table 组件，现代化样式 |
 | 分页 | ✅ | 支持 10/20/50/100 条每页 |
 | 状态筛选 | ✅ | 全部/已发布/草稿/审核中/已归档 |
 | 分类筛选 | ✅ | 预留 UI，待分类功能完成后启用 |
@@ -71,11 +71,11 @@
 | 编辑模式 | ✅ | `/admin/posts/:id` 路由 |
 | 标题输入 | ✅ | 必填，最少 2 字符验证 |
 | Slug 生成 | ✅ | 从标题自动生成，可手动编辑 |
-| Markdown 编辑 | ✅ | 使用 Textarea，支持 Markdown 语法 |
-| 分类选择 | ✅ | Select 下拉选择 |
+| Markdown 编辑 | ✅ | SimpleEditor 组件带工具栏 |
+| 分类选择 | ✅ | CategoryTagSelector 组件 |
 | 标签多选 | ✅ | 支持添加/移除多个标签 |
 | 状态选择 | ✅ | 草稿/已发布/审核中/已归档 |
-| 封面图 URL | ✅ | 输入图片 URL |
+| 封面图上传 | ✅ | CoverImageUploader 组件 |
 | SEO 标题 | ✅ | 可选 |
 | SEO 描述 | ✅ | 可选 |
 | 表单验证 | ✅ | 标题/Slug/内容验证 |
@@ -83,7 +83,6 @@
 | 保存提示 | ✅ | 使用 Toast 提示 |
 | 删除确认 | ✅ | 删除前弹窗确认 |
 | 返回列表 | ✅ | 返回按钮 |
-| 预览功能 | ✅ | 预留按钮（未实现） |
 
 **API 集成**:
 - `GET /api/v1/posts/:id` - 获取文章详情（编辑模式）
@@ -93,112 +92,127 @@
 
 ---
 
-## 三、技术实现
+## 三、组件样式优化详情
 
-### 3.1 使用的主要组件
+### 3.1 SimpleEditor.vue
 
-- **shadcn-vue**: Table, Badge, Button, Checkbox, Input, Label, Select, Textarea, Card, Separator
-- **lucide-vue-next**: Plus, Search, Filter, Download, Save, Eye, Trash2, ArrowLeft
-- **Vue Router**: 路由导航和参数获取
-- **Pinia**: 未使用（直接组件状态管理）
-- **useToast**: Toast 提示
+**设计特点**:
+- 工具栏分组设计，不同功能组使用不同颜色主题
+  - 标题组：天空蓝 (sky)
+  - 文本格式：翡翠绿 (emerald)
+  - 块元素：琥珀色 (amber) / 紫色 (violet)
+  - 列表：玫瑰红 (rose)
+  - 媒体：靛蓝色 (indigo)
+- 圆角工具栏按钮，带 hover 缩放和阴影效果
+- 编辑/预览切换按钮
+- 预览模式支持基础 Markdown 渲染
 
-### 3.2 关键代码片段
+### 3.2 CategoryTagSelector.vue
 
-**自动保存草稿**:
-```typescript
-let autoSaveTimer: NodeJS.Timeout | null = null
+**设计特点**:
+- 分类和标签 Label 带彩色图标装饰
+- 已选标签展示区使用渐变背景
+- 标签 Badge 带紫色主题，hover 有缩放效果
+- 创建新标签按钮带过渡动画
+- 焦点状态环效果
 
-async function autoSave() {
-  if (isNewPost.value || !post.value.id || saving.value) return
-  const payload = {
-    title: post.value.title,
-    slug: post.value.slug,
-    content: post.value.content,
-    excerpt: post.value.excerpt,
-    status: 'draft' as const,
-  }
-  await $fetch(`/api/v1/posts/${post.value.id}`, {
-    method: 'PUT',
-    body: payload,
-  })
-}
+### 3.3 CoverImageUploader.vue
 
-onMounted(() => {
-  autoSaveTimer = setInterval(() => {
-    if (isEditMode.value && post.value.id) {
-      autoSave()
-    }
-  }, 30000)
-})
-```
+**设计特点**:
+- 图片预览卡片带圆角和阴影
+- hover 时图片有缩放效果
+- 操作按钮带毛玻璃效果
+- 成功指示器（绿色勾选）
+- 空状态带渐变背景和图标动画
+- URL 输入框带链接图标装饰
 
-**Slug 自动生成**:
-```typescript
-function generateSlug() {
-  if (!post.value.title) return
-  const slug = post.value.title
-    .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
-  post.value.slug = slug
-}
-```
+### 3.4 PostList.vue
 
-**批量操作**:
-```typescript
-async function handleBulkDelete() {
-  if (selectedPostIds.value.size === 0) return
-  if (!confirm(`确定要删除选中的 ${selectedPostIds.value.size} 篇文章吗？`)) return
-  try {
-    await $fetch('/api/v1/posts/bulk', {
-      method: 'DELETE',
-      body: { ids: Array.from(selectedPostIds.value) },
-    })
-    selectedPostIds.value.clear()
-    fetchPosts()
-  } catch (error) {
-    console.error('Failed to bulk delete:', error)
-  }
-}
-```
+**设计特点**:
+- 表格头部带渐变背景
+- 行 hover 效果带渐变
+- 状态 Badge 带颜色和图标
+- 加载状态带旋转动画
+- 空状态带图标和说明文字
+- 操作按钮带颜色主题和 hover 效果
+  - 查看：靛蓝色
+  - 编辑：天空蓝
+  - 删除：玫瑰红
+
+### 3.5 BulkActions.vue
+
+**设计特点**:
+- 渐变天空蓝背景
+- 已选数量 Badge 带勾选图标
+- 操作按钮带颜色主题
+  - 批量发布：翡翠绿
+  - 批量归档：琥珀色
+  - 批量删除：玫瑰红
+- 进入动画（fade-in + slide-in）
+
+### 3.6 PostForm.vue
+
+**设计特点**:
+- Card 头部带彩色图标和渐变背景
+- 每个表单项 Label 带彩色图标装饰
+  - 标题：紫色
+  - Slug：琥珀色
+  - 摘要：翡翠绿
+  - 内容：靛蓝色
+  - 状态：玫瑰红
+  - SEO：天空蓝
+- 错误提示带图标
+- 输入框带焦点环和 hover 阴影
+- SEO 区域带特殊渐变背景卡片
 
 ---
 
-## 四、已知问题与待办
+## 四、技术实现
 
-### 4.1 未完成的组件拆分
+### 4.1 使用的主要组件
 
-当前所有功能都在页面组件内实现，建议后续拆分为独立组件以提高可维护性：
+- **shadcn-vue**: Table, Badge, Button, Checkbox, Input, Label, Select, Textarea, Card, Separator
+- **lucide-vue-next**: 所有图标
+- **Vue Router**: 路由导航和参数获取
+- **Pinia**: 认证状态管理
+- **Tailwind CSS**: 原子化样式
 
-- [ ] 提取 `PostList.vue` 组件
-- [ ] 提取 `PostForm.vue` 组件
-- [ ] 创建 `SimpleEditor.vue` 组件（带 Markdown 工具栏）
-- [ ] 创建 `CategoryTagSelector.vue` 组件
-- [ ] 创建 `CoverImageUploader.vue` 组件
-- [ ] 提取 `BulkActions.vue` 组件
+### 4.2 样式技术
 
-### 4.2 功能增强
+| 技术 | 用途 | 示例 |
+|------|------|------|
+| 渐变背景 | Card 头部、Badge | `bg-gradient-to-r from-sky-500 to-sky-600` |
+| 阴影效果 | 卡片、按钮 | `shadow-sm`, `shadow-md`, `shadow-lg` |
+| 过渡动画 | hover、focus 状态 | `transition-all`, `duration-200` |
+| 圆角 | 卡片、按钮 | `rounded-xl`, `rounded-lg` |
+| 焦点环 | 输入框、按钮 | `focus:ring-2`, `focus:ring-offset-0` |
+| 缩放效果 | hover 状态 | `hover:scale-105`, `group-hover:scale-110` |
 
-- [ ] 富文本编辑器集成（TipTap/Vditor）
-- [ ] 图片上传功能（从本地上传）
+---
+
+## 五、已知问题与待办
+
+### 5.1 测试文件
+
+- [ ] 创建 `PostList.test.ts`
+- [ ] 创建 `PostForm.test.ts`
+- [ ] 创建 `SimpleEditor.test.ts`
+- [ ] 创建 `CategoryTagSelector.test.ts`
+- [ ] 创建 `CoverImageUploader.test.ts`
+- [ ] 创建 `BulkActions.test.ts`
+
+### 5.2 功能增强
+
+- [ ] 富文本编辑器增强（集成 TipTap/Vditor）
+- [ ] 图片上传功能（从本地上传到服务器）
 - [ ] 媒体库集成
 - [ ] 文章预览功能
 - [ ] 分类/标签管理页面
 - [ ] 离开页面确认（有未保存更改时）
 
-### 4.3 测试
-
-- [ ] 创建 `PostList.test.ts`
-- [ ] 创建 `PostForm.test.ts`
-- [ ] 创建 `SimpleEditor.test.ts`
-- [ ] 创建页面测试文件
-
 ---
 
-## 五、API 端点使用
+## 六、API 端点使用
 
 | 端点 | 方法 | 用途 | 状态 |
 |------|------|------|------|
@@ -212,7 +226,7 @@ async function handleBulkDelete() {
 
 ---
 
-## 六、下一步计划
+## 七、下一步计划
 
 ### Plan 05: 分类和标签管理
 
@@ -235,7 +249,7 @@ async function handleBulkDelete() {
 
 ---
 
-## 七、验收状态
+## 八、验收状态
 
 - [x] 文章列表表格展示
 - [x] 分页功能（页码 + 每页条数）
@@ -245,13 +259,15 @@ async function handleBulkDelete() {
 - [x] 编辑文章页面
 - [x] 表单验证
 - [x] 自动保存草稿
-- [ ] SimpleEditor Markdown 工具栏（使用 Textarea 替代）
-- [ ] 分类标签选择器组件（已在页面内实现）
-- [ ] 封面图上传组件（使用 Input 替代）
+- [x] SimpleEditor Markdown 工具栏
+- [x] 分类标签选择器组件
+- [x] 封面图上传组件
+- [x] 样式优化（现代化设计）
 
-**Must Have 完成度**: 7/10 (70%)
+**Must Have 完成度**: 10/10 (100%)
 
 ---
 
 *文档创建时间：2026-03-25*
+*文档更新时间：2026-03-25 (样式优化完成)*
 *Phase: 05-admin, Plan: 04/08*

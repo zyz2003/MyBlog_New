@@ -109,7 +109,7 @@ ls apps/site/pages/admin/login.vue
 | Step | Tool | Usage |
 |------|------|-------|
 | 1. Design inspiration | ui-ux-pro-max | Get login page design patterns |
-| 2. Theme selection | theme-factory | Selected Slate色系 (shadcn-vue) |
+| 2. Theme selection | theme-factory | Selected Slate 色系 (shadcn-vue) |
 | 3. Design file | pencil MCP | Created admin-login.pen (docs/design/phase-05/) |
 | 4. Code generation | frontend-design | Generated Vue 3 login page code |
 
@@ -118,12 +118,29 @@ ls apps/site/pages/admin/login.vue
 **Location:** `docs/design/phase-05/admin-login.pen`
 
 **Design preview:**
-- Centered card layout (420px width)
-- White card with shadow on Slate-50 background
-- Logo area with icon + "Blog Admin" text
-- Title: "欢迎回来"
-- Username and password inputs with labels
-- Full-width login button (Slate-900)
+- Background: Light blue `#E8F4F8`
+- Card: White `#FFFFFF` with rounded corners (20px)
+- Shadow: Soft blue-tinted shadow `#6BB6E840`
+- Logo: Blue square `#4A9FD8` with rounded corners (16px)
+- Title text: Dark blue `#1E3A5F`
+- Subtitle: Muted blue `#6B98B8`
+- Labels: Medium blue `#3D5A73`
+- Input background: Very light blue `#F8FBFF`
+- Input border: Light blue `#B8D4E8`
+- Input placeholder: Soft blue `#94B8D0`
+- Button: Primary blue `#4A9FD8` with shadow
+
+**Color palette:**
+```
+Background:  #E8F4F8 (浅蓝色背景)
+Card:        #FFFFFF (白色卡片)
+Primary:     #4A9FD8 (主蓝色)
+Dark:        #1E3A5F (深蓝色文字)
+Medium:      #3D5A73 (中标签)
+Light:       #6B98B8 (浅副标题)
+Border:      #B8D4E8 (边框)
+Placeholder: #94B8D0 (占位符)
+```
 
 ## Key Decisions
 
@@ -137,6 +154,8 @@ ls apps/site/pages/admin/login.vue
 
 5. **shadcn-vue components**: Used Card, Input, Button, Label from installed component library. Consistent with Phase 5 UI system.
 
+6. **Light blue + white color scheme**: User-requested modern, professional color palette with浅蓝色 background and white card.
+
 ## Self-Check: PASSED
 
 - [x] Auth Store created with persistence
@@ -148,6 +167,7 @@ ls apps/site/pages/admin/login.vue
 - [x] Design file created with pencil MCP
 - [x] All commits atomic
 - [x] SUMMARY.md created
+- [x] Colors match user requirements (浅蓝色 + 白色)
 
 ## Next Steps
 

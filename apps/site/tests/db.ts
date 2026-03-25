@@ -31,15 +31,18 @@ export function getTestDatabase(): LibSQLDatabase<typeof schema> {
  *
  * @returns Object with db instance and cleanup function
  */
-export function createIsolatedTestDatabase(): {
+export async function createIsolatedTestDatabase(): Promise<{
   db: LibSQLDatabase<typeof schema>
   cleanup: () => Promise<void>
-} {
+}> {
   const client = createClient({
     url: 'file::memory:?cache=shared',
   })
   // Pass schema explicitly to drizzle for proper table metadata
   const db = drizzle(client, { schema })
+
+  // Initialize database schema (create tables)
+  await initializeTestDatabase(db)
 
   return {
     db,

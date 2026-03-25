@@ -45,7 +45,7 @@ describe('Auth API Contract', () => {
 
   beforeEach(async () => {
     // Create isolated database for this test file
-    const dbSetup = createIsolatedTestDatabase()
+    const dbSetup = await createIsolatedTestDatabase()
     db = dbSetup.db
     cleanup = dbSetup.cleanup
 

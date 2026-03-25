@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import type { UserObject } from '~/server/services/auth.service'
 
 export interface AuthState {
@@ -6,6 +7,8 @@ export interface AuthState {
   user: UserObject | null
   isLoggedIn: boolean
 }
+
+const persistedState = piniaPluginPersistedstate
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({

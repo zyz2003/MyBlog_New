@@ -28,8 +28,19 @@ vi.mock('#app', () => ({
   }),
 }))
 
-// Mock Pinia
-vi.mock('pinia', () => ({
-  defineStore: vi.fn(),
-  storeToRefs: vi.fn(),
-}))
+// Mock Pinia - export actual Pinia for store tests, only mock defineStore and storeToRefs
+vi.mock('pinia', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    defineStore: vi.fn((id, options) => {
+      // Return a mock store function that returns the options
+      return () => ({
+        state: typeof options.state === 'function' ? options.state() : options.state,
+        getters: options.getters,
+        actions: options.actions,
+      })
+    }),
+    storeToRefs: vi.fn(),
+  }
+})

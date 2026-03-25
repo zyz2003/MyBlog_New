@@ -1,56 +1,50 @@
 /**
  * PUT /api/v1/posts/:id
  *
- * Update an existing post
+ * Update a post by ID
  *
- * Route params:
- * - id: Post ID (UUID)
- *
- * Request body (all optional - partial update):
+ * Request body:
  * - title?: string
+ * - slug?: string
  * - content?: string
  * - excerpt?: string
  * - coverImage?: string
  * - seoTitle?: string
  * - seoDescription?: string
- * - categoryId?: string
+ * - status?: 'draft' | 'published' | 'archived' | 'reviewing'
+ * - categoryId?: string | null
  * - tagIds?: string[]
- * - status?: 'draft' | 'reviewing' | 'published' | 'archived'
  *
- * Returns: Updated post with relations
+ * Returns: Updated post
  * Requires: Authentication
  * Throws: 404 if post not found
  */
 
-import { defineEventHandler, getRouterParams } from 'h3'
+import { defineEventHandler, readBody } from 'h3'
 import { updatePost } from '../../../services/post.service'
-import { createSuccessResponse } from '../../../utils/response'
 import { requireAuth } from '../../../middleware/auth'
-import { validateRequestBody } from '../../../utils/validate'
-import { updatePostSchema } from '../../../schemas/posts'
-import { HTTPError } from '../../../utils/error'
 
 export default defineEventHandler(async (event) => {
   // Require authentication
   await requireAuth(event)
 
-  // Get post ID from route params
-  const params = getRouterParams(event) as { id?: string }
-  const postId = params.id
-
-  if (!postId) {
-    throw HTTPError.BAD_REQUEST('Post ID is required')
+  // Get post ID from URL
+  const id = event.context.params?.id
+  if (!id) {
+    throw createError({
+      statusCode: 400,
+      message: 'Post ID is required',
+    })
   }
 
-  // Parse and validate request body
-  const body = await validateRequestBody(event, updatePostSchema)
+  // Parse request body
+  const body = await readBody(event)
 
-  // Extract tagIds from body if provided
-  const { tagIds, ...updateData } = body
+  // Extract tagIds from body (for tag association)
+  const { tagIds, ...postData } = body
 
   // Update the post
-  const updatedPost = await updatePost(postId, updateData, tagIds)
+  const updatedPost = await updatePost(id, postData, tagIds || [])
 
-  // Return updated post
-  return createSuccessResponse(updatedPost, 'Post updated successfully')
+  return updatedPost
 })
