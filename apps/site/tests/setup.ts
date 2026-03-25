@@ -1,20 +1,35 @@
-import { afterAll, beforeAll, beforeEach } from 'vitest'
-import { resetTestDatabase } from './db'
+// Vitest test setup file
+import { config } from '@vue/test-utils'
+import { vi } from 'vitest'
 
-// Global test setup - runs once before all tests
-beforeAll(() => {
-  console.log('[Test] Global setup - initializing test environment')
-})
+// Make vi available globally
+globalThis.vi = vi
 
-// Global test teardown - runs once after all tests
-afterAll(async () => {
-  console.log('[Test] Global teardown - cleaning up test environment')
-  // Reset database after all tests complete
-  await resetTestDatabase()
-})
+// Global test configuration
+config.global.stubs = {
+  RouterLink: true,
+  Suspense: true,
+}
 
-// Reset database between each test for isolation
-beforeEach(async () => {
-  // Reset database state before each test
-  await resetTestDatabase()
-})
+// Mock Nuxt composables
+vi.mock('#app', () => ({
+  useNuxtApp: () => ({
+    $pinia: {},
+  }),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    currentRoute: { value: { path: '/' } },
+  }),
+  useRoute: () => ({
+    path: '/',
+    params: {},
+    query: {},
+  }),
+}))
+
+// Mock Pinia
+vi.mock('pinia', () => ({
+  defineStore: vi.fn(),
+  storeToRefs: vi.fn(),
+}))
