@@ -2,7 +2,9 @@
 import { ref, onMounted } from 'vue'
 import { useCategoryAdminStore } from '~/stores/categoryAdmin'
 import { useCategoryAdmin } from '~/composables/useCategoryAdmin'
-import CategoryTreeTable, { type CategoryTreeNode } from '~/components/admin/categories/CategoryTreeTable.vue'
+import CategoryTreeTable, {
+  type CategoryTreeNode,
+} from '~/components/admin/categories/CategoryTreeTable.vue'
 import CategoryForm from '~/components/admin/categories/CategoryForm.vue'
 import AdminLayout from '~/components/layouts/AdminLayout.vue'
 import AdminBreadcrumb from '~/components/admin/Breadcrumb.vue'
@@ -16,10 +18,11 @@ import {
   DialogFooter,
 } from '~/components/ui/dialog'
 import { toast } from 'vue-sonner'
-import { Plus, FolderPlus } from 'lucide-vue-next'
+import { Plus } from 'lucide-vue-next'
 
 const store = useCategoryAdminStore()
-const { createCategory, updateCategory, deleteCategory, reorderCategories, fetchCategories } = useCategoryAdmin()
+const { createCategory, updateCategory, deleteCategory, reorderCategories, fetchCategories } =
+  useCategoryAdmin()
 
 const loading = ref(false)
 const deleteConfirmDialog = ref(false)
@@ -30,7 +33,7 @@ const loadCategories = async () => {
   loading.value = true
   try {
     store.categories = await fetchCategories({ tree: true })
-  } catch (error) {
+  } catch {
     toast.error('加载分类失败')
   } finally {
     loading.value = false
@@ -64,7 +67,7 @@ const handleSubmit = async (data: {
     }
     store.closeDialog()
     await loadCategories()
-  } catch (error) {
+  } catch {
     toast.error('操作失败')
   }
 }
@@ -85,7 +88,7 @@ const handleDelete = async () => {
     deleteConfirmDialog.value = false
     categoryToDelete.value = null
     await loadCategories()
-  } catch (error) {
+  } catch {
     toast.error('删除失败')
   }
 }
@@ -107,7 +110,7 @@ const handleReorder = async (
     await reorderCategories(fromId, toId, dropPosition)
     await loadCategories()
     toast.success('排序已更新')
-  } catch (error) {
+  } catch {
     toast.error('排序更新失败')
   }
 }
@@ -119,20 +122,13 @@ const handleReorder = async (
       <!-- 头部 -->
       <div class="container mx-auto px-4 py-6">
         <!-- 面包屑 -->
-        <AdminBreadcrumb
-          :items="[
-            { title: '后台管理', href: '/admin' },
-            { title: '分类管理' }
-          ]"
-        />
+        <AdminBreadcrumb :items="[{ title: '后台管理', href: '/admin' }, { title: '分类管理' }]" />
 
         <!-- 页面标题和操作 -->
         <div class="flex items-center justify-between mt-4">
           <div>
             <h1 class="text-2xl font-bold">分类管理</h1>
-            <p class="text-sm text-muted-foreground mt-1">
-              管理文章分类，支持多级分类和拖拽排序
-            </p>
+            <p class="text-sm text-muted-foreground mt-1">管理文章分类，支持多级分类和拖拽排序</p>
           </div>
           <Button @click="openCreateDialog">
             <Plus class="w-4 h-4 mr-2" />
@@ -148,7 +144,7 @@ const handleReorder = async (
           :loading="loading"
           @edit="store.openEditDialog"
           @delete="confirmDelete"
-          @addSubCategory="handleAddSubCategory"
+          @add-sub-category="handleAddSubCategory"
           @reorder="handleReorder"
         />
       </div>
@@ -172,12 +168,8 @@ const handleReorder = async (
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" @click="deleteConfirmDialog = false">
-              取消
-            </Button>
-            <Button variant="destructive" @click="handleDelete">
-              删除
-            </Button>
+            <Button variant="outline" @click="deleteConfirmDialog = false"> 取消 </Button>
+            <Button variant="destructive" @click="handleDelete"> 删除 </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

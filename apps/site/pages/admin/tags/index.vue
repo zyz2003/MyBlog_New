@@ -17,12 +17,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '~/components/ui/dialog'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '~/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { toast } from 'vue-sonner'
 import { Plus, Cloud, List } from 'lucide-vue-next'
 
@@ -43,7 +38,7 @@ const loadTags = async (page = 1, search = '') => {
     store.tags = result.items
     store.pagination.total = result.total
     store.pagination.current = page
-  } catch (error) {
+  } catch {
     toast.error('加载标签失败')
   } finally {
     loading.value = false
@@ -87,7 +82,7 @@ const handleSubmit = async (data: {
     store.closeDialog()
     await loadTags(store.pagination.current)
     await loadTagCloud()
-  } catch (error) {
+  } catch {
     toast.error('操作失败')
   }
 }
@@ -109,7 +104,7 @@ const handleDelete = async () => {
     tagToDelete.value = null
     await loadTags(store.pagination.current)
     await loadTagCloud()
-  } catch (error) {
+  } catch {
     toast.error('删除失败')
   }
 }
@@ -127,20 +122,13 @@ const handleTagClick = (tag: TagWithCount) => {
       <!-- 头部 -->
       <div class="container mx-auto px-4 py-6">
         <!-- 面包屑 -->
-        <AdminBreadcrumb
-          :items="[
-            { title: '后台管理', href: '/admin' },
-            { title: '标签管理' }
-          ]"
-        />
+        <AdminBreadcrumb :items="[{ title: '后台管理', href: '/admin' }, { title: '标签管理' }]" />
 
         <!-- 页面标题和操作 -->
         <div class="flex items-center justify-between mt-4">
           <div>
             <h1 class="text-2xl font-bold">标签管理</h1>
-            <p class="text-sm text-muted-foreground mt-1">
-              管理文章标签，支持标签云可视化
-            </p>
+            <p class="text-sm text-muted-foreground mt-1">管理文章标签，支持标签云可视化</p>
           </div>
           <Button @click="openCreateDialog">
             <Plus class="w-4 h-4 mr-2" />
@@ -172,18 +160,14 @@ const handleTagClick = (tag: TagWithCount) => {
               :pagination="store.pagination"
               @edit="store.openEditDialog"
               @delete="confirmDelete"
-              @pageChange="loadTags"
+              @page-change="loadTags"
               @search="loadTags"
             />
           </TabsContent>
 
           <!-- 标签云视图 -->
           <TabsContent value="cloud">
-            <TagCloud
-              :tags="tagCloudData"
-              :loading="loading"
-              @tagClick="handleTagClick"
-            />
+            <TagCloud :tags="tagCloudData" :loading="loading" @tag-click="handleTagClick" />
           </TabsContent>
         </Tabs>
       </div>
@@ -206,12 +190,8 @@ const handleTagClick = (tag: TagWithCount) => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" @click="deleteConfirmDialog = false">
-              取消
-            </Button>
-            <Button variant="destructive" @click="handleDelete">
-              删除
-            </Button>
+            <Button variant="outline" @click="deleteConfirmDialog = false"> 取消 </Button>
+            <Button variant="destructive" @click="handleDelete"> 删除 </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

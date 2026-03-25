@@ -5,20 +5,8 @@ import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { useDebounceFn } from '@vueuse/core'
 import type { Tag } from '@my-blog/database'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
@@ -30,27 +18,46 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  'submit': [data: {
-    name: string
-    slug: string
-    description?: string
-    color: string
-  }]
+  submit: [
+    data: {
+      name: string
+      slug: string
+      description?: string
+      color: string
+    },
+  ]
 }>()
 
 // 预设颜色
 const presetColors = [
-  '#EF4444', '#F97316', '#F59E0B', '#84CC16',
-  '#10B981', '#06B6D4', '#3B82F6', '#6366F1',
-  '#8B5CF6', '#EC4899', '#F43F5E', '#64748b',
+  '#EF4444',
+  '#F97316',
+  '#F59E0B',
+  '#84CC16',
+  '#10B981',
+  '#06B6D4',
+  '#3B82F6',
+  '#6366F1',
+  '#8B5CF6',
+  '#EC4899',
+  '#F43F5E',
+  '#64748b',
 ]
 
-const formSchema = toTypedSchema(z.object({
-  name: z.string().min(1, '标签名称不能为空').max(30, '标签名称最多 30 个字符'),
-  slug: z.string().min(1, '别名不能为空').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, '别名只能包含小写字母、数字和连字符'),
-  description: z.string().max(100, '描述最多 100 个字符').optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色').default('#3B82F6'),
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string().min(1, '标签名称不能为空').max(30, '标签名称最多 30 个字符'),
+    slug: z
+      .string()
+      .min(1, '别名不能为空')
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, '别名只能包含小写字母、数字和连字符'),
+    description: z.string().max(100, '描述最多 100 个字符').optional(),
+    color: z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色')
+      .default('#3B82F6'),
+  })
+)
 
 const { handleSubmit, setFieldValue, values, resetForm } = useForm({
   validationSchema: formSchema,
@@ -63,25 +70,31 @@ const { handleSubmit, setFieldValue, values, resetForm } = useForm({
 })
 
 // 监听对话框打开，重置表单
-watch(() => props.open, (newOpen) => {
-  if (newOpen) {
-    resetForm({
-      values: {
-        name: props.tag?.name || '',
-        slug: props.tag?.slug || '',
-        description: props.tag?.description || '',
-        color: props.tag?.color || '#3B82F6',
-      },
-    })
+watch(
+  () => props.open,
+  (newOpen) => {
+    if (newOpen) {
+      resetForm({
+        values: {
+          name: props.tag?.name || '',
+          slug: props.tag?.slug || '',
+          description: props.tag?.description || '',
+          color: props.tag?.color || '#3B82F6',
+        },
+      })
+    }
   }
-})
+)
 
 // 别名自动生成
-watch(() => values.name, (newName) => {
-  if (!props.tag || newName !== props.tag.name) {
-    setFieldValue('slug', generateSlug(newName))
+watch(
+  () => values.name,
+  (newName) => {
+    if (!props.tag || newName !== props.tag.name) {
+      setFieldValue('slug', generateSlug(newName))
+    }
   }
-})
+)
 
 // 别名唯一性检查
 const slugError = ref('')
@@ -115,7 +128,7 @@ const generateSlug = (name: string): string => {
       <DialogHeader>
         <DialogTitle>{{ tag ? '编辑标签' : '新增标签' }}</DialogTitle>
       </DialogHeader>
-      <form @submit="onSubmit" class="space-y-4">
+      <form class="space-y-4" @submit="onSubmit">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem>
             <FormLabel>标签名称</FormLabel>

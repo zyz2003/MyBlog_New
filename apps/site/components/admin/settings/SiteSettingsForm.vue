@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -24,36 +24,41 @@ interface SiteSettings {
   }
 }
 
-const props = withDefaults(defineProps<{
-  settings: SiteSettings | null
-  loading?: boolean
-  saveMode?: 'auto' | 'manual'
-}>(), {
-  saveMode: 'manual',
-})
+const props = withDefaults(
+  defineProps<{
+    settings: SiteSettings | null
+    loading?: boolean
+    saveMode?: 'auto' | 'manual'
+  }>(),
+  {
+    saveMode: 'manual',
+  }
+)
 
 const emit = defineEmits<{
-  'save': [settings: Partial<SiteSettings>]
-  'fieldChange': [field: string, value: any]
+  save: [settings: Partial<SiteSettings>]
+  fieldChange: [field: string, value: unknown]
 }>()
 
 const logoPreviewUrl = ref<string | undefined>(props.settings?.logo)
 const faviconPreviewUrl = ref<string | undefined>(props.settings?.favicon)
 
-const formSchema = toTypedSchema(z.object({
-  name: z.string().min(1, '站点名称不能为空').max(50),
-  description: z.string().max(200),
-  url: z.string().url('请输入有效的 URL'),
-  logo: z.string().optional(),
-  favicon: z.string().optional(),
-  seo: z.object({
-    defaultTitle: z.string().max(60),
-    defaultDescription: z.string().max(160),
-    metaKeywords: z.string().optional(),
-    googleVerification: z.string().optional(),
-    bingVerification: z.string().optional(),
-  }),
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string().min(1, '站点名称不能为空').max(50),
+    description: z.string().max(200),
+    url: z.string().url('请输入有效的 URL'),
+    logo: z.string().optional(),
+    favicon: z.string().optional(),
+    seo: z.object({
+      defaultTitle: z.string().max(60),
+      defaultDescription: z.string().max(160),
+      metaKeywords: z.string().optional(),
+      googleVerification: z.string().optional(),
+      bingVerification: z.string().optional(),
+    }),
+  })
+)
 
 const { handleSubmit, setFieldValue, values, resetForm } = useForm({
   validationSchema: formSchema,
@@ -71,15 +76,19 @@ const { handleSubmit, setFieldValue, values, resetForm } = useForm({
   },
 })
 
-watch(() => props.settings, (newSettings) => {
-  if (newSettings) {
-    resetForm({
-      values: newSettings,
-    })
-    logoPreviewUrl.value = newSettings.logo
-    faviconPreviewUrl.value = newSettings.favicon
-  }
-}, { immediate: true })
+watch(
+  () => props.settings,
+  (newSettings) => {
+    if (newSettings) {
+      resetForm({
+        values: newSettings,
+      })
+      logoPreviewUrl.value = newSettings.logo
+      faviconPreviewUrl.value = newSettings.favicon
+    }
+  },
+  { immediate: true }
+)
 
 const onSubmit = handleSubmit((data) => {
   emit('save', data)
@@ -109,7 +118,7 @@ const handleFaviconRemove = () => {
 </script>
 
 <template>
-  <form @submit="onSubmit" class="space-y-6">
+  <form class="space-y-6" @submit="onSubmit">
     <!-- 基础设置 -->
     <Card>
       <CardHeader>
@@ -117,9 +126,7 @@ const handleFaviconRemove = () => {
           <Globe class="w-5 h-5" />
           基础设置
         </CardTitle>
-        <CardDescription>
-          配置站点的基本信息
-        </CardDescription>
+        <CardDescription> 配置站点的基本信息 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <SettingField
@@ -156,9 +163,7 @@ const handleFaviconRemove = () => {
           <Image class="w-5 h-5" />
           品牌标识
         </CardTitle>
-        <CardDescription>
-          上传站点的 Logo 和 Favicon
-        </CardDescription>
+        <CardDescription> 上传站点的 Logo 和 Favicon </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <SettingField
@@ -194,9 +199,7 @@ const handleFaviconRemove = () => {
           <Search class="w-5 h-5" />
           SEO 设置
         </CardTitle>
-        <CardDescription>
-          优化搜索引擎收录和排名
-        </CardDescription>
+        <CardDescription> 优化搜索引擎收录和排名 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <SettingField

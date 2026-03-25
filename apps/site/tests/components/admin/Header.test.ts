@@ -14,7 +14,7 @@ vi.mock('lucide-vue-next', () => ({
 vi.mock('#app', async () => {
   const actual = await vi.importActual('#app')
   return {
-    ...(actual as any),
+    ...(actual as unknown),
     useRoute: () => ({
       path: '/admin/posts',
       name: 'admin-posts',

@@ -6,7 +6,7 @@ import ThemePreviewModal from '~/components/admin/themes/ThemePreviewModal.vue'
 import ThemeConfigForm from '~/components/admin/themes/ThemeConfigForm.vue'
 import { Button } from '#components'
 import { useToast } from '#imports'
-import { Upload, Palette } from 'lucide-vue-next'
+import { Upload } from 'lucide-vue-next'
 import { useThemeAdminStore, type Theme, type ThemeConfig } from '~/stores/themeAdmin'
 
 definePageMeta({
@@ -87,9 +87,7 @@ onMounted(() => {
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold">主题管理</h1>
-          <p class="text-muted-foreground mt-1">
-            浏览、预览和管理博客主题
-          </p>
+          <p class="text-muted-foreground mt-1">浏览、预览和管理博客主题</p>
         </div>
         <div class="flex items-center gap-2">
           <Button variant="outline" @click="showUploadDialog = true">

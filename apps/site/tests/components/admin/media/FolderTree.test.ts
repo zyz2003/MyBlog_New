@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import FolderTree from '~/components/admin/media/FolderTree.vue'
@@ -215,7 +215,10 @@ describe('FolderTree', () => {
     })
 
     wrapper.vm.newFolderName = '新文件夹'
-    wrapper.vm.contextMenuTarget = { folder: { id: 'new', name: '', parentId: '1' } as any, parentId: '1' }
+    wrapper.vm.contextMenuTarget = {
+      folder: { id: 'new', name: '', parentId: '1' } as unknown,
+      parentId: '1',
+    }
     wrapper.vm.handleCreate()
 
     expect(wrapper.emitted('create')).toBeTruthy()

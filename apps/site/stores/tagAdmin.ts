@@ -63,29 +63,19 @@ export const useTagAdminStore = defineStore('tagAdmin', {
       this.editingTag = null
     },
 
-    async createTag(_data: {
-      name: string
-      slug: string
-      description?: string
-      color: string
-    }) {
+    async createTag() {
       // TODO: Replace with actual API call
       // await $fetch('/api/v1/tags', { method: 'POST', body: data })
       await this.fetchTags()
     },
 
-    async updateTag(_id: string, _data: {
-      name: string
-      slug: string
-      description?: string
-      color: string
-    }) {
+    async updateTag() {
       // TODO: Replace with actual API call
       // await $fetch(`/api/v1/tags/${id}`, { method: 'PUT', body: data })
       await this.fetchTags()
     },
 
-    async deleteTag(_id: string) {
+    async deleteTag() {
       // TODO: Replace with actual API call
       // await $fetch(`/api/v1/tags/${id}`, { method: 'DELETE' })
       await this.fetchTags()

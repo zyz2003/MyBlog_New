@@ -52,37 +52,25 @@ export const useCategoryAdminStore = defineStore('categoryAdmin', {
       this.editingCategory = null
     },
 
-    async createCategory(_data: {
-      name: string
-      slug: string
-      parentId?: string | null
-      description?: string
-      color?: string
-    }) {
+    async createCategory() {
       // TODO: Replace with actual API call
       // await $fetch('/api/v1/categories', { method: 'POST', body: data })
       await this.fetchCategories()
     },
 
-    async updateCategory(_id: string, _data: {
-      name: string
-      slug: string
-      parentId?: string | null
-      description?: string
-      color?: string
-    }) {
+    async updateCategory() {
       // TODO: Replace with actual API call
       // await $fetch(`/api/v1/categories/${id}`, { method: 'PUT', body: data })
       await this.fetchCategories()
     },
 
-    async deleteCategory(_id: string) {
+    async deleteCategory() {
       // TODO: Replace with actual API call
       // await $fetch(`/api/v1/categories/${id}`, { method: 'DELETE' })
       await this.fetchCategories()
     },
 
-    async reorderCategories(_fromId: string, _toId: string, _dropPosition: 'before' | 'after' | 'inside') {
+    async reorderCategories() {
       // TODO: Replace with actual API call
       // await $fetch('/api/v1/categories/reorder', {
       //   method: 'POST',

@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { Input } from '#components'
-import { Badge } from '#components'
 import { Search, Puzzle } from 'lucide-vue-next'
 import type { Plugin } from './PluginCard.vue'
 import PluginCard from './PluginCard.vue'
@@ -13,11 +12,11 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'toggle': [pluginId: string, enabled: boolean]
-  'configure': [plugin: Plugin]
-  'search': [query: string]
-  'categoryChange': [category: string]
-  'statusChange': [status: string]
+  toggle: [pluginId: string, enabled: boolean]
+  configure: [plugin: Plugin]
+  search: [query: string]
+  categoryChange: [category: string]
+  statusChange: [status: string]
 }>()
 
 const searchQuery = ref('')
@@ -30,7 +29,7 @@ const debouncedSearch = useDebounceFn((query: string) => {
 
 // 动态获取分类列表
 const categories = computed(() => {
-  const cats = new Set(props.plugins.map(p => p.category))
+  const cats = new Set(props.plugins.map((p) => p.category))
   return ['all', ...Array.from(cats)]
 })
 
@@ -38,21 +37,22 @@ const filteredPlugins = computed(() => {
   let result = props.plugins
 
   if (categoryFilter.value !== 'all') {
-    result = result.filter(p => p.category === categoryFilter.value)
+    result = result.filter((p) => p.category === categoryFilter.value)
   }
 
   if (statusFilter.value === 'enabled') {
-    result = result.filter(p => p.isEnabled)
+    result = result.filter((p) => p.isEnabled)
   } else if (statusFilter.value === 'disabled') {
-    result = result.filter(p => !p.isEnabled)
+    result = result.filter((p) => !p.isEnabled)
   }
 
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase()
-    result = result.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
-      p.author.toLowerCase().includes(q)
+    result = result.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.author.toLowerCase().includes(q)
     )
   }
 
@@ -61,8 +61,8 @@ const filteredPlugins = computed(() => {
 
 const stats = computed(() => ({
   total: props.plugins.length,
-  enabled: props.plugins.filter(p => p.isEnabled).length,
-  disabled: props.plugins.filter(p => !p.isEnabled).length,
+  enabled: props.plugins.filter((p) => p.isEnabled).length,
+  disabled: props.plugins.filter((p) => !p.isEnabled).length,
 }))
 </script>
 
@@ -82,7 +82,7 @@ const stats = computed(() => ({
 
       <Select v-model="categoryFilter" @update:model-value="emit('categoryChange', $event)">
         <option value="all">全部分类</option>
-        <option v-for="cat in categories" :key="cat" :value="cat" v-if="cat !== 'all'">
+        <option v-for="cat in categories.filter((c) => c !== 'all')" :key="cat" :value="cat">
           {{ cat }}
         </option>
       </Select>

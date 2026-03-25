@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useMediaLibraryStore } from '~/stores/mediaLibrary'
 import { useMediaLibrary } from '~/composables/useMediaLibrary'
-import { useAuthStore } from '~/stores/auth'
 import { toast } from 'vue-sonner'
 import type { Media } from '@my-blog/database'
 
@@ -19,23 +18,34 @@ import MediaSelector from '~/components/admin/media/MediaSelector.vue'
 // shadcn-vue components
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '~/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Separator } from '~/components/ui/separator'
-import { Badge } from '~/components/ui/badge'
 
 // Icons
-import { Upload, Search, Grid, List, Plus, Image as ImageIcon } from 'lucide-vue-next'
+import { Search, Grid, List, Plus } from 'lucide-vue-next'
 
 const mediaLibraryStore = useMediaLibraryStore()
 const mediaLibraryComposable = useMediaLibrary()
-const authStore = useAuthStore()
 
 // State
 const mediaItems = ref<Media[]>([])
-const folders = ref<Array<{ id: string; name: string; parentId: string | null; children?: unknown[]; mediaCount: number }>>([])
+const folders = ref<
+  Array<{
+    id: string
+    name: string
+    parentId: string | null
+    children?: unknown[]
+    mediaCount: number
+  }>
+>([])
 const loading = ref(false)
-const uploading = ref(false)
 const previewMedia = ref<Media | null>(null)
 const showPreviewModal = ref(false)
 const showUploadDialog = ref(false)
@@ -49,7 +59,6 @@ const breadcrumbs = computed(() => [
   { label: '媒体库', href: '/admin/media' },
 ])
 
-const hasSelection = computed(() => mediaLibraryStore.hasSelection)
 const selectionCount = computed(() => mediaLibraryStore.selectionCount)
 
 // Methods
@@ -220,9 +229,7 @@ onMounted(() => {
           <h1 class="text-2xl font-bold mt-2">媒体库</h1>
         </div>
         <div class="flex items-center gap-2">
-          <Button @click="showMediaSelector = true">
-            选择媒体
-          </Button>
+          <Button @click="showMediaSelector = true"> 选择媒体 </Button>
           <Button @click="showUploadDialog = true">
             <Plus class="w-4 h-4 mr-2" />
             上传文件
@@ -256,7 +263,9 @@ onMounted(() => {
           <div class="flex items-center gap-2 mb-4">
             <!-- Search -->
             <div class="relative flex-1 max-w-sm">
-              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+              />
               <Input
                 v-model="searchInput"
                 placeholder="搜索媒体文件..."
@@ -266,7 +275,10 @@ onMounted(() => {
             </div>
 
             <!-- Filter Type -->
-            <Select v-model="mediaLibraryStore.filterType" @update:model-value="handleFilterTypeChange">
+            <Select
+              v-model="mediaLibraryStore.filterType"
+              @update:model-value="handleFilterTypeChange"
+            >
               <SelectTrigger class="w-[120px]">
                 <SelectValue placeholder="类型" />
               </SelectTrigger>

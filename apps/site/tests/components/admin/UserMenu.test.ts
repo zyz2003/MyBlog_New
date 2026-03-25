@@ -15,7 +15,7 @@ vi.mock('lucide-vue-next', () => ({
 vi.mock('vue-router', async () => {
   const actual = await vi.importActual('vue-router')
   return {
-    ...(actual as any),
+    ...(actual as unknown),
     useRouter: vi.fn(),
   }
 })

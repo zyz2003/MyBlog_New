@@ -102,7 +102,7 @@ describe('UploadArea', () => {
 
     // Invalid file type
     const invalidFile = new File(['test'], 'test.exe', { type: 'application/x-executable' })
-    const validation = (wrapper.vm as any).validateFile(invalidFile)
+    const validation = (wrapper.vm as unknown).validateFile(invalidFile)
 
     expect(validation.valid).toBe(false)
     expect(validation.error).toBe('不支持的文件类型')
@@ -116,7 +116,7 @@ describe('UploadArea', () => {
     })
 
     const validFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' })
-    const validation = (wrapper.vm as any).validateFile(validFile)
+    const validation = (wrapper.vm as unknown).validateFile(validFile)
 
     expect(validation.valid).toBe(true)
   })
@@ -239,9 +239,9 @@ describe('UploadArea', () => {
       },
     })
 
-    expect((wrapper.vm as any).formatFileSize(0)).toBe('0 B')
-    expect((wrapper.vm as any).formatFileSize(1024)).toBe('1 KB')
-    expect((wrapper.vm as any).formatFileSize(1048576)).toBe('1 MB')
+    expect((wrapper.vm as unknown).formatFileSize(0)).toBe('0 B')
+    expect((wrapper.vm as unknown).formatFileSize(1024)).toBe('1 KB')
+    expect((wrapper.vm as unknown).formatFileSize(1048576)).toBe('1 MB')
   })
 
   it('shows progress bar for uploading files', () => {

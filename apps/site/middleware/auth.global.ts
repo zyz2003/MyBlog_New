@@ -23,7 +23,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         Authorization: `Bearer ${authStore.token}`,
       },
     })
-  } catch (error) {
+  } catch {
     // Token 失效，清除认证状态并重定向
     authStore.clearAuth()
     return navigateTo(`/admin/login?redirect=${encodeURIComponent(to.path as string)}`)

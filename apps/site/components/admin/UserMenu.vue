@@ -37,13 +37,17 @@ const handleSettings = () => {
 
 <template>
   <DropdownMenu>
-    <DropdownMenuTrigger class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5 outline-none transition-colors hover:bg-slate-50">
+    <DropdownMenuTrigger
+      class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1.5 outline-none transition-colors hover:bg-slate-50"
+    >
       <Avatar class="h-7 w-7">
         <AvatarFallback class="bg-sky-500 text-white">
           {{ userInitial }}
         </AvatarFallback>
       </Avatar>
-      <span class="hidden max-w-24 truncate text-sm font-medium text-slate-700 md:inline-block">{{ user.username }}</span>
+      <span class="hidden max-w-24 truncate text-sm font-medium text-slate-700 md:inline-block">{{
+        user.username
+      }}</span>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" class="w-56 border-slate-200">
       <DropdownMenuLabel>
@@ -53,12 +57,12 @@ const handleSettings = () => {
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem @click="handleSettings" class="gap-2 text-slate-700">
+      <DropdownMenuItem class="gap-2 text-slate-700" @click="handleSettings">
         <Settings class="h-4 w-4" />
         <span>设置中心</span>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem @click="handleLogout" class="gap-2 text-red-600 focus:text-red-600">
+      <DropdownMenuItem class="gap-2 text-red-600 focus:text-red-600" @click="handleLogout">
         <LogOut class="h-4 w-4" />
         <span>退出登录</span>
       </DropdownMenuItem>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { Tag } from '@my-blog/database'
-import { Badge } from '~/components/ui/badge'
 import { Button } from '~/components/ui/button'
 import { Tag as TagIcon, TrendingUp } from 'lucide-vue-next'
 
@@ -15,7 +14,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'tagClick': [tag: TagCloudItem]
+  tagClick: [tag: TagCloudItem]
 }>()
 
 const sortBy = ref<'frequency' | 'name'>('frequency')
@@ -37,7 +36,7 @@ const getFontSize = (count: number, maxCount: number, minCount: number): string 
   const maxSize = 32
   const range = maxCount - minCount || 1
   const ratio = (count - minCount) / range
-  const size = minSize + (ratio * (maxSize - minSize))
+  const size = minSize + ratio * (maxSize - minSize)
   return `${Math.round(size)}px`
 }
 
@@ -50,7 +49,7 @@ const sortedTags = computed(() => {
 })
 
 const stats = computed(() => {
-  const counts = props.tags.map(t => t.usageCount)
+  const counts = props.tags.map((t) => t.usageCount)
   return {
     max: Math.max(...counts, 0),
     min: Math.min(...counts, 0),
@@ -64,8 +63,12 @@ const stats = computed(() => {
     <!-- 头部统计和排序 -->
     <div class="flex justify-between items-center">
       <div class="flex gap-4 text-sm text-muted-foreground">
-        <span>标签总数：<strong>{{ tags.length }}</strong></span>
-        <span>总使用次数：<strong>{{ stats.total }}</strong></span>
+        <span
+          >标签总数：<strong>{{ tags.length }}</strong></span
+        >
+        <span
+          >总使用次数：<strong>{{ stats.total }}</strong></span
+        >
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm text-muted-foreground">排序：</span>
@@ -90,10 +93,7 @@ const stats = computed(() => {
     </div>
 
     <!-- 标签云 -->
-    <div
-      v-if="tags.length > 0"
-      class="flex flex-wrap gap-3 p-4 bg-muted/30 rounded-lg"
-    >
+    <div v-if="tags.length > 0" class="flex flex-wrap gap-3 p-4 bg-muted/30 rounded-lg">
       <span
         v-for="tag in sortedTags"
         :key="tag.id"
@@ -106,10 +106,7 @@ const stats = computed(() => {
         @click="emit('tagClick', tag)"
       >
         {{ tag.name }}
-        <span
-          class="ml-1 text-xs opacity-60"
-          :style="{ fontSize: '0.5em' }"
-        >
+        <span class="ml-1 text-xs opacity-60" :style="{ fontSize: '0.5em' }">
           ({{ tag.usageCount }})
         </span>
       </span>

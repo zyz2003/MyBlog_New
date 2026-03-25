@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
-import SettingField from './SettingField.vue'
+import { Input } from '@/components/ui/input'
 import { Lock, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-vue-next'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
   loading?: boolean
 }>()
-
 const emit = defineEmits<{
-  'success': []
-  'error': [error: string]
+  success: []
+  error: [error: string]
 }>()
 
 const showCurrentPassword = ref(false)
@@ -83,31 +83,36 @@ const strengthLabel = computed(() => {
   return '很强'
 })
 
-const formSchema = toTypedSchema(z.object({
-  currentPassword: z.string().min(1, '请输入当前密码'),
-  newPassword: z.string()
-    .min(8, '密码至少 8 个字符')
-    .regex(/[A-Z]/, '密码必须包含大写字母')
-    .regex(/[a-z]/, '密码必须包含小写字母')
-    .regex(/[0-9]/, '密码必须包含数字'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: '两次输入的密码不一致',
-  path: ['confirmPassword'],
-}))
+const formSchema = toTypedSchema(
+  z
+    .object({
+      currentPassword: z.string().min(1, '请输入当前密码'),
+      newPassword: z
+        .string()
+        .min(8, '密码至少 8 个字符')
+        .regex(/[A-Z]/, '密码必须包含大写字母')
+        .regex(/[a-z]/, '密码必须包含小写字母')
+        .regex(/[0-9]/, '密码必须包含数字'),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+      message: '两次输入的密码不一致',
+      path: ['confirmPassword'],
+    })
+)
 
 const { handleSubmit, resetForm, setFieldValue, values } = useForm({
   validationSchema: formSchema,
 })
 
-const onSubmit = handleSubmit(async (data) => {
+const onSubmit = handleSubmit(async () => {
   try {
     emit('success')
     resetForm()
     passwordStrength.value = 0
-    passwordRules.value = passwordRules.value.map(rule => ({ ...rule, valid: false }))
-  } catch (error) {
-    emit('error', error as string)
+    passwordRules.value = passwordRules.value.map((rule) => ({ ...rule, valid: false }))
+  } catch {
+    emit('error', '修改失败')
   }
 })
 
@@ -124,18 +129,16 @@ const handleNewPasswordInput = (value: string) => {
         <Lock class="w-5 h-5" />
         修改密码
       </CardTitle>
-      <CardDescription>
-        定期修改密码可以提高账户安全性
-      </CardDescription>
+      <CardDescription> 定期修改密码可以提高账户安全性 </CardDescription>
     </CardHeader>
     <CardContent>
-      <form @submit="onSubmit" class="space-y-4">
+      <form class="space-y-4" @submit="onSubmit">
         <div class="space-y-2">
           <Label>当前密码</Label>
           <div class="relative">
             <Input
-              :type="showCurrentPassword ? 'text' : 'password'"
               v-model="values.currentPassword"
+              :type="showCurrentPassword ? 'text' : 'password'"
               placeholder="请输入当前密码"
               class="pr-10"
             />
@@ -156,8 +159,8 @@ const handleNewPasswordInput = (value: string) => {
           <Label>新密码</Label>
           <div class="relative">
             <Input
-              :type="showNewPassword ? 'text' : 'password'"
               v-model="values.newPassword"
+              :type="showNewPassword ? 'text' : 'password'"
               placeholder="请输入新密码"
               class="pr-10"
               @update:model-value="handleNewPasswordInput"
@@ -205,8 +208,8 @@ const handleNewPasswordInput = (value: string) => {
           <Label>确认密码</Label>
           <div class="relative">
             <Input
-              :type="showConfirmPassword ? 'text' : 'password'"
               v-model="values.confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
               placeholder="请再次输入新密码"
               class="pr-10"
             />
@@ -226,9 +229,7 @@ const handleNewPasswordInput = (value: string) => {
         <!-- 安全提示 -->
         <Alert>
           <AlertTriangle class="w-4 h-4" />
-          <AlertDescription>
-            密码修改后，其他设备将需要重新登录
-          </AlertDescription>
+          <AlertDescription> 密码修改后，其他设备将需要重新登录 </AlertDescription>
         </Alert>
 
         <div class="flex justify-end pt-4">

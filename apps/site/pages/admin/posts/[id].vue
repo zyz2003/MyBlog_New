@@ -185,7 +185,7 @@ async function savePost() {
       seoDescription: post.value.seoDescription,
       status: post.value.status,
       categoryId: post.value.categoryId,
-      tagIds: post.value.tags?.map(t => t.id) || [],
+      tagIds: post.value.tags?.map((t) => t.id) || [],
     }
 
     if (isNewPost.value) {
@@ -273,14 +273,14 @@ function handleBack() {
 
 // Handle tag selection
 function handleTagSelect(tagId: string) {
-  const tag = tags.value.find(t => t.id === tagId)
+  const tag = tags.value.find((t) => t.id === tagId)
   if (!tag) return
 
   if (!post.value.tags) {
     post.value.tags = []
   }
 
-  const exists = post.value.tags.some(t => t.id === tagId)
+  const exists = post.value.tags.some((t) => t.id === tagId)
   if (!exists) {
     post.value.tags.push(tag)
   }
@@ -289,13 +289,13 @@ function handleTagSelect(tagId: string) {
 // Remove tag
 function removeTag(tagId: string) {
   if (!post.value.tags) return
-  post.value.tags = post.value.tags.filter(t => t.id !== tagId)
+  post.value.tags = post.value.tags.filter((t) => t.id !== tagId)
 }
 
 // Watch for title changes to auto-generate slug
 watch(
   () => post.value.title,
-  (newTitle) => {
+  () => {
     if (isNewPost.value && !post.value.slug) {
       generateSlug()
     }
@@ -351,7 +351,7 @@ onUnmounted(() => {
             <Eye class="h-4 w-4 mr-2" />
             预览
           </Button>
-          <Button @click="savePost" :disabled="saving">
+          <Button :disabled="saving" @click="savePost">
             <Save class="h-4 w-4 mr-2" />
             {{ saving ? '保存中...' : '保存' }}
           </Button>
@@ -392,8 +392,8 @@ onUnmounted(() => {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  @click="generateSlug"
                   class="h-6 text-xs"
+                  @click="generateSlug"
                 >
                   从标题生成
                 </Button>
@@ -485,7 +485,7 @@ onUnmounted(() => {
                     v-for="tag in tags"
                     :key="tag.id"
                     :value="tag.id"
-                    :disabled="post.tags?.some(t => t.id === tag.id)"
+                    :disabled="post.tags?.some((t) => t.id === tag.id)"
                   >
                     {{ tag.name }}
                   </SelectItem>

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import type { Tag } from '@my-blog/database'
 import {
@@ -11,7 +10,6 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { Button } from '~/components/ui/button'
-import { Badge } from '~/components/ui/badge'
 import { Input } from '~/components/ui/input'
 import { Pencil, Trash2, Search, Tag } from 'lucide-vue-next'
 
@@ -19,6 +17,7 @@ export interface TagWithCount extends Tag {
   usageCount: number
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps<{
   tags: TagWithCount[]
   loading?: boolean
@@ -29,11 +28,12 @@ const props = defineProps<{
   }
 }>()
 
+ 
 const emit = defineEmits<{
-  'edit': [tag: TagWithCount]
-  'delete': [tag: TagWithCount]
-  'pageChange': [page: number]
-  'search': [query: string]
+  edit: [tag: TagWithCount]
+  delete: [tag: TagWithCount]
+  pageChange: [page: number]
+  search: [query: string]
 }>()
 
 const debouncedSearch = useDebounceFn((query: string) => {
@@ -67,11 +67,7 @@ const debouncedSearch = useDebounceFn((query: string) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow
-          v-for="tag in tags"
-          :key="tag.id"
-          class="group"
-        >
+        <TableRow v-for="tag in tags" :key="tag.id" class="group">
           <TableCell>
             <Badge
               :style="{ backgroundColor: tag.color || '#64748b', color: 'white' }"
@@ -91,21 +87,18 @@ const debouncedSearch = useDebounceFn((query: string) => {
             <Badge variant="outline">{{ tag.usageCount || 0 }}</Badge>
           </TableCell>
           <TableCell>
-            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="icon"
-                @click="emit('edit', tag)"
-                title="编辑"
-              >
+            <div
+              class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Button variant="ghost" size="icon" title="编辑" @click="emit('edit', tag)">
                 <Pencil class="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                @click="emit('delete', tag)"
                 title="删除"
                 :disabled="tag.usageCount > 0"
+                @click="emit('delete', tag)"
               >
                 <Trash2 class="w-4 h-4" />
               </Button>
@@ -126,9 +119,7 @@ const debouncedSearch = useDebounceFn((query: string) => {
 
     <!-- 分页 -->
     <div class="flex justify-between items-center">
-      <p class="text-sm text-muted-foreground">
-        共 {{ pagination.total }} 条
-      </p>
+      <p class="text-sm text-muted-foreground">共 {{ pagination.total }} 条</p>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -138,9 +129,7 @@ const debouncedSearch = useDebounceFn((query: string) => {
         >
           上一页
         </Button>
-        <span class="text-sm">
-          第 {{ pagination.current }} 页
-        </span>
+        <span class="text-sm"> 第 {{ pagination.current }} 页 </span>
         <Button
           variant="outline"
           size="sm"

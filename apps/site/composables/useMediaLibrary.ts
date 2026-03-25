@@ -79,7 +79,7 @@ export function useMediaLibrary() {
       formData.append('folderId', folderId)
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const xhr = new XMLHttpRequest()
 
       xhr.upload.addEventListener('progress', (e) => {
@@ -94,7 +94,7 @@ export function useMediaLibrary() {
           try {
             const response = JSON.parse(xhr.responseText)
             resolve(response.data)
-          } catch (err) {
+          } catch {
             reject(new Error('Failed to parse response'))
           }
         } else {
@@ -131,7 +131,7 @@ export function useMediaLibrary() {
     const maxConcurrent = 5 // Limit concurrent uploads
     let completed = 0
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const processNext = async () => {
         if (completed >= files.length) {
           resolve(results)

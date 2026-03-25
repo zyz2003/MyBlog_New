@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Settings, User, Monitor, Save, X } from 'lucide-vue-next'
 
@@ -11,25 +10,23 @@ export interface TabItem {
   hasUnsavedChanges: boolean
 }
 
-const props = withDefaults(defineProps<{
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const props = defineProps<{
   modelValue: string
   tabs: TabItem[]
   globalSaveMode?: boolean
   hasGlobalUnsavedChanges?: boolean
   loading?: boolean
-}>(), {
-  globalSaveMode: false,
-  hasGlobalUnsavedChanges: false,
-  loading: false,
-})
-
-const emit = defineEmits<{
-  'update:modelValue': [value: string]
-  'save': []
-  'cancel': []
 }>()
 
-const icons: Record<string, any> = {
+ 
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  save: []
+  cancel: []
+}>()
+
+const icons: Record<string, unknown> = {
   site: Settings,
   user: User,
   system: Monitor,
@@ -40,12 +37,7 @@ const icons: Record<string, any> = {
   <Tabs :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
     <div class="flex items-center justify-between mb-6">
       <TabsList class="grid grid-cols-3 w-full max-w-md">
-        <TabsTrigger
-          v-for="tab in tabs"
-          :key="tab.id"
-          :value="tab.id"
-          class="relative"
-        >
+        <TabsTrigger v-for="tab in tabs" :key="tab.id" :value="tab.id" class="relative">
           <component :is="icons[tab.id]" class="w-4 h-4 mr-2" />
           {{ tab.label }}
           <span

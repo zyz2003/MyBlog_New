@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import MediaSelector from '~/components/admin/media/MediaSelector.vue'
@@ -184,9 +184,7 @@ describe('MediaSelector', () => {
       },
     })
 
-    const mockMedia = [
-      { id: '1', url: '/uploads/test.jpg', filename: 'test.jpg' },
-    ]
+    const mockMedia = [{ id: '1', url: '/uploads/test.jpg', filename: 'test.jpg' }]
 
     wrapper.vm.handleUploadComplete(mockMedia)
 

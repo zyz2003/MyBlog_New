@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import SettingField from './SettingField.vue'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Clock, Globe, Database, Zap, AlertTriangle } from 'lucide-vue-next'
+import { Globe, Database, Zap, AlertTriangle } from 'lucide-vue-next'
 
 interface SystemSettings {
   general: {
@@ -29,18 +29,21 @@ interface SystemSettings {
   }
 }
 
-const props = withDefaults(defineProps<{
-  settings: SystemSettings | null
-  loading?: boolean
-  saveMode?: 'auto' | 'manual'
-}>(), {
-  saveMode: 'manual',
-})
+const props = withDefaults(
+  defineProps<{
+    settings: SystemSettings | null
+    loading?: boolean
+    saveMode?: 'auto' | 'manual'
+  }>(),
+  {
+    saveMode: 'manual',
+  }
+)
 
 const emit = defineEmits<{
-  'save': [settings: SystemSettings]
-  'clearCache': []
-  'fieldChange': [field: string, value: any]
+  save: [settings: SystemSettings]
+  clearCache: []
+  fieldChange: [field: string, value: unknown]
 }>()
 
 const timezones = [
@@ -72,22 +75,24 @@ const cacheTtlOptions = [
   { label: '24 小时', value: 86400 },
 ]
 
-const formSchema = toTypedSchema(z.object({
-  general: z.object({
-    timezone: z.string(),
-    language: z.string(),
-    dateFormat: z.string(),
-  }),
-  cache: z.object({
-    enabled: z.boolean(),
-    ttl: z.number().min(60).max(86400),
-  }),
-  performance: z.object({
-    imageQuality: z.number().min(10).max(100),
-    postsPerPage: z.number().min(5).max(100),
-    lazyLoad: z.boolean(),
-  }),
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    general: z.object({
+      timezone: z.string(),
+      language: z.string(),
+      dateFormat: z.string(),
+    }),
+    cache: z.object({
+      enabled: z.boolean(),
+      ttl: z.number().min(60).max(86400),
+    }),
+    performance: z.object({
+      imageQuality: z.number().min(10).max(100),
+      postsPerPage: z.number().min(5).max(100),
+      lazyLoad: z.boolean(),
+    }),
+  })
+)
 
 const { handleSubmit, values, resetForm } = useForm({
   validationSchema: formSchema,
@@ -109,11 +114,15 @@ const { handleSubmit, values, resetForm } = useForm({
   },
 })
 
-watch(() => props.settings, (newSettings) => {
-  if (newSettings) {
-    resetForm({ values: newSettings })
-  }
-}, { immediate: true })
+watch(
+  () => props.settings,
+  (newSettings) => {
+    if (newSettings) {
+      resetForm({ values: newSettings })
+    }
+  },
+  { immediate: true }
+)
 
 const onSubmit = handleSubmit((data) => {
   emit('save', data)
@@ -133,7 +142,7 @@ const applyPreset = (preset: 'development' | 'production') => {
 </script>
 
 <template>
-  <form @submit="onSubmit" class="space-y-6">
+  <form class="space-y-6" @submit="onSubmit">
     <!-- 常规设置 -->
     <Card>
       <CardHeader>
@@ -141,9 +150,7 @@ const applyPreset = (preset: 'development' | 'production') => {
           <Globe class="w-5 h-5" />
           常规设置
         </CardTitle>
-        <CardDescription>
-          配置系统的基础设置
-        </CardDescription>
+        <CardDescription> 配置系统的基础设置 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <SettingField
@@ -177,17 +184,13 @@ const applyPreset = (preset: 'development' | 'production') => {
           <Database class="w-5 h-5" />
           缓存设置
         </CardTitle>
-        <CardDescription>
-          管理系统的缓存策略
-        </CardDescription>
+        <CardDescription> 管理系统的缓存策略 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <Label>启用缓存</Label>
-            <p class="text-sm text-muted-foreground">
-              缓存可以提升页面加载速度
-            </p>
+            <p class="text-sm text-muted-foreground">缓存可以提升页面加载速度</p>
           </div>
           <Switch
             v-model="values.cache.enabled"
@@ -208,19 +211,11 @@ const applyPreset = (preset: 'development' | 'production') => {
 
         <Alert>
           <AlertTriangle class="w-4 h-4" />
-          <AlertDescription>
-            清除缓存会导致短时间内性能下降，建议在低峰期操作
-          </AlertDescription>
+          <AlertDescription> 清除缓存会导致短时间内性能下降，建议在低峰期操作 </AlertDescription>
         </Alert>
 
         <div class="flex justify-end">
-          <Button
-            variant="outline"
-            type="button"
-            @click="emit('clearCache')"
-          >
-            清除缓存
-          </Button>
+          <Button variant="outline" type="button" @click="emit('clearCache')"> 清除缓存 </Button>
         </div>
       </CardContent>
     </Card>
@@ -232,27 +227,15 @@ const applyPreset = (preset: 'development' | 'production') => {
           <Zap class="w-5 h-5" />
           性能设置
         </CardTitle>
-        <CardDescription>
-          优化系统性能和资源使用
-        </CardDescription>
+        <CardDescription> 优化系统性能和资源使用 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <!-- 性能预设 -->
         <div class="flex gap-2 mb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            @click="applyPreset('development')"
-          >
+          <Button variant="outline" size="sm" type="button" @click="applyPreset('development')">
             开发模式
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            @click="applyPreset('production')"
-          >
+          <Button variant="outline" size="sm" type="button" @click="applyPreset('production')">
             生产模式
           </Button>
         </div>
@@ -274,9 +257,7 @@ const applyPreset = (preset: 'development' | 'production') => {
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <Label>启用懒加载</Label>
-            <p class="text-sm text-muted-foreground">
-              图片和内容在滚动到可视区域时加载
-            </p>
+            <p class="text-sm text-muted-foreground">图片和内容在滚动到可视区域时加载</p>
           </div>
           <Switch
             v-model="values.performance.lazyLoad"

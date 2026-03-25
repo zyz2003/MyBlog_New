@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  'select': [urls: string[]]
+  select: [urls: string[]]
 }>()
 
 const selectedMedia = ref<string[]>([])
@@ -35,7 +35,15 @@ const isSubmitting = ref(false)
 
 // Mock media data (in real implementation, this would come from API)
 const mediaItems = ref<Media[]>([])
-const folders = ref<Array<{ id: string; name: string; parentId: string | null; children?: unknown[]; mediaCount: number }>>([])
+const folders = ref<
+  Array<{
+    id: string
+    name: string
+    parentId: string | null
+    children?: unknown[]
+    mediaCount: number
+  }>
+>([])
 const currentFolderId = ref<string | null>(null)
 
 const hasSelection = computed(() => selectedMedia.value.length > 0)
@@ -125,15 +133,9 @@ const fetchFolders = async () => {
       <Tabs v-model="activeTab" class="flex-1 flex flex-col overflow-hidden">
         <div class="px-6 pt-4">
           <TabsList>
-            <TabsTrigger value="library">
-              媒体库
-            </TabsTrigger>
-            <TabsTrigger value="upload">
-              上传
-            </TabsTrigger>
-            <TabsTrigger value="url">
-              外链
-            </TabsTrigger>
+            <TabsTrigger value="library"> 媒体库 </TabsTrigger>
+            <TabsTrigger value="upload"> 上传 </TabsTrigger>
+            <TabsTrigger value="url"> 外链 </TabsTrigger>
           </TabsList>
         </div>
 
@@ -185,9 +187,7 @@ const fetchFolders = async () => {
                     placeholder="https://example.com/image.jpg"
                     @keyup.enter="insertUrl"
                   />
-                  <Button @click="insertUrl" :disabled="!imageUrl.trim()">
-                    插入
-                  </Button>
+                  <Button :disabled="!imageUrl.trim()" @click="insertUrl"> 插入 </Button>
                 </div>
               </div>
 
@@ -212,29 +212,19 @@ const fetchFolders = async () => {
       <div class="px-6 pb-6 border-t pt-4 flex justify-between items-center">
         <div class="text-sm text-muted-foreground">
           <template v-if="activeTab === 'library'">
-            <span v-if="selectedMedia.length > 0">
-              已选择 {{ selectedMedia.length }} 项
-            </span>
-            <span v-else>
-              从媒体库中选择
-            </span>
+            <span v-if="selectedMedia.length > 0"> 已选择 {{ selectedMedia.length }} 项 </span>
+            <span v-else> 从媒体库中选择 </span>
           </template>
-          <template v-else-if="activeTab === 'upload'">
-            上传文件到媒体库
-          </template>
-          <template v-else>
-            使用外链图片
-          </template>
+          <template v-else-if="activeTab === 'upload'"> 上传文件到媒体库 </template>
+          <template v-else> 使用外链图片 </template>
         </div>
 
         <div class="flex gap-2">
-          <Button variant="ghost" @click="emit('update:open', false)">
-            取消
-          </Button>
+          <Button variant="ghost" @click="emit('update:open', false)"> 取消 </Button>
           <Button
             v-if="activeTab === 'library'"
-            @click="confirmSelection"
             :disabled="!hasSelection"
+            @click="confirmSelection"
           >
             <Check class="w-4 h-4 mr-2" />
             插入{{ selectedMedia.length > 0 ? `(${selectedMedia.length})` : '' }}

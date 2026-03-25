@@ -39,7 +39,7 @@ const tabs = computed(() => [
 ])
 
 const beforeUnload = (event: BeforeUnloadEvent) => {
-  const hasChanges = Object.values(store.unsavedChanges).some(v => v)
+  const hasChanges = Object.values(store.unsavedChanges).some((v) => v)
   if (hasChanges) {
     event.preventDefault()
     event.returnValue = ''
@@ -55,7 +55,7 @@ onUnmounted(() => {
   window.removeEventListener('beforeunload', beforeUnload)
 })
 
-const handleSiteSave = async (data: any) => {
+const handleSiteSave = async (data: unknown) => {
   const result = await store.saveSiteSettings(data)
   if (result.success) {
     toast({
@@ -71,7 +71,7 @@ const handleSiteSave = async (data: any) => {
   }
 }
 
-const handleProfileSave = async (data: any) => {
+const handleProfileSave = async (data: unknown) => {
   const result = await store.saveUserProfile(data)
   if (result.success) {
     toast({
@@ -102,7 +102,7 @@ const handlePasswordError = (error: string) => {
   })
 }
 
-const handleNotificationSave = async (data: any) => {
+const handleNotificationSave = async (data: unknown) => {
   const result = await store.saveNotificationSettings(data)
   if (result.success) {
     toast({
@@ -118,7 +118,7 @@ const handleNotificationSave = async (data: any) => {
   }
 }
 
-const handleSystemSave = async (data: any) => {
+const handleSystemSave = async (data: unknown) => {
   const result = await store.saveSystemSettings(data)
   if (result.success) {
     toast({
@@ -150,15 +150,18 @@ const handleClearCache = async () => {
   }
 }
 
-const handleSiteFieldChange = (field: string, value: any) => {
+const handleSiteFieldChange = (/* field */
+/* value */) => {
   store.markUnsaved('site')
 }
 
-const handleUserFieldChange = (field: string, value: any) => {
+const handleUserFieldChange = (/* field */
+/* value */) => {
   store.markUnsaved('user')
 }
 
-const handleSystemFieldChange = (field: string, value: any) => {
+const handleSystemFieldChange = (/* field */
+/* value */) => {
   store.markUnsaved('system')
 }
 </script>

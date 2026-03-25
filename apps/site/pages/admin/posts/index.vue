@@ -12,8 +12,6 @@ import {
   SelectValue,
 } from '~/components/ui/select'
 import { Plus, Search, Filter, Download } from 'lucide-vue-next'
-import PostList from '~/components/admin/posts/PostList.vue'
-import BulkActions from '~/components/admin/posts/BulkActions.vue'
 
 interface PostListItem {
   id: string
@@ -150,7 +148,7 @@ async function handleBulkPublish() {
       method: 'PUT',
       body: {
         ids: Array.from(selectedPostIds.value),
-        status: 'published'
+        status: 'published',
       },
     })
     selectedPostIds.value.clear()
@@ -170,7 +168,7 @@ async function handleBulkArchive() {
       method: 'PUT',
       body: {
         ids: Array.from(selectedPostIds.value),
-        status: 'archived'
+        status: 'archived',
       },
     })
     selectedPostIds.value.clear()
@@ -279,17 +277,14 @@ onMounted(() => {
       </div>
 
       <!-- Bulk Actions Bar -->
-      <div v-if="selectedPostIds.size > 0" class="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
+      <div
+        v-if="selectedPostIds.size > 0"
+        class="flex items-center gap-3 rounded-lg bg-slate-50 p-3"
+      >
         <span class="text-sm text-slate-600">已选择 {{ selectedPostIds.size }} 篇文章</span>
-        <Button variant="outline" size="sm" @click="handleBulkPublish">
-          批量发布
-        </Button>
-        <Button variant="outline" size="sm" @click="handleBulkArchive">
-          批量归档
-        </Button>
-        <Button variant="destructive" size="sm" @click="handleBulkDelete">
-          批量删除
-        </Button>
+        <Button variant="outline" size="sm" @click="handleBulkPublish"> 批量发布 </Button>
+        <Button variant="outline" size="sm" @click="handleBulkArchive"> 批量归档 </Button>
+        <Button variant="destructive" size="sm" @click="handleBulkDelete"> 批量删除 </Button>
       </div>
 
       <!-- Posts Table -->
@@ -298,10 +293,7 @@ onMounted(() => {
           <TableHeader>
             <TableRow>
               <TableHead class="w-12">
-                <Checkbox
-                  :checked="selectAll"
-                  @update:checked="handleSelectAll"
-                />
+                <Checkbox :checked="selectAll" @update:checked="handleSelectAll" />
               </TableHead>
               <TableHead>标题</TableHead>
               <TableHead class="w-24">状态</TableHead>
@@ -344,7 +336,9 @@ onMounted(() => {
                 {{ post.viewCount }}
               </TableCell>
               <TableCell class="text-sm text-slate-600">
-                {{ post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('zh-CN') : '-' }}
+                {{
+                  post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('zh-CN') : '-'
+                }}
               </TableCell>
               <TableCell>
                 <div class="flex gap-2">
@@ -378,9 +372,7 @@ onMounted(() => {
 
       <!-- Pagination -->
       <div class="flex items-center justify-between">
-        <div class="text-sm text-slate-600">
-          共 {{ total }} 条结果
-        </div>
+        <div class="text-sm text-slate-600">共 {{ total }} 条结果</div>
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <span class="text-sm text-slate-600">每页</span>

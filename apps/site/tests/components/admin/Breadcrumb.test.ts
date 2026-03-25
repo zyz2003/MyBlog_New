@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import Breadcrumb from '../../../components/admin/Breadcrumb.vue'
 
 describe('Breadcrumb', () => {
-  const createRouterInstance = (path: string) => {
+  const createRouterInstance = () => {
     return createRouter({
       history: createWebHistory(),
       routes: [

@@ -5,19 +5,8 @@ import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 import { useDebounceFn } from '@vueuse/core'
 import type { Category } from '@my-blog/database'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '~/components/ui/form'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '~/components/ui/dialog'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
@@ -30,29 +19,48 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  'submit': [data: {
-    name: string
-    slug: string
-    parentId: string | null
-    description?: string
-    color?: string
-  }]
+  submit: [
+    data: {
+      name: string
+      slug: string
+      parentId: string | null
+      description?: string
+      color?: string
+    },
+  ]
 }>()
 
 // 预设颜色
 const presetColors = [
-  '#EF4444', '#F97316', '#F59E0B', '#84CC16',
-  '#10B981', '#06B6D4', '#3B82F6', '#6366F1',
-  '#8B5CF6', '#EC4899', '#F43F5E', '#64748b',
+  '#EF4444',
+  '#F97316',
+  '#F59E0B',
+  '#84CC16',
+  '#10B981',
+  '#06B6D4',
+  '#3B82F6',
+  '#6366F1',
+  '#8B5CF6',
+  '#EC4899',
+  '#F43F5E',
+  '#64748b',
 ]
 
-const formSchema = toTypedSchema(z.object({
-  name: z.string().min(1, '分类名称不能为空').max(50, '分类名称最多 50 个字符'),
-  slug: z.string().min(1, '别名不能为空').regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, '别名只能包含小写字母、数字和连字符'),
-  parentId: z.string().nullable().optional(),
-  description: z.string().max(200, '描述最多 200 个字符').optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色').optional(),
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string().min(1, '分类名称不能为空').max(50, '分类名称最多 50 个字符'),
+    slug: z
+      .string()
+      .min(1, '别名不能为空')
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, '别名只能包含小写字母、数字和连字符'),
+    parentId: z.string().nullable().optional(),
+    description: z.string().max(200, '描述最多 200 个字符').optional(),
+    color: z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色')
+      .optional(),
+  })
+)
 
 const { handleSubmit, setFieldValue, values, resetForm } = useForm({
   validationSchema: formSchema,
@@ -66,26 +74,32 @@ const { handleSubmit, setFieldValue, values, resetForm } = useForm({
 })
 
 // 监听对话框打开，重置表单
-watch(() => props.open, (newOpen) => {
-  if (newOpen) {
-    resetForm({
-      values: {
-        name: props.category?.name || '',
-        slug: props.category?.slug || '',
-        parentId: props.category?.parentId || null,
-        description: props.category?.description || '',
-        color: props.category?.color || '#3B82F6',
-      },
-    })
+watch(
+  () => props.open,
+  (newOpen) => {
+    if (newOpen) {
+      resetForm({
+        values: {
+          name: props.category?.name || '',
+          slug: props.category?.slug || '',
+          parentId: props.category?.parentId || null,
+          description: props.category?.description || '',
+          color: props.category?.color || '#3B82F6',
+        },
+      })
+    }
   }
-})
+)
 
 // 别名自动生成
-watch(() => values.name, (newName) => {
-  if (!props.category || newName !== props.category.name) {
-    setFieldValue('slug', generateSlug(newName))
+watch(
+  () => values.name,
+  (newName) => {
+    if (!props.category || newName !== props.category.name) {
+      setFieldValue('slug', generateSlug(newName))
+    }
   }
-})
+)
 
 // 别名唯一性检查
 const slugError = ref('')
@@ -113,7 +127,10 @@ const generateSlug = (name: string): string => {
 }
 
 // 获取树形结构的父分类选项
-const getParentCategoryOptions = (categories: Category[], depth = 0): Array<{ value: string; label: string; disabled: boolean }> => {
+const getParentCategoryOptions = (
+  categories: Category[],
+  depth = 0
+): Array<{ value: string; label: string; disabled: boolean }> => {
   const options: Array<{ value: string; label: string; disabled: boolean }> = []
   for (const cat of categories) {
     // 禁用当前分类和它的子分类
@@ -142,15 +159,12 @@ const parentCategoryOptions = computed(() => {
       <DialogHeader>
         <DialogTitle>{{ category ? '编辑分类' : '新增分类' }}</DialogTitle>
       </DialogHeader>
-      <form @submit="onSubmit" class="space-y-4">
+      <form class="space-y-4" @submit="onSubmit">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem>
             <FormLabel>分类名称</FormLabel>
             <FormControl>
-              <Input
-                v-bind="componentField"
-                placeholder="请输入分类名称"
-              />
+              <Input v-bind="componentField" placeholder="请输入分类名称" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -167,10 +181,7 @@ const parentCategoryOptions = computed(() => {
                   :class="{ 'border-red-500': slugError }"
                   @input="checkSlugAvailability(values.slug)"
                 />
-                <span
-                  v-if="slugError"
-                  class="absolute -bottom-5 right-0 text-xs text-red-500"
-                >
+                <span v-if="slugError" class="absolute -bottom-5 right-0 text-xs text-red-500">
                   {{ slugError }}
                 </span>
               </div>
@@ -205,11 +216,7 @@ const parentCategoryOptions = computed(() => {
           <FormItem>
             <FormLabel>描述</FormLabel>
             <FormControl>
-              <Textarea
-                v-bind="componentField"
-                placeholder="分类描述（可选）"
-                rows="3"
-              />
+              <Textarea v-bind="componentField" placeholder="分类描述（可选）" rows="3" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -226,11 +233,7 @@ const parentCategoryOptions = computed(() => {
                   class="w-12 h-10 rounded cursor-pointer border border-input"
                 />
               </FormControl>
-              <Input
-                v-model="values.color"
-                placeholder="#3B82F6"
-                class="w-32"
-              />
+              <Input v-model="values.color" placeholder="#3B82F6" class="w-32" />
             </div>
             <!-- 预设色板 -->
             <div class="flex gap-2 mt-2 flex-wrap">

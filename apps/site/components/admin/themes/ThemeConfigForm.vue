@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogTitle,
   DialogHeader,
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -52,60 +51,73 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  'save': [config: ThemeConfig]
+  save: [config: ThemeConfig]
 }>()
 
 const activeTab = ref('basic')
 
 const presetColors = [
-  '#3B82F6', '#8B5CF6', '#EC4899', '#EF4444',
-  '#F97316', '#F59E0B', '#10B981', '#06B6D4',
+  '#3B82F6',
+  '#8B5CF6',
+  '#EC4899',
+  '#EF4444',
+  '#F97316',
+  '#F59E0B',
+  '#10B981',
+  '#06B6D4',
 ]
 
-const formSchema = toTypedSchema(z.object({
-  name: z.string().min(1, '主题名称不能为空').max(50),
-  description: z.string().max(200).optional(),
-  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色'),
-  backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色'),
-  textColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色'),
-  fontFamily: z.string().default('Inter, system-ui, sans-serif'),
-  baseFontSize: z.enum(['14px', '16px', '18px']),
-  sidebarPosition: z.enum(['left', 'right']),
-  sidebarWidth: z.number().min(200).max(400),
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    name: z.string().min(1, '主题名称不能为空').max(50),
+    description: z.string().max(200).optional(),
+    primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色'),
+    backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色'),
+    textColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '请选择有效的颜色'),
+    fontFamily: z.string().default('Inter, system-ui, sans-serif'),
+    baseFontSize: z.enum(['14px', '16px', '18px']),
+    sidebarPosition: z.enum(['left', 'right']),
+    sidebarWidth: z.number().min(200).max(400),
+  })
+)
 
 const { handleSubmit, resetForm, setFieldValue, values } = useForm({
   validationSchema: formSchema,
-  initialValues: props.config ? {
-    name: props.config.name,
-    description: props.config.description,
-    primaryColor: props.config.colors.primary,
-    backgroundColor: props.config.colors.background,
-    textColor: props.config.colors.foreground,
-    fontFamily: props.config.typography.fontFamily,
-    baseFontSize: props.config.typography.baseSize,
-    sidebarPosition: props.config.layout.sidebarPosition,
-    sidebarWidth: props.config.layout.sidebarWidth,
-  } : {},
+  initialValues: props.config
+    ? {
+        name: props.config.name,
+        description: props.config.description,
+        primaryColor: props.config.colors.primary,
+        backgroundColor: props.config.colors.background,
+        textColor: props.config.colors.foreground,
+        fontFamily: props.config.typography.fontFamily,
+        baseFontSize: props.config.typography.baseSize,
+        sidebarPosition: props.config.layout.sidebarPosition,
+        sidebarWidth: props.config.layout.sidebarWidth,
+      }
+    : {},
 })
 
-watch(() => props.config, (newConfig) => {
-  if (newConfig) {
-    resetForm({
-      values: {
-        name: newConfig.name,
-        description: newConfig.description || '',
-        primaryColor: newConfig.colors.primary,
-        backgroundColor: newConfig.colors.background,
-        textColor: newConfig.colors.foreground,
-        fontFamily: newConfig.typography.fontFamily,
-        baseFontSize: newConfig.typography.baseSize,
-        sidebarPosition: newConfig.layout.sidebarPosition,
-        sidebarWidth: newConfig.layout.sidebarWidth,
-      },
-    })
+watch(
+  () => props.config,
+  (newConfig) => {
+    if (newConfig) {
+      resetForm({
+        values: {
+          name: newConfig.name,
+          description: newConfig.description || '',
+          primaryColor: newConfig.colors.primary,
+          backgroundColor: newConfig.colors.background,
+          textColor: newConfig.colors.foreground,
+          fontFamily: newConfig.typography.fontFamily,
+          baseFontSize: newConfig.typography.baseSize,
+          sidebarPosition: newConfig.layout.sidebarPosition,
+          sidebarWidth: newConfig.layout.sidebarWidth,
+        },
+      })
+    }
   }
-})
+)
 
 const onSubmit = handleSubmit((data) => {
   emit('save', {
@@ -143,7 +155,7 @@ const onSubmit = handleSubmit((data) => {
           <TabsTrigger value="layout">布局</TabsTrigger>
         </TabsList>
 
-        <form @submit="onSubmit" class="mt-4 space-y-4">
+        <form class="mt-4 space-y-4" @submit="onSubmit">
           <!-- 基础设置 -->
           <TabsContent value="basic" class="space-y-4">
             <FormField v-slot="{ componentField }" name="name">
@@ -278,12 +290,7 @@ const onSubmit = handleSubmit((data) => {
               <FormItem>
                 <FormLabel>侧边栏宽度 (px)</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    v-bind="componentField"
-                    :min="200"
-                    :max="400"
-                  />
+                  <Input type="number" v-bind="componentField" :min="200" :max="400" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -295,12 +302,8 @@ const onSubmit = handleSubmit((data) => {
             <Button type="button" variant="outline" @click="emit('update:open', false)">
               取消
             </Button>
-            <Button type="button" variant="secondary">
-              重置为默认
-            </Button>
-            <Button type="submit">
-              保存配置
-            </Button>
+            <Button type="button" variant="secondary"> 重置为默认 </Button>
+            <Button type="submit"> 保存配置 </Button>
           </div>
         </form>
       </Tabs>

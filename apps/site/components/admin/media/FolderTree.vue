@@ -3,7 +3,13 @@
 import { ref, computed } from 'vue'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '~/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '~/components/ui/dialog'
 import { Label } from '~/components/ui/label'
 import {
   DropdownMenu,
@@ -12,12 +18,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '~/components/ui/dropdown-menu'
-import {
-  Folder,
-  FolderOpen,
-  ChevronRight,
-  ChevronDown,
-} from 'lucide-vue-next'
+import { Folder, FolderOpen, ChevronRight, ChevronDown } from 'lucide-vue-next'
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 interface MediaFolder {
@@ -40,10 +41,10 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'select': [folderId: string | null]
-  'create': [name: string, parentId: string | null]
-  'rename': [id: string, name: string]
-  'delete': [id: string]
+  select: [folderId: string | null]
+  create: [name: string, parentId: string | null]
+  rename: [id: string, name: string]
+  delete: [id: string]
 }>()
 
 const expandedFolders = ref<Set<string>>(new Set())
@@ -150,9 +151,7 @@ const totalMediaCount = computed(() => {
       <div
         :class="[
           'flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer transition-colors mb-1',
-          selectedFolderId === null
-            ? 'bg-primary text-primary-foreground'
-            : 'hover:bg-muted',
+          selectedFolderId === null ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
         ]"
         @click="selectFolder(null)"
       >
@@ -162,9 +161,7 @@ const totalMediaCount = computed(() => {
           v-if="totalMediaCount > 0"
           :class="[
             'text-xs px-1.5 py-0.5 rounded-full',
-            selectedFolderId === null
-              ? 'bg-primary-foreground/20'
-              : 'bg-muted-foreground/20',
+            selectedFolderId === null ? 'bg-primary-foreground/20' : 'bg-muted-foreground/20',
           ]"
         >
           {{ totalMediaCount }}
@@ -206,9 +203,7 @@ const totalMediaCount = computed(() => {
         </div>
         <DialogFooter>
           <Button variant="ghost" @click="isCreateDialogOpen = false">取消</Button>
-          <Button @click="handleCreate" :disabled="!newFolderName.trim()">
-            创建
-          </Button>
+          <Button :disabled="!newFolderName.trim()" @click="handleCreate"> 创建 </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -231,9 +226,7 @@ const totalMediaCount = computed(() => {
         </div>
         <DialogFooter>
           <Button variant="ghost" @click="isRenameDialogOpen = false">取消</Button>
-          <Button @click="handleRename" :disabled="!renameFolderName.trim()">
-            保存
-          </Button>
+          <Button :disabled="!renameFolderName.trim()" @click="handleRename"> 保存 </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -246,20 +239,20 @@ const totalMediaCount = computed(() => {
         </DialogHeader>
         <div class="py-4">
           <p class="text-sm text-muted-foreground">
-            确定要删除文件夹"<strong>{{ targetFolder?.name }}</strong>"吗？
+            确定要删除文件夹"<strong>{{ targetFolder?.name }}</strong
+            >"吗？
           </p>
           <p
             v-if="targetFolder && targetFolder.mediaCount > 0"
             class="text-sm text-destructive mt-2"
           >
-            警告：此文件夹包含 {{ targetFolder.mediaCount }} 个媒体文件，删除后这些文件将失去文件夹分类。
+            警告：此文件夹包含
+            {{ targetFolder.mediaCount }} 个媒体文件，删除后这些文件将失去文件夹分类。
           </p>
         </div>
         <DialogFooter>
           <Button variant="ghost" @click="isDeleteDialogOpen = false">取消</Button>
-          <Button variant="destructive" @click="handleDelete">
-            删除
-          </Button>
+          <Button variant="destructive" @click="handleDelete"> 删除 </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -351,9 +344,7 @@ export default defineComponent({
         {
           class: [
             'flex items-center gap-1 py-1.5 px-2 rounded-md cursor-pointer transition-colors',
-            isSelected.value
-              ? 'bg-primary text-primary-foreground'
-              : 'hover:bg-muted',
+            isSelected.value ? 'bg-primary text-primary-foreground' : 'hover:bg-muted',
           ].join(' '),
           style: { paddingLeft: `${props.level * 12 + 8}px` },
           onClick: handleSelect,
@@ -377,20 +368,14 @@ export default defineComponent({
           expanded.value
             ? h(FolderOpenIcon, { class: 'w-4 h-4 flex-shrink-0' })
             : h(FolderIcon, { class: 'w-4 h-4 flex-shrink-0' }),
-          h(
-            'span',
-            { class: 'text-sm truncate flex-1' },
-            props.folder.name
-          ),
+          h('span', { class: 'text-sm truncate flex-1' }, props.folder.name),
           props.folder.mediaCount > 0
             ? h(
                 'span',
                 {
                   class: [
                     'text-xs px-1.5 py-0.5 rounded-full',
-                    isSelected.value
-                      ? 'bg-primary-foreground/20'
-                      : 'bg-muted-foreground/20',
+                    isSelected.value ? 'bg-primary-foreground/20' : 'bg-muted-foreground/20',
                   ].join(' '),
                 },
                 String(props.folder.mediaCount)
@@ -430,20 +415,14 @@ export default defineComponent({
                         DropdownMenuItem,
                         { onClick: handleCreate },
                         {
-                          default: () => [
-                            h(Plus, { class: 'w-4 h-4 mr-2' }),
-                            ' 新建子文件夹',
-                          ],
+                          default: () => [h(Plus, { class: 'w-4 h-4 mr-2' }), ' 新建子文件夹'],
                         }
                       ),
                       h(
                         DropdownMenuItem,
                         { onClick: handleRename },
                         {
-                          default: () => [
-                            h(Pencil, { class: 'w-4 h-4 mr-2' }),
-                            ' 重命名',
-                          ],
+                          default: () => [h(Pencil, { class: 'w-4 h-4 mr-2' }), ' 重命名'],
                         }
                       ),
                       h(DropdownMenuSeparator),
@@ -454,10 +433,7 @@ export default defineComponent({
                           onClick: handleDelete,
                         },
                         {
-                          default: () => [
-                            h(Trash2, { class: 'w-4 h-4 mr-2' }),
-                            ' 删除',
-                          ],
+                          default: () => [h(Trash2, { class: 'w-4 h-4 mr-2' }), ' 删除'],
                         }
                       ),
                     ],

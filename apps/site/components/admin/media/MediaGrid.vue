@@ -43,9 +43,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'update:modelValue': [ids: string[]]
-  'preview': [media: Media]
-  'delete': [id: string]
-  'select': [media: Media]
+  preview: [media: Media]
+  delete: [id: string]
+  select: [media: Media]
   'update:viewMode': [mode: 'grid' | 'list']
 }>()
 
@@ -137,7 +137,10 @@ const formatDate = (date: Date | number | null | undefined): string => {
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="media.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+    <div
+      v-else-if="media.length === 0"
+      class="flex flex-col items-center justify-center py-12 text-center"
+    >
       <div class="w-24 h-24 mb-4 rounded-full bg-muted flex items-center justify-center">
         <Image class="w-12 h-12 text-muted-foreground" />
       </div>
@@ -146,7 +149,10 @@ const formatDate = (date: Date | number | null | undefined): string => {
     </div>
 
     <!-- Grid View -->
-    <div v-else-if="viewMode === 'grid'" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+    <div
+      v-else-if="viewMode === 'grid'"
+      class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4"
+    >
       <Card
         v-for="mediaItem in media"
         :key="mediaItem.id"
@@ -217,10 +223,7 @@ const formatDate = (date: Date | number | null | undefined): string => {
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
               loading="lazy"
             />
-            <div
-              v-else
-              class="w-full h-full flex items-center justify-center"
-            >
+            <div v-else class="w-full h-full flex items-center justify-center">
               <component
                 :is="getFileIcon(mediaItem.mimeType)"
                 class="w-12 h-12 text-muted-foreground"
@@ -228,17 +231,17 @@ const formatDate = (date: Date | number | null | undefined): string => {
             </div>
 
             <!-- File type badge -->
-            <Badge
-              variant="secondary"
-              class="absolute bottom-2 right-2 text-xs"
-            >
+            <Badge variant="secondary" class="absolute bottom-2 right-2 text-xs">
               {{ mediaItem.mimeType.split('/')[0] }}
             </Badge>
           </div>
 
           <!-- Info -->
           <div class="p-3">
-            <p class="text-sm font-medium truncate mb-1" :title="mediaItem.originalName || mediaItem.filename">
+            <p
+              class="text-sm font-medium truncate mb-1"
+              :title="mediaItem.originalName || mediaItem.filename"
+            >
               {{ mediaItem.originalName || mediaItem.filename }}
             </p>
             <div class="flex items-center justify-between text-xs text-muted-foreground">
@@ -287,7 +290,9 @@ const formatDate = (date: Date | number | null | undefined): string => {
               </div>
             </td>
             <td class="p-3">
-              <div class="w-12 h-12 rounded overflow-hidden bg-muted flex items-center justify-center">
+              <div
+                class="w-12 h-12 rounded overflow-hidden bg-muted flex items-center justify-center"
+              >
                 <img
                   v-if="mediaItem.mimeType.startsWith('image/')"
                   :src="mediaItem.url"
@@ -296,15 +301,17 @@ const formatDate = (date: Date | number | null | undefined): string => {
                   loading="lazy"
                 />
                 <component
-                  v-else
                   :is="getFileIcon(mediaItem.mimeType)"
+                  v-else
                   class="w-6 h-6 text-muted-foreground"
                 />
               </div>
             </td>
             <td class="p-3">
               <div class="max-w-xs truncate" :title="mediaItem.originalName || mediaItem.filename">
-                <p class="text-sm font-medium">{{ mediaItem.originalName || mediaItem.filename }}</p>
+                <p class="text-sm font-medium">
+                  {{ mediaItem.originalName || mediaItem.filename }}
+                </p>
               </div>
             </td>
             <td class="p-3">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { useForm } from 'vee-validate'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -21,28 +21,33 @@ interface NotificationSettings {
   frequency: 'immediate' | 'hourly' | 'daily'
 }
 
-const props = withDefaults(defineProps<{
-  settings: NotificationSettings | null
-  loading?: boolean
-  saveMode?: 'auto' | 'manual'
-}>(), {
-  saveMode: 'manual',
-})
+const props = withDefaults(
+  defineProps<{
+    settings: NotificationSettings | null
+    loading?: boolean
+    saveMode?: 'auto' | 'manual'
+  }>(),
+  {
+    saveMode: 'manual',
+  }
+)
 
 const emit = defineEmits<{
-  'save': [settings: NotificationSettings]
-  'fieldChange': [field: string, value: any]
+  save: [settings: NotificationSettings]
+  fieldChange: [field: string, value: unknown]
 }>()
 
-const formSchema = toTypedSchema(z.object({
-  emailNotifications: z.object({
-    newComments: z.boolean(),
-    systemUpdates: z.boolean(),
-    securityAlerts: z.boolean(),
-  }),
-  browserNotifications: z.boolean(),
-  frequency: z.enum(['immediate', 'hourly', 'daily']),
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    emailNotifications: z.object({
+      newComments: z.boolean(),
+      systemUpdates: z.boolean(),
+      securityAlerts: z.boolean(),
+    }),
+    browserNotifications: z.boolean(),
+    frequency: z.enum(['immediate', 'hourly', 'daily']),
+  })
+)
 
 const { handleSubmit, values, resetForm } = useForm({
   validationSchema: formSchema,
@@ -57,11 +62,15 @@ const { handleSubmit, values, resetForm } = useForm({
   },
 })
 
-watch(() => props.settings, (newSettings) => {
-  if (newSettings) {
-    resetForm({ values: newSettings })
-  }
-}, { immediate: true })
+watch(
+  () => props.settings,
+  (newSettings) => {
+    if (newSettings) {
+      resetForm({ values: newSettings })
+    }
+  },
+  { immediate: true }
+)
 
 const onSubmit = handleSubmit((data) => {
   emit('save', data)
@@ -75,7 +84,7 @@ const frequencyOptions = [
 </script>
 
 <template>
-  <form @submit="onSubmit" class="space-y-6">
+  <form class="space-y-6" @submit="onSubmit">
     <!-- 邮件通知 -->
     <Card>
       <CardHeader>
@@ -83,17 +92,13 @@ const frequencyOptions = [
           <Mail class="w-5 h-5" />
           邮件通知
         </CardTitle>
-        <CardDescription>
-          选择通过邮件接收哪些通知
-        </CardDescription>
+        <CardDescription> 选择通过邮件接收哪些通知 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <Label>新评论通知</Label>
-            <p class="text-sm text-muted-foreground">
-              当文章有新评论时发送邮件
-            </p>
+            <p class="text-sm text-muted-foreground">当文章有新评论时发送邮件</p>
           </div>
           <Switch
             v-model="values.emailNotifications.newComments"
@@ -106,9 +111,7 @@ const frequencyOptions = [
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <Label>系统更新通知</Label>
-            <p class="text-sm text-muted-foreground">
-              系统更新或新功能发布时通知
-            </p>
+            <p class="text-sm text-muted-foreground">系统更新或新功能发布时通知</p>
           </div>
           <Switch
             v-model="values.emailNotifications.systemUpdates"
@@ -124,14 +127,9 @@ const frequencyOptions = [
               安全通知
               <span class="text-xs text-muted-foreground">（必选）</span>
             </Label>
-            <p class="text-sm text-muted-foreground">
-              账户安全相关的重要通知
-            </p>
+            <p class="text-sm text-muted-foreground">账户安全相关的重要通知</p>
           </div>
-          <Switch
-            v-model="values.emailNotifications.securityAlerts"
-            disabled
-          />
+          <Switch v-model="values.emailNotifications.securityAlerts" disabled />
         </div>
       </CardContent>
     </Card>
@@ -143,17 +141,13 @@ const frequencyOptions = [
           <Bell class="w-5 h-5" />
           浏览器通知
         </CardTitle>
-        <CardDescription>
-          在浏览器中接收实时通知
-        </CardDescription>
+        <CardDescription> 在浏览器中接收实时通知 </CardDescription>
       </CardHeader>
       <CardContent>
         <div class="flex items-center justify-between">
           <div class="space-y-0.5">
             <Label>启用浏览器通知</Label>
-            <p class="text-sm text-muted-foreground">
-              需要浏览器授权通知权限
-            </p>
+            <p class="text-sm text-muted-foreground">需要浏览器授权通知权限</p>
           </div>
           <Switch
             v-model="values.browserNotifications"
@@ -170,9 +164,7 @@ const frequencyOptions = [
           <Eye class="w-5 h-5" />
           通知频率
         </CardTitle>
-        <CardDescription>
-          控制通知的发送频率
-        </CardDescription>
+        <CardDescription> 控制通知的发送频率 </CardDescription>
       </CardHeader>
       <CardContent>
         <SettingField

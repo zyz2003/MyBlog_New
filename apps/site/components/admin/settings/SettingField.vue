@@ -1,44 +1,60 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FormControl, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
+import { Select, FormControl } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Info, Upload, X } from 'lucide-vue-next'
+import { X } from 'lucide-vue-next'
 
-type FieldType = 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'file' | 'email' | 'password'
+type FieldType =
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'boolean'
+  | 'select'
+  | 'file'
+  | 'email'
+  | 'password'
 
 export interface SelectOption {
   label: string
   value: string | number
 }
 
-const props = withDefaults(defineProps<{
-  modelValue: any
-  label: string
-  type?: FieldType
-  description?: string
-  placeholder?: string
-  options?: SelectOption[]
-  accept?: string
-  previewUrl?: string
-  error?: string
-  disabled?: boolean
-  required?: boolean
-  showRemove?: boolean
-  rows?: number
-}>(), {
-  type: 'text',
-  rows: 3,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: unknown
+    label: string
+    type?: FieldType
+    description?: string
+    placeholder?: string
+    options?: SelectOption[]
+    accept?: string
+    previewUrl?: string
+    error?: string
+    disabled?: boolean
+    required?: boolean
+    showRemove?: boolean
+    rows?: number
+  }>(),
+  {
+    type: 'text',
+    rows: 3,
+    description: undefined,
+    placeholder: undefined,
+    options: undefined,
+    accept: undefined,
+    previewUrl: undefined,
+    error: undefined,
+  }
+)
 
 const emit = defineEmits<{
-  'update:modelValue': [value: any]
-  'remove': []
-  'fileChange': [file: File]
+  'update:modelValue': [value: unknown]
+  remove: []
+  fileChange: [file: File]
 }>()
 
 const showPreview = computed(() => {
@@ -67,11 +83,7 @@ const handleFileChange = (event: Event) => {
     <template v-if="type === 'file'">
       <div class="flex items-start gap-4">
         <div v-if="showPreview" class="relative group">
-          <img
-            :src="previewUrl"
-            :alt="label"
-            class="w-20 h-20 object-cover rounded-lg border"
-          />
+          <img :src="previewUrl" :alt="label" class="w-20 h-20 object-cover rounded-lg border" />
           <Button
             v-if="showRemove"
             variant="destructive"
@@ -84,15 +96,8 @@ const handleFileChange = (event: Event) => {
         </div>
 
         <div class="flex-1">
-          <Input
-            type="file"
-            :accept="accept"
-            :disabled="disabled"
-            @change="handleFileChange"
-          />
-          <p class="text-xs text-muted-foreground mt-1">
-            支持 JPG, PNG 格式，最大 2MB
-          </p>
+          <Input type="file" :accept="accept" :disabled="disabled" @change="handleFileChange" />
+          <p class="text-xs text-muted-foreground mt-1">支持 JPG, PNG 格式，最大 2MB</p>
         </div>
       </div>
     </template>
@@ -123,11 +128,7 @@ const handleFileChange = (event: Event) => {
       <Select :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
         <FormControl>
           <select class="w-full rounded-md border p-2" :disabled="disabled">
-            <option
-              v-for="option in options"
-              :key="option.value"
-              :value="option.value"
-            >
+            <option v-for="option in options" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
           </select>

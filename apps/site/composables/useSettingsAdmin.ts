@@ -5,7 +5,7 @@ export function useSettingsAdmin() {
   const store = useSettingsAdminStore()
   const { toast } = useToast()
 
-  const handleSiteSave = async (data: any) => {
+  const handleSiteSave = async (data: unknown) => {
     const result = await store.saveSiteSettings(data)
     if (result.success) {
       toast({
@@ -21,7 +21,7 @@ export function useSettingsAdmin() {
     }
   }
 
-  const handleProfileSave = async (data: any) => {
+  const handleProfileSave = async (data: unknown) => {
     const result = await store.saveUserProfile(data)
     if (result.success) {
       toast({
@@ -71,7 +71,7 @@ export function useSettingsAdmin() {
     }
   }
 
-  const handleNotificationSave = async (data: any) => {
+  const handleNotificationSave = async (data: unknown) => {
     const result = await store.saveNotificationSettings(data)
     if (result.success) {
       toast({
@@ -87,7 +87,7 @@ export function useSettingsAdmin() {
     }
   }
 
-  const handleSystemSave = async (data: any) => {
+  const handleSystemSave = async (data: unknown) => {
     const result = await store.saveSystemSettings(data)
     if (result.success) {
       toast({

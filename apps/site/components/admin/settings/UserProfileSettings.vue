@@ -22,32 +22,37 @@ interface UserProfile {
   }
 }
 
-const props = withDefaults(defineProps<{
-  profile: UserProfile | null
-  loading?: boolean
-  saveMode?: 'auto' | 'manual'
-}>(), {
-  saveMode: 'manual',
-})
+const props = withDefaults(
+  defineProps<{
+    profile: UserProfile | null
+    loading?: boolean
+    saveMode?: 'auto' | 'manual'
+  }>(),
+  {
+    saveMode: 'manual',
+  }
+)
 
 const emit = defineEmits<{
-  'save': [profile: Partial<UserProfile>]
-  'fieldChange': [field: string, value: any]
+  save: [profile: Partial<UserProfile>]
+  fieldChange: [field: string, value: unknown]
 }>()
 
 const avatarPreviewUrl = ref<string | undefined>(props.profile?.avatar)
 
-const formSchema = toTypedSchema(z.object({
-  displayName: z.string().min(2, '显示名称至少 2 个字符').max(50),
-  email: z.string().email(),
-  bio: z.string().max(500),
-  avatar: z.string().optional(),
-  socialLinks: z.object({
-    github: z.string().url().optional().or(z.literal('')),
-    twitter: z.string().url().optional().or(z.literal('')),
-    weibo: z.string().url().optional().or(z.literal('')),
-  }),
-}))
+const formSchema = toTypedSchema(
+  z.object({
+    displayName: z.string().min(2, '显示名称至少 2 个字符').max(50),
+    email: z.string().email(),
+    bio: z.string().max(500),
+    avatar: z.string().optional(),
+    socialLinks: z.object({
+      github: z.string().url().optional().or(z.literal('')),
+      twitter: z.string().url().optional().or(z.literal('')),
+      weibo: z.string().url().optional().or(z.literal('')),
+    }),
+  })
+)
 
 const { handleSubmit, setFieldValue, values, resetForm } = useForm({
   validationSchema: formSchema,
@@ -59,20 +64,24 @@ const { handleSubmit, setFieldValue, values, resetForm } = useForm({
   },
 })
 
-watch(() => props.profile, (newProfile) => {
-  if (newProfile) {
-    resetForm({
-      values: {
-        displayName: newProfile.displayName,
-        email: newProfile.email,
-        bio: newProfile.bio || '',
-        avatar: newProfile.avatar,
-        socialLinks: newProfile.socialLinks || {},
-      },
-    })
-    avatarPreviewUrl.value = newProfile.avatar
-  }
-}, { immediate: true })
+watch(
+  () => props.profile,
+  (newProfile) => {
+    if (newProfile) {
+      resetForm({
+        values: {
+          displayName: newProfile.displayName,
+          email: newProfile.email,
+          bio: newProfile.bio || '',
+          avatar: newProfile.avatar,
+          socialLinks: newProfile.socialLinks || {},
+        },
+      })
+      avatarPreviewUrl.value = newProfile.avatar
+    }
+  },
+  { immediate: true }
+)
 
 const onSubmit = handleSubmit((data) => {
   emit('save', data)
@@ -91,7 +100,7 @@ const handleAvatarRemove = () => {
 </script>
 
 <template>
-  <form @submit="onSubmit" class="space-y-6">
+  <form class="space-y-6" @submit="onSubmit">
     <!-- 头像设置 -->
     <Card>
       <CardHeader>
@@ -99,9 +108,7 @@ const handleAvatarRemove = () => {
           <User class="w-5 h-5" />
           头像设置
         </CardTitle>
-        <CardDescription>
-          上传你的个人头像
-        </CardDescription>
+        <CardDescription> 上传你的个人头像 </CardDescription>
       </CardHeader>
       <CardContent>
         <div class="flex items-start gap-6">
@@ -145,9 +152,7 @@ const handleAvatarRemove = () => {
     <Card>
       <CardHeader>
         <CardTitle>个人资料</CardTitle>
-        <CardDescription>
-          管理你的个人信息和简介
-        </CardDescription>
+        <CardDescription> 管理你的个人信息和简介 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <SettingField
@@ -180,9 +185,7 @@ const handleAvatarRemove = () => {
     <Card>
       <CardHeader>
         <CardTitle>社交链接</CardTitle>
-        <CardDescription>
-          添加你的社交媒体主页链接
-        </CardDescription>
+        <CardDescription> 添加你的社交媒体主页链接 </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
         <SettingField

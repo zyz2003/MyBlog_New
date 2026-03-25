@@ -324,9 +324,9 @@ describe('MediaPreviewModal', () => {
       },
     })
 
-    expect((wrapper.vm as any).formatFileSize(0)).toBe('0 B')
-    expect((wrapper.vm as any).formatFileSize(1024)).toBe('1 KB')
-    expect((wrapper.vm as any).formatFileSize(204800)).toBe('200 KB')
+    expect((wrapper.vm as unknown).formatFileSize(0)).toBe('0 B')
+    expect((wrapper.vm as unknown).formatFileSize(1024)).toBe('1 KB')
+    expect((wrapper.vm as unknown).formatFileSize(204800)).toBe('200 KB')
   })
 
   it('formats date correctly', () => {
@@ -340,7 +340,7 @@ describe('MediaPreviewModal', () => {
       },
     })
 
-    const dateStr = (wrapper.vm as any).formatDate(new Date('2024-01-15T10:30:00Z'))
+    const dateStr = (wrapper.vm as unknown).formatDate(new Date('2024-01-15T10:30:00Z'))
     expect(dateStr).toBeTruthy()
   })
 

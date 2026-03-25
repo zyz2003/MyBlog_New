@@ -3,7 +3,16 @@ import { ref, computed } from 'vue'
 import { Button } from '~/components/ui/button'
 import { Progress } from '~/components/ui/progress'
 import { Badge } from '~/components/ui/badge'
-import { Upload, File, X, CheckCircle, AlertCircle, Image as ImageIcon, FileText, Video } from 'lucide-vue-next'
+import {
+  Upload,
+  File,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Image as ImageIcon,
+  FileText,
+  Video,
+} from 'lucide-vue-next'
 import { useAuthStore } from '~/stores/auth'
 
 interface UploadProgress {
@@ -41,6 +50,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   'upload-complete': [results: MediaResult[]]
   'upload-error': [error: Error]
+  'upload-all': []
 }>()
 
 const authStore = useAuthStore()
@@ -52,7 +62,11 @@ const inputRef = ref<HTMLInputElement | null>(null)
 const ALLOWED_MIME_TYPES = {
   image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
   video: ['video/mp4', 'video/webm', 'video/ogg'],
-  document: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  document: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
 }
 
 const getFileIcon = (mimeType: string) => {
@@ -149,14 +163,16 @@ const handleFiles = (files: File[]) => {
 
   // Auto upload if enabled
   if (props.autoUpload) {
-    for (const { file, id } of validFiles) {
-      uploadFile(file, id)
+    for (const { file } of validFiles) {
+      uploadFile(file)
     }
   }
 }
 
-const uploadFile = async (file: File, _id: string) => {
-  const upload = uploads.value.find((u) => u.name === file.name && uploads.value.filter((u) => u.name === file.name).length === 1)
+const uploadFile = async (file: File) => {
+  const upload = uploads.value.find(
+    (u) => u.name === file.name && uploads.value.filter((u) => u.name === file.name).length === 1
+  )
   if (!upload) return
 
   upload.status = 'uploading'
@@ -282,9 +298,7 @@ const hasCompletedUploads = computed(() => {
         </div>
 
         <div>
-          <p class="text-lg font-medium mb-1">
-            拖拽文件到此处，或点击选择文件
-          </p>
+          <p class="text-lg font-medium mb-1">拖拽文件到此处，或点击选择文件</p>
           <p class="text-sm text-muted-foreground">
             支持图片、视频、文档格式，单个文件最大 {{ maxSizeMB }}MB
           </p>
@@ -301,12 +315,7 @@ const hasCompletedUploads = computed(() => {
     <div v-if="uploads.length > 0" class="mt-4 space-y-2">
       <div class="flex items-center justify-between mb-2">
         <h4 class="text-sm font-medium">上传列表</h4>
-        <Button
-          v-if="hasCompletedUploads"
-          variant="ghost"
-          size="sm"
-          @click="clearCompleted"
-        >
+        <Button v-if="hasCompletedUploads" variant="ghost" size="sm" @click="clearCompleted">
           清除完成
         </Button>
       </div>
@@ -316,8 +325,12 @@ const hasCompletedUploads = computed(() => {
         :key="index"
         :class="[
           'flex items-center gap-3 p-3 rounded-lg border bg-card',
-          upload.status === 'success' ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : '',
-          upload.status === 'error' ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' : '',
+          upload.status === 'success'
+            ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+            : '',
+          upload.status === 'error'
+            ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+            : '',
         ]"
       >
         <!-- Icon -->
@@ -366,7 +379,10 @@ const hasCompletedUploads = computed(() => {
           </p>
 
           <!-- Success message -->
-          <p v-if="upload.status === 'success'" class="text-xs text-green-600 dark:text-green-400 mt-1">
+          <p
+            v-if="upload.status === 'success'"
+            class="text-xs text-green-600 dark:text-green-400 mt-1"
+          >
             上传完成
           </p>
         </div>
@@ -397,9 +413,7 @@ const hasCompletedUploads = computed(() => {
 
     <!-- Upload Button (when not auto-upload) -->
     <div v-if="!autoUpload && uploads.length > 0 && !hasActiveUploads" class="mt-4">
-      <Button @click="$emit('upload-all')">
-        开始上传
-      </Button>
+      <Button @click="$emit('upload-all')"> 开始上传 </Button>
     </div>
   </div>
 </template>

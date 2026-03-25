@@ -46,14 +46,14 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:open': [value: boolean]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  'save': [pluginId: string, config: Record<string, any>]
+  save: [pluginId: string, config: Record<string, any>]
 }>()
 
 // 动态生成 schema
 const buildSchema = (fields: PluginConfigField[]) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const schemaObj: Record<string, any> = {}
-  fields.forEach(field => {
+  fields.forEach((field) => {
     let validator = z.any()
     if (field.required) {
       if (field.type === 'text' || field.type === 'textarea') {
@@ -64,7 +64,6 @@ const buildSchema = (fields: PluginConfigField[]) => {
         validator = z.boolean()
       }
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       validator = z.any().optional()
     }
     schemaObj[field.key] = validator
@@ -82,13 +81,17 @@ const { handleSubmit, resetForm } = useForm({
   initialValues: props.config || {},
 })
 
-watch(() => props.config, (newConfig) => {
-  if (newConfig) {
-    resetForm({
-      values: { ...newConfig },
-    })
-  }
-}, { immediate: true })
+watch(
+  () => props.config,
+  (newConfig) => {
+    if (newConfig) {
+      resetForm({
+        values: { ...newConfig },
+      })
+    }
+  },
+  { immediate: true }
+)
 
 const onSubmit = handleSubmit((data) => {
   if (props.plugin) {
@@ -107,7 +110,7 @@ const renderField = (field: PluginConfigField) => {
       return h(
         'select',
         { class: 'w-full rounded-md border p-2' },
-        field.options?.map(opt => h('option', { value: opt.value }, opt.label))
+        field.options?.map((opt) => h('option', { value: opt.value }, opt.label))
       )
     case 'color':
       return h('input', { type: 'color', class: 'w-12 h-10 rounded cursor-pointer' })
@@ -124,7 +127,7 @@ const renderField = (field: PluginConfigField) => {
         <DialogTitle>配置插件：{{ plugin?.name }}</DialogTitle>
       </DialogHeader>
 
-      <form @submit="onSubmit" class="mt-4 space-y-4">
+      <form class="mt-4 space-y-4" @submit="onSubmit">
         <template v-if="plugin?.configSchema">
           <FormField
             v-for="field in plugin.configSchema"
@@ -138,7 +141,9 @@ const renderField = (field: PluginConfigField) => {
                 <component
                   :is="renderField(field)"
                   v-bind="componentField"
-                  :value="field.type === 'boolean' ? componentField.modelValue : componentField.value"
+                  :value="
+                    field.type === 'boolean' ? componentField.modelValue : componentField.value
+                  "
                 />
               </FormControl>
               <FormMessage />
@@ -156,9 +161,7 @@ const renderField = (field: PluginConfigField) => {
           <Button type="button" variant="outline" @click="emit('update:open', false)">
             取消
           </Button>
-          <Button type="submit">
-            保存配置
-          </Button>
+          <Button type="submit"> 保存配置 </Button>
         </div>
       </form>
     </DialogContent>

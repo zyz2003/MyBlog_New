@@ -22,51 +22,41 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'toggleExpand': []
-  'toggleSelect': []
-  'edit': []
-  'delete': []
-  'addSub': []
+  toggleExpand: []
+  toggleSelect: []
+  edit: []
+  delete: []
+  addSub: []
 }>()
 
 const indent = computed(() => (props.depth || 0) * 24)
 </script>
 
 <template>
-  <TableRow
-    class="group hover:bg-muted/50"
-    :class="{ 'bg-muted/30': selected }"
-  >
+  <TableRow class="group hover:bg-muted/50" :class="{ 'bg-muted/30': selected }">
     <TableCell :style="{ paddingLeft: `${indent + 16}px` }">
       <div class="flex items-center gap-2">
         <!-- 选择框 -->
         <input
           type="checkbox"
           :checked="selected"
-          @change="emit('toggleSelect')"
           class="w-4 h-4 rounded border-gray-300"
+          @change="emit('toggleSelect')"
         />
         <!-- 展开/收起按钮 -->
         <button
           v-if="category.children?.length > 0"
-          @click="emit('toggleExpand')"
           class="p-1 hover:bg-muted rounded transition-colors"
+          @click="emit('toggleExpand')"
         >
-          <ChevronRight
-            v-if="!expanded"
-            class="w-4 h-4"
-          />
-          <ChevronDown
-            v-else
-            class="w-4 h-4"
-          />
+          <ChevronRight v-if="!expanded" class="w-4 h-4" />
+          <ChevronDown v-else class="w-4 h-4" />
         </button>
-        <span
-          v-else
-          class="w-6"
-        ></span>
+        <span v-else class="w-6"></span>
         <!-- 拖拽手柄 -->
-        <GripVertical class="w-4 h-4 text-muted-foreground drag-handle cursor-grab opacity-0 group-hover:opacity-100 transition-opacity" />
+        <GripVertical
+          class="w-4 h-4 text-muted-foreground drag-handle cursor-grab opacity-0 group-hover:opacity-100 transition-opacity"
+        />
         <!-- 颜色指示器 -->
         <span
           v-if="category.color"
@@ -74,10 +64,7 @@ const indent = computed(() => (props.depth || 0) * 24)
           :style="{ backgroundColor: category.color }"
         ></span>
         <!-- 文件夹图标 -->
-        <Folder
-          v-if="category.children?.length > 0"
-          class="w-4 h-4 text-primary"
-        />
+        <Folder v-if="category.children?.length > 0" class="w-4 h-4 text-primary" />
         <!-- 分类名称 -->
         <span class="text-sm font-medium">{{ category.name }}</span>
       </div>
@@ -93,28 +80,18 @@ const indent = computed(() => (props.depth || 0) * 24)
     </TableCell>
     <TableCell>
       <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button
-          variant="ghost"
-          size="icon"
-          @click="emit('addSub')"
-          title="添加子分类"
-        >
+        <Button variant="ghost" size="icon" title="添加子分类" @click="emit('addSub')">
           <Plus class="w-4 h-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          @click="emit('edit')"
-          title="编辑"
-        >
+        <Button variant="ghost" size="icon" title="编辑" @click="emit('edit')">
           <Pencil class="w-4 h-4" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          @click="emit('delete')"
           title="删除"
           :disabled="category.children?.length > 0"
+          @click="emit('delete')"
         >
           <Trash2 class="w-4 h-4" />
         </Button>

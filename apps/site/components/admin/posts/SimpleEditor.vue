@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { Textarea } from '~/components/ui/textarea'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
@@ -52,10 +52,7 @@ function insertMarkdown(before: string, after: string = '', placeholder: string 
   // Restore cursor position
   setTimeout(() => {
     textarea.focus()
-    textarea.setSelectionRange(
-      start + before.length,
-      end + before.length
-    )
+    textarea.setSelectionRange(start + before.length, end + before.length)
   }, 0)
 }
 
@@ -121,9 +118,13 @@ const showPreview = ref(false)
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+  <div
+    class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+  >
     <!-- Toolbar -->
-    <div class="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/80 p-2 backdrop-blur">
+    <div
+      class="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/80 p-2 backdrop-blur"
+    >
       <!-- Headings Group -->
       <div class="flex items-center gap-1 rounded-lg bg-white/60 p-1 shadow-sm">
         <Button
@@ -132,8 +133,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-sky-100 hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500"
           :disabled="readonly"
-          @click="addHeading1"
           title="一级标题"
+          @click="addHeading1"
         >
           <Heading1 class="h-4 w-4" />
         </Button>
@@ -143,8 +144,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-sky-100 hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500"
           :disabled="readonly"
-          @click="addHeading2"
           title="二级标题"
+          @click="addHeading2"
         >
           <Heading2 class="h-4 w-4" />
         </Button>
@@ -154,8 +155,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-sky-100 hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500"
           :disabled="readonly"
-          @click="addHeading3"
           title="三级标题"
+          @click="addHeading3"
         >
           <Heading3 class="h-4 w-4" />
         </Button>
@@ -171,8 +172,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-emerald-100 hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500"
           :disabled="readonly"
-          @click="addBold"
           title="粗体"
+          @click="addBold"
         >
           <Bold class="h-4 w-4" />
         </Button>
@@ -182,8 +183,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-emerald-100 hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500"
           :disabled="readonly"
-          @click="addItalic"
           title="斜体"
+          @click="addItalic"
         >
           <Italic class="h-4 w-4" />
         </Button>
@@ -199,8 +200,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-amber-100 hover:text-amber-700 focus-visible:ring-2 focus-visible:ring-amber-500"
           :disabled="readonly"
-          @click="addQuote"
           title="引用"
+          @click="addQuote"
         >
           <Quote class="h-4 w-4" />
         </Button>
@@ -210,8 +211,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-violet-100 hover:text-violet-700 focus-visible:ring-2 focus-visible:ring-violet-500"
           :disabled="readonly"
-          @click="addCode"
           title="代码块"
+          @click="addCode"
         >
           <Code class="h-4 w-4" />
         </Button>
@@ -227,8 +228,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-rose-100 hover:text-rose-700 focus-visible:ring-2 focus-visible:ring-rose-500"
           :disabled="readonly"
-          @click="addBulletList"
           title="无序列表"
+          @click="addBulletList"
         >
           <List class="h-4 w-4" />
         </Button>
@@ -238,8 +239,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-rose-100 hover:text-rose-700 focus-visible:ring-2 focus-visible:ring-rose-500"
           :disabled="readonly"
-          @click="addNumberedList"
           title="有序列表"
+          @click="addNumberedList"
         >
           <ListOrdered class="h-4 w-4" />
         </Button>
@@ -249,8 +250,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-rose-100 hover:text-rose-700 focus-visible:ring-2 focus-visible:ring-rose-500"
           :disabled="readonly"
-          @click="addTodoList"
           title="任务列表"
+          @click="addTodoList"
         >
           <ListTodo class="h-4 w-4" />
         </Button>
@@ -266,8 +267,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-indigo-100 hover:text-indigo-700 focus-visible:ring-2 focus-visible:ring-indigo-500"
           :disabled="readonly"
-          @click="addLink"
           title="插入链接"
+          @click="addLink"
         >
           <Link class="h-4 w-4" />
         </Button>
@@ -277,8 +278,8 @@ const showPreview = ref(false)
           size="icon"
           class="h-8 w-8 rounded-md text-slate-600 transition-all hover:bg-indigo-100 hover:text-indigo-700 focus-visible:ring-2 focus-visible:ring-indigo-500"
           :disabled="readonly"
-          @click="addImage"
           title="插入图片"
+          @click="addImage"
         >
           <Image class="h-4 w-4" />
         </Button>
@@ -381,13 +382,16 @@ function renderMarkdown(text: string): string {
   padding: 0;
 }
 
-.prose :deep(h1), .prose :deep(h2), .prose :deep(h3) {
+.prose :deep(h1),
+.prose :deep(h2),
+.prose :deep(h3) {
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
   font-weight: 600;
 }
 
-.prose :deep(ul), .prose :deep(ol) {
+.prose :deep(ul),
+.prose :deep(ol) {
   padding-left: 1.5rem;
   margin: 0.75rem 0;
 }

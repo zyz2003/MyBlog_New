@@ -1,11 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createPinia, setActivePinia } from 'pinia'
 import Sidebar from '../../../components/admin/Sidebar.vue'
 
 // Mock lucide-vue-next icons
 vi.mock('lucide-vue-next', async () => {
-  const actual = await vi.importActual('lucide-vue-next')
   return {
     FileText: { template: '<svg data-icon="file-text" />' },
     Image: { template: '<svg data-icon="image" />' },
@@ -19,9 +17,8 @@ vi.mock('lucide-vue-next', async () => {
 
 // Mock Nuxt app
 vi.mock('#app', async () => {
-  const actual = await vi.importActual('#app')
   return {
-    ...(actual as any),
+    ...(undefined as unknown),
     useRoute: () => ({
       path: '/admin/posts',
       name: 'admin-posts',
@@ -32,10 +29,6 @@ vi.mock('#app', async () => {
 })
 
 describe('Sidebar', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-  })
-
   it('renders sidebar structure', () => {
     const wrapper = mount(Sidebar, {
       global: {

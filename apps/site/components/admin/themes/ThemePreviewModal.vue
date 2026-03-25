@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  Button,
-  ScrollArea,
-} from '#components'
-import { X, ExternalLink, Monitor, Smartphone, Tablet, Palette, Power } from 'lucide-vue-next'
+import { Dialog, DialogContent, DialogTitle, Button, ScrollArea } from '#components'
+import { ExternalLink, Monitor, Smartphone, Tablet, Palette, Power } from 'lucide-vue-next'
 import type { Theme } from './ThemeCard.vue'
 
 const props = defineProps<{
@@ -18,7 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  'activate': [themeId: string]
+  activate: [themeId: string]
 }>()
 
 const devicePreview = ref<'desktop' | 'tablet' | 'mobile'>('desktop')
@@ -63,8 +56,8 @@ const activateTheme = () => {
                 variant="ghost"
                 size="sm"
                 :class="{ 'bg-muted': devicePreview === 'desktop' }"
-                @click="devicePreview = 'desktop'"
                 title="桌面视图"
+                @click="devicePreview = 'desktop'"
               >
                 <Monitor class="w-4 h-4" />
               </Button>
@@ -72,8 +65,8 @@ const activateTheme = () => {
                 variant="ghost"
                 size="sm"
                 :class="{ 'bg-muted': devicePreview === 'tablet' }"
-                @click="devicePreview = 'tablet'"
                 title="平板视图"
+                @click="devicePreview = 'tablet'"
               >
                 <Tablet class="w-4 h-4" />
               </Button>
@@ -81,8 +74,8 @@ const activateTheme = () => {
                 variant="ghost"
                 size="sm"
                 :class="{ 'bg-muted': devicePreview === 'mobile' }"
-                @click="devicePreview = 'mobile'"
                 title="手机视图"
+                @click="devicePreview = 'mobile'"
               >
                 <Smartphone class="w-4 h-4" />
               </Button>
@@ -120,21 +113,13 @@ const activateTheme = () => {
 
         <!-- 底部操作栏 -->
         <div class="flex items-center justify-between p-4 border-t">
-          <Button
-            v-if="theme?.hasDemo"
-            variant="outline"
-          >
+          <Button v-if="theme?.hasDemo" variant="outline">
             <ExternalLink class="w-4 h-4 mr-2" />
             查看演示
           </Button>
           <div class="flex gap-2 ml-auto">
-            <Button variant="outline" @click="emit('update:open', false)">
-              关闭
-            </Button>
-            <Button
-              v-if="!theme?.isActive"
-              @click="activateTheme"
-            >
+            <Button variant="outline" @click="emit('update:open', false)"> 关闭 </Button>
+            <Button v-if="!theme?.isActive" @click="activateTheme">
               <Power class="w-4 h-4 mr-2" />
               激活此主题
             </Button>
