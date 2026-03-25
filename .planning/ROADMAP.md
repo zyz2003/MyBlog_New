@@ -219,7 +219,20 @@ Plans: 14/18 complete
 
 **Wave:** 1
 
----
+**Plans:** 8/8 plans complete ✅
+
+Plans:
+
+- [x] 05-01-PLAN.md — Admin UI Infrastructure (shadcn-vue, Pinia)
+- [x] 05-02-PLAN.md — Authentication System (login page, auth store)
+- [x] 05-03-PLAN.md — Admin Layout System (layout, sidebar, header)
+- [x] 05-04-PLAN.md — Article Management (list, edit, create, delete)
+- [x] 05-05-PLAN.md — Media Library Management (grid, upload, folders)
+- [x] 05-06-PLAN.md — Category & Tag Management
+- [x] 05-07-PLAN.md — Theme & Plugin Management
+- [x] 05-08-PLAN.md — Settings Management
+
+**Phase 5 Complete ✅** — Ready for Phase 6: 前台博客
 
 ### Phase 6: 前台博客
 
@@ -358,4 +371,4 @@ Plans: 14/18 complete
 ---
 
 _Roadmap created: 2026-03-16_
-_Last updated: 2026-03-19 - Phase 3 complete (CI/CD verified)_
+_Last updated: 2026-03-25 - Phase 5 Complete (Media Library + All Admin Features)_
