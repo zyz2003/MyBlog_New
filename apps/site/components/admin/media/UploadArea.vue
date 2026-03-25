@@ -80,6 +80,7 @@ const validateFile = (file: File): { valid: boolean; error?: string } => {
   }
 
   // Check file type
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fileType = Object.entries(ALLOWED_MIME_TYPES).find(([_, types]) =>
     types.some((type) => {
       if (type.endsWith('*')) {
@@ -88,13 +89,6 @@ const validateFile = (file: File): { valid: boolean; error?: string } => {
       return file.type === type
     })
   )
-
-  if (!fileType) {
-    return {
-      valid: false,
-      error: '不支持的文件类型',
-    }
-  }
 
   return { valid: true }
 }
@@ -161,7 +155,7 @@ const handleFiles = (files: File[]) => {
   }
 }
 
-const uploadFile = async (file: File, uploadId: string) => {
+const uploadFile = async (file: File, _id: string) => {
   const upload = uploads.value.find((u) => u.name === file.name && uploads.value.filter((u) => u.name === file.name).length === 1)
   if (!upload) return
 

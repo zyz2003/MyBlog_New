@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { watch, computed } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogTitle,
   DialogHeader,
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -16,11 +15,10 @@ import {
   FormMessage,
   Input,
   Textarea,
-  Select,
   Switch,
   Button,
 } from '#components'
-import { X, Settings } from 'lucide-vue-next'
+import { Settings } from 'lucide-vue-next'
 
 export interface PluginConfigField {
   key: string
@@ -28,6 +26,7 @@ export interface PluginConfigField {
   type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'color'
   required?: boolean
   options?: { label: string; value: string }[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultValue?: any
 }
 
@@ -40,16 +39,19 @@ export interface Plugin {
 const props = defineProps<{
   open: boolean
   plugin: Plugin | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: Record<string, any> | null
 }>()
 
 const emit = defineEmits<{
   'update:open': [value: boolean]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   'save': [pluginId: string, config: Record<string, any>]
 }>()
 
 // 动态生成 schema
 const buildSchema = (fields: PluginConfigField[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const schemaObj: Record<string, any> = {}
   fields.forEach(field => {
     let validator = z.any()
@@ -62,6 +64,7 @@ const buildSchema = (fields: PluginConfigField[]) => {
         validator = z.boolean()
       }
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       validator = z.any().optional()
     }
     schemaObj[field.key] = validator

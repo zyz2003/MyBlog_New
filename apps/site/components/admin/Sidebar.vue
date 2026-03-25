@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   Sidebar,
@@ -28,6 +27,7 @@ import {
 } from 'lucide-vue-next'
 
 // Icon mapping for lucide-vue-next components
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const iconMap: Record<string, any> = {
   FileText,
   Image,

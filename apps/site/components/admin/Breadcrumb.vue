@@ -1,19 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
 import { ChevronRight } from 'lucide-vue-next'
-
-export interface BreadcrumbItem {
-  title: string
-  href?: string
-}
-
-const props = defineProps<{
-  items?: BreadcrumbItem[]
-  separator?: string
-}>()
-
-const route = useRoute()
 
 // Generate breadcrumbs from route if not provided
 const breadcrumbs = computed(() => {

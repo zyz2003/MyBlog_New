@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { Media } from '@my-blog/database'
 import { Card, CardContent } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
@@ -13,7 +13,6 @@ import {
 } from '~/components/ui/dropdown-menu'
 import {
   Image,
-  File,
   Video,
   Grid,
   List,
@@ -47,6 +46,7 @@ const emit = defineEmits<{
   'preview': [media: Media]
   'delete': [id: string]
   'select': [media: Media]
+  'update:viewMode': [mode: 'grid' | 'list']
 }>()
 
 const selectedIds = computed({
@@ -105,8 +105,6 @@ const formatDate = (date: Date | number | null | undefined): string => {
   })
 }
 </script>
-
-<template>
 
 <template>
   <div class="media-grid">
@@ -183,7 +181,7 @@ const formatDate = (date: Date | number | null | undefined): string => {
           @click.stop
         >
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger as-child>
               <Button variant="secondary" size="icon" class="h-8 w-8">
                 <MoreVertical class="w-4 h-4" />
               </Button>
@@ -322,7 +320,7 @@ const formatDate = (date: Date | number | null | undefined): string => {
             </td>
             <td v-if="showActions" class="p-3 text-right" @click.stop>
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger as-child>
                   <Button variant="ghost" size="sm">
                     <MoreVertical class="w-4 h-4" />
                   </Button>

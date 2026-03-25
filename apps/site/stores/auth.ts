@@ -45,7 +45,7 @@ export const useAuthStore = defineStore('auth', {
               Authorization: `Bearer ${this.token}`,
             },
           })
-        } catch (error) {
+        } catch (_error) {
           // 忽略登出错误，始终清除本地状态
         } finally {
           this.clearAuth()

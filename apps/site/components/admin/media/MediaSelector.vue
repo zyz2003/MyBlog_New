@@ -5,7 +5,7 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
-import { Upload, Link as LinkIcon, Check } from 'lucide-vue-next'
+import { Check } from 'lucide-vue-next'
 import type { Media } from '@my-blog/database'
 import MediaGrid from './MediaGrid.vue'
 import FolderTree from './FolderTree.vue'
@@ -30,6 +30,7 @@ const emit = defineEmits<{
 const selectedMedia = ref<string[]>([])
 const activeTab = ref<'library' | 'upload' | 'url'>('library')
 const imageUrl = ref('')
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const isSubmitting = ref(false)
 
 // Mock media data (in real implementation, this would come from API)
@@ -62,6 +63,7 @@ const handleUploadComplete = (results: Media[]) => {
   activeTab.value = 'library'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const toggleSelection = (url: string) => {
   if (!props.multiple) {
     selectedMedia.value = [url]

@@ -13,6 +13,7 @@ export interface Plugin {
 }
 
 export interface PluginConfig {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
 }
 

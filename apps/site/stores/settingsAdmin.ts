@@ -197,8 +197,10 @@ export const useSettingsAdminStore = defineStore('settingsAdmin', {
           body: formData,
         })
         if (this.userProfile) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           this.userProfile.avatar = (result as any).avatar
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return { success: true, url: (result as any).avatar }
       } catch (error) {
         return { success: false, error: error instanceof Error ? error.message : '上传失败' }

@@ -4,19 +4,17 @@ import { Dialog, DialogContent } from '~/components/ui/dialog'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import {
   X,
   Copy,
-  Link,
+  Link as LinkIcon,
   Image as ImageIcon,
-  Download,
-  Trash2,
-  Check,
   ChevronLeft,
   ChevronRight,
   FileText,
   Video,
+  Download,
+  Trash2,
 } from 'lucide-vue-next'
 import type { Media } from '@my-blog/database'
 import { toast } from 'vue-sonner'
@@ -73,10 +71,6 @@ const isImage = computed(() => {
 
 const isVideo = computed(() => {
   return currentMedia.value?.mimeType?.startsWith('video/')
-})
-
-const isDocument = computed(() => {
-  return !isImage.value && !isVideo.value
 })
 
 const getFileIcon = () => {
@@ -148,7 +142,6 @@ const saveAltText = async () => {
     currentMedia.value.altText = altText.value
     isEditingAlt.value = false
     toast.success('替代文本已保存')
-    // In a real implementation, this would call an API to update
   }
 }
 
@@ -337,7 +330,7 @@ watch(
               {{ copied ? '已复制' : '复制链接' }}
             </Button>
             <Button v-if="showInsert" class="w-full justify-start" @click="insertIntoPost">
-              <Link class="w-4 h-4 mr-2" />
+              <LinkIcon class="w-4 h-4 mr-2" />
               插入文章
             </Button>
             <Button variant="outline" class="w-full justify-start" @click="downloadFile">

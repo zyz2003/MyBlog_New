@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { DndContext, type DragEndEvent } from '@dnd-kit/core'
-import { arrayMove } from '@dnd-kit/sortable'
 import type { Category } from '@my-blog/database'
 import {
   Table,
@@ -12,23 +11,7 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { Button } from '~/components/ui/button'
-import { Badge } from '~/components/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '~/components/ui/dropdown-menu'
-import {
-  ChevronRight,
-  ChevronDown,
-  Folder,
-  MoreVertical,
-  Pencil,
-  Trash2,
-  Plus,
-  GripVertical,
-} from 'lucide-vue-next'
+import { Folder } from 'lucide-vue-next'
 import CategoryTreeRow from './CategoryTreeRow.vue'
 
 export interface CategoryTreeNode extends Category {
@@ -37,7 +20,7 @@ export interface CategoryTreeNode extends Category {
   articleCount: number
 }
 
-const props = defineProps<{
+defineProps<{
   categories: CategoryTreeNode[]
   loading?: boolean
 }>()
@@ -80,10 +63,6 @@ const toggleSelect = (id: string) => {
   }
 }
 
-const selectAll = () => {
-  props.categories.forEach(cat => selectedIds.value.add(cat.id))
-}
-
 const clearSelection = () => {
   selectedIds.value.clear()
 }
@@ -102,7 +81,7 @@ const hasSelected = computed(() => selectedIds.value.size > 0)
     </div>
 
     <!-- 表格 -->
-    <DndContext @dragEnd="handleDragEnd">
+    <DndContext @drag-end="handleDragEnd">
       <Table>
         <TableHeader>
           <TableRow>

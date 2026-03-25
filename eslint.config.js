@@ -35,6 +35,9 @@ export default [
         parser: tseslint.parser,
       },
     },
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
   },
   eslintConfigPrettier,
 ]
