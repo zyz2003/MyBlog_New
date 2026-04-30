@@ -1,3 +1,5 @@
+export { ThemeManager, themeManager } from './manager'
+export { CSSVariablesMap } from './types'
 export type {
   ThemeConfig,
   ThemeMeta,
@@ -11,4 +13,3 @@ export type {
   HookContext,
   HookHandler,
 } from './types'
-export { CSSVariablesMap } from './types'
