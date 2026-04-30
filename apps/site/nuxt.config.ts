@@ -33,6 +33,19 @@ export default defineNuxtConfig({
   // Dev server config
   devtools: { enabled: true },
 
+  // Per FOUND-05: Environment variable management
+  runtimeConfig: {
+    // Server-only (not exposed to client)
+    jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
+    databaseUrl: process.env.DATABASE_URL || './database/blog.sqlite',
+
+    // Public (exposed to client via useRuntimeConfig)
+    public: {
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      siteName: process.env.NUXT_PUBLIC_SITE_NAME || 'My Blog',
+    },
+  },
+
   // Compatibility
   compatibilityDate: '2025-01-01',
 })
