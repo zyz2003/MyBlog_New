@@ -213,7 +213,7 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Core content CRUD APIs (Article + Category + Tag services and routes)
+- [x] 06-01-PLAN.md — Core content CRUD APIs (Article + Category + Tag services and routes)
 - [ ] 06-02-PLAN.md — Storage adapter + Media API + System settings API
 - [ ] 06-03-PLAN.md — Middleware chain + Search API + Cache service
 
@@ -254,8 +254,19 @@ Plans:
 
 **Goal:** 后台可写文章
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Admin layout + login page + auth composable (sidebar, navbar, breadcrumbs, client-side auth)
+- [ ] 07-02-PLAN.md — Dashboard + article list pages (stats, table, search, filter, pagination, delete)
+- [ ] 07-03-PLAN.md — Article editor with Vditor + metadata panel (create/edit, categories, tags, status)
+
 **Requirements:**
-- ADMIN-01~05, STOR-01~03
+- ADMIN-01: 后台布局 (侧边栏 + 顶部导航 + 面包屑)
+- ADMIN-02: 仪表盘页面 (概览统计)
+- ADMIN-03: 文章管理页面 (列表 + 创建/编辑/删除)
+- ADMIN-04: 文章编辑器 (Vditor Markdown 编辑)
+- ADMIN-05: 文章状态管理 (草稿/发布/定时发布)
 
 **Success Criteria:**
 1. 后台布局可用 (侧边栏+导航)
@@ -359,9 +370,9 @@ Plans:
 | CORE-07 | 5 | Verified |
 | CORE-08 | 5 | Verified |
 | API-01 | 6 | Pending |
-| API-02 | 6 | Pending |
-| API-03 | 6 | Pending |
-| API-04 | 6 | Pending |
+| API-02 | 6 | Complete |
+| API-03 | 6 | Complete |
+| API-04 | 6 | Complete |
 | API-05 | 6 | Pending |
 | API-06 | 6 | Pending |
 | API-07 | 6 | Pending |
@@ -411,3 +422,5 @@ Plans:
 *Phase 5 plan created: 2026-04-30*
 *Phase 5 completed: 2026-04-30*
 *Phase 6 plan created: 2026-04-30*
+*Phase 6 Plan 1 completed: 2026-04-30*
+*Phase 7 plan created: 2026-04-30*
