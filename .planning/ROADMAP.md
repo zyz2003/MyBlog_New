@@ -214,8 +214,8 @@ Plans:
 
 Plans:
 - [x] 06-01-PLAN.md — Core content CRUD APIs (Article + Category + Tag services and routes)
-- [ ] 06-02-PLAN.md — Storage adapter + Media API + System settings API
-- [ ] 06-03-PLAN.md — Middleware chain + Search API + Cache service
+- [x] 06-02-PLAN.md — Storage adapter + Media API + System settings API
+- [x] 06-03-PLAN.md — Middleware chain + Search API + Cache service
 
 **Requirements:**
 - API-01: 统一 API 响应格式 (already done in Phase 3)
@@ -257,9 +257,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Admin layout + login page + auth composable (sidebar, navbar, breadcrumbs, client-side auth)
-- [ ] 07-02-PLAN.md — Dashboard + article list pages (stats, table, search, filter, pagination, delete)
-- [ ] 07-03-PLAN.md — Article editor with Vditor + metadata panel (create/edit, categories, tags, status)
+- [x] 07-01-PLAN.md — Admin layout + login page + auth composable (sidebar, navbar, breadcrumbs, client-side auth)
+- [x] 07-02-PLAN.md — Dashboard + article list pages (stats, table, search, filter, pagination, delete)
+- [x] 07-03-PLAN.md — Article editor with Vditor + metadata panel (create/edit, categories, tags, status)
 
 **Requirements:**
 - ADMIN-01: 后台布局 (侧边栏 + 顶部导航 + 面包屑)
@@ -369,27 +369,27 @@ Plans:
 | CORE-06 | 5 | Verified |
 | CORE-07 | 5 | Verified |
 | CORE-08 | 5 | Verified |
-| API-01 | 6 | Pending |
+| API-01 | 6 | Complete |
 | API-02 | 6 | Complete |
 | API-03 | 6 | Complete |
 | API-04 | 6 | Complete |
-| API-05 | 6 | Pending |
-| API-06 | 6 | Pending |
-| API-07 | 6 | Pending |
-| API-08 | 6 | Pending |
-| API-09 | 6 | Pending |
-| API-10 | 6 | Pending |
-| API-11 | 6 | Pending |
-| API-12 | 6 | Pending |
-| CACHE-01 | 6 | Pending |
-| STOR-01 | 6 | Pending |
-| STOR-02 | 6 | Pending |
-| STOR-03 | 6 | Pending |
-| ADMIN-01 | 7 | Pending |
-| ADMIN-02 | 7 | Pending |
-| ADMIN-03 | 7 | Pending |
-| ADMIN-04 | 7 | Pending |
-| ADMIN-05 | 7 | Pending |
+| API-05 | 6 | Complete |
+| API-06 | 5 | Complete |
+| API-07 | 4 | Complete |
+| API-08 | 6 | Complete |
+| API-09 | 6 | Complete |
+| API-10 | 6 | Complete |
+| API-11 | 6 | Complete |
+| API-12 | 6 | Complete |
+| CACHE-01 | 6 | Complete |
+| STOR-01 | 6 | Complete |
+| STOR-02 | 6 | Complete |
+| STOR-03 | 6 | Complete |
+| ADMIN-01 | 7 | Complete |
+| ADMIN-02 | 7 | Complete |
+| ADMIN-03 | 7 | Complete |
+| ADMIN-04 | 7 | Complete |
+| ADMIN-05 | 7 | Complete |
 | ADMIN-06 | 8 | Pending |
 | ADMIN-07 | 8 | Pending |
 | ADMIN-08 | 8 | Pending |
@@ -424,3 +424,4 @@ Plans:
 *Phase 6 plan created: 2026-04-30*
 *Phase 6 Plan 1 completed: 2026-04-30*
 *Phase 7 plan created: 2026-04-30*
+*Phase 7 completed: 2026-04-30*

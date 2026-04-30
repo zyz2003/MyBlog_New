@@ -5,26 +5,27 @@
 See: .planning/PROJECT.md (updated 2026-04-30)
 
 **Core value:** 方便的内容管理 + 灵活的样式/插件系统 + 自部署可控
-**Current focus:** Phase 5 — 主题系统
+**Current focus:** Phase 7 — 后台布局 + 文章管理
 
 ## Current Phase
 
-**Phase:** 6 — API 层
-**Status:** Not started
-**Next action:** `/gsd-plan-phase 6`
+**Phase:** 7 — 后台布局 + 文章管理
+**Status:** Complete
+**Next action:** `/gsd-plan-phase 8`
 
 ## Progress
 
 | Milestone | Phases | Status |
 |-----------|--------|--------|
-| M1: 基础框架 | 1-6 | In progress (5/6) |
-| M2: 核心功能 | 7-10 | Not started |
+| M1: 基础框架 | 1-6 | Complete (6/6) |
+| M2: 核心功能 | 7-10 | In progress (1/4) |
+| M2: 核心功能 | 7-10 | In progress (1/4) |
 | M3: 扩展功能 | 11 | Not started |
 
 ## Session Continuity
 
-**Last session:** 2026-04-30 — Phase 5 Theme system complete
-**Resume point:** `/gsd-plan-phase 6`
+**Last session:** 2026-04-30 — Phase 7 admin posts complete, M2 Phase 7 done
+**Resume point:** `/gsd-plan-phase 8`
 
 ## Key Decisions Log
 
@@ -84,5 +85,30 @@ See: .planning/PROJECT.md (updated 2026-04-30)
 **Key files:** apps/site/server/core/theme/types.ts, manager.ts, index.ts, apps/site/server/core/hooks/event-emitter.ts, index.ts, themes/default/ (config.json, layout.vue, styles.css), apps/site/server/plugins/register-themes.ts, apps/site/server/api/themes/, apps/site/stores/theme.ts, apps/site/composables/useTheme.ts
 **Note:** Theme system infrastructure complete. ThemeManager discovers themes, generates CSS Variables, persists to DB. useTheme composable injects CSS into document.head for real-time switching.
 
+## Phase 6 Summary
+
+**Status:** Complete
+**Plans:** 3/3 complete
+**Requirements:** API-02~05, API-08~12, STOR-01~03, CACHE-01 all built
+**Key files:**
+- Services: article.service.ts, category.service.ts, tag.service.ts, media.service.ts, settings.service.ts, cache.service.ts
+- Storage: adapter.ts, local.adapter.ts, index.ts
+- API routes: articles/ (5), categories/ (5), tags/ (4), media/ (3), settings/ (3), search.get.ts
+- Middleware: error-handler.ts, log.ts, rate-limit.ts, utils/error-handler.ts
+**Note:** All CRUD APIs, storage adapter, media upload, settings, search, caching, and middleware chain complete.
+
+## Phase 7 Summary
+
+**Status:** Complete
+**Plans:** 3/3 complete
+**Requirements:** ADMIN-01~05 all built
+**Key files:**
+- Auth: stores/auth.ts, composables/useAuth.ts, middleware/admin-auth.ts
+- Layout: layouts/admin.vue, layouts/auth.vue, components/admin/common/Sidebar.vue, Navbar.vue, Breadcrumb.vue
+- Pages: pages/admin/login.vue, pages/admin/index.vue, pages/admin/articles/index.vue, new.vue, [id].vue
+- Editor: components/admin/articles/ArticleEditor.vue, CategorySelector.vue, TagInput.vue
+- API: composables/useAdminApi.ts
+**Note:** Admin shell complete — login/auth flow, sidebar navigation, dashboard with stats, article list with search/filter/pagination, article editor with Vditor Markdown.
+
 ---
-*Last updated: 2026-04-30 after Phase 5 completion*
+*Last updated: 2026-04-30 after Phase 7 completion — M2 Admin Posts DONE*
