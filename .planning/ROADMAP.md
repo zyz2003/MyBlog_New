@@ -141,9 +141,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Plugin types + PluginManager (server-side core: PluginAdapter interface, manager with register/enable/disable)
-- [ ] 04-02-PLAN.md — Mount point components + PluginRenderer (8 Vue components for plugin rendering at 6 mount points)
-- [ ] 04-03-PLAN.md — Plugin API routes + store + composable + verification checkpoint
+- [x] 04-01-PLAN.md — Plugin types + PluginManager (server-side core: PluginAdapter interface, manager with register/enable/disable)
+- [x] 04-02-PLAN.md — Mount point components + PluginRenderer (8 Vue components for plugin rendering at 6 mount points)
+- [x] 04-03-PLAN.md — Plugin API routes + store + composable + verification checkpoint
 
 **Requirements:**
 - CORE-01: 插件适配器接口 (PluginAdapter: meta, configSchema, mountPoints, component, onMount)
@@ -174,8 +174,18 @@ Plans:
 
 **Goal:** 主题热切换，CSS Variables 动态主题
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Theme types + hook system EventEmitter (type definitions, event emitter for lifecycle hooks)
+- [ ] 05-02-PLAN.md — ThemeManager + default theme (server-side manager, CSS Variables generation, default theme assets, Nitro plugin)
+- [ ] 05-03-PLAN.md — Theme API routes + store + composable (REST API, Pinia store, useTheme with CSS injection)
+
 **Requirements:**
-- CORE-05~08
+- CORE-05: 主题系统 (layout.vue + config.json + styles.css per theme)
+- CORE-06: 主题热切换 (动态组件加载，defineAsyncComponent)
+- CORE-07: CSS Variables 主题变量系统
+- CORE-08: 钩子系统 (生命周期管理)
 
 **Success Criteria:**
 1. 主题可加载/切换
@@ -184,9 +194,15 @@ Plans:
 4. 钩子系统可用
 
 **Deliverables:**
-- `apps/site/server/core/theme/` — 主题系统
-- `apps/site/server/core/hooks/` — 钩子系统
-- `themes/` — 默认主题
+- `apps/site/server/core/theme/types.ts` — Theme TypeScript interfaces
+- `apps/site/server/core/theme/manager.ts` — ThemeManager class
+- `apps/site/server/core/theme/index.ts` — Barrel export
+- `apps/site/server/core/hooks/event-emitter.ts` — EventEmitter class
+- `apps/site/server/core/hooks/index.ts` — Barrel export
+- `themes/default/layout.vue` — Default theme layout
+- `apps/site/server/api/themes/` — Theme API routes
+- `apps/site/stores/theme.ts` — Pinia theme store
+- `apps/site/composables/useTheme.ts` — useTheme composable
 
 ---
 
@@ -311,10 +327,10 @@ Plans:
 | AUTH-03 | 3 | Verified |
 | AUTH-04 | 3 | Verified |
 | AUTH-05 | 3 | Verified |
-| CORE-01 | 4 | Pending |
-| CORE-02 | 4 | Pending |
-| CORE-03 | 4 | Pending |
-| CORE-04 | 4 | Pending |
+| CORE-01 | 4 | Verified |
+| CORE-02 | 4 | Verified |
+| CORE-03 | 4 | Verified |
+| CORE-04 | 4 | Verified |
 | CORE-05 | 5 | Pending |
 | CORE-06 | 5 | Pending |
 | CORE-07 | 5 | Pending |
@@ -369,3 +385,4 @@ Plans:
 *Phase 2 plan created: 2026-04-30*
 *Phase 3 plan created: 2026-04-30*
 *Phase 4 plan created: 2026-04-30*
+*Phase 5 plan created: 2026-04-30*
