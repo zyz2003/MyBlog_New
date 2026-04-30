@@ -31,6 +31,11 @@ export default defineNuxtConfig({
     strict: true,
   },
 
+  // Custom error handler for unified { code, message } response format
+  nitro: {
+    errorHandler: '~/server/utils/error-handler',
+  },
+
   // Dev server config
   devtools: { enabled: true },
 
