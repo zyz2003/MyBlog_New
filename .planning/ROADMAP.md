@@ -210,8 +210,30 @@ Plans:
 
 **Goal:** 所有 CRUD API 可用
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Core content CRUD APIs (Article + Category + Tag services and routes)
+- [ ] 06-02-PLAN.md — Storage adapter + Media API + System settings API
+- [ ] 06-03-PLAN.md — Middleware chain + Search API + Cache service
+
 **Requirements:**
-- API-01~12, STOR-01~03, CACHE-01
+- API-01: 统一 API 响应格式 (already done in Phase 3)
+- API-02: 文章 CRUD API (list/create/update/delete)
+- API-03: 分类管理 API (树形结构 CRUD)
+- API-04: 标签管理 API (CRUD)
+- API-05: 媒体管理 API (upload/list/delete)
+- API-06: 主题管理 API (already done in Phase 5)
+- API-07: 插件管理 API (already done in Phase 4)
+- API-08: 系统设置 API (get/update)
+- API-09: 搜索接口 (文章标题/内容搜索)
+- API-10: 错误处理中间件
+- API-11: 请求日志中间件
+- API-12: Rate limiting 中间件 (登录接口 5 次/分钟)
+- STOR-01: 存储适配器接口 (StorageAdapter)
+- STOR-02: 本地存储实现
+- STOR-03: 文件上传 (类型/大小限制 + MIME 校验)
+- CACHE-01: LRU 缓存服务 (per-data-type TTL)
 
 **Success Criteria:**
 1. 统一响应格式
@@ -221,9 +243,10 @@ Plans:
 5. 缓存服务可用
 
 **Deliverables:**
-- `apps/site/server/api/` — 所有 API 路由
-- `apps/site/server/services/` — 业务服务层
-- `apps/site/server/storage/` — 存储适配层
+- `apps/site/server/api/` — 所有 API 路由 (articles, categories, tags, media, settings, search)
+- `apps/site/server/services/` — 业务服务层 (article, category, tag, media, settings, cache)
+- `apps/site/server/storage/` — 存储适配层 (adapter, local, factory)
+- `apps/site/server/middleware/` — 中间件 (error-handler, log, rate-limit)
 
 ---
 
@@ -387,3 +410,4 @@ Plans:
 *Phase 4 plan created: 2026-04-30*
 *Phase 5 plan created: 2026-04-30*
 *Phase 5 completed: 2026-04-30*
+*Phase 6 plan created: 2026-04-30*
