@@ -1,0 +1,21 @@
+{
+  "name": "my-blog",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @my-blog/site dev",
+    "build": "pnpm --filter @my-blog/site build",
+    "preview": "pnpm --filter @my-blog/site preview",
+    "lint": "pnpm --filter @my-blog/site lint",
+    "lint:fix": "pnpm --filter @my-blog/site lint:fix",
+    "type-check": "pnpm --filter @my-blog/site type-check",
+    "db:generate": "pnpm --filter @my-blog/site db:generate",
+    "db:push": "pnpm --filter @my-blog/site db:push",
+    "db:migrate": "pnpm --filter @my-blog/site db:migrate",
+    "db:reset": "pnpm --filter @my-blog/site db:reset"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
