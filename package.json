@@ -11,11 +11,15 @@
     "db:generate": "pnpm --filter @my-blog/site db:generate",
     "db:push": "pnpm --filter @my-blog/site db:push",
     "db:migrate": "pnpm --filter @my-blog/site db:migrate",
-    "db:reset": "pnpm --filter @my-blog/site db:reset"
+    "db:reset": "pnpm --filter @my-blog/site db:reset",
+    "seed": "pnpm --filter @my-blog/site seed"
   },
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
-  "packageManager": "pnpm@9.0.0"
+  "packageManager": "pnpm@9.0.0",
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
 }
