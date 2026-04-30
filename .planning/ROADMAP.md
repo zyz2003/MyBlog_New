@@ -284,16 +284,44 @@ Plans:
 
 **Goal:** 所有管理功能可用
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Categories + Tags management pages (tree CRUD, color picker)
+- [ ] 08-02-PLAN.md — Media library + Themes + Plugins pages (upload, activate, enable/disable)
+- [ ] 08-03-PLAN.md — Settings page + verification (tabbed form, user menu logout)
+
 **Requirements:**
-- ADMIN-06~12
+- ADMIN-06: 分类管理页面 (树形结构 + CRUD)
+- ADMIN-07: 标签管理页面 (CRUD + 颜色)
+- ADMIN-08: 媒体库页面 (上传/浏览/删除)
+- ADMIN-09: 主题管理页面 (列表/启用/配置)
+- ADMIN-10: 插件管理页面 (列表/启用/配置)
+- ADMIN-11: 系统设置页面 (站点/SEO/阅读/社交)
+- ADMIN-12: 用户菜单 (登出)
 
 **Success Criteria:**
 1. 分类管理 (树形 CRUD)
-2. 标签管理 (CRUD)
+2. 标签管理 (CRUD + 颜色)
 3. 媒体库 (上传/浏览/删除)
-4. 主题管理 (列表/启用/配置)
+4. 主题管理 (列表/启用)
 5. 插件管理 (列表/启用/配置)
-6. 系统设置
+6. 系统设置 (4 个分组 tab)
+7. 用户菜单登出
+
+**Deliverables:**
+- `apps/site/pages/admin/categories.vue` — 分类管理页面
+- `apps/site/pages/admin/tags.vue` — 标签管理页面
+- `apps/site/pages/admin/media.vue` — 媒体库页面
+- `apps/site/pages/admin/themes.vue` — 主题管理页面
+- `apps/site/pages/admin/plugins.vue` — 插件管理页面
+- `apps/site/pages/admin/settings.vue` — 系统设置页面
+- `apps/site/components/admin/categories/` — 分类组件
+- `apps/site/components/admin/tags/` — 标签组件
+- `apps/site/components/admin/media/` — 媒体组件
+- `apps/site/components/admin/themes/` — 主题组件
+- `apps/site/components/admin/plugins/` — 插件组件
+- `apps/site/components/admin/settings/` — 设置组件
 
 ---
 
@@ -425,3 +453,4 @@ Plans:
 *Phase 6 Plan 1 completed: 2026-04-30*
 *Phase 7 plan created: 2026-04-30*
 *Phase 7 completed: 2026-04-30*
+*Phase 8 plan created: 2026-04-30*
