@@ -14,7 +14,7 @@
     "db:reset": "drizzle-kit drop"
   },
   "dependencies": {
-    "better-sqlite3": "^12.9.0",
+    "better-sqlite3": "11.6.0",
     "drizzle-orm": "^0.45.2",
     "nuxt": "^3.16.0",
     "vue": "^3.5.0",
