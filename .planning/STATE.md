@@ -5,27 +5,26 @@
 See: .planning/PROJECT.md (updated 2026-04-30)
 
 **Core value:** 方便的内容管理 + 灵活的样式/插件系统 + 自部署可控
-**Current focus:** Phase 7 — 后台布局 + 文章管理
+**Current focus:** Phase 9 — 前台博客
 
 ## Current Phase
 
-**Phase:** 7 — 后台布局 + 文章管理
+**Phase:** 8 — 后台完整管理
 **Status:** Complete
-**Next action:** `/gsd-plan-phase 8`
+**Next action:** `/gsd-plan-phase 9`
 
 ## Progress
 
 | Milestone | Phases | Status |
 |-----------|--------|--------|
 | M1: 基础框架 | 1-6 | Complete (6/6) |
-| M2: 核心功能 | 7-10 | In progress (1/4) |
-| M2: 核心功能 | 7-10 | In progress (1/4) |
+| M2: 核心功能 | 7-10 | In progress (2/4) |
 | M3: 扩展功能 | 11 | Not started |
 
 ## Session Continuity
 
-**Last session:** 2026-04-30 — Phase 7 admin posts complete, M2 Phase 7 done
-**Resume point:** `/gsd-plan-phase 8`
+**Last session:** 2026-04-30 — Phase 8 admin complete management done
+**Resume point:** `/gsd-plan-phase 9`
 
 ## Key Decisions Log
 
@@ -110,5 +109,19 @@ See: .planning/PROJECT.md (updated 2026-04-30)
 - API: composables/useAdminApi.ts
 **Note:** Admin shell complete — login/auth flow, sidebar navigation, dashboard with stats, article list with search/filter/pagination, article editor with Vditor Markdown.
 
+## Phase 8 Summary
+
+**Status:** Complete
+**Plans:** 3/3 complete
+**Requirements:** ADMIN-06~12 all built
+**Key files:**
+- Categories: pages/admin/categories.vue, components/admin/categories/CategoryTree.vue, CategoryForm.vue
+- Tags: pages/admin/tags.vue, components/admin/tags/TagTable.vue, TagForm.vue
+- Media: pages/admin/media.vue, components/admin/media/MediaGallery.vue, MediaUploader.vue
+- Themes: pages/admin/themes.vue, components/admin/themes/ThemeCard.vue
+- Plugins: pages/admin/plugins.vue, components/admin/plugins/PluginCard.vue
+- Settings: pages/admin/settings.vue, components/admin/settings/SettingsForm.vue
+**Note:** All admin management pages complete. Categories tree CRUD, tags with colors, media upload/gallery, theme activation, plugin enable/disable with config, settings with 4 tabs, user menu logout.
+
 ---
-*Last updated: 2026-04-30 after Phase 7 completion — M2 Admin Posts DONE*
+*Last updated: 2026-04-30 after Phase 8 completion — M2 Admin Complete DONE*

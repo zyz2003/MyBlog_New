@@ -6,29 +6,29 @@
 
 ## Milestone 1: 基础框架
 
-| # | Phase | Goal | Requirements | Success Criteria |
-|---|-------|------|--------------|------------------|
-| 1 | Monorepo 脚手架 | 可运行的 Nuxt 3 项目 | FOUND-01~05 | pnpm dev 可启动，UnoCSS 可用 |
-| 2 | 数据库层 | SQLite + Drizzle ORM 可用 | DB-01~05 | Schema 定义完成，迁移可执行 |
-| 3 | 认证系统 | JWT 登录/登出 | AUTH-01~05 | 管理员可登录，API 受保护 |
-| 4 | 插件系统 | 插件适配器 + 挂载点 | CORE-01~04 | 插件可注册/启用/渲染 |
-| 5 | 主题系统 | 主题热切换 + CSS Variables | CORE-05~08 | 主题可切换，样式实时生效 |
-| 6 | API 层 | RESTful 路由 + 中间件 | API-01~12, CACHE-01 | 所有 CRUD API 可用 |
+| # | Phase | Goal | Requirements | Success Criteria | Status |
+|---|-------|------|--------------|------------------|--------|
+| 1 | Monorepo 脚手架 | 可运行的 Nuxt 3 项目 | FOUND-01~05 | pnpm dev 可启动，UnoCSS 可用 | Complete |
+| 2 | 数据库层 | SQLite + Drizzle ORM 可用 | DB-01~05 | Schema 定义完成，迁移可执行 | Complete |
+| 3 | 认证系统 | JWT 登录/登出 | AUTH-01~05 | 管理员可登录，API 受保护 | Complete |
+| 4 | 插件系统 | 插件适配器 + 挂载点 | CORE-01~04 | 插件可注册/启用/渲染 | Complete |
+| 5 | 主题系统 | 主题热切换 + CSS Variables | CORE-05~08 | 主题可切换，样式实时生效 | Complete |
+| 6 | API 层 | RESTful 路由 + 中间件 | API-01~12, CACHE-01 | 所有 CRUD API 可用 | Complete |
 
 ## Milestone 2: 核心功能
 
-| # | Phase | Goal | Requirements | Success Criteria |
-|---|-------|------|--------------|------------------|
-| 7 | 后台布局 + 文章管理 | 后台可写文章 | ADMIN-01~05, STOR-01~03 | 后台可创建/编辑/发布文章 |
-| 8 | 后台完整管理 | 所有管理功能 | ADMIN-06~12 | 分类/标签/媒体/主题/插件/设置可用 |
-| 9 | 前台博客 | 博客前台可访问 | FE-01~05, FE-10 | 首页/列表/详情/分类/标签可用 |
-| 10 | 前台扩展 | 搜索/RSS/SEO | FE-06~09 | 搜索/RSS/SEO 全部可用 |
+| # | Phase | Goal | Requirements | Success Criteria | Status |
+|---|-------|------|--------------|------------------|--------|
+| 7 | 后台布局 + 文章管理 | 后台可写文章 | ADMIN-01~05, STOR-01~03 | 后台可创建/编辑/发布文章 | Complete |
+| 8 | 后台完整管理 | 所有管理功能 | ADMIN-06~12 | 分类/标签/媒体/主题/插件/设置可用 | Complete |
+| 9 | 前台博客 | 博客前台可访问 | FE-01~05, FE-10 | 首页/列表/详情/分类/标签可用 | Pending |
+| 10 | 前台扩展 | 搜索/RSS/SEO | FE-06~09 | 搜索/RSS/SEO 全部可用 | Pending |
 
 ## Milestone 3: 扩展功能
 
-| # | Phase | Goal | Requirements | Success Criteria |
-|---|-------|------|--------------|------------------|
-| 11 | 集成测试 + 优化 | 稳定可用版本 | (全部 v1) | 端到端流程畅通，无阻断 bug |
+| # | Phase | Goal | Requirements | Success Criteria | Status |
+|---|-------|------|--------------|------------------|--------|
+| 11 | 集成测试 + 优化 | 稳定可用版本 | (全部 v1) | 端到端流程畅通，无阻断 bug | Pending |
 
 ---
 
@@ -287,9 +287,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Categories + Tags management pages (tree CRUD, color picker)
-- [ ] 08-02-PLAN.md — Media library + Themes + Plugins pages (upload, activate, enable/disable)
-- [ ] 08-03-PLAN.md — Settings page + verification (tabbed form, user menu logout)
+- [x] 08-01-PLAN.md — Categories + Tags management pages (tree CRUD, color picker)
+- [x] 08-02-PLAN.md — Media library + Themes + Plugins pages (upload, activate, enable/disable)
+- [x] 08-03-PLAN.md — Settings page + verification (tabbed form, user menu logout)
 
 **Requirements:**
 - ADMIN-06: 分类管理页面 (树形结构 + CRUD)
@@ -374,29 +374,29 @@ Plans:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | 1 | Verified |
-| FOUND-02 | 1 | Verified |
-| FOUND-03 | 1 | Verified |
-| FOUND-04 | 1 | Verified |
-| FOUND-05 | 1 | Verified |
-| DB-01 | 2 | Verified |
-| DB-02 | 2 | Verified |
-| DB-03 | 2 | Verified |
-| DB-04 | 2 | Verified |
-| DB-05 | 2 | Verified |
-| AUTH-01 | 3 | Verified |
-| AUTH-02 | 3 | Verified |
-| AUTH-03 | 3 | Verified |
-| AUTH-04 | 3 | Verified |
-| AUTH-05 | 3 | Verified |
-| CORE-01 | 4 | Verified |
-| CORE-02 | 4 | Verified |
-| CORE-03 | 4 | Verified |
-| CORE-04 | 4 | Verified |
-| CORE-05 | 5 | Verified |
-| CORE-06 | 5 | Verified |
-| CORE-07 | 5 | Verified |
-| CORE-08 | 5 | Verified |
+| FOUND-01 | 1 | Complete |
+| FOUND-02 | 1 | Complete |
+| FOUND-03 | 1 | Complete |
+| FOUND-04 | 1 | Complete |
+| FOUND-05 | 1 | Complete |
+| DB-01 | 2 | Complete |
+| DB-02 | 2 | Complete |
+| DB-03 | 2 | Complete |
+| DB-04 | 2 | Complete |
+| DB-05 | 2 | Complete |
+| AUTH-01 | 3 | Complete |
+| AUTH-02 | 3 | Complete |
+| AUTH-03 | 3 | Complete |
+| AUTH-04 | 3 | Complete |
+| AUTH-05 | 3 | Complete |
+| CORE-01 | 4 | Complete |
+| CORE-02 | 4 | Complete |
+| CORE-03 | 4 | Complete |
+| CORE-04 | 4 | Complete |
+| CORE-05 | 5 | Complete |
+| CORE-06 | 5 | Complete |
+| CORE-07 | 5 | Complete |
+| CORE-08 | 5 | Complete |
 | API-01 | 6 | Complete |
 | API-02 | 6 | Complete |
 | API-03 | 6 | Complete |
@@ -418,13 +418,13 @@ Plans:
 | ADMIN-03 | 7 | Complete |
 | ADMIN-04 | 7 | Complete |
 | ADMIN-05 | 7 | Complete |
-| ADMIN-06 | 8 | Pending |
-| ADMIN-07 | 8 | Pending |
-| ADMIN-08 | 8 | Pending |
-| ADMIN-09 | 8 | Pending |
-| ADMIN-10 | 8 | Pending |
-| ADMIN-11 | 8 | Pending |
-| ADMIN-12 | 8 | Pending |
+| ADMIN-06 | 8 | Complete |
+| ADMIN-07 | 8 | Complete |
+| ADMIN-08 | 8 | Complete |
+| ADMIN-09 | 8 | Complete |
+| ADMIN-10 | 8 | Complete |
+| ADMIN-11 | 8 | Complete |
+| ADMIN-12 | 8 | Complete |
 | FE-01 | 9 | Pending |
 | FE-02 | 9 | Pending |
 | FE-03 | 9 | Pending |
@@ -454,3 +454,4 @@ Plans:
 *Phase 7 plan created: 2026-04-30*
 *Phase 7 completed: 2026-04-30*
 *Phase 8 plan created: 2026-04-30*
+*Phase 8 completed: 2026-04-30*
