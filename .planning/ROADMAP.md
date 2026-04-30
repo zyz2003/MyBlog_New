@@ -177,9 +177,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Theme types + hook system EventEmitter (type definitions, event emitter for lifecycle hooks)
-- [ ] 05-02-PLAN.md — ThemeManager + default theme (server-side manager, CSS Variables generation, default theme assets, Nitro plugin)
-- [ ] 05-03-PLAN.md — Theme API routes + store + composable (REST API, Pinia store, useTheme with CSS injection)
+- [x] 05-01-PLAN.md — Theme types + hook system EventEmitter (type definitions, event emitter for lifecycle hooks)
+- [x] 05-02-PLAN.md — ThemeManager + default theme (server-side manager, CSS Variables generation, default theme assets, Nitro plugin)
+- [x] 05-03-PLAN.md — Theme API routes + store + composable (REST API, Pinia store, useTheme with CSS injection)
 
 **Requirements:**
 - CORE-05: 主题系统 (layout.vue + config.json + styles.css per theme)
@@ -331,10 +331,10 @@ Plans:
 | CORE-02 | 4 | Verified |
 | CORE-03 | 4 | Verified |
 | CORE-04 | 4 | Verified |
-| CORE-05 | 5 | Pending |
-| CORE-06 | 5 | Pending |
-| CORE-07 | 5 | Pending |
-| CORE-08 | 5 | Pending |
+| CORE-05 | 5 | Verified |
+| CORE-06 | 5 | Verified |
+| CORE-07 | 5 | Verified |
+| CORE-08 | 5 | Verified |
 | API-01 | 6 | Pending |
 | API-02 | 6 | Pending |
 | API-03 | 6 | Pending |
@@ -386,3 +386,4 @@ Plans:
 *Phase 3 plan created: 2026-04-30*
 *Phase 4 plan created: 2026-04-30*
 *Phase 5 plan created: 2026-04-30*
+*Phase 5 completed: 2026-04-30*
