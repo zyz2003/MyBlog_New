@@ -10,42 +10,44 @@ import { errorResponse, AuthErrors } from '../utils/response'
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
 
-  // Only protect /api/admin/** routes
-  if (!path.startsWith('/api/admin/')) {
-    return // Pass through — no auth required
+  // Public routes — no auth required
+  const publicPaths = ['/api/auth/', '/api/plugins/enabled']
+  if (publicPaths.some((p) => path.startsWith(p))) {
+    return
   }
 
-  // Extract Bearer token
+  // Protected paths that require auth
+  const protectedPaths = ['/api/admin/', '/api/plugins/', '/api/media/']
+  const needsAuth = protectedPaths.some((p) => path.startsWith(p))
+
+  // Extract Bearer token if present
   const authHeader = getRequestHeader(event, 'Authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+
+  if (token) {
+    // Verify token and inject user context
+    const user = await getUserFromToken(token)
+    if (user) {
+      event.context.user = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        displayName: user.displayName,
+        avatar: user.avatar,
+        role: user.role,
+      }
+    } else if (needsAuth) {
+      const payload = await getTokenPayload(token)
+      const errorCode = payload ? AuthErrors.UNAUTHENTICATED : AuthErrors.TOKEN_EXPIRED
+      throw createError({
+        statusCode: 401,
+        data: errorResponse(errorCode.code, errorCode.message),
+      })
+    }
+  } else if (needsAuth) {
     throw createError({
       statusCode: 401,
       data: errorResponse(AuthErrors.UNAUTHENTICATED.code, AuthErrors.UNAUTHENTICATED.message),
     })
-  }
-
-  const token = authHeader.slice(7)
-
-  // Verify token and get user (AUTH-05)
-  const user = await getUserFromToken(token)
-  if (!user) {
-    // Check if token is expired vs invalid for better error messages
-    const payload = await getTokenPayload(token)
-    const errorCode = payload ? AuthErrors.UNAUTHENTICATED : AuthErrors.TOKEN_EXPIRED
-
-    throw createError({
-      statusCode: 401,
-      data: errorResponse(errorCode.code, errorCode.message),
-    })
-  }
-
-  // Inject user into event context — available in route handlers as event.context.user
-  event.context.user = {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    displayName: user.displayName,
-    avatar: user.avatar,
-    role: user.role,
   }
 })
