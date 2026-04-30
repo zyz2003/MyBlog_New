@@ -14,8 +14,10 @@
     "db:reset": "drizzle-kit drop"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "11.6.0",
     "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.3",
     "nuxt": "^3.16.0",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0"
@@ -24,6 +26,7 @@
     "@iconify-json/heroicons": "^1.2.0",
     "@iconify-json/lucide": "^1.2.0",
     "@nuxt/eslint-config": "^1.0.0",
+    "@types/bcryptjs": "^3.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@unocss/nuxt": "^66.0.0",
     "@unocss/preset-icons": "^66.0.0",
