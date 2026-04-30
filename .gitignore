@@ -7,6 +7,10 @@ dist/
 .output/
 .nuxt/
 *.db
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+database/
 
 # Environment
 .env
@@ -30,3 +34,7 @@ npm-debug.log*
 # Claude Code local state
 .claude/progress-log.md
 .claude/session-context.md
+.claude/skills
+
+# GSD planning (local only)
+.planning/
