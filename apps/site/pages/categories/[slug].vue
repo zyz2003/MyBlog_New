@@ -23,11 +23,11 @@ const { data: articlesData } = await useAsyncData(
   { watch: [page] }
 )
 
-useHead({
-  title: computed(() => `分类: ${category.value?.name || ''}`),
-  meta: [
-    { name: 'description', content: computed(() => `${category.value?.name} 分类下的所有文章`) },
-  ],
+useSeoMeta({
+  title: () => `分类: ${category.value?.name || ''}`,
+  ogTitle: () => `分类: ${category.value?.name || ''}`,
+  description: () => `${category.value?.name} 分类下的所有文章`,
+  ogDescription: () => `${category.value?.name} 分类下的所有文章`,
 })
 </script>
 

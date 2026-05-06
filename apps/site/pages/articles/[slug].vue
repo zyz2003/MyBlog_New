@@ -16,14 +16,13 @@ if (error.value) {
 
 const article = computed(() => data.value?.data)
 
-useHead({
-  title: computed(() => article.value?.seoTitle || article.value?.title || '文章详情'),
-  meta: [
-    { name: 'description', content: computed(() => article.value?.seoDescription || article.value?.excerpt || '') },
-    { property: 'og:title', content: computed(() => article.value?.seoTitle || article.value?.title || '') },
-    { property: 'og:description', content: computed(() => article.value?.seoDescription || article.value?.excerpt || '') },
-    { property: 'og:image', content: computed(() => article.value?.coverImage || '') },
-  ],
+useSeoMeta({
+  title: () => article.value?.seoTitle || article.value?.title || '文章详情',
+  ogTitle: () => article.value?.seoTitle || article.value?.title || '文章详情',
+  description: () => article.value?.seoDescription || article.value?.excerpt || '',
+  ogDescription: () => article.value?.seoDescription || article.value?.excerpt || '',
+  ogImage: () => article.value?.coverImage || '',
+  twitterCard: 'summary_large_image',
 })
 
 const displayDate = computed(() => {

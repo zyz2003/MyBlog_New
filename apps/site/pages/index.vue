@@ -10,6 +10,15 @@ const { data } = await useAsyncData(
   () => getArticles({ page: page.value, pageSize: 10 }),
   { watch: [page] },
 )
+
+if (import.meta.server) {
+  useSeoMeta({
+    title: '首页',
+    ogTitle: '首页',
+    description: '最新文章列表',
+    ogDescription: '最新文章列表',
+  })
+}
 </script>
 
 <template>

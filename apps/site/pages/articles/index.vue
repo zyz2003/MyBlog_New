@@ -18,6 +18,15 @@ const { data } = await useAsyncData(
   }),
   { watch: [page, categoryId, tagId] },
 )
+
+if (import.meta.server) {
+  useSeoMeta({
+    title: '文章列表',
+    ogTitle: '文章列表',
+    description: '所有文章',
+    ogDescription: '所有文章',
+  })
+}
 </script>
 
 <template>
