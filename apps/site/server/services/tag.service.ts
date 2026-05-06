@@ -46,6 +46,16 @@ export class TagService {
     return created
   }
 
+  /** Get tag by slug */
+  static async getBySlug(slug: string): Promise<typeof tags.$inferSelect | null> {
+    const [tag] = await db
+      .select()
+      .from(tags)
+      .where(eq(tags.slug, slug))
+      .limit(1)
+    return tag ?? null
+  }
+
   /** List all tags */
   static async list(): Promise<typeof tags.$inferSelect[]> {
     return db

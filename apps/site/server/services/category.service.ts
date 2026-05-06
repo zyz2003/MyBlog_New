@@ -80,6 +80,16 @@ export class CategoryService {
     return created
   }
 
+  /** Get category by slug */
+  static async getBySlug(slug: string): Promise<typeof categories.$inferSelect | null> {
+    const [category] = await db
+      .select()
+      .from(categories)
+      .where(eq(categories.slug, slug))
+      .limit(1)
+    return category ?? null
+  }
+
   /** List all categories flat, sorted by sortOrder */
   static async list(): Promise<typeof categories.$inferSelect[]> {
     return db
