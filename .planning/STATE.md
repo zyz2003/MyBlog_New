@@ -5,26 +5,26 @@
 See: .planning/PROJECT.md (updated 2026-04-30)
 
 **Core value:** 方便的内容管理 + 灵活的样式/插件系统 + 自部署可控
-**Current focus:** Phase 9 — 前台博客
+**Current focus:** Phase 11 — 集成测试 + 优化
 
 ## Current Phase
 
-**Phase:** 8 — 后台完整管理
-**Status:** Complete
-**Next action:** `/gsd-plan-phase 9`
+**Phase:** 11 — 集成测试 + 优化
+**Status:** Ready to plan
+**Next action:** `/gsd-plan-phase 11`
 
 ## Progress
 
 | Milestone | Phases | Status |
 |-----------|--------|--------|
 | M1: 基础框架 | 1-6 | Complete (6/6) |
-| M2: 核心功能 | 7-10 | In progress (2/4) |
+| M2: 核心功能 | 7-10 | Complete (4/4) |
 | M3: 扩展功能 | 11 | Not started |
 
 ## Session Continuity
 
-**Last session:** 2026-04-30 — Phase 8 admin complete management done
-**Resume point:** `/gsd-plan-phase 9`
+**Last session:** 2026-05-06 — Phase 10 complete
+**Resume point:** `/gsd-plan-phase 11`
 
 ## Key Decisions Log
 
@@ -123,5 +123,32 @@ See: .planning/PROJECT.md (updated 2026-04-30)
 - Settings: pages/admin/settings.vue, components/admin/settings/SettingsForm.vue
 **Note:** All admin management pages complete. Categories tree CRUD, tags with colors, media upload/gallery, theme activation, plugin enable/disable with config, settings with 4 tabs, user menu logout.
 
+## Phase 9 Summary
+
+**Status:** Complete
+**Plans:** 3/3 complete
+**Requirements:** FE-01~05, FE-10 all complete
+**Key files:**
+- Layout: layouts/blog.vue
+- Pages: pages/index.vue, pages/articles/index.vue, pages/articles/[slug].vue, pages/categories/[slug].vue, pages/tags/[slug].vue
+- Components: components/blog/ArticleCard.vue, Pagination.vue, CategoryNav.vue, TagCloud.vue, ArticleContent.vue, TableOfContents.vue
+- Composable: composables/usePublicApi.ts
+- API: server/api/articles/by-slug/[slug].get.ts, server/api/categories/by-slug/[slug].get.ts, server/api/tags/by-slug/[slug].get.ts
+- Dependencies: markdown-it, highlight.js, @types/markdown-it
+**Note:** Frontend blog complete — homepage with article list, article detail with Markdown rendering and TOC, category/tag filter pages, responsive design.
+
+## Phase 10 Summary
+
+**Status:** Complete
+**Plans:** 3/3 complete
+**Requirements:** FE-06~09 all complete
+**Key files:**
+- Pages: pages/search.vue, pages/about.vue
+- Server: server/routes/rss.xml.ts
+- Config: nuxt.config.ts (sitemap module, titleTemplate, global meta)
+- SEO: useSeoMeta added to all 5 blog pages (index, articles/index, articles/[slug], categories/[slug], tags/[slug])
+- Dependencies: rss, @types/rss, @nuxtjs/sitemap
+**Note:** Frontend extensions complete — search page with URL-synced keywords, about page, RSS feed at /rss.xml, SEO meta tags on all pages, automatic sitemap.xml generation.
+
 ---
-*Last updated: 2026-04-30 after Phase 8 completion — M2 Admin Complete DONE*
+*Last updated: 2026-05-06 after Phase 10 completion — Frontend Extensions DONE*

@@ -22,7 +22,7 @@
 | 7 | 后台布局 + 文章管理 | 后台可写文章 | ADMIN-01~05, STOR-01~03 | 后台可创建/编辑/发布文章 | Complete |
 | 8 | 后台完整管理 | 所有管理功能 | ADMIN-06~12 | 分类/标签/媒体/主题/插件/设置可用 | Complete |
 | 9 | 前台博客 | 博客前台可访问 | FE-01~05, FE-10 | 首页/列表/详情/分类/标签可用 | Complete |
-| 10 | 前台扩展 | 搜索/RSS/SEO | FE-06~09 | 搜索/RSS/SEO 全部可用 | Pending |
+| 10 | 前台扩展 | 搜索/RSS/SEO | FE-06~09 | 搜索/RSS/SEO 全部可用 | Complete |
 
 ## Milestone 3: 扩展功能
 
@@ -373,9 +373,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Search page + About page (FE-06, FE-07)
-- [ ] 10-02-PLAN.md — RSS feed server route (FE-08)
-- [ ] 10-03-PLAN.md — SEO meta tags + Sitemap module (FE-09)
+- [x] 10-01-PLAN.md — Search page + About page (FE-06, FE-07) — Wave 1
+- [x] 10-02-PLAN.md — RSS feed server route (FE-08) — Wave 1
+- [x] 10-03-PLAN.md — SEO meta tags + Sitemap module (FE-09) — Wave 2 (depends on 10-02)
 
 **Requirements:**
 - FE-06: 搜索页 (关键词搜索)
@@ -472,10 +472,10 @@ Plans:
 | FE-04 | 9 | Complete |
 | FE-05 | 9 | Complete |
 | FE-10 | 9 | Complete |
-| FE-06 | 10 | Pending |
-| FE-07 | 10 | Pending |
-| FE-08 | 10 | Pending |
-| FE-09 | 10 | Pending |
+| FE-06 | 10 | Complete |
+| FE-07 | 10 | Complete |
+| FE-08 | 10 | Complete |
+| FE-09 | 10 | Complete |
 
 **Coverage:**
 - v1 requirements: 52 total
@@ -498,3 +498,5 @@ Plans:
 *Phase 8 completed: 2026-04-30*
 *Phase 9 plan created: 2026-04-30*
 *Phase 9 completed: 2026-04-30*
+*Phase 10 plan created: 2026-05-06*
+*Phase 10 completed: 2026-05-06*
