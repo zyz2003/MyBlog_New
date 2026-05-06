@@ -38,18 +38,11 @@ const error = ref('')
 const vditorInstance = ref<any>(null)
 const editorContainerId = 'vditor-editor'
 
-// Auto-generate slug from title
-function onTitleInput() {
-  if (props.mode === 'create' || !slug.value || slug.value === generateSlug(title.value)) {
-    slug.value = generateSlug(title.value)
-  }
-}
-
-function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9一-鿿]+/g, '-')
-    .replace(/^-|-$/g, '')
+// Auto-generate slug from date+ID (called after save)
+function generateSlugFromDateId(id: number, date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}/${month}/${id}`
 }
 
 // Initialize Vditor on client side
@@ -102,7 +95,7 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
     if (props.mode === 'create') {
       const input: ArticleCreateInput = {
         title: title.value,
-        slug: slug.value,
+        slug: slug.value || undefined, // Will be auto-generated if empty
         content: vditorContent,
         excerpt: excerpt.value || undefined,
         status: finalStatus,
@@ -113,6 +106,15 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
       }
 
       const article = await api.post<ArticleWithRelations>('/api/articles', input)
+
+      // Auto-generate slug if empty (date+ID format)
+      if (!slug.value && article.id) {
+        const now = new Date()
+        const autoSlug = generateSlugFromDateId(article.id, now)
+        await api.put(`/api/articles/${article.id}`, { slug: autoSlug })
+        article.slug = autoSlug
+      }
+
       emit('saved', article)
     }
     else {
@@ -135,7 +137,7 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
     await navigateTo('/admin/articles')
   }
   catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Failed to save article'
+    error.value = e instanceof Error ? e.message : '保存文章失败'
   }
   finally {
     saving.value = false
@@ -148,7 +150,7 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
     <!-- Header with save buttons -->
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-900">
-        {{ mode === 'create' ? 'New Article' : 'Edit Article' }}
+        {{ mode === 'create' ? '新建文章' : '编辑文章' }}
       </h1>
       <div class="flex items-center gap-3">
         <button
@@ -156,7 +158,7 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
           :disabled="saving"
           @click="save('draft')"
         >
-          Save Draft
+          保存草稿
         </button>
         <button
           v-if="status !== 'scheduled'"
@@ -164,7 +166,7 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
           :disabled="saving"
           @click="save('published')"
         >
-          {{ saving ? 'Publishing...' : 'Publish' }}
+          {{ saving ? '发布中...' : '发布' }}
         </button>
         <button
           v-else
@@ -172,7 +174,7 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
           :disabled="saving"
           @click="save('scheduled')"
         >
-          {{ saving ? 'Scheduling...' : 'Schedule' }}
+          {{ saving ? '定时中...' : '定时发布' }}
         </button>
       </div>
     </div>
@@ -198,55 +200,43 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
       <div class="flex-[3] space-y-4">
         <!-- Title -->
         <div class="card">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">标题</label>
           <input
             v-model="title"
             type="text"
-            placeholder="Article title"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-            @input="onTitleInput"
-          >
-        </div>
-
-        <!-- Slug -->
-        <div class="card">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Slug</label>
-          <input
-            v-model="slug"
-            type="text"
-            placeholder="article-slug"
+            placeholder="请输入文章标题"
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           >
         </div>
 
         <!-- Category -->
         <div class="card">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">分类</label>
           <AdminArticlesCategorySelector v-model="categoryId" />
         </div>
 
         <!-- Tags -->
         <div class="card">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">标签</label>
           <AdminArticlesTagInput v-model="tagIds" />
         </div>
 
         <!-- Status -->
         <div class="card">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
           <select
             v-model="status"
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="scheduled">Scheduled</option>
+            <option value="draft">草稿</option>
+            <option value="published">已发布</option>
+            <option value="scheduled">定时发布</option>
           </select>
         </div>
 
         <!-- Scheduled date (only when status = scheduled) -->
         <div v-if="status === 'scheduled'" class="card">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Schedule Date</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">定时日期</label>
           <input
             v-model="scheduledAt"
             type="datetime-local"
@@ -256,11 +246,11 @@ async function save(publishStatus?: 'draft' | 'published' | 'scheduled') {
 
         <!-- Excerpt -->
         <div class="card">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">摘要</label>
           <textarea
             v-model="excerpt"
             rows="3"
-            placeholder="Brief summary of the article..."
+            placeholder="请输入文章摘要..."
             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary resize-none"
           />
         </div>

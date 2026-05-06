@@ -24,16 +24,25 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!body?.slug) {
-    throw createError({
-      statusCode: 400,
-      data: errorResponse(ValidationErrors.MISSING_PARAM.code, 'Slug 不能为空'),
-    })
+  // Auto-generate slug from name if not provided
+  let slug = body?.slug
+  if (!slug) {
+    slug = body.name
+      .toLowerCase()
+      .trim()
+      .replace(/[\s]+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+
+    if (!slug) {
+      slug = `tag-${Date.now()}`
+    }
   }
 
   const tag = await TagService.create({
     name: body.name,
-    slug: body.slug,
+    slug,
     color: body.color,
   })
 

@@ -10,7 +10,7 @@ const { data: searchData } = await useAsyncData(
   `search-${route.query.q}-${route.query.page}`,
   () => {
     if (!route.query.q) return Promise.resolve(null)
-    return $fetch('/api/search', {
+    return $fetch<{ code: number; data: { items: any[]; total: number; page: number; totalPages: number } }>('/api/search', {
       params: {
         q: route.query.q,
         page: Number(route.query.page) || 1,

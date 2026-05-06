@@ -1,11 +1,11 @@
-import { relations } from 'drizzle-orm'
-import { integer, sqliteTable, text, primaryKey } from 'drizzle-orm/sqlite-core'
+import { relations, sql } from 'drizzle-orm'
+import { integer, sqliteTable, text, primaryKey, index } from 'drizzle-orm/sqlite-core'
 
 // ========== Posts Table ==========
 export const posts = sqliteTable('posts', {
   id: integer('id').primaryKey(),
   title: text('title').notNull(),
-  slug: text('slug').notNull().unique(),
+  slug: text('slug').notNull(),
   content: text('content'),
   excerpt: text('excerpt'),
   coverImage: text('cover_image'),
@@ -24,7 +24,13 @@ export const posts = sqliteTable('posts', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   deletedAt: integer('deleted_at', { mode: 'timestamp' }),
-})
+}, (t) => ({
+  slugIdx: index('idx_posts_slug_unique').on(t.slug).where(sql`deleted_at IS NULL`),
+  statusIdx: index('idx_posts_status').on(t.status),
+  deletedAtIdx: index('idx_posts_deleted_at').on(t.deletedAt),
+  createdAtIdx: index('idx_posts_created_at').on(t.createdAt),
+  authorIdIdx: index('idx_posts_author_id').on(t.authorId),
+}))
 
 // ========== Categories Table ==========
 export const categories = sqliteTable('categories', {
@@ -53,6 +59,7 @@ export const postCategories = sqliteTable('post_categories', {
   isPrimary: integer('is_primary', { mode: 'boolean' }).notNull().default(false),
 }, (t) => ({
   pk: primaryKey({ columns: [t.postId, t.categoryId] }),
+  categoryIdIdx: index('idx_post_categories_category_id').on(t.categoryId),
 }))
 
 // ========== Post-Tags Junction Table ==========
@@ -61,9 +68,32 @@ export const postTags = sqliteTable('post_tags', {
   tagId: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
 }, (t) => ({
   pk: primaryKey({ columns: [t.postId, t.tagId] }),
+  tagIdIdx: index('idx_post_tags_tag_id').on(t.tagId),
 }))
 
 // ========== Relations ==========
+
+export const postCategoriesRelations = relations(postCategories, ({ one }) => ({
+  post: one(posts, {
+    fields: [postCategories.postId],
+    references: [posts.id],
+  }),
+  category: one(categories, {
+    fields: [postCategories.categoryId],
+    references: [categories.id],
+  }),
+}))
+
+export const postTagsRelations = relations(postTags, ({ one }) => ({
+  post: one(posts, {
+    fields: [postTags.postId],
+    references: [posts.id],
+  }),
+  tag: one(tags, {
+    fields: [postTags.tagId],
+    references: [tags.id],
+  }),
+}))
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   author: one(users, {

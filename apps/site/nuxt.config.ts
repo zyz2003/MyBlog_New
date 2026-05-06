@@ -5,9 +5,6 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      titleTemplate: (titleChunk: string | null) => {
-        return titleChunk ? `${titleChunk} - ${process.env.NUXT_PUBLIC_SITE_NAME || 'My Blog'}` : (process.env.NUXT_PUBLIC_SITE_NAME || 'My Blog')
-      },
       meta: [
         { name: 'description', content: '个人博客系统' },
         { property: 'og:site_name', content: process.env.NUXT_PUBLIC_SITE_NAME || 'My Blog' },
@@ -45,13 +42,19 @@ export default defineNuxtConfig({
     strict: true,
   },
 
-  // Custom error handler for unified { code, message } response format
-  nitro: {
-    errorHandler: '~/server/utils/error-handler',
+  // Disable appManifest (causes #app-manifest resolve error in dev mode)
+  experimental: {
+    appManifest: false,
   },
 
   // Dev server config
   devtools: { enabled: true },
+
+  // Nitro configuration
+  nitro: {
+    // Custom error handler for unified { code, message } response format
+    errorHandler: '~/server/utils/error-handler',
+  },
 
   // Per FOUND-05: Environment variable management
   runtimeConfig: {
@@ -69,7 +72,7 @@ export default defineNuxtConfig({
   sitemap: {
     hostname: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     exclude: ['/admin/**', '/api/**'],
-  },
+  } as any,
 
   // Compatibility
   compatibilityDate: '2025-01-01',

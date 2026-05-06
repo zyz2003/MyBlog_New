@@ -1,6 +1,5 @@
 <script setup lang="ts">
-const { getTags } = usePublicApi()
-const { data } = await useAsyncData('tag-list', () => getTags())
+const { data } = await useFetch('/api/tags')
 </script>
 
 <template>

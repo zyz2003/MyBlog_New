@@ -115,7 +115,7 @@ function getTypeColor(type: string): string {
           class="i-heroicons-chevron-right w-4 h-4 transition-transform"
           :class="{ 'rotate-90': showConfig }"
         />
-        Configure
+        配置
       </button>
 
       <div v-if="showConfig" class="mt-3 space-y-3">
@@ -150,7 +150,7 @@ function getTypeColor(type: string): string {
           class="btn-primary px-3 py-1.5 text-sm"
           @click="saveConfig"
         >
-          Save Config
+          保存配置
         </button>
       </div>
     </div>

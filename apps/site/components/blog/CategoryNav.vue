@@ -6,8 +6,7 @@ interface Category {
   children?: Category[]
 }
 
-const { getCategoryTree } = usePublicApi()
-const { data } = await useAsyncData('category-tree', () => getCategoryTree())
+const { data } = await useFetch('/api/categories/tree')
 </script>
 
 <template>

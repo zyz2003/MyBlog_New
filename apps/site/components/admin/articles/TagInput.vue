@@ -125,7 +125,7 @@ onUnmounted(() => {
         ref="inputRef"
         v-model="searchQuery"
         type="text"
-        placeholder="Type to search or create tags..."
+        placeholder="输入以搜索或创建标签..."
         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         @focus="onInputFocus"
       >
@@ -149,11 +149,11 @@ onUnmounted(() => {
         class="px-3 py-2 text-sm cursor-pointer hover:bg-primary/5 text-primary border-t border-gray-100"
         @click="createTag"
       >
-        Create tag: "{{ searchQuery }}"
+        创建标签: "{{ searchQuery }}"
       </div>
     </div>
 
     <!-- Loading state -->
-    <p v-if="loading" class="text-xs text-gray-400 mt-1">Loading tags...</p>
+    <p v-if="loading" class="text-xs text-gray-400 mt-1">加载标签中...</p>
   </div>
 </template>

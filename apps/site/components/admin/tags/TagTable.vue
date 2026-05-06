@@ -30,7 +30,7 @@ function formatDate(date: Date | string): string {
     <!-- Empty state -->
     <div v-else-if="tags.length === 0" class="text-center py-12">
       <span class="i-heroicons-tag w-16 h-16 mx-auto text-gray-300 block mb-4" />
-      <p class="text-gray-500">No tags yet</p>
+      <p class="text-gray-500">暂无标签</p>
     </div>
 
     <!-- Table -->
@@ -39,11 +39,11 @@ function formatDate(date: Date | string): string {
         <table class="w-full">
           <thead>
             <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 w-10">Color</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Name</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Slug</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Created</th>
-              <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 w-10">颜色</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">名称</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">别名</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">创建时间</th>
+              <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -71,14 +71,14 @@ function formatDate(date: Date | string): string {
                 <div class="flex items-center justify-end gap-2">
                   <button
                     class="p-1 text-gray-400 hover:text-primary rounded transition-colors"
-                    title="Edit"
+                    title="编辑"
                     @click="emit('edit', tag.id)"
                   >
                     <span class="i-heroicons-pencil w-4 h-4" />
                   </button>
                   <button
                     class="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
-                    title="Delete"
+                    title="删除"
                     @click="emit('delete', tag.id)"
                   >
                     <span class="i-heroicons-trash w-4 h-4" />

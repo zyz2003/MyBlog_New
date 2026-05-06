@@ -24,45 +24,45 @@ interface TabDef {
 const tabs: TabDef[] = [
   {
     id: 'site',
-    label: 'Site',
+    label: '站点',
     icon: 'i-heroicons-globe-alt',
     fields: [
-      { key: 'siteTitle', label: 'Site Title', type: 'text', placeholder: 'My Blog' },
-      { key: 'siteDescription', label: 'Site Description', type: 'textarea', placeholder: 'A brief description of your blog' },
-      { key: 'siteUrl', label: 'Site URL', type: 'text', placeholder: 'https://example.com' },
+      { key: 'siteTitle', label: '站点标题', type: 'text', placeholder: '我的博客' },
+      { key: 'siteDescription', label: '站点描述', type: 'textarea', placeholder: '博客的简短描述' },
+      { key: 'siteUrl', label: '站点URL', type: 'text', placeholder: 'https://example.com' },
       { key: 'logo', label: 'Logo URL', type: 'text', placeholder: '/logo.png' },
       { key: 'favicon', label: 'Favicon URL', type: 'text', placeholder: '/favicon.ico' },
     ],
   },
   {
     id: 'seo',
-    label: 'SEO',
+    label: '搜索引擎优化',
     icon: 'i-heroicons-magnifying-glass',
     fields: [
-      { key: 'seoTitle', label: 'SEO Title', type: 'text', placeholder: 'Default page title' },
-      { key: 'seoDescription', label: 'SEO Description', type: 'textarea', placeholder: 'Default meta description' },
-      { key: 'seoKeywords', label: 'SEO Keywords', type: 'text', placeholder: 'blog, articles, tech' },
+      { key: 'seoTitle', label: 'SEO标题', type: 'text', placeholder: '默认页面标题' },
+      { key: 'seoDescription', label: 'SEO描述', type: 'textarea', placeholder: '默认元描述' },
+      { key: 'seoKeywords', label: 'SEO关键词', type: 'text', placeholder: '博客, 文章, 技术' },
     ],
   },
   {
     id: 'reading',
-    label: 'Reading',
+    label: '阅读',
     icon: 'i-heroicons-book-open',
     fields: [
-      { key: 'postsPerPage', label: 'Posts Per Page', type: 'number', min: 1, max: 100 },
-      { key: 'enableComments', label: 'Enable Comments', type: 'boolean' },
-      { key: 'enableRss', label: 'Enable RSS Feed', type: 'boolean' },
+      { key: 'postsPerPage', label: '每页文章数', type: 'number', min: 1, max: 100 },
+      { key: 'enableComments', label: '启用评论', type: 'boolean' },
+      { key: 'enableRss', label: '启用RSS订阅', type: 'boolean' },
     ],
   },
   {
     id: 'social',
-    label: 'Social',
+    label: '社交',
     icon: 'i-heroicons-share',
     fields: [
       { key: 'github', label: 'GitHub URL', type: 'text', placeholder: 'https://github.com/username' },
       { key: 'twitter', label: 'Twitter URL', type: 'text', placeholder: 'https://twitter.com/username' },
-      { key: 'weibo', label: 'Weibo URL', type: 'text', placeholder: 'https://weibo.com/username' },
-      { key: 'email', label: 'Contact Email', type: 'text', placeholder: 'hello@example.com' },
+      { key: 'weibo', label: '微博URL', type: 'text', placeholder: 'https://weibo.com/username' },
+      { key: 'email', label: '联系邮箱', type: 'text', placeholder: 'hello@example.com' },
     ],
   },
 ]
@@ -133,7 +133,7 @@ async function handleSave() {
       value: settingsValues.value[key],
     }))
 
-    await api.put('/api/settings', { items })
+    await api.put('/api/settings', items)
     changedKeys.value.clear()
     saveSuccess.value = true
 
@@ -143,7 +143,7 @@ async function handleSave() {
     }, 3000)
   }
   catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Failed to save settings'
+    const message = e instanceof Error ? e.message : '保存设置失败'
     alert(message)
   }
   finally {
@@ -151,7 +151,7 @@ async function handleSave() {
   }
 }
 
-const activeTabDef = computed(() => tabs.find(t => t.id === activeTab) || tabs[0])
+const activeTabDef = computed(() => tabs.find(t => t.id === activeTab.value) || tabs[0])
 const hasChanges = computed(() => changedKeys.value.size > 0)
 
 onMounted(() => {
@@ -163,11 +163,11 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Settings</h1>
+      <h1 class="text-2xl font-bold text-gray-900">系统设置</h1>
       <div class="flex items-center gap-3">
         <span v-if="saveSuccess" class="text-sm text-green-600 flex items-center gap-1">
           <span class="i-heroicons-check-circle w-4 h-4" />
-          Saved successfully
+          保存成功
         </span>
         <button
           class="btn-primary px-4 py-2 text-sm flex items-center gap-2"
@@ -176,7 +176,7 @@ onMounted(() => {
           @click="handleSave"
         >
           <span v-if="saving" class="i-heroicons-arrow-path w-4 h-4 animate-spin" />
-          {{ saving ? 'Saving...' : 'Save Changes' }}
+          {{ saving ? '保存中...' : '保存修改' }}
         </button>
       </div>
     </div>
@@ -209,7 +209,7 @@ onMounted(() => {
 
       <!-- Tab content -->
       <div class="card p-6">
-        <AdminSettingsSettingsForm
+        <AdminSettingsForm
           :fields="activeTabDef.fields"
           :model-value="settingsValues"
           @update:model-value="handleFieldChange(activeTab, $event)"

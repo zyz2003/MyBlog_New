@@ -10,15 +10,16 @@ const md = new MarkdownIt({
   html: false,
   linkify: true,
   typographer: true,
-  highlight(str: string, lang: string) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`
-      } catch (_) {}
-    }
-    return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`
-  }
 })
+
+md.options.highlight = (str: string, lang: string): string => {
+  if (lang && hljs.getLanguage(lang)) {
+    try {
+      return `<pre class="hljs"><code>${hljs.highlight(str, { language: lang }).value}</code></pre>`
+    } catch (_) {}
+  }
+  return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`
+}
 
 const renderedHtml = computed(() => md.render(props.content || ''))
 </script>

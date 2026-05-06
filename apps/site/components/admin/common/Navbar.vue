@@ -59,7 +59,7 @@ onUnmounted(() => {
         <div v-else class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
           <span class="i-heroicons-user w-5 h-5 text-primary" />
         </div>
-        <span class="text-sm font-medium text-gray-700">{{ user?.displayName || user?.username || 'Admin' }}</span>
+        <span class="text-sm font-medium text-gray-700">{{ user?.displayName || user?.username || '管理员' }}</span>
         <span class="i-heroicons-chevron-down w-4 h-4 text-gray-400" />
       </button>
 
@@ -73,7 +73,7 @@ onUnmounted(() => {
           @click="handleLogout"
         >
           <span class="i-heroicons-arrow-right-on-rectangle w-4 h-4" />
-          Logout
+          退出登录
         </button>
       </div>
     </div>

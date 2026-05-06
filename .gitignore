@@ -12,6 +12,9 @@ dist/
 *.sqlite-shm
 database/
 
+# Uploads
+uploads/
+
 # Environment
 .env
 .env.*

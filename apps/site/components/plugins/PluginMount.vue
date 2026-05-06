@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps<{
   pluginName: string
-  componentPath?: string
   scriptUrl?: string
   config: Record<string, unknown>
 }>()
@@ -11,14 +10,11 @@ const props = defineProps<{
 const scriptContainer = ref<HTMLElement | null>(null)
 let scriptElement: HTMLScriptElement | null = null
 
-// Lazy-load Vue component if componentPath is provided
-const PluginComponent = props.componentPath
-  ? defineAsyncComponent(() => import(/* @vite-ignore */ props.componentPath!))
-  : null
-
-// Handle script injection for non-component plugins
 onMounted(() => {
   if (props.scriptUrl && scriptContainer.value) {
+    // Inject config before script loads
+    ;(window as Record<string, unknown>).__PLUGIN_CONFIG__ = props.config
+
     scriptElement = document.createElement('script')
     scriptElement.src = props.scriptUrl
     scriptElement.async = true
@@ -36,16 +32,7 @@ onUnmounted(() => {
 
 <template>
   <div :data-plugin="pluginName" class="plugin-mount">
-    <!-- Component-based plugin (SSR safe) -->
-    <Suspense v-if="PluginComponent">
-      <component :is="PluginComponent" :config="config" />
-      <template #fallback>
-        <div class="plugin-loading" />
-      </template>
-    </Suspense>
-
-    <!-- Script-injection plugin (client only) -->
-    <ClientOnly v-else-if="scriptUrl">
+    <ClientOnly>
       <div ref="scriptContainer" class="plugin-script-container" />
     </ClientOnly>
   </div>

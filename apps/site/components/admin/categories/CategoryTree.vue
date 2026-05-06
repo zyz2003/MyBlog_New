@@ -70,7 +70,7 @@ function hasChildren(node: CategoryTreeNode): boolean {
         <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             class="p-1 text-gray-400 hover:text-primary rounded transition-colors"
-            title="Edit"
+            title="编辑"
             @click="emit('edit', node.id)"
           >
             <span class="i-heroicons-pencil w-4 h-4" />
@@ -78,7 +78,7 @@ function hasChildren(node: CategoryTreeNode): boolean {
           <button
             class="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
             :class="{ 'opacity-50 cursor-not-allowed': hasChildren(node) }"
-            :title="hasChildren(node) ? 'Cannot delete: has children' : 'Delete'"
+            :title="hasChildren(node) ? '无法删除：存在子分类' : '删除'"
             @click="!hasChildren(node) && emit('delete', node.id)"
           >
             <span class="i-heroicons-trash w-4 h-4" />

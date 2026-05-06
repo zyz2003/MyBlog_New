@@ -50,13 +50,13 @@ async function handleFile(file: File) {
 
   // Validate type
   if (!ALLOWED_TYPES.includes(file.type)) {
-    errorMessage.value = `Unsupported file type: ${file.type}`
+    errorMessage.value = `不支持的文件类型: ${file.type}`
     return
   }
 
   // Validate size
   if (file.size > MAX_SIZE) {
-    errorMessage.value = `File too large. Maximum size: ${MAX_SIZE / 1024 / 1024}MB`
+    errorMessage.value = `文件过大，最大支持: ${MAX_SIZE / 1024 / 1024}MB`
     return
   }
 
@@ -78,7 +78,7 @@ async function handleFile(file: File) {
   }
   catch (e: unknown) {
     const err = e as { data?: { message?: string } }
-    errorMessage.value = err?.data?.message || 'Upload failed'
+    errorMessage.value = err?.data?.message || '上传失败'
   }
   finally {
     isUploading.value = false
@@ -109,15 +109,15 @@ async function handleFile(file: File) {
 
       <div v-if="isUploading" class="flex flex-col items-center gap-2">
         <span class="i-heroicons-arrow-up-tray w-8 h-8 text-primary animate-pulse" />
-        <p class="text-sm text-gray-500">Uploading...</p>
+        <p class="text-sm text-gray-500">上传中...</p>
       </div>
 
       <div v-else class="flex flex-col items-center gap-2">
         <span class="i-heroicons-cloud-arrow-up w-8 h-8 text-gray-400" />
         <p class="text-sm text-gray-600">
-          Drop files here or <span class="text-primary font-medium">click to upload</span>
+          拖拽文件到此处或 <span class="text-primary font-medium">点击上传</span>
         </p>
-        <p class="text-xs text-gray-400">Images and PDF, up to 10MB</p>
+        <p class="text-xs text-gray-400">支持图片和PDF，最大10MB</p>
       </div>
     </div>
 

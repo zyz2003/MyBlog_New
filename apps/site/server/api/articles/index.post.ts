@@ -24,17 +24,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!body?.slug) {
-    throw createError({
-      statusCode: 400,
-      data: errorResponse(ValidationErrors.MISSING_PARAM.code, 'Slug 不能为空'),
-    })
-  }
+  // Slug is optional - will be auto-generated if not provided
+  const slug = body?.slug || `temp-${Date.now()}`
 
   const article = await ArticleService.create(
     {
       title: body.title,
-      slug: body.slug,
+      slug,
       content: body.content,
       excerpt: body.excerpt,
       coverImage: body.coverImage,

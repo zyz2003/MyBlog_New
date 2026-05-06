@@ -4,7 +4,6 @@ import { successResponse } from '../../utils/response'
 /**
  * GET /api/plugins/enabled
  * Public endpoint - returns enabled plugins for rendering
- * Used by PluginRenderer component
  */
 export default defineEventHandler(() => {
   const enabled = pluginManager.getEnabled()
@@ -13,7 +12,7 @@ export default defineEventHandler(() => {
     name: plugin.meta.name,
     mountPoints: plugin.mountPoints,
     config: pluginManager.getConfig(plugin.meta.name) ?? {},
-    componentPath: plugin.component ? `~/plugins/${plugin.meta.name}.vue` : undefined,
+    scriptUrl: `/plugins/${plugin.meta.name}.js`,
   }))
 
   return successResponse(data)

@@ -6,11 +6,32 @@
  */
 const config = useRuntimeConfig()
 
+useHead({
+  titleTemplate: (titleChunk) => {
+    return titleChunk ? `${titleChunk} - ${config.public.siteName}` : config.public.siteName
+  },
+})
+
 const navLinks = [
   { label: '首页', to: '/' },
   { label: '文章', to: '/articles' },
   { label: '关于', to: '/about' },
 ]
+
+// Load enabled plugins
+const { data: pluginsData } = await useFetch<{ code: number; data: Array<{ name: string; mountPoints: string[]; config: Record<string, unknown>; scriptUrl: string }> }>('/api/plugins/enabled')
+
+const bodyEndPlugins = computed(() => {
+  return (pluginsData.value?.data ?? []).filter(p => p.mountPoints.includes('body-end'))
+})
+
+// Inject plugin scripts via useHead
+useHead({
+  script: bodyEndPlugins.value.map(p => ({
+    src: p.scriptUrl,
+    defer: true,
+  })),
+})
 </script>
 
 <template>
@@ -59,5 +80,10 @@ const navLinks = [
         </div>
       </div>
     </footer>
+
+    <!-- Plugin: body end (inline rendering) -->
+    <template v-for="plugin in bodyEndPlugins" :key="plugin.name">
+      <div :id="`plugin-${plugin.name}`" />
+    </template>
   </div>
 </template>

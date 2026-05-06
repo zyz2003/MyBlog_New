@@ -10,6 +10,7 @@ import { errorResponse, RateLimitErrors } from '../utils/response'
 
 const WINDOW_MS = 60 * 1000 // 1 minute
 const MAX_REQUESTS = 5
+const MAX_TRACKED_IPS = 10000 // Prevent memory exhaustion under attack
 
 // In-memory store: key -> { count, resetAt }
 const store = new Map<string, { count: number; resetAt: number }>()
@@ -19,6 +20,14 @@ setInterval(() => {
   const now = Date.now()
   for (const [key, entry] of store) {
     if (entry.resetAt <= now) store.delete(key)
+  }
+  // Evict oldest entries if store exceeds limit
+  if (store.size > MAX_TRACKED_IPS) {
+    const entries = [...store.entries()].sort((a, b) => a[1].resetAt - b[1].resetAt)
+    const toDelete = entries.slice(0, store.size - MAX_TRACKED_IPS)
+    for (const [key] of toDelete) {
+      store.delete(key)
+    }
   }
 }, 5 * 60 * 1000).unref()
 

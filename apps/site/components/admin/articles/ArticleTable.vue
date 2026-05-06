@@ -26,7 +26,7 @@ function formatDate(date: Date | string | null): string {
 }
 
 function getPrimaryCategory(article: ArticleWithRelations): string {
-  if (!article.categories || article.categories.length === 0) return 'Uncategorized'
+  if (!article.categories || article.categories.length === 0) return '未分类'
   const primary = article.categories.find(c => c.isPrimary) || article.categories[0]
   return primary.name
 }
@@ -52,7 +52,7 @@ const visiblePages = computed(() => {
     <!-- Empty state -->
     <div v-else-if="articles.length === 0" class="text-center py-12">
       <span class="i-heroicons-document-text w-16 h-16 mx-auto text-gray-300 block mb-4" />
-      <p class="text-gray-500">No articles found</p>
+      <p class="text-gray-500">暂无文章</p>
     </div>
 
     <!-- Table -->
@@ -61,11 +61,11 @@ const visiblePages = computed(() => {
         <table class="w-full">
           <thead>
             <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Title</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Status</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Category</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">Date</th>
-              <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">标题</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">状态</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">分类</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">日期</th>
+              <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -102,13 +102,13 @@ const visiblePages = computed(() => {
                     class="px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded transition-colors"
                     @click="emit('edit', article.id)"
                   >
-                    Edit
+                    编辑
                   </button>
                   <button
                     class="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
                     @click="emit('delete', article.id)"
                   >
-                    Delete
+                    删除
                   </button>
                 </div>
               </td>
@@ -120,7 +120,7 @@ const visiblePages = computed(() => {
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
         <p class="text-sm text-gray-500">
-          Page {{ currentPage }} of {{ totalPages }}
+          第 {{ currentPage }} 页，共 {{ totalPages }} 页
         </p>
         <div class="flex items-center gap-1">
           <button
@@ -128,7 +128,7 @@ const visiblePages = computed(() => {
             class="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             @click="emit('page-change', currentPage - 1)"
           >
-            Prev
+            上一页
           </button>
           <button
             v-for="page in visiblePages"
@@ -146,7 +146,7 @@ const visiblePages = computed(() => {
             class="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             @click="emit('page-change', currentPage + 1)"
           >
-            Next
+            下一页
           </button>
         </div>
       </div>

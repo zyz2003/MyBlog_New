@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
 
   const items = await db
     .select({
+      id: posts.id,
       title: posts.title,
       slug: posts.slug,
       excerpt: posts.excerpt,
@@ -38,11 +39,17 @@ export default defineEventHandler(async (event) => {
     .limit(20)
 
   for (const item of items) {
+    // Generate date+ID URL format
+    const date = item.publishedAt || new Date()
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const url = `${siteUrl}/articles/${year}/${month}/${item.id}`
+
     feed.item({
       title: item.title,
       description: item.excerpt || '',
-      url: `${siteUrl}/articles/${item.slug}`,
-      date: item.publishedAt || new Date(),
+      url,
+      date,
     })
   }
 

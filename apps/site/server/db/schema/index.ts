@@ -8,6 +8,8 @@ export {
   postsRelations,
   categoriesRelations,
   tagsRelations,
+  postCategoriesRelations,
+  postTagsRelations,
 } from './posts'
 
 export { users } from './users'

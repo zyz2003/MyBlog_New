@@ -47,7 +47,7 @@ async function handleToggle(data: { name: string; enable: boolean }) {
     await fetchPlugins()
   }
   catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Failed to toggle plugin'
+    const message = e instanceof Error ? e.message : '切换插件状态失败'
     alert(message)
   }
 }
@@ -58,7 +58,7 @@ async function handleConfigSave(data: { name: string; config: Record<string, unk
     await fetchPlugins()
   }
   catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Failed to save config'
+    const message = e instanceof Error ? e.message : '保存配置失败'
     alert(message)
   }
 }
@@ -72,7 +72,7 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Plugins</h1>
+      <h1 class="text-2xl font-bold text-gray-900">插件管理</h1>
     </div>
 
     <!-- Loading skeleton -->
@@ -83,7 +83,7 @@ onMounted(() => {
     <!-- Empty state -->
     <div v-else-if="plugins.length === 0" class="text-center py-12 card">
       <span class="i-heroicons-puzzle-piece w-16 h-16 mx-auto text-gray-300 block mb-4" />
-      <p class="text-gray-500">No plugins registered</p>
+      <p class="text-gray-500">暂无插件</p>
     </div>
 
     <!-- Plugin cards -->

@@ -6,8 +6,8 @@ interface ArticleCardProps {
     slug: string
     excerpt?: string | null
     coverImage?: string | null
-    publishedAt?: Date | null
-    createdAt: Date
+    publishedAt?: Date | string | null
+    createdAt: Date | string
     viewCount?: number
     categories?: Array<{ id: number; name: string; slug: string }>
     tags?: Array<{ id: number; name: string; slug: string; color?: string | null }>
@@ -20,6 +20,13 @@ const displayDate = computed(() => {
   const date = props.article.publishedAt || props.article.createdAt
   return new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 })
+
+const articleUrl = computed(() => {
+  const date = new Date(props.article.publishedAt || props.article.createdAt)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `/articles/${year}/${month}/${props.article.id}`
+})
 </script>
 
 <template>
@@ -31,7 +38,7 @@ const displayDate = computed(() => {
       </div>
       <!-- Content -->
       <div class="flex-1 min-w-0">
-        <NuxtLink :to="`/articles/${article.slug}`" class="block">
+        <NuxtLink :to="articleUrl" class="block">
           <h2 class="text-lg font-semibold truncate group-hover:text-blue-600 transition-colors">
             {{ article.title }}
           </h2>

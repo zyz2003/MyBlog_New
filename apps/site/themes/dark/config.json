@@ -1,0 +1,35 @@
+{
+  "name": "dark",
+  "version": "1.0.0",
+  "author": "Blog Team",
+  "description": "暗色主题，适合夜间阅读",
+  "colors": {
+    "primary": "#60A5FA",
+    "secondary": "#94A3B8",
+    "accent": "#A78BFA",
+    "background": "#0F172A",
+    "surface": "#1E293B",
+    "text": "#F1F5F9",
+    "textMuted": "#94A3B8"
+  },
+  "fonts": {
+    "heading": "Inter, system-ui, sans-serif",
+    "body": "Inter, system-ui, sans-serif",
+    "mono": "JetBrains Mono, monospace"
+  },
+  "spacing": {
+    "unit": "8px",
+    "containerMax": "720px",
+    "contentPadding": "24px"
+  },
+  "borderRadius": {
+    "small": "4px",
+    "medium": "8px",
+    "large": "16px"
+  },
+  "layout": {
+    "headerPosition": "sticky",
+    "sidebarPosition": "right",
+    "footerStyle": "minimal"
+  }
+}

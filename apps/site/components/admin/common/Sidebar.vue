@@ -10,14 +10,14 @@ const emit = defineEmits<{
 const route = useRoute()
 
 const navItems = [
-  { label: 'Dashboard', icon: 'i-heroicons-home', path: '/admin' },
-  { label: 'Articles', icon: 'i-heroicons-document-text', path: '/admin/articles' },
-  { label: 'Categories', icon: 'i-heroicons-folder', path: '/admin/categories' },
-  { label: 'Tags', icon: 'i-heroicons-tag', path: '/admin/tags' },
-  { label: 'Media', icon: 'i-heroicons-photo', path: '/admin/media' },
-  { label: 'Themes', icon: 'i-heroicons-paint-brush', path: '/admin/themes' },
-  { label: 'Plugins', icon: 'i-heroicons-puzzle-piece', path: '/admin/plugins' },
-  { label: 'Settings', icon: 'i-heroicons-cog-6-tooth', path: '/admin/settings' },
+  { label: '仪表盘', icon: 'i-heroicons-home', path: '/admin' },
+  { label: '文章', icon: 'i-heroicons-document-text', path: '/admin/articles' },
+  { label: '分类', icon: 'i-heroicons-folder', path: '/admin/categories' },
+  { label: '标签', icon: 'i-heroicons-tag', path: '/admin/tags' },
+  { label: '媒体', icon: 'i-heroicons-photo', path: '/admin/media' },
+  { label: '主题', icon: 'i-heroicons-paint-brush', path: '/admin/themes' },
+  { label: '插件', icon: 'i-heroicons-puzzle-piece', path: '/admin/plugins' },
+  { label: '设置', icon: 'i-heroicons-cog-6-tooth', path: '/admin/settings' },
 ]
 
 function isActive(path: string): boolean {
@@ -35,8 +35,8 @@ function isActive(path: string): boolean {
   >
     <!-- Logo / Title -->
     <div class="flex items-center justify-between h-14 px-4 border-b border-gray-700">
-      <span v-if="!collapsed" class="text-lg font-bold truncate">Blog Admin</span>
-      <span v-else class="text-lg font-bold">B</span>
+      <span v-if="!collapsed" class="text-lg font-bold truncate">博客后台</span>
+      <span v-else class="text-lg font-bold">博</span>
       <button
         class="p-1 rounded hover:bg-gray-700 transition-colors"
         @click="emit('toggle-collapse')"

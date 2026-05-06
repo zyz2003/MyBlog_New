@@ -20,7 +20,7 @@ async function fetchArticle() {
     article.value = await api.get<ArticleWithRelations>(`/api/articles/${id}`)
   }
   catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Failed to load article'
+    error.value = e instanceof Error ? e.message : '加载文章失败'
   }
   finally {
     loading.value = false
@@ -44,7 +44,7 @@ onMounted(() => {
       <span class="i-heroicons-exclamation-triangle w-16 h-16 mx-auto text-red-400 block mb-4" />
       <p class="text-gray-600 mb-4">{{ error }}</p>
       <NuxtLink to="/admin/articles" class="btn-primary">
-        Back to Articles
+        返回文章列表
       </NuxtLink>
     </div>
 

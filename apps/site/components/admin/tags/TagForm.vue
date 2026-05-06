@@ -46,17 +46,13 @@ function validate(): boolean {
   errors.slug = ''
 
   if (!form.name.trim()) {
-    errors.name = 'Name is required'
+    errors.name = '请输入标签名称'
     return false
   }
 
-  if (!form.slug.trim()) {
-    errors.slug = 'Slug is required'
-    return false
-  }
-
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)) {
-    errors.slug = 'Slug must be URL-safe (lowercase, hyphens)'
+  // Slug is optional - only validate if provided
+  if (form.slug.trim() && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)) {
+    errors.slug = '别名必须是URL安全格式（小写字母、连字符）'
     return false
   }
 
@@ -68,7 +64,7 @@ function handleSubmit() {
 
   emit('submit', {
     name: form.name.trim(),
-    slug: form.slug.trim(),
+    slug: form.slug.trim() || undefined, // Let API auto-generate if empty
     color: form.color,
   })
 }
@@ -83,39 +79,38 @@ function handleSubmit() {
       <!-- Modal -->
       <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ tag ? 'Edit Tag' : 'New Tag' }}
+          {{ tag ? '编辑标签' : '新建标签' }}
         </h2>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <!-- Name -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">名称 *</label>
             <input
               v-model="form.name"
               type="text"
               class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               :class="errors.name ? 'border-red-300' : 'border-gray-300'"
-              placeholder="Tag name"
+              placeholder="请输入标签名称"
             />
             <p v-if="errors.name" class="mt-1 text-sm text-red-600">{{ errors.name }}</p>
           </div>
 
           <!-- Slug -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">别名（可选）</label>
             <input
               v-model="form.slug"
               type="text"
-              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-              :class="errors.slug ? 'border-red-300' : 'border-gray-300'"
-              placeholder="tag-slug"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              placeholder="自动生成（如：JavaScript → javascript）"
             />
-            <p v-if="errors.slug" class="mt-1 text-sm text-red-600">{{ errors.slug }}</p>
+            <p class="mt-1 text-xs text-gray-400">留空将自动生成，用于 URL 如 /tags/javascript</p>
           </div>
 
           <!-- Color -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">颜色</label>
             <div class="flex items-center gap-3">
               <input
                 v-model="form.color"
@@ -133,13 +128,13 @@ function handleSubmit() {
               class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               @click="emit('close')"
             >
-              Cancel
+              取消
             </button>
             <button
               type="submit"
               class="btn-primary px-4 py-2 text-sm"
             >
-              {{ tag ? 'Save Changes' : 'Create Tag' }}
+              {{ tag ? '保存修改' : '创建标签' }}
             </button>
           </div>
         </form>

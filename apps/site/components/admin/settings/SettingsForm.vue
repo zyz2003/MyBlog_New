@@ -75,7 +75,7 @@ function updateField(key: string, value: unknown) {
             :class="modelValue[field.key] ? 'translate-x-6' : 'translate-x-1'"
           />
         </button>
-        <span class="text-sm text-gray-500">{{ modelValue[field.key] ? 'Enabled' : 'Disabled' }}</span>
+        <span class="text-sm text-gray-500">{{ modelValue[field.key] ? '已启用' : '已禁用' }}</span>
       </div>
     </div>
   </div>

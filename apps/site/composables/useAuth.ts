@@ -1,9 +1,8 @@
 import { useAuthStore, type AuthUser } from '~/stores/auth'
 
-let initialized = false
-
 export function useAuth() {
   const store = useAuthStore()
+  let initialized = false
 
   /** Login with username/password, stores token in localStorage and Pinia */
   async function login(username: string, password: string) {

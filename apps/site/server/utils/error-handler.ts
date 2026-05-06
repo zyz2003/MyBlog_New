@@ -1,4 +1,4 @@
-import type { H3Error } from 'h3'
+import type { H3Error, H3Event } from 'h3'
 import { errorResponse, SystemErrors } from './response'
 
 /**
@@ -10,7 +10,7 @@ import { errorResponse, SystemErrors } from './response'
  * the data field and send it directly for a flat { code, message } shape.
  * Unknown errors get wrapped in a 500 with code 9001.
  */
-export default function errorHandler(error: H3Error, event: any) {
+export default function errorHandler(error: H3Error, event: H3Event) {
   // If the error has a data field (from createError({ data: errorResponse(...) }))
   // send it directly as the response body — this gives us the flat { code, message } format
   if (error.data) {

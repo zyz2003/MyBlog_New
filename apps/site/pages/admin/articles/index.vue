@@ -75,7 +75,7 @@ function onEdit(id: number) {
 }
 
 async function onDelete(id: number) {
-  if (!confirm('Are you sure you want to delete this article?')) return
+  if (!confirm('确定要删除这篇文章吗？')) return
 
   try {
     await api.del(`/api/articles/${id}`)
@@ -84,7 +84,7 @@ async function onDelete(id: number) {
   }
   catch (e) {
     console.error('Failed to delete article:', e)
-    alert('Failed to delete article')
+    alert('删除文章失败')
   }
 }
 
@@ -98,14 +98,14 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-gray-900">Articles</h1>
+        <h1 class="text-2xl font-bold text-gray-900">文章管理</h1>
         <span v-if="total > 0" class="px-2 py-0.5 bg-gray-100 text-gray-600 text-sm rounded-full">
           {{ total }}
         </span>
       </div>
       <NuxtLink to="/admin/articles/new" class="btn-primary flex items-center gap-2">
         <span class="i-heroicons-plus w-5 h-5" />
-        New Article
+        新建文章
       </NuxtLink>
     </div>
 
@@ -118,7 +118,7 @@ onMounted(() => {
           <input
             v-model="keyword"
             type="text"
-            placeholder="Search articles..."
+            placeholder="搜索文章..."
             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
             @input="onSearchInput"
           >
@@ -131,10 +131,10 @@ onMounted(() => {
         class="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
         @change="onStatusChange"
       >
-        <option value="">All Status</option>
-        <option value="published">Published</option>
-        <option value="draft">Draft</option>
-        <option value="scheduled">Scheduled</option>
+        <option value="">全部状态</option>
+        <option value="published">已发布</option>
+        <option value="draft">草稿</option>
+        <option value="scheduled">定时发布</option>
       </select>
     </div>
 

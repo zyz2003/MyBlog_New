@@ -39,7 +39,7 @@ async function handleActivate(name: string) {
     await fetchThemes()
   }
   catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Failed to activate theme'
+    const message = e instanceof Error ? e.message : '启用主题失败'
     alert(message)
   }
 }
@@ -53,7 +53,7 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Themes</h1>
+      <h1 class="text-2xl font-bold text-gray-900">主题管理</h1>
     </div>
 
     <!-- Loading skeleton -->
@@ -64,7 +64,7 @@ onMounted(() => {
     <!-- Empty state -->
     <div v-else-if="themes.length === 0" class="text-center py-12 card">
       <span class="i-heroicons-paint-brush w-16 h-16 mx-auto text-gray-300 block mb-4" />
-      <p class="text-gray-500">No themes installed</p>
+      <p class="text-gray-500">暂无主题</p>
     </div>
 
     <!-- Theme cards -->

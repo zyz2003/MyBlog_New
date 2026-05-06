@@ -57,20 +57,20 @@ async function handleSubmit(data: { name: string; slug: string; color: string })
     await fetchTags()
   }
   catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Operation failed'
+    const message = e instanceof Error ? e.message : '操作失败'
     alert(message)
   }
 }
 
 async function handleDelete(id: number) {
-  if (!confirm('Are you sure you want to delete this tag?')) return
+  if (!confirm('确定要删除这个标签吗？')) return
 
   try {
     await api.del(`/api/tags/${id}`)
     await fetchTags()
   }
   catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Delete failed'
+    const message = e instanceof Error ? e.message : '删除失败'
     alert(message)
   }
 }
@@ -85,7 +85,7 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-gray-900">Tags</h1>
+        <h1 class="text-2xl font-bold text-gray-900">标签管理</h1>
         <span v-if="tags.length > 0" class="px-2 py-0.5 bg-gray-100 text-gray-600 text-sm rounded-full">
           {{ tags.length }}
         </span>
@@ -95,7 +95,7 @@ onMounted(() => {
         @click="openCreateForm"
       >
         <span class="i-heroicons-plus w-5 h-5" />
-        New Tag
+        新建标签
       </button>
     </div>
 

@@ -49,14 +49,12 @@ function handleUploaded() {
 }
 
 async function handleDelete(id: number) {
-  if (!confirm('Are you sure you want to delete this media file?')) return
-
   try {
     await api.del(`/api/media/${id}`)
     await fetchMedia()
   }
   catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Delete failed'
+    const message = e instanceof Error ? e.message : '删除失败'
     alert(message)
   }
 }
@@ -75,17 +73,17 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Media Library</h1>
+      <h1 class="text-2xl font-bold text-gray-900">媒体库</h1>
     </div>
 
     <!-- Uploader -->
     <div class="mb-6">
-      <AdminMediaMediaUploader @uploaded="handleUploaded" />
+      <AdminMediaUploader @uploaded="handleUploaded" />
     </div>
 
     <!-- Gallery -->
     <div class="card p-4">
-      <AdminMediaMediaGallery
+      <AdminMediaGallery
         :items="items"
         :loading="loading"
         :page="page"

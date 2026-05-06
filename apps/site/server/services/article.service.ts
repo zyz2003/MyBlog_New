@@ -93,11 +93,11 @@ export interface ArticleWithRelations {
 export class ArticleService {
   /** Create a new article */
   static async create(input: ArticleCreateInput, authorId: number): Promise<ArticleWithRelations> {
-    // Check slug uniqueness
+    // Check slug uniqueness (exclude soft-deleted articles)
     const [existingSlug] = await db
       .select({ id: posts.id })
       .from(posts)
-      .where(eq(posts.slug, input.slug))
+      .where(and(eq(posts.slug, input.slug), isNull(posts.deletedAt)))
       .limit(1)
 
     if (existingSlug) {
@@ -162,7 +162,7 @@ export class ArticleService {
     const conditions = [isNull(posts.deletedAt)]
 
     if (query.status) {
-      conditions.push(eq(posts.status, query.status))
+      conditions.push(eq(posts.status, query.status as 'draft' | 'published' | 'scheduled'))
     }
 
     if (query.keyword) {
@@ -238,113 +238,113 @@ export class ArticleService {
 
   /** Get a single article by slug with relations (public — published only) */
   static async getBySlug(slug: string): Promise<ArticleWithRelations | null> {
-    const [post] = await db
-      .select()
-      .from(posts)
-      .where(and(eq(posts.slug, slug), isNull(posts.deletedAt), eq(posts.status, 'published')))
-      .limit(1)
+    const post = await db.query.posts.findFirst({
+      where: and(eq(posts.slug, slug), isNull(posts.deletedAt), eq(posts.status, 'published')),
+      with: {
+        author: {
+          columns: { id: true, username: true, displayName: true, avatar: true },
+        },
+        categories: {
+          with: {
+            category: {
+              columns: { id: true, name: true, slug: true },
+            },
+          },
+        },
+        tags: {
+          with: {
+            tag: {
+              columns: { id: true, name: true, slug: true, color: true },
+            },
+          },
+        },
+      },
+    })
 
     if (!post) return null
 
-    // Get author
-    const [author] = await db
-      .select({
-        id: users.id,
-        username: users.username,
-        displayName: users.displayName,
-        avatar: users.avatar,
-      })
-      .from(users)
-      .where(eq(users.id, post.authorId))
-      .limit(1)
-
-    // Get categories
+    // Get isPrimary from junction table (extras not supported in this Drizzle version)
     const postCats = await db
-      .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        isPrimary: postCategories.isPrimary,
-      })
+      .select({ categoryId: postCategories.categoryId, isPrimary: postCategories.isPrimary })
       .from(postCategories)
-      .innerJoin(categories, eq(postCategories.categoryId, categories.id))
       .where(eq(postCategories.postId, post.id))
 
-    // Get tags
-    const postTgs = await db
-      .select({
-        id: tags.id,
-        name: tags.name,
-        slug: tags.slug,
-        color: tags.color,
-      })
-      .from(postTags)
-      .innerJoin(tags, eq(postTags.tagId, tags.id))
-      .where(eq(postTags.postId, post.id))
+    const isPrimaryMap = new Map(postCats.map((pc) => [pc.categoryId, pc.isPrimary]))
 
-    // Increment view count
+    // Increment view count (write operation, kept separate)
     await db.update(posts).set({ viewCount: sql`${posts.viewCount} + 1` }).where(eq(posts.id, post.id))
 
-    return {
+    const mapped = {
       ...post,
       viewCount: post.viewCount + 1,
-      author: author ?? undefined,
-      categories: postCats,
-      tags: postTgs,
+      author: post.author ?? undefined,
+      categories: (post.categories ?? []).map((pc: any) => ({
+        id: pc.category.id,
+        name: pc.category.name,
+        slug: pc.category.slug,
+        isPrimary: isPrimaryMap.get(pc.category.id) ?? false,
+      })),
+      tags: (post.tags ?? []).map((pt: any) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+        color: pt.tag.color,
+      })),
     } as ArticleWithRelations
+
+    return mapped
   }
 
   /** Get a single article by ID with relations */
   static async getById(id: number): Promise<ArticleWithRelations | null> {
-    const [post] = await db
-      .select()
-      .from(posts)
-      .where(and(eq(posts.id, id), isNull(posts.deletedAt)))
-      .limit(1)
+    const post = await db.query.posts.findFirst({
+      where: and(eq(posts.id, id), isNull(posts.deletedAt)),
+      with: {
+        author: {
+          columns: { id: true, username: true, displayName: true, avatar: true },
+        },
+        categories: {
+          with: {
+            category: {
+              columns: { id: true, name: true, slug: true },
+            },
+          },
+        },
+        tags: {
+          with: {
+            tag: {
+              columns: { id: true, name: true, slug: true, color: true },
+            },
+          },
+        },
+      },
+    })
 
     if (!post) return null
 
-    // Get author
-    const [author] = await db
-      .select({
-        id: users.id,
-        username: users.username,
-        displayName: users.displayName,
-        avatar: users.avatar,
-      })
-      .from(users)
-      .where(eq(users.id, post.authorId))
-      .limit(1)
-
-    // Get categories
+    // Get isPrimary from junction table
     const postCats = await db
-      .select({
-        id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
-        isPrimary: postCategories.isPrimary,
-      })
+      .select({ categoryId: postCategories.categoryId, isPrimary: postCategories.isPrimary })
       .from(postCategories)
-      .innerJoin(categories, eq(postCategories.categoryId, categories.id))
       .where(eq(postCategories.postId, id))
 
-    // Get tags
-    const postTgs = await db
-      .select({
-        id: tags.id,
-        name: tags.name,
-        slug: tags.slug,
-        color: tags.color,
-      })
-      .from(postTags)
-      .innerJoin(tags, eq(postTags.tagId, tags.id))
-      .where(eq(postTags.postId, id))
+    const isPrimaryMap = new Map(postCats.map((pc) => [pc.categoryId, pc.isPrimary]))
 
     return {
       ...post,
-      author: author ?? undefined,
-      categories: postCats,
-      tags: postTgs,
+      author: post.author ?? undefined,
+      categories: (post.categories ?? []).map((pc: any) => ({
+        id: pc.category.id,
+        name: pc.category.name,
+        slug: pc.category.slug,
+        isPrimary: isPrimaryMap.get(pc.category.id) ?? false,
+      })),
+      tags: (post.tags ?? []).map((pt: any) => ({
+        id: pt.tag.id,
+        name: pt.tag.name,
+        slug: pt.tag.slug,
+        color: pt.tag.color,
+      })),
     } as ArticleWithRelations
   }
 
@@ -364,7 +364,7 @@ export class ArticleService {
       const [slugConflict] = await db
         .select({ id: posts.id })
         .from(posts)
-        .where(and(eq(posts.slug, input.slug), ne(posts.id, id)))
+        .where(and(eq(posts.slug, input.slug), ne(posts.id, id), isNull(posts.deletedAt)))
         .limit(1)
 
       if (slugConflict) {
