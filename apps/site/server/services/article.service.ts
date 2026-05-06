@@ -236,6 +236,64 @@ export class ArticleService {
     }
   }
 
+  /** Get a single article by slug with relations (public — published only) */
+  static async getBySlug(slug: string): Promise<ArticleWithRelations | null> {
+    const [post] = await db
+      .select()
+      .from(posts)
+      .where(and(eq(posts.slug, slug), isNull(posts.deletedAt), eq(posts.status, 'published')))
+      .limit(1)
+
+    if (!post) return null
+
+    // Get author
+    const [author] = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        displayName: users.displayName,
+        avatar: users.avatar,
+      })
+      .from(users)
+      .where(eq(users.id, post.authorId))
+      .limit(1)
+
+    // Get categories
+    const postCats = await db
+      .select({
+        id: categories.id,
+        name: categories.name,
+        slug: categories.slug,
+        isPrimary: postCategories.isPrimary,
+      })
+      .from(postCategories)
+      .innerJoin(categories, eq(postCategories.categoryId, categories.id))
+      .where(eq(postCategories.postId, post.id))
+
+    // Get tags
+    const postTgs = await db
+      .select({
+        id: tags.id,
+        name: tags.name,
+        slug: tags.slug,
+        color: tags.color,
+      })
+      .from(postTags)
+      .innerJoin(tags, eq(postTags.tagId, tags.id))
+      .where(eq(postTags.postId, post.id))
+
+    // Increment view count
+    await db.update(posts).set({ viewCount: sql`${posts.viewCount} + 1` }).where(eq(posts.id, post.id))
+
+    return {
+      ...post,
+      viewCount: post.viewCount + 1,
+      author: author ?? undefined,
+      categories: postCats,
+      tags: postTgs,
+    } as ArticleWithRelations
+  }
+
   /** Get a single article by ID with relations */
   static async getById(id: number): Promise<ArticleWithRelations | null> {
     const [post] = await db

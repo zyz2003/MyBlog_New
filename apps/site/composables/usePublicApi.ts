@@ -32,5 +32,10 @@ export function usePublicApi() {
     return $fetch('/api/tags')
   }
 
-  return { getArticles, getArticle, getCategoryTree, getTags }
+  /** Fetch single article by slug (public) */
+  async function getArticleBySlug(slug: string) {
+    return $fetch(`/api/articles/by-slug/${slug}`)
+  }
+
+  return { getArticles, getArticle, getArticleBySlug, getCategoryTree, getTags }
 }
