@@ -15,6 +15,7 @@
     "seed": "npx tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@nuxtjs/sitemap": "^8.0.15",
     "@pinia/nuxt": "^0.11.3",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "11.6.0",
@@ -24,6 +25,7 @@
     "markdown-it": "^14.1.1",
     "nuxt": "^3.16.0",
     "pinia": "^3.0.4",
+    "rss": "^1.2.2",
     "vditor": "^3.11.2",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0"
@@ -35,6 +37,7 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/markdown-it": "^14.1.2",
+    "@types/rss": "^0.0.32",
     "@unocss/nuxt": "^66.0.0",
     "@unocss/preset-icons": "^66.0.0",
     "@unocss/preset-wind": "^66.0.0",
