@@ -21,7 +21,7 @@
 |---|-------|------|--------------|------------------|--------|
 | 7 | 后台布局 + 文章管理 | 后台可写文章 | ADMIN-01~05, STOR-01~03 | 后台可创建/编辑/发布文章 | Complete |
 | 8 | 后台完整管理 | 所有管理功能 | ADMIN-06~12 | 分类/标签/媒体/主题/插件/设置可用 | Complete |
-| 9 | 前台博客 | 博客前台可访问 | FE-01~05, FE-10 | 首页/列表/详情/分类/标签可用 | Pending |
+| 9 | 前台博客 | 博客前台可访问 | FE-01~05, FE-10 | 首页/列表/详情/分类/标签可用 | Complete |
 | 10 | 前台扩展 | 搜索/RSS/SEO | FE-06~09 | 搜索/RSS/SEO 全部可用 | Pending |
 
 ## Milestone 3: 扩展功能
@@ -329,8 +329,20 @@ Plans:
 
 **Goal:** 博客前台可访问
 
+**Plans:** 3 plans
+
+Plans:
+- [x] 09-01-PLAN.md — Blog layout + homepage + article list pages (layout, composables, ArticleCard, Pagination, CategoryNav, TagCloud)
+- [x] 09-02-PLAN.md — Article detail page with Markdown rendering (slug API, markdown-it, highlight.js, TOC, code highlighting)
+- [x] 09-03-PLAN.md — Category/tag filter pages + responsive design (slug lookup APIs, category/tag pages)
+
 **Requirements:**
-- FE-01~05, FE-10
+- FE-01: 首页 (最新文章列表 + 分类/标签导航)
+- FE-02: 文章列表页 (分页 + 分类/标签筛选)
+- FE-03: 文章详情页 (Markdown 渲染 + 目录 + 代码高亮)
+- FE-04: 分类页 (按分类筛选文章)
+- FE-05: 标签页 (按标签筛选文章)
+- FE-10: 响应式设计 (移动端适配)
 
 **Success Criteria:**
 1. 首页展示最新文章
@@ -339,20 +351,49 @@ Plans:
 4. 分类/标签筛选
 5. 移动端响应式
 
+**Deliverables:**
+- `apps/site/layouts/blog.vue` — 博客前台布局
+- `apps/site/pages/index.vue` — 首页
+- `apps/site/pages/articles/index.vue` — 文章列表页
+- `apps/site/pages/articles/[slug].vue` — 文章详情页
+- `apps/site/pages/categories/[slug].vue` — 分类筛选页
+- `apps/site/pages/tags/[slug].vue` — 标签筛选页
+- `apps/site/components/blog/` — 博客组件 (ArticleCard, Pagination, CategoryNav, TagCloud, ArticleContent, TableOfContents)
+- `apps/site/composables/usePublicApi.ts` — 前台 API composable
+- `apps/site/server/api/articles/by-slug/[slug].get.ts` — Slug 查询接口
+- `apps/site/server/api/categories/by-slug/[slug].get.ts` — 分类 Slug 查询
+- `apps/site/server/api/tags/by-slug/[slug].get.ts` — 标签 Slug 查询
+
 ---
 
 ### Phase 10: 前台扩展
 
 **Goal:** 搜索/RSS/SEO 全部可用
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Search page + About page (FE-06, FE-07)
+- [ ] 10-02-PLAN.md — RSS feed server route (FE-08)
+- [ ] 10-03-PLAN.md — SEO meta tags + Sitemap module (FE-09)
+
 **Requirements:**
-- FE-06~09
+- FE-06: 搜索页 (关键词搜索)
+- FE-07: 关于页面
+- FE-08: RSS Feed 生成
+- FE-09: SEO 优化 (meta tags, og tags, sitemap)
 
 **Success Criteria:**
-1. 搜索功能可用
-2. RSS Feed 生成
-3. SEO meta tags
-4. Sitemap 生成
+1. 搜索功能可用 (关键词搜索 + 分页 + URL 同步)
+2. RSS Feed 生成 (/rss.xml 返回 RSS 2.0 XML)
+3. SEO meta tags (所有页面 useSeoMeta + titleTemplate)
+4. Sitemap 生成 (/sitemap.xml 自动发现路由)
+
+**Deliverables:**
+- `apps/site/pages/search.vue` — 搜索页面
+- `apps/site/pages/about.vue` — 关于页面
+- `apps/site/server/routes/rss.xml.ts` — RSS Feed 路由
+- `apps/site/nuxt.config.ts` — Sitemap 模块 + titleTemplate 配置
 
 ---
 
@@ -425,12 +466,12 @@ Plans:
 | ADMIN-10 | 8 | Complete |
 | ADMIN-11 | 8 | Complete |
 | ADMIN-12 | 8 | Complete |
-| FE-01 | 9 | Pending |
-| FE-02 | 9 | Pending |
-| FE-03 | 9 | Pending |
-| FE-04 | 9 | Pending |
-| FE-05 | 9 | Pending |
-| FE-10 | 9 | Pending |
+| FE-01 | 9 | Complete |
+| FE-02 | 9 | Complete |
+| FE-03 | 9 | Complete |
+| FE-04 | 9 | Complete |
+| FE-05 | 9 | Complete |
+| FE-10 | 9 | Complete |
 | FE-06 | 10 | Pending |
 | FE-07 | 10 | Pending |
 | FE-08 | 10 | Pending |
@@ -455,3 +496,5 @@ Plans:
 *Phase 7 completed: 2026-04-30*
 *Phase 8 plan created: 2026-04-30*
 *Phase 8 completed: 2026-04-30*
+*Phase 9 plan created: 2026-04-30*
+*Phase 9 completed: 2026-04-30*
