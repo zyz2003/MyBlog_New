@@ -46,6 +46,7 @@ export const BusinessErrors = {
   INVALID_PARENT: { code: 3006, message: '父分类不存在或不能设置自身为父分类' },
   SETTING_NOT_FOUND: { code: 3007, message: '设置项不存在' },
   MEDIA_NOT_FOUND: { code: 3008, message: '媒体文件不存在' },
+  PAGE_NOT_FOUND: { code: 3011, message: '页面不存在' },
   INVALID_FILE_TYPE: { code: 3009, message: '不支持的文件类型' },
   FILE_TOO_LARGE: { code: 3010, message: '文件大小超过限制' },
 } as const

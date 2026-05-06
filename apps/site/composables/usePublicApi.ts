@@ -47,5 +47,15 @@ export function usePublicApi() {
     return $fetch(`/api/tags/by-slug/${slug}`)
   }
 
-  return { getArticles, getArticle, getArticleBySlug, getCategoryTree, getTags, getCategoryBySlug, getTagBySlug }
+  /** Fetch page by slug */
+  async function getPageBySlug(slug: string) {
+    return $fetch(`/api/pages/by-slug/${slug}`)
+  }
+
+  /** Fetch navigation pages */
+  async function getNavPages() {
+    return $fetch('/api/pages/nav')
+  }
+
+  return { getArticles, getArticle, getArticleBySlug, getCategoryTree, getTags, getCategoryBySlug, getTagBySlug, getPageBySlug, getNavPages }
 }

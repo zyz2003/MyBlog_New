@@ -74,6 +74,11 @@ export default defineNuxtConfig({
     exclude: ['/admin/**', '/api/**'],
   } as any,
 
+  // Vue runtime compiler for dynamic component rendering
+  vue: {
+    runtimeCompiler: true,
+  },
+
   // Compatibility
   compatibilityDate: '2025-01-01',
 })
