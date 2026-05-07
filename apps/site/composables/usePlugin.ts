@@ -1,4 +1,5 @@
 import { usePluginStore } from '~/stores/plugin'
+import { usePublicApi } from '~/composables/usePublicApi'
 
 /**
  * Composable for reactive plugin access
@@ -6,6 +7,7 @@ import { usePluginStore } from '~/stores/plugin'
  */
 export function usePlugin() {
   const store = usePluginStore()
+  const publicApi = usePublicApi()
 
   // Fetch plugins on first use (client-side only)
   if (import.meta.client && store.plugins.length === 0) {
@@ -29,6 +31,30 @@ export function usePlugin() {
     return computed(() => store.plugins.find((p) => p.meta.name === name)?.config ?? {})
   }
 
+  /** Check if a path is registered by an enabled plugin */
+  async function isPluginPath(path: string): Promise<{ registered: boolean; pluginName: string | null }> {
+    try {
+      const response = await publicApi.get<{ registered: boolean; pluginName: string | null }>(
+        `/api/pages/check-plugin?path=${encodeURIComponent(path)}`,
+      )
+      return response
+    }
+    catch {
+      return { registered: false, pluginName: null }
+    }
+  }
+
+  /** Get all plugin-registered page paths */
+  async function getPluginPagePaths(): Promise<string[]> {
+    try {
+      const response = await publicApi.get<{ pages: string[] }>('/api/plugins/page-routes')
+      return response.pages || []
+    }
+    catch {
+      return []
+    }
+  }
+
   return {
     // Reactive state
     plugins: computed(() => store.plugins),
@@ -39,6 +65,10 @@ export function usePlugin() {
     getPluginsForMountPoint,
     isPluginEnabled,
     getPluginConfig,
+
+    // Page route methods
+    isPluginPath,
+    getPluginPagePaths,
 
     // Actions
     refresh: store.fetchPlugins,

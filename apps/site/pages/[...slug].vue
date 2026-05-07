@@ -9,29 +9,26 @@ const slug = computed(() => {
 
 const { getPageBySlug } = usePublicApi()
 
+// Fetch database page
 const { data } = await useAsyncData(
   () => `page-${slug.value}`,
   () => getPageBySlug(slug.value),
   { watch: [slug] },
 )
 
-if (!data.value?.data) {
-  throw createError({ statusCode: 404, message: '页面不存在' })
-}
-
-const page = computed(() => data.value!.data)
+const pageData = computed(() => data.value?.data)
 
 useSeoMeta({
-  title: () => page.value?.seoTitle || page.value?.title || '',
-  ogTitle: () => page.value?.seoTitle || page.value?.title || '',
-  description: () => page.value?.seoDescription || '',
-  ogDescription: () => page.value?.seoDescription || '',
+  title: () => pageData.value?.seoTitle || pageData.value?.title || '',
+  ogTitle: () => pageData.value?.seoTitle || pageData.value?.title || '',
+  description: () => pageData.value?.seoDescription || '',
+  ogDescription: () => pageData.value?.seoDescription || '',
 })
 </script>
 
 <template>
-  <ClientOnly v-if="page">
-    <DynamicPageRenderer :code="page.componentCode" />
+  <ClientOnly v-if="pageData">
+    <DynamicPageRenderer :code="pageData.componentCode" />
     <template #fallback>
       <div class="py-12 text-center text-gray-400">
         加载中...
