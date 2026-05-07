@@ -1,4 +1,5 @@
 import { pluginManager } from '../../../core/plugin/manager'
+import type { PluginAdapterExtended } from '../../../core/plugin/types'
 
 /**
  * GET /api/pages/check-plugin?path=/xxx
@@ -27,9 +28,10 @@ export default defineEventHandler(async (event) => {
   if (registeredPath) {
     // Find which plugin owns this route
     let pluginName = 'unknown'
-    for (const name of Array.from(pluginManager.getEnabled())) {
-      const plugin = pluginManager.getPlugin(name)
-      if (plugin && 'pages' in plugin && plugin.pages && registeredPath in plugin.pages) {
+    const enabledPlugins = pluginManager.getEnabled()
+
+    for (const plugin of enabledPlugins) {
+      if (plugin && 'pages' in plugin && typeof plugin.pages === 'object' && plugin.pages !== null && registeredPath in plugin.pages) {
         pluginName = plugin.meta.name
         break
       }

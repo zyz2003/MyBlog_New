@@ -1,5 +1,4 @@
 import { usePluginStore } from '~/stores/plugin'
-import { usePublicApi } from '~/composables/usePublicApi'
 
 /**
  * Composable for reactive plugin access
@@ -7,7 +6,6 @@ import { usePublicApi } from '~/composables/usePublicApi'
  */
 export function usePlugin() {
   const store = usePluginStore()
-  const publicApi = usePublicApi()
 
   // Fetch plugins on first use (client-side only)
   if (import.meta.client && store.plugins.length === 0) {
@@ -34,10 +32,10 @@ export function usePlugin() {
   /** Check if a path is registered by an enabled plugin */
   async function isPluginPath(path: string): Promise<{ registered: boolean; pluginName: string | null }> {
     try {
-      const response = await publicApi.get<{ registered: boolean; pluginName: string | null }>(
+      const response = await $fetch<{ code: number; data: { registered: boolean; pluginName: string | null } }>(
         `/api/pages/check-plugin?path=${encodeURIComponent(path)}`,
       )
-      return response
+      return response.data
     }
     catch {
       return { registered: false, pluginName: null }
@@ -47,8 +45,8 @@ export function usePlugin() {
   /** Get all plugin-registered page paths */
   async function getPluginPagePaths(): Promise<string[]> {
     try {
-      const response = await publicApi.get<{ pages: string[] }>('/api/plugins/page-routes')
-      return response.pages || []
+      const response = await $fetch<{ code: number; data: { pages: string[] } }>('/api/plugins/page-routes')
+      return response.data.pages || []
     }
     catch {
       return []
