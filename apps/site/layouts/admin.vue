@@ -4,8 +4,8 @@ import { useAuth } from '~/composables/useAuth'
 const { user, logout } = useAuth()
 
 const sidebarCollapsed = ref(false)
+const showSearch = ref(false)
 
-// Persist sidebar state in localStorage
 onMounted(() => {
   const saved = localStorage.getItem('sidebar_collapsed')
   if (saved === 'true') {
@@ -30,7 +30,7 @@ function toggleSidebar() {
     <!-- Main content area -->
     <div class="flex-1 flex flex-col overflow-hidden">
       <!-- Top navbar -->
-      <AdminCommonNavbar :user="user" @logout="logout">
+      <AdminCommonNavbar :user="user" @logout="logout" @search="showSearch = true">
         <AdminCommonBreadcrumb />
       </AdminCommonNavbar>
 
@@ -39,5 +39,8 @@ function toggleSidebar() {
         <slot />
       </main>
     </div>
+
+    <!-- Command Palette -->
+    <AdminCommonCommandPalette v-if="showSearch" @close="showSearch = false" />
   </div>
 </template>

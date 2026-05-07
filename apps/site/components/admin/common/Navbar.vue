@@ -7,6 +7,7 @@ defineProps<{
 
 const emit = defineEmits<{
   logout: []
+  search: []
 }>()
 
 const showDropdown = ref(false)
@@ -21,7 +22,6 @@ function handleLogout() {
   emit('logout')
 }
 
-// Close dropdown when clicking outside
 function handleClickOutside(event: MouseEvent) {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
     showDropdown.value = false
@@ -44,8 +44,18 @@ onUnmounted(() => {
       <slot />
     </div>
 
-    <!-- Right: User menu -->
-    <div ref="dropdownRef" class="relative">
+    <!-- Right: Search + User menu -->
+    <div class="flex items-center gap-2">
+      <button
+        class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors text-sm text-gray-500"
+        @click="$emit('search')"
+      >
+        <span class="i-heroicons-magnifying-glass w-4 h-4" />
+        <span class="hidden sm:inline">搜索</span>
+        <kbd class="hidden sm:inline text-xs bg-gray-100 px-1.5 py-0.5 rounded">Ctrl+K</kbd>
+      </button>
+
+      <div ref="dropdownRef" class="relative">
       <button
         class="flex items-center gap-2 px-3 py-1.5 rounded-md hover:bg-gray-100 transition-colors"
         @click="toggleDropdown"
