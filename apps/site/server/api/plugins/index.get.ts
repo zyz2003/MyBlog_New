@@ -22,6 +22,7 @@ export default defineEventHandler((event) => {
     mountPoints: plugin.mountPoints,
     enabled: pluginManager.isEnabled(plugin.meta.name),
     config: pluginManager.getConfig(plugin.meta.name) ?? {},
+    configSchema: plugin.configSchema,
   }))
 
   return successResponse(data)

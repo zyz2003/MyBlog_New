@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'blog' })
+definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const { getArticles } = usePublicApi()
@@ -27,11 +27,20 @@ if (import.meta.server) {
     ogDescription: '所有文章',
   })
 }
+
+const titleStyle = computed(() => ({
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-heading, system-ui)',
+}))
+
+const emptyStyle = computed(() => ({
+  color: 'var(--color-text-muted, #94A3B8)',
+}))
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">文章列表</h1>
+    <h1 class="text-2xl font-bold mb-6" :style="titleStyle">文章列表</h1>
     <div v-if="data?.data?.items?.length" class="space-y-4">
       <BlogArticleCard
         v-for="article in data.data.items"
@@ -39,7 +48,7 @@ if (import.meta.server) {
         :article="article"
       />
     </div>
-    <div v-else class="text-center py-12 text-gray-400">
+    <div v-else class="text-center py-12" :style="emptyStyle">
       暂无文章
     </div>
     <BlogPagination

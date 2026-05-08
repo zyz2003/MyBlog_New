@@ -4,6 +4,7 @@ definePageMeta({
 })
 
 const api = useAdminApi()
+const router = useRouter()
 
 interface PageItem {
   id: number
@@ -24,13 +25,11 @@ async function fetchPages() {
   try {
     const params: Record<string, unknown> = { pageSize: 100 }
     if (filter.value !== 'all') params.status = filter.value
-    const res = await api.get<{ items: PageItem[] }>('/api/pages', params)
+    const res = await api.get<{ items: PageItem[] }>('/api/admin/pages', params)
     pages.value = res.items
-  }
-  catch (e) {
+  } catch (e) {
     console.error('Failed to fetch pages:', e)
-  }
-  finally {
+  } finally {
     loading.value = false
   }
 }
@@ -40,8 +39,7 @@ async function deletePage(id: number) {
   try {
     await api.del(`/api/pages/${id}`)
     await fetchPages()
-  }
-  catch (e) {
+  } catch (e) {
     console.error('Failed to delete:', e)
   }
 }
@@ -50,8 +48,7 @@ async function toggleNav(page: PageItem) {
   try {
     await api.put(`/api/pages/${page.id}`, { showInNav: !page.showInNav })
     await fetchPages()
-  }
-  catch (e) {
+  } catch (e) {
     console.error('Failed to update:', e)
   }
 }
@@ -60,6 +57,19 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('zh-CN', {
     year: 'numeric', month: '2-digit', day: '2-digit',
   })
+}
+
+function copyLink(slug: string) {
+  const url = `${window.location.origin}/${slug}`
+  navigator.clipboard.writeText(url).then(() => {
+    alert('链接已复制到剪贴板')
+  }).catch(() => {
+    alert('复制失败，请手动复制')
+  })
+}
+
+function viewPage(slug: string) {
+  window.open(`/${slug}`, '_blank')
 }
 
 const statusLabels: Record<string, string> = {
@@ -84,14 +94,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">自定义页面</h1>
-      <NuxtLink to="/admin/pages/new" class="btn-primary px-4 py-2 flex items-center gap-2">
+      <h1 class="text-2xl font-bold text-amber-900">自定义页面</h1>
+      <button
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white transition-all cursor-pointer"
+        style="background: linear-gradient(to right, #F59E0B, #EA580C);"
+        @click="router.push('/admin/pages/new')"
+      >
         <span class="i-heroicons-plus w-4 h-4" />
         新建页面
-      </NuxtLink>
+      </button>
     </div>
 
     <!-- Filter tabs -->
@@ -100,10 +114,10 @@ onMounted(() => {
         <button
           v-for="f in ['all', 'published', 'draft'] as const"
           :key="f"
-          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors"
+          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
           :class="filter === f
-            ? 'border-primary text-primary'
-            : 'border-transparent text-gray-500 hover:text-gray-700'"
+            ? 'border-amber-500 text-amber-600'
+            : 'border-transparent text-gray-500 hover:text-amber-700'"
           @click="filter = f; fetchPages()"
         >
           {{ f === 'all' ? '全部' : f === 'published' ? '已发布' : '草稿' }}
@@ -112,7 +126,7 @@ onMounted(() => {
     </div>
 
     <!-- Page list -->
-    <div class="card overflow-hidden">
+    <div class="rounded-xl overflow-hidden" style="background: rgba(255, 255, 255, 0.9); border: 1px solid #FDE68A; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
       <div v-if="loading" class="p-8">
         <div class="space-y-4">
           <div v-for="i in 5" :key="i" class="h-12 bg-gray-100 rounded animate-pulse" />
@@ -121,23 +135,23 @@ onMounted(() => {
 
       <table v-else-if="pages.length > 0" class="w-full">
         <thead>
-          <tr class="border-b border-gray-200 bg-gray-50">
-            <th class="text-left px-4 py-3 text-sm font-medium text-gray-500">标题</th>
-            <th class="text-left px-4 py-3 text-sm font-medium text-gray-500 w-24">模板</th>
-            <th class="text-left px-4 py-3 text-sm font-medium text-gray-500 w-24">状态</th>
-            <th class="text-left px-4 py-3 text-sm font-medium text-gray-500 w-24">导航</th>
-            <th class="text-left px-4 py-3 text-sm font-medium text-gray-500 w-32">更新时间</th>
-            <th class="text-right px-4 py-3 text-sm font-medium text-gray-500 w-32">操作</th>
+          <tr class="border-b border-amber-100" style="background: #FEF3C7;">
+            <th class="text-left px-4 py-3 text-sm font-medium text-amber-700">标题</th>
+            <th class="text-left px-4 py-3 text-sm font-medium text-amber-700 w-24">模板</th>
+            <th class="text-left px-4 py-3 text-sm font-medium text-amber-700 w-24">状态</th>
+            <th class="text-left px-4 py-3 text-sm font-medium text-amber-700 w-24">导航</th>
+            <th class="text-left px-4 py-3 text-sm font-medium text-amber-700 w-32">更新时间</th>
+            <th class="text-right px-4 py-3 text-sm font-medium text-amber-700 w-40">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="page in pages"
             :key="page.id"
-            class="border-b border-gray-100 hover:bg-gray-50"
+            class="border-b border-amber-50 hover:bg-amber-50/50"
           >
             <td class="px-4 py-3">
-              <div class="font-medium text-gray-900">{{ page.title }}</div>
+              <div class="font-medium text-amber-900">{{ page.title }}</div>
               <div class="text-xs text-gray-400 font-mono">/{{ page.slug }}</div>
             </td>
             <td class="px-4 py-3 text-sm text-gray-600">
@@ -153,7 +167,7 @@ onMounted(() => {
             </td>
             <td class="px-4 py-3">
               <button
-                class="p-1 rounded transition-colors"
+                class="p-1 rounded transition-colors cursor-pointer"
                 :class="page.showInNav ? 'text-green-600' : 'text-gray-300'"
                 @click="toggleNav(page)"
               >
@@ -167,15 +181,31 @@ onMounted(() => {
               {{ formatDate(page.updatedAt) }}
             </td>
             <td class="px-4 py-3">
-              <div class="flex items-center justify-end gap-2">
-                <NuxtLink
-                  :to="`/admin/pages/${page.id}`"
-                  class="p-1.5 text-gray-400 hover:text-blue-600 rounded"
+              <div class="flex items-center justify-end gap-1">
+                <button
+                  class="p-1.5 text-gray-400 hover:text-amber-600 rounded cursor-pointer"
+                  title="复制链接"
+                  @click="copyLink(page.slug)"
+                >
+                  <span class="i-heroicons-link w-4 h-4" />
+                </button>
+                <button
+                  class="p-1.5 text-gray-400 hover:text-green-600 rounded cursor-pointer"
+                  title="查看前台"
+                  @click="viewPage(page.slug)"
+                >
+                  <span class="i-heroicons-eye w-4 h-4" />
+                </button>
+                <button
+                  class="p-1.5 text-gray-400 hover:text-blue-600 rounded cursor-pointer"
+                  title="编辑"
+                  @click="router.push(`/admin/pages/${page.id}`)"
                 >
                   <span class="i-heroicons-pencil-square w-4 h-4" />
-                </NuxtLink>
+                </button>
                 <button
-                  class="p-1.5 text-gray-400 hover:text-red-600 rounded"
+                  class="p-1.5 text-gray-400 hover:text-red-600 rounded cursor-pointer"
+                  title="删除"
                   @click="deletePage(page.id)"
                 >
                   <span class="i-heroicons-trash w-4 h-4" />
@@ -186,12 +216,16 @@ onMounted(() => {
         </tbody>
       </table>
 
-      <div v-else class="text-center py-12 text-gray-400">
-        <span class="i-heroicons-document-duplicate w-12 h-12 mx-auto block mb-2" />
-        <p>暂无页面</p>
-        <NuxtLink to="/admin/pages/new" class="text-primary hover:underline mt-2 inline-block">
+      <div v-else class="text-center py-12">
+        <span class="i-heroicons-document-duplicate w-12 h-12 mx-auto block mb-2 text-gray-300" />
+        <p class="text-gray-400 mb-4">暂无页面</p>
+        <button
+          class="inline-block px-4 py-2 font-medium text-white rounded-lg cursor-pointer"
+          style="background: linear-gradient(to right, #F59E0B, #EA580C);"
+          @click="router.push('/admin/pages/new')"
+        >
           创建第一个页面
-        </NuxtLink>
+        </button>
       </div>
     </div>
   </div>

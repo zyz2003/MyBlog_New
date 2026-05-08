@@ -1,5 +1,5 @@
 import { PageService } from '../../services/page.service'
-import { successResponse, errorResponse, BusinessErrors } from '../../utils/response'
+import { successResponse, errorResponse, BusinessErrors, ValidationErrors } from '../../utils/response'
 
 /**
  * GET /api/pages/:id
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   if (!id || Number.isNaN(id)) {
     throw createError({
       statusCode: 400,
-      data: errorResponse(BusinessErrors.MISSING_PARAM.code, '无效的页面 ID'),
+      data: errorResponse(ValidationErrors.MISSING_PARAM.code, '无效的页面 ID'),
     })
   }
 

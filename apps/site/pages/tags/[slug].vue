@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'blog' })
+definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -29,16 +29,25 @@ useSeoMeta({
   description: () => `标签 ${tag.value?.name} 下的所有文章`,
   ogDescription: () => `标签 ${tag.value?.name} 下的所有文章`,
 })
+
+const titleStyle = computed(() => ({
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-heading, system-ui)',
+}))
+
+const emptyStyle = computed(() => ({
+  color: 'var(--color-text-muted, #94A3B8)',
+}))
 </script>
 
 <template>
   <div v-if="tag">
     <div class="mb-6">
-      <h1 class="text-2xl font-bold flex items-center gap-2">
+      <h1 class="text-2xl font-bold flex items-center gap-2" :style="titleStyle">
         标签:
         <span
           class="rounded px-3 py-1 text-lg"
-          :style="{ background: (tag.color || '#E5E7EB') + '30', color: tag.color || '#6B7280' }"
+          :style="{ background: (tag.color || 'var(--color-secondary, #E5E7EB)') + '30', color: tag.color || 'var(--color-text-muted, #6B7280)' }"
         >
           {{ tag.name }}
         </span>
@@ -51,7 +60,7 @@ useSeoMeta({
         :article="article"
       />
     </div>
-    <div v-else class="text-center py-12 text-gray-400">
+    <div v-else class="text-center py-12" :style="emptyStyle">
       该标签下暂无文章
     </div>
     <BlogPagination

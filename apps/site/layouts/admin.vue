@@ -20,7 +20,7 @@ function toggleSidebar() {
 </script>
 
 <template>
-  <div class="flex h-screen bg-gray-50 overflow-hidden">
+  <div class="flex h-screen bg-amber-50/50 dark:bg-gray-900 overflow-hidden">
     <!-- Sidebar -->
     <AdminCommonSidebar
       :collapsed="sidebarCollapsed"
@@ -35,7 +35,7 @@ function toggleSidebar() {
       </AdminCommonNavbar>
 
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto p-6">
+      <main class="flex-1 overflow-y-auto p-6 bg-amber-50/30 dark:bg-gray-900">
         <slot />
       </main>
     </div>

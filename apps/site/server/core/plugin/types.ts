@@ -7,7 +7,7 @@
 export type PluginType = 'comment' | 'analytics' | 'search' | 'social' | 'ad' | 'feature' | 'custom'
 
 /** Available mount points in the blog layout */
-export type MountPoint = 'head-end' | 'header-end' | 'sidebar' | 'post-end' | 'footer-start' | 'body-end'
+export type MountPoint = 'head-end' | 'header-end' | 'sidebar' | 'post-end' | 'footer-start' | 'body-end' | 'page'
 
 /** Config field input types */
 export type ConfigFieldType = 'string' | 'number' | 'boolean' | 'select' | 'multi-select' | 'code' | 'textarea' | 'color' | 'image'
@@ -72,6 +72,15 @@ export interface PluginAdapter {
   onMount?(container: HTMLElement, config: Record<string, unknown>): void
 }
 
+/** Plugin page definition */
+export interface PluginPage {
+  title: string
+  componentCode: string
+  showInNav?: boolean
+  navLabel?: string
+  navOrder?: number
+}
+
 /**
  * Extended plugin adapter with lifecycle hooks and dependency management
  * Plugins implementing this get access to init/unmount/config-change lifecycle
@@ -89,4 +98,6 @@ export interface PluginAdapterExtended extends PluginAdapter {
   dependencies?: string[]
   /** Plugin names that conflict with this plugin */
   conflicts?: string[]
+  /** Pages this plugin registers (path -> page definition) */
+  pages?: Record<string, PluginPage>
 }

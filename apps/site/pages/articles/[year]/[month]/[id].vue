@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'blog' })
+definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const id = Number(route.params.id)
@@ -31,21 +31,39 @@ const displayDate = computed(() => {
   return new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
 })
 
-const articleUrl = computed(() => {
-  if (!article.value) return ''
-  const date = new Date(article.value.publishedAt || article.value.createdAt)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  return `/articles/${year}/${month}/${article.value.id}`
-})
+const titleStyle = computed(() => ({
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-heading, system-ui)',
+}))
+
+const metaStyle = computed(() => ({
+  color: 'var(--color-text-muted, #64748B)',
+}))
+
+const categoryBadgeStyle = computed(() => ({
+  background: 'var(--color-primary, #3B82F6)15',
+  color: 'var(--color-primary, #3B82F6)',
+  borderRadius: 'var(--radius-small, 4px)',
+  padding: '2px 8px',
+  fontSize: '0.75rem',
+  transition: 'background var(--transition-fast, 0.15s ease)',
+}))
+
+const borderStyle = computed(() => ({
+  borderTop: '1px solid var(--color-border, #E2E8F0)',
+}))
+
+const linkStyle = computed(() => ({
+  color: 'var(--color-primary, #3B82F6)',
+}))
 </script>
 
 <template>
   <div v-if="article">
     <!-- Article header -->
     <header class="mb-8">
-      <h1 class="text-3xl font-bold mb-4">{{ article.title }}</h1>
-      <div class="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+      <h1 class="text-3xl font-bold mb-4" :style="titleStyle">{{ article.title }}</h1>
+      <div class="flex flex-wrap items-center gap-3 text-sm" :style="metaStyle">
         <span>{{ displayDate }}</span>
         <span v-if="article.author">{{ article.author.displayName || article.author.username }}</span>
         <span v-if="article.viewCount">{{ article.viewCount }} 次阅读</span>
@@ -55,7 +73,7 @@ const articleUrl = computed(() => {
           v-for="cat in article.categories"
           :key="cat.id"
           :to="`/categories/${cat.slug}`"
-          class="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-600 hover:bg-blue-100"
+          :style="categoryBadgeStyle"
         >
           {{ cat.name }}
         </NuxtLink>
@@ -64,7 +82,7 @@ const articleUrl = computed(() => {
           :key="tag.id"
           :to="`/tags/${tag.slug}`"
           class="rounded px-2 py-0.5 text-xs"
-          :style="{ background: (tag.color || '#E5E7EB') + '20', color: tag.color || '#6B7280' }"
+          :style="{ background: (tag.color || 'var(--color-secondary, #E5E7EB)') + '20', color: tag.color || 'var(--color-text-muted, #6B7280)' }"
         >
           {{ tag.name }}
         </NuxtLink>
@@ -80,8 +98,8 @@ const articleUrl = computed(() => {
     <BlogArticleContent :content="article.content || ''" />
 
     <!-- Back link -->
-    <div class="mt-12 pt-6 border-t border-gray-200">
-      <NuxtLink to="/articles" class="text-blue-600 hover:underline text-sm">
+    <div class="mt-12 pt-6" :style="borderStyle">
+      <NuxtLink to="/articles" class="hover:underline text-sm" :style="linkStyle">
         &larr; 返回文章列表
       </NuxtLink>
     </div>

@@ -27,47 +27,73 @@ const articleUrl = computed(() => {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   return `/articles/${year}/${month}/${props.article.id}`
 })
+
+const coverUrl = computed(() => {
+  return props.article.coverImage || `https://picsum.photos/seed/${props.article.id}/400/240`
+})
 </script>
 
 <template>
-  <article class="group rounded-lg border border-gray-200 bg-white p-4 sm:p-6 transition-shadow hover:shadow-md">
-    <div class="flex gap-4">
+  <article class="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-amber-100 dark:border-gray-700">
+    <NuxtLink :to="articleUrl" class="block">
       <!-- Cover image -->
-      <div v-if="article.coverImage" class="hidden sm:block w-32 h-24 rounded-md overflow-hidden shrink-0">
-        <img :src="article.coverImage" :alt="article.title" class="w-full h-full object-cover" />
-      </div>
-      <!-- Content -->
-      <div class="flex-1 min-w-0">
-        <NuxtLink :to="articleUrl" class="block">
-          <h2 class="text-lg font-semibold truncate group-hover:text-blue-600 transition-colors">
-            {{ article.title }}
-          </h2>
-        </NuxtLink>
-        <p v-if="article.excerpt" class="mt-2 text-sm text-gray-500 line-clamp-2">
-          {{ article.excerpt }}
-        </p>
-        <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-400">
-          <span>{{ displayDate }}</span>
-          <span v-if="article.viewCount">{{ article.viewCount }} 次阅读</span>
-          <NuxtLink
-            v-for="cat in article.categories?.slice(0, 2)"
-            :key="cat.id"
-            :to="`/categories/${cat.slug}`"
-            class="rounded bg-blue-50 px-2 py-0.5 text-blue-600 hover:bg-blue-100"
-          >
-            {{ cat.name }}
-          </NuxtLink>
-          <NuxtLink
-            v-for="tag in article.tags?.slice(0, 3)"
-            :key="tag.id"
-            :to="`/tags/${tag.slug}`"
-            class="rounded px-2 py-0.5"
-            :style="{ background: (tag.color || '#E5E7EB') + '20', color: tag.color || '#6B7280' }"
-          >
-            {{ tag.name }}
-          </NuxtLink>
+      <div class="relative h-48 overflow-hidden bg-amber-100 dark:bg-gray-700">
+        <img
+          :src="coverUrl"
+          :alt="article.title"
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        >
+        <!-- Category badge -->
+        <div v-if="article.categories?.length" class="absolute top-4 left-4">
+          <span class="px-3 py-1 text-xs font-medium bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-amber-700 dark:text-amber-400 rounded-full shadow-sm">
+            {{ article.categories[0].name }}
+          </span>
         </div>
       </div>
-    </div>
+
+      <!-- Content -->
+      <div class="p-5">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors line-clamp-2 mb-2">
+          {{ article.title }}
+        </h2>
+        <p v-if="article.excerpt" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
+          {{ article.excerpt }}
+        </p>
+
+        <!-- Meta -->
+        <div class="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+          <div class="flex items-center gap-3">
+            <span class="flex items-center gap-1">
+              <span class="i-heroicons-calendar w-4 h-4" />
+              {{ displayDate }}
+            </span>
+            <span v-if="article.viewCount" class="flex items-center gap-1">
+              <span class="i-heroicons-eye w-4 h-4" />
+              {{ article.viewCount }}
+            </span>
+          </div>
+
+          <!-- Tags -->
+          <div v-if="article.tags?.length" class="flex gap-1">
+            <span
+              v-for="tag in article.tags.slice(0, 2)"
+              :key="tag.id"
+              class="px-2 py-0.5 text-xs rounded-full bg-amber-100 dark:bg-gray-700 text-amber-600 dark:text-gray-400"
+            >
+              {{ tag.name }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </NuxtLink>
   </article>
 </template>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

@@ -76,7 +76,7 @@ export class PageService {
 
     const conditions = [isNull(pages.deletedAt)]
 
-    if (params.status) {
+    if (params.status && (params.status === 'draft' || params.status === 'published')) {
       conditions.push(eq(pages.status, params.status))
     }
 
@@ -227,5 +227,57 @@ export class PageService {
     await db.update(pages)
       .set({ deletedAt: new Date() })
       .where(eq(pages.id, id))
+  }
+
+  /**
+   * Upsert a plugin-managed page
+   * Creates the page if it doesn't exist, updates if it does
+   * Used by plugin system to register plugin pages in the database
+   */
+  static async upsertPluginPage(slug: string, data: {
+    title: string
+    componentCode: string
+    showInNav?: boolean
+    navLabel?: string
+    navOrder?: number
+  }): Promise<void> {
+    const existing = await db.select().from(pages)
+      .where(and(eq(pages.slug, slug), isNull(pages.deletedAt)))
+      .limit(1)
+
+    if (existing.length > 0) {
+      await db.update(pages)
+        .set({
+          title: data.title,
+          componentCode: data.componentCode,
+          showInNav: data.showInNav ?? false,
+          navLabel: data.navLabel ?? null,
+          navOrder: data.navOrder ?? 0,
+          updatedAt: new Date(),
+        })
+        .where(eq(pages.id, existing[0].id))
+    }
+    else {
+      await db.insert(pages).values({
+        title: data.title,
+        slug,
+        componentCode: data.componentCode,
+        template: 'default',
+        showInNav: data.showInNav ?? false,
+        navLabel: data.navLabel ?? null,
+        navOrder: data.navOrder ?? 0,
+        status: 'published',
+        authorId: 0, // System/plugin owned
+      })
+    }
+  }
+
+  /**
+   * Soft delete all pages owned by a plugin (by slug prefix)
+   */
+  static async deletePluginPage(slug: string): Promise<void> {
+    await db.update(pages)
+      .set({ deletedAt: new Date() })
+      .where(and(eq(pages.slug, slug), isNull(pages.deletedAt)))
   }
 }

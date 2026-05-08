@@ -22,7 +22,7 @@ const component = computed(() => {
 
     // Match const x = ref(value)
     const refPattern = /const\s+(\w+)\s*=\s*ref\(([^)]*)\)/g
-    let match
+    let match: RegExpExecArray | null
     while ((match = refPattern.exec(scriptContent)) !== null) {
       try {
         declarations[match[1]] = ref(new Function(`return ${match[2]}`)())
@@ -35,11 +35,12 @@ const component = computed(() => {
     // Match const x = computed(() => value)
     const computedPattern = /const\s+(\w+)\s*=\s*computed\(\(\)\s*=>\s*([^)]*)\)/g
     while ((match = computedPattern.exec(scriptContent)) !== null) {
+      const m = match!
       try {
-        declarations[match[1]] = computed(() => new Function(`return ${match[2]}`)())
+        declarations[m[1]] = computed(() => new Function(`return ${m[2]}`)())
       }
       catch {
-        declarations[match[1]] = computed(() => match?.[2])
+        declarations[m[1]] = computed(() => m[2])
       }
     }
 

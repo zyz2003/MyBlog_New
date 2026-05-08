@@ -1,5 +1,6 @@
 import { pluginManager } from '../core/plugin'
 import testPlugin from '../core/plugin/test-plugin'
+import friendsPlugin from '../core/plugin/friends-plugin'
 
 /**
  * Server plugin: registers all plugins on startup
@@ -8,6 +9,7 @@ import testPlugin from '../core/plugin/test-plugin'
 export default defineNitroPlugin(async () => {
   // Register plugins
   pluginManager.register(testPlugin)
+  pluginManager.register(friendsPlugin)
 
   // Load enabled state from database
   await pluginManager.loadFromDb()

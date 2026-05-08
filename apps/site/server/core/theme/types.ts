@@ -59,6 +59,46 @@ export interface ThemeLayout {
   sidebarPosition: 'left' | 'right' | 'none'
   /** Footer style variant */
   footerStyle: 'simple' | 'detailed' | 'minimal'
+  /** Navigation links (customizable per theme) */
+  navLinks?: Array<{ label: string; to: string }>
+  /** Show sidebar */
+  showSidebar?: boolean
+  /** Sidebar components to display */
+  sidebarComponents?: string[]
+}
+
+/** Theme shadow presets */
+export interface ThemeShadows {
+  sm: string
+  md: string
+  lg: string
+}
+
+/** Theme transition presets */
+export interface ThemeTransitions {
+  fast: string
+  normal: string
+  slow: string
+}
+
+/** Component-level style overrides */
+export interface ThemeComponents {
+  articleCard?: {
+    showExcerpt?: boolean
+    showDate?: boolean
+    showAuthor?: boolean
+    showCover?: boolean
+    excerptLines?: number
+  }
+  articleContent?: {
+    maxWidth?: string
+    codeTheme?: string
+    lineHeight?: number
+  }
+  sidebar?: {
+    width?: string
+    background?: string
+  }
 }
 
 /**
@@ -76,6 +116,12 @@ export interface ThemeConfig {
   borderRadius: ThemeBorderRadius
   /** Layout configuration */
   layout: ThemeLayout
+  /** Shadow presets */
+  shadows?: ThemeShadows
+  /** Transition presets */
+  transitions?: ThemeTransitions
+  /** Component-level overrides */
+  components?: ThemeComponents
 }
 
 /** Theme metadata (from config.json) */
@@ -156,7 +202,23 @@ export function CSSVariablesMap(config: ThemeConfig): Record<string, string> {
 
   // Layout variables
   for (const [key, value] of Object.entries(config.layout)) {
-    vars[`--layout-${key}`] = value
+    if (typeof value === 'string') {
+      vars[`--layout-${key}`] = value
+    }
+  }
+
+  // Shadow variables
+  if (config.shadows) {
+    for (const [key, value] of Object.entries(config.shadows)) {
+      vars[`--shadow-${key}`] = value
+    }
+  }
+
+  // Transition variables
+  if (config.transitions) {
+    for (const [key, value] of Object.entries(config.transitions)) {
+      vars[`--transition-${key}`] = value
+    }
   }
 
   return vars

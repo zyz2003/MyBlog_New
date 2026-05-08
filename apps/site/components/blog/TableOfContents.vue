@@ -50,19 +50,39 @@ onMounted(() => {
 
   onUnmounted(() => observer.disconnect())
 })
+
+const tocStyle = computed(() => ({
+  background: 'var(--color-surface, #fff)',
+  border: '1px solid var(--color-border, #E2E8F0)',
+  borderRadius: 'var(--radius-medium, 8px)',
+}))
+
+const headingStyle = computed(() => ({
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-heading, system-ui)',
+}))
+
+const linkStyle = computed(() => ({
+  color: 'var(--color-text-muted, #64748B)',
+  transition: 'color var(--transition-fast, 0.15s ease)',
+}))
+
+const activeLinkStyle = computed(() => ({
+  color: 'var(--color-primary, #3B82F6)',
+}))
 </script>
 
 <template>
-  <div v-if="headings.length" class="rounded-lg border border-gray-200 bg-white p-4">
-    <h3 class="text-sm font-semibold text-gray-700 mb-3">目录</h3>
+  <div v-if="headings.length" class="p-4" :style="tocStyle">
+    <h3 class="text-sm font-semibold mb-3" :style="headingStyle">目录</h3>
     <nav class="space-y-1">
       <a
         v-for="heading in headings"
         :key="heading.id"
         :href="`#${heading.id}`"
-        class="block text-sm transition-colors hover:text-blue-600"
+        class="block text-sm"
+        :style="activeId === heading.id ? { ...linkStyle, ...activeLinkStyle, fontWeight: '500' } : linkStyle"
         :class="[
-          activeId === heading.id ? 'text-blue-600 font-medium' : 'text-gray-500',
           heading.level === 2 ? 'pl-0' : heading.level === 3 ? 'pl-4' : 'pl-8'
         ]"
       >

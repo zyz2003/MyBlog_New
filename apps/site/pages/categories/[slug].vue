@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'blog' })
+definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -29,13 +29,26 @@ useSeoMeta({
   description: () => `${category.value?.name} 分类下的所有文章`,
   ogDescription: () => `${category.value?.name} 分类下的所有文章`,
 })
+
+const titleStyle = computed(() => ({
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-heading, system-ui)',
+}))
+
+const descStyle = computed(() => ({
+  color: 'var(--color-text-muted, #64748B)',
+}))
+
+const emptyStyle = computed(() => ({
+  color: 'var(--color-text-muted, #94A3B8)',
+}))
 </script>
 
 <template>
   <div v-if="category">
     <div class="mb-6">
-      <h1 class="text-2xl font-bold">分类: {{ category.name }}</h1>
-      <p v-if="category.description" class="mt-2 text-gray-500">{{ category.description }}</p>
+      <h1 class="text-2xl font-bold" :style="titleStyle">分类: {{ category.name }}</h1>
+      <p v-if="category.description" class="mt-2" :style="descStyle">{{ category.description }}</p>
     </div>
     <div v-if="articlesData?.data?.items?.length" class="space-y-4">
       <BlogArticleCard
@@ -44,7 +57,7 @@ useSeoMeta({
         :article="article"
       />
     </div>
-    <div v-else class="text-center py-12 text-gray-400">
+    <div v-else class="text-center py-12" :style="emptyStyle">
       该分类下暂无文章
     </div>
     <BlogPagination

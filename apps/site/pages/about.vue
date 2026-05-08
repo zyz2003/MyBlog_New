@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'blog' })
+definePageMeta({ layout: 'default' })
 
 if (import.meta.server) {
   useSeoMeta({
@@ -9,11 +9,20 @@ if (import.meta.server) {
     ogDescription: '关于本站',
   })
 }
+
+const titleStyle = computed(() => ({
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-heading, system-ui)',
+}))
+
+const linkStyle = computed(() => ({
+  color: 'var(--color-primary, #3B82F6)',
+}))
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">关于</h1>
+    <h1 class="text-2xl font-bold mb-6" :style="titleStyle">关于</h1>
     <article class="prose max-w-none">
       <p>这是一个个人博客系统，使用 Nuxt 3 构建，支持 SSR 渲染。</p>
       <h2>技术栈</h2>
@@ -35,7 +44,7 @@ if (import.meta.server) {
       <h2>联系</h2>
       <p>如有问题或建议，欢迎通过以下方式联系：</p>
       <ul>
-        <li>GitHub: <a href="https://github.com" class="text-blue-600 hover:underline" target="_blank" rel="noopener">查看项目</a></li>
+        <li>GitHub: <a href="https://github.com" class="hover:underline" :style="linkStyle" target="_blank" rel="noopener">查看项目</a></li>
       </ul>
     </article>
   </div>

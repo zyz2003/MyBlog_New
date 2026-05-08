@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { pluginSettings } from '../../db/schema/settings'
 import { db } from '../../utils/db'
+import { PageService } from '../../services/page.service'
 import type {
   PluginAdapter,
   PluginAdapterExtended,
@@ -95,6 +96,26 @@ export class PluginManager {
 
     // Persist to database
     await this.persistToDb(pluginName, config, plugin.meta.version)
+
+    // Register plugin pages in the database
+    if (isExtended(plugin) && plugin.pages) {
+      for (const [path, pageDef] of Object.entries(plugin.pages)) {
+        const slug = path.replace(/^\//, '')
+        try {
+          await PageService.upsertPluginPage(slug, {
+            title: pageDef.title,
+            componentCode: pageDef.componentCode,
+            showInNav: pageDef.showInNav,
+            navLabel: pageDef.navLabel,
+            navOrder: pageDef.navOrder,
+          })
+          console.log(`[PluginManager] Registered page "${slug}" for plugin "${pluginName}"`)
+        }
+        catch (error) {
+          console.error(`[PluginManager] Failed to register page "${slug}":`, error)
+        }
+      }
+    }
   }
 
   /**
@@ -116,6 +137,20 @@ export class PluginManager {
     // Call onUnmount for extended plugins
     if (isExtended(plugin) && plugin.onUnmount) {
       await plugin.onUnmount()
+    }
+
+    // Remove plugin pages from database
+    if (isExtended(plugin) && plugin.pages) {
+      for (const path of Object.keys(plugin.pages)) {
+        const slug = path.replace(/^\//, '')
+        try {
+          await PageService.deletePluginPage(slug)
+          console.log(`[PluginManager] Removed page "${slug}" for plugin "${pluginName}"`)
+        }
+        catch (error) {
+          console.error(`[PluginManager] Failed to remove page "${slug}":`, error)
+        }
+      }
     }
 
     // Remove from memory
@@ -210,6 +245,21 @@ export class PluginManager {
    */
   isEnabled(pluginName: string): boolean {
     return this.enabledPlugins.has(pluginName)
+  }
+
+  /**
+   * Get all registered pages from enabled plugins
+   * Returns a map of route path -> component path
+   */
+  getPluginPages(): Record<string, string> {
+    const pages: Record<string, string> = {}
+    for (const name of Array.from(this.enabledPlugins)) {
+      const plugin = this.plugins.get(name)
+      if (plugin && isExtended(plugin) && plugin.pages) {
+        Object.assign(pages, plugin.pages)
+      }
+    }
+    return pages
   }
 
   /**

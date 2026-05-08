@@ -30,6 +30,36 @@
   "layout": {
     "headerPosition": "sticky",
     "sidebarPosition": "right",
-    "footerStyle": "minimal"
+    "footerStyle": "minimal",
+    "showSidebar": true,
+    "navLinks": [
+      { "label": "首页", "to": "/" },
+      { "label": "文章", "to": "/articles" },
+      { "label": "关于", "to": "/about" }
+    ],
+    "sidebarComponents": ["category-nav", "tag-cloud"]
+  },
+  "shadows": {
+    "sm": "0 1px 2px rgba(0,0,0,0.3)",
+    "md": "0 4px 6px rgba(0,0,0,0.4)",
+    "lg": "0 10px 15px rgba(0,0,0,0.5)"
+  },
+  "transitions": {
+    "fast": "0.15s ease",
+    "normal": "0.3s ease",
+    "slow": "0.5s ease"
+  },
+  "components": {
+    "articleCard": {
+      "showExcerpt": true,
+      "showDate": true,
+      "showAuthor": false,
+      "showCover": true,
+      "excerptLines": 2
+    },
+    "articleContent": {
+      "maxWidth": "720px",
+      "lineHeight": 1.75
+    }
   }
 }

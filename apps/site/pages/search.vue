@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'blog' })
+definePageMeta({ layout: 'default' })
 
 const route = useRoute()
 const router = useRouter()
@@ -33,21 +33,47 @@ if (import.meta.server) {
     description: () => `搜索文章 - ${route.query.q || '请输入关键词'}`,
   })
 }
+
+const titleStyle = computed(() => ({
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-heading, system-ui)',
+}))
+
+const inputStyle = computed(() => ({
+  background: 'var(--color-surface, #fff)',
+  color: 'var(--color-text, #0F172A)',
+  border: '1px solid var(--color-border, #E2E8F0)',
+  borderRadius: 'var(--radius-small, 4px)',
+  transition: 'border-color var(--transition-fast, 0.15s ease)',
+}))
+
+const buttonStyle = computed(() => ({
+  background: 'var(--color-primary, #3B82F6)',
+  color: '#fff',
+  borderRadius: 'var(--radius-small, 4px)',
+  transition: 'opacity var(--transition-fast, 0.15s ease)',
+}))
+
+const emptyStyle = computed(() => ({
+  color: 'var(--color-text-muted, #94A3B8)',
+}))
 </script>
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold mb-6">搜索</h1>
+    <h1 class="text-2xl font-bold mb-6" :style="titleStyle">搜索</h1>
     <form @submit.prevent="onSearch" class="flex gap-2 mb-6">
       <input
         v-model="searchQuery"
         type="text"
         placeholder="输入搜索关键词..."
-        class="flex-1 rounded border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none"
+        class="flex-1 px-4 py-2 focus:outline-none"
+        :style="inputStyle"
       >
       <button
         type="submit"
-        class="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+        class="px-6 py-2 hover:opacity-90"
+        :style="buttonStyle"
       >
         搜索
       </button>
@@ -61,7 +87,7 @@ if (import.meta.server) {
           :article="article"
         />
       </div>
-      <div v-else class="text-center py-12 text-gray-400">
+      <div v-else class="text-center py-12" :style="emptyStyle">
         未找到相关文章
       </div>
       <BlogPagination
@@ -71,7 +97,7 @@ if (import.meta.server) {
         base-url="/search"
       />
     </div>
-    <div v-else class="text-center py-12 text-gray-400">
+    <div v-else class="text-center py-12" :style="emptyStyle">
       请输入关键词进行搜索
     </div>
   </div>

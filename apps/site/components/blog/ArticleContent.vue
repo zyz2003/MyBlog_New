@@ -6,6 +6,10 @@ const props = defineProps<{
   content: string
 }>()
 
+const { themeConfig } = useTheme()
+
+const contentConfig = computed(() => themeConfig.value?.components?.articleContent ?? {})
+
 const md = new MarkdownIt({
   html: false,
   linkify: true,
@@ -22,31 +26,61 @@ md.options.highlight = (str: string, lang: string): string => {
 }
 
 const renderedHtml = computed(() => md.render(props.content || ''))
+
+const articleStyle = computed(() => ({
+  maxWidth: contentConfig.value.maxWidth ?? 'var(--container-max, 720px)',
+  lineHeight: contentConfig.value.lineHeight ?? 1.75,
+  color: 'var(--color-text, #0F172A)',
+  fontFamily: 'var(--font-body, Inter, system-ui, sans-serif)',
+}))
 </script>
 
 <template>
   <article
     class="prose prose-slate max-w-none
       prose-headings:scroll-mt-20
-      prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+      prose-a:no-underline hover:prose-a:underline
       prose-img:rounded-lg
-      prose-pre:bg-gray-900 prose-pre:text-gray-100
-      prose-code:before:content-none prose-code:after:content-none
-      prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm"
+      prose-code:before:content-none prose-code:after:content-none"
+    :style="articleStyle"
     v-html="renderedHtml"
   />
 </template>
 
 <style>
-.hljs { color: #c9d1d9; background: #0d1117; padding: 1em; border-radius: 0.5em; overflow-x: auto; }
-.hljs-keyword { color: #ff7b72; }
-.hljs-string { color: #a5d6ff; }
-.hljs-comment { color: #8b949e; }
-.hljs-function { color: #d2a8ff; }
-.hljs-number { color: #79c0ff; }
-.hljs-title { color: #d2a8ff; }
-.hljs-built_in { color: #ffa657; }
-.hljs-attr { color: #79c0ff; }
-.hljs-params { color: #c9d1d9; }
-.hljs-meta { color: #8b949e; }
+.article-content a,
+.prose a {
+  color: #4F46E5;
+}
+.prose-headings {
+  font-family: var(--font-heading, system-ui);
+  color: #1F2937;
+}
+.prose code {
+  font-family: var(--font-mono, JetBrains Mono, monospace);
+  background: #F3F4F6;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.prose pre {
+  background: #1F2937;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.prose blockquote {
+  border-left-color: #4F46E5;
+  color: #6B7280;
+}
+.hljs { color: #E5E7EB; background: #1F2937; padding: 1em; border-radius: 0.5em; overflow-x: auto; }
+.hljs-keyword { color: #F472B6; }
+.hljs-string { color: #A5F3FC; }
+.hljs-comment { color: #9CA3AF; }
+.hljs-function { color: #C4B5FD; }
+.hljs-number { color: #FCD34D; }
+.hljs-title { color: #C4B5FD; }
+.hljs-built_in { color: #FDBA74; }
+.hljs-attr { color: #93C5FD; }
+.hljs-params { color: #E5E7EB; }
+.hljs-meta { color: #9CA3AF; }
 </style>

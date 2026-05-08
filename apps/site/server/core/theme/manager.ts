@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm'
 import { themeSettings } from '../../db/schema/settings'
 import { db } from '../../utils/db'
 import { hookEmitter } from '../hooks/event-emitter'
-import type { ThemeConfig, ThemeManifest, ThemeMeta } from './types'
+import type { ThemeConfig, ThemeManifest, ThemeMeta, ThemeShadows, ThemeTransitions, ThemeComponents } from './types'
 import { CSSVariablesMap } from './types'
 
 /** Raw shape of config.json (includes both meta and config fields) */
@@ -19,6 +19,9 @@ interface RawThemeJson {
   spacing: ThemeConfig['spacing']
   borderRadius: ThemeConfig['borderRadius']
   layout: ThemeConfig['layout']
+  shadows?: ThemeShadows
+  transitions?: ThemeTransitions
+  components?: ThemeComponents
 }
 
 /**
@@ -316,6 +319,9 @@ export class ThemeManager {
       spacing: raw.spacing,
       borderRadius: raw.borderRadius,
       layout: raw.layout,
+      shadows: raw.shadows,
+      transitions: raw.transitions,
+      components: raw.components,
     }
   }
 

@@ -1,69 +1,66 @@
-import { useThemeStore } from '~/stores/theme'
+import type { ThemeConfig, ThemeManifest } from '~/server/core/theme/types'
+import { CSSVariablesMap } from '~/server/core/theme/types'
 
 /**
- * Composable for reactive theme access with CSS Variables injection
- * Provides theme data and real-time CSS switching without page refresh
+ * useTheme — composable for theme lifecycle management
+ * Per architecture doc section 4.1.3
+ *
+ * Handles: active theme state, CSS Variables injection, layout switching
  */
 export function useTheme() {
-  const store = useThemeStore()
+  const activeTheme = useState<string>('activeTheme', () => 'default')
+  const themeConfig = useState<ThemeConfig | null>('themeConfig', () => null)
+  const loaded = useState<boolean>('themeLoaded', () => false)
 
-  // Track injected style element for cleanup
-  const styleElement = ref<HTMLStyleElement | null>(null)
-
-  /** Apply CSS Variables to document head */
-  function applyCSS(css: string) {
-    if (import.meta.server) return // Client-only
-
-    // Remove existing injected style
-    if (styleElement.value) {
-      styleElement.value.remove()
-    }
-
-    // Create and inject new style element
-    const style = document.createElement('style')
-    style.id = 'theme-css-variables'
-    style.textContent = css
-    document.head.appendChild(style)
-    styleElement.value = style
-  }
-
-  /** Fetch and apply active theme */
-  async function loadActiveTheme() {
-    await store.fetchActiveTheme()
-    if (store.activeTheme.css) {
-      applyCSS(store.activeTheme.css)
+  /** Apply CSS Variables to document root */
+  function applyThemeStyles(config: ThemeConfig) {
+    if (import.meta.server) return
+    const vars = CSSVariablesMap(config)
+    const root = document.documentElement
+    for (const [key, value] of Object.entries(vars)) {
+      root.style.setProperty(key, value)
     }
   }
 
-  // Auto-load on first client-side use
-  if (import.meta.client && !store.activeTheme.theme) {
-    loadActiveTheme()
+  /** Initialize theme on app startup — fetches active theme from API */
+  async function initTheme() {
+    if (loaded.value) return
+    try {
+      const data = await $fetch<{ code: number; data: { theme: ThemeManifest | null; css: string } }>('/api/themes/active')
+      if (data.code === 0 && data.data?.theme) {
+        activeTheme.value = data.data.theme.meta.name
+        themeConfig.value = data.data.theme.config
+        applyThemeStyles(data.data.theme.config)
+      }
+    }
+    catch {
+      console.warn('[useTheme] Failed to load active theme, using default')
+    }
+    loaded.value = true
   }
 
-  /** Switch theme (admin action) */
-  async function switchTheme(name: string) {
-    await store.activateTheme(name)
-    // CSS is automatically updated via fetchActiveTheme in activateTheme
-    if (store.activeTheme.css) {
-      applyCSS(store.activeTheme.css)
+  /** Switch to a different theme (admin action) */
+  async function switchTheme(themeName: string) {
+    try {
+      await $fetch(`/api/themes/${themeName}/activate`, { method: 'POST' })
+      const data = await $fetch<{ code: number; data: { theme: ThemeManifest | null; css: string } }>('/api/themes/active')
+      if (data.code === 0 && data.data?.theme) {
+        activeTheme.value = themeName
+        themeConfig.value = data.data.theme.config
+        applyThemeStyles(data.data.theme.config)
+      }
+    }
+    catch (error) {
+      console.error('[useTheme] Failed to switch theme:', error)
     }
   }
 
   return {
-    // Reactive state
-    activeTheme: computed(() => store.activeTheme.theme),
-    activeThemeName: computed(() => store.activeThemeName),
-    activeCSS: computed(() => store.activeTheme.css),
-    themes: computed(() => store.themes),
-    loading: computed(() => store.loading),
-
-    // Actions
+    activeTheme,
+    themeConfig,
+    loaded,
+    initTheme,
     switchTheme,
-    loadActiveTheme,
-    applyCSS,
-
-    // Admin actions
-    fetchThemes: store.fetchThemes,
-    activateTheme: store.activateTheme,
+    applyThemeStyles,
   }
 }

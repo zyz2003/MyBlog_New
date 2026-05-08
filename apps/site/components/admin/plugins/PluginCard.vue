@@ -1,4 +1,15 @@
 <script setup lang="ts">
+interface ConfigField {
+  type: 'string' | 'number' | 'boolean' | 'select' | 'multi-select' | 'code' | 'textarea' | 'color' | 'image'
+  label: string
+  description?: string
+  required?: boolean
+  default?: unknown
+  options?: Array<{ label: string; value: string | number }>
+  placeholder?: string
+  language?: string
+}
+
 const props = defineProps<{
   plugin: {
     meta: {
@@ -13,6 +24,7 @@ const props = defineProps<{
     mountPoints: string[]
     enabled: boolean
     config: Record<string, unknown>
+    configSchema?: Record<string, ConfigField>
   }
 }>()
 
@@ -24,10 +36,23 @@ const emit = defineEmits<{
 const showConfig = ref(false)
 const editConfig = ref<Record<string, unknown>>({})
 
+const hasConfig = computed(() => {
+  return props.plugin.configSchema && Object.keys(props.plugin.configSchema).length > 0
+})
+
 // Initialize config editor when expanding
 function toggleConfig() {
   if (!showConfig.value) {
-    editConfig.value = { ...props.plugin.config }
+    // Merge with defaults from schema
+    const defaults: Record<string, unknown> = {}
+    if (props.plugin.configSchema) {
+      for (const [key, field] of Object.entries(props.plugin.configSchema)) {
+        if (field.default !== undefined) {
+          defaults[key] = field.default
+        }
+      }
+    }
+    editConfig.value = { ...defaults, ...props.plugin.config }
   }
   showConfig.value = !showConfig.value
 }
@@ -47,10 +72,25 @@ const typeColors: Record<string, string> = {
   social: 'bg-pink-100 text-pink-700',
   seo: 'bg-yellow-100 text-yellow-700',
   integration: 'bg-indigo-100 text-indigo-700',
+  comment: 'bg-orange-100 text-orange-700',
+  search: 'bg-cyan-100 text-cyan-700',
+  ad: 'bg-red-100 text-red-700',
+  feature: 'bg-teal-100 text-teal-700',
+  custom: 'bg-gray-100 text-gray-700',
 }
 
 function getTypeColor(type: string): string {
   return typeColors[type] || 'bg-gray-100 text-gray-700'
+}
+
+const mountPointLabels: Record<string, string> = {
+  'head-end': 'HTML头部',
+  'header-end': '导航后',
+  'sidebar': '侧边栏',
+  'post-end': '文章末尾',
+  'footer-start': '页脚前',
+  'body-end': '页面底部',
+  'page': '自定义页面',
 }
 </script>
 
@@ -85,7 +125,7 @@ function getTypeColor(type: string): string {
             :key="mp"
             class="px-1.5 py-0.5 bg-gray-100 text-gray-500 text-xs rounded"
           >
-            {{ mp }}
+            {{ mountPointLabels[mp] || mp }}
           </span>
         </div>
       </div>
@@ -106,7 +146,7 @@ function getTypeColor(type: string): string {
     </div>
 
     <!-- Config section -->
-    <div v-if="Object.keys(plugin.config).length > 0" class="mt-3 pt-3 border-t border-gray-100">
+    <div v-if="hasConfig" class="mt-3 pt-3 border-t border-gray-100">
       <button
         class="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition-colors"
         @click="toggleConfig"
@@ -118,40 +158,27 @@ function getTypeColor(type: string): string {
         配置
       </button>
 
-      <div v-if="showConfig" class="mt-3 space-y-3">
-        <div
-          v-for="(value, key) in editConfig"
-          :key="key"
-        >
-          <label class="block text-xs font-medium text-gray-500 mb-1">{{ key }}</label>
-          <input
-            v-if="typeof value === 'boolean'"
-            type="checkbox"
-            :checked="value"
-            class="rounded border-gray-300"
-            @change="editConfig[key] = ($event.target as HTMLInputElement).checked"
-          />
-          <input
-            v-else-if="typeof value === 'number'"
-            type="number"
-            :value="value"
-            class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md"
-            @input="editConfig[key] = Number(($event.target as HTMLInputElement).value)"
-          />
-          <input
-            v-else
-            type="text"
-            :value="String(value)"
-            class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md"
-            @input="editConfig[key] = ($event.target as HTMLInputElement).value"
-          />
+      <div v-if="showConfig" class="mt-3">
+        <AdminPluginsConfigFormRenderer
+          v-if="plugin.configSchema"
+          :schema="plugin.configSchema"
+          v-model="editConfig"
+          class="mb-4"
+        />
+        <div class="flex gap-2">
+          <button
+            class="btn-primary px-3 py-1.5 text-sm"
+            @click="saveConfig"
+          >
+            保存配置
+          </button>
+          <button
+            class="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            @click="showConfig = false"
+          >
+            取消
+          </button>
         </div>
-        <button
-          class="btn-primary px-3 py-1.5 text-sm"
-          @click="saveConfig"
-        >
-          保存配置
-        </button>
       </div>
     </div>
   </div>

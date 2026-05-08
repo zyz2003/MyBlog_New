@@ -1,4 +1,12 @@
 <script setup lang="ts">
+interface ThemeConfigValues {
+  colors: Record<string, string>
+  fonts: Record<string, string>
+  spacing: Record<string, string | number>
+  borderRadius: Record<string, string | number>
+  layout: Record<string, string | string[] | boolean>
+}
+
 const props = defineProps<{
   theme: {
     meta: {
@@ -8,19 +16,14 @@ const props = defineProps<{
       author?: string
       description?: string
     }
-    config: {
-      colors: Record<string, string>
-      fonts: Record<string, string>
-      spacing: Record<string, string>
-      borderRadius: Record<string, string>
-      layout: Record<string, string>
-    }
+    config: ThemeConfigValues
     isActive: boolean
   }
 }>()
 
 const emit = defineEmits<{
   activate: [name: string]
+  customize: [theme: typeof props.theme]
 }>()
 
 const showDetail = ref(false)
@@ -98,6 +101,12 @@ const colorLabels: Record<string, string> = {
           @click="showDetail = !showDetail"
         >
           {{ showDetail ? '收起详情' : '查看详情' }}
+        </button>
+        <button
+          class="flex-1 px-3 py-2 text-sm rounded border border-primary/30 hover:bg-primary/5 transition-colors text-primary font-medium"
+          @click="emit('customize', theme)"
+        >
+          定制
         </button>
         <button
           v-if="!theme.isActive"

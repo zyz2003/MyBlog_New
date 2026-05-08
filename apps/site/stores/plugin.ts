@@ -10,11 +10,23 @@ interface PluginMeta {
   icon?: string
 }
 
+interface ConfigField {
+  type: 'string' | 'number' | 'boolean' | 'select' | 'multi-select' | 'code' | 'textarea' | 'color' | 'image'
+  label: string
+  description?: string
+  required?: boolean
+  default?: unknown
+  options?: Array<{ label: string; value: string | number }>
+  placeholder?: string
+  language?: string
+}
+
 interface PluginInfo {
   meta: PluginMeta
   mountPoints: string[]
   enabled: boolean
   config: Record<string, unknown>
+  configSchema?: Record<string, ConfigField>
 }
 
 /**

@@ -10,7 +10,7 @@ interface DraftItem {
   title: string
   type: 'article' | 'page'
   status: string
-  updatedAt: string
+  updatedAt: string | null
 }
 
 const loading = ref(true)

@@ -30,7 +30,7 @@ const targetLabels: Record<string, string> = {
 
 const actionIcons: Record<string, string> = {
   create: 'i-heroicons-plus-circle text-green-500',
-  update: 'i-heroicons-pencil-square text-blue-500',
+  update: 'i-heroicons-pencil-square text-amber-500',
   delete: 'i-heroicons-trash text-red-500',
   publish: 'i-heroicons-check-circle text-green-600',
 }
@@ -52,9 +52,9 @@ function formatDate(dateStr: string): string {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg border border-gray-200 p-4">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">最近活动</h3>
-    <div class="space-y-3">
+  <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-amber-100 dark:border-gray-700 p-6">
+    <h3 class="text-lg font-semibold text-amber-900 dark:text-white mb-4">最近活动</h3>
+    <div class="space-y-4">
       <div
         v-for="activity in activities"
         :key="activity.id"
@@ -65,23 +65,23 @@ function formatDate(dateStr: string): string {
           class="w-5 h-5 mt-0.5 flex-shrink-0"
         />
         <div class="min-w-0 flex-1">
-          <p class="text-sm text-gray-700">
+          <p class="text-sm text-amber-800 dark:text-gray-200">
             <span class="font-medium">{{ actionLabels[activity.action] || activity.action }}</span>
-            <span class="text-gray-500">{{ targetLabels[activity.targetType] || activity.targetType }}</span>
+            <span class="text-amber-600 dark:text-gray-400">{{ targetLabels[activity.targetType] || activity.targetType }}</span>
             <span class="font-medium truncate">{{ activity.targetTitle || '(无标题)' }}</span>
           </p>
-          <p class="text-xs text-gray-400 mt-0.5">{{ formatDate(activity.createdAt) }}</p>
+          <p class="text-xs text-amber-500 dark:text-gray-500 mt-0.5">{{ formatDate(activity.createdAt) }}</p>
         </div>
       </div>
-      <div v-if="activities.length === 0 && !loading" class="text-center py-4 text-gray-400 text-sm">
+      <div v-if="activities.length === 0 && !loading" class="text-center py-6 text-amber-400 dark:text-gray-500 text-sm">
         暂无活动记录
       </div>
-      <div v-if="loading" class="space-y-3">
+      <div v-if="loading" class="space-y-4">
         <div v-for="i in 3" :key="i" class="flex items-start gap-3 animate-pulse">
-          <div class="w-5 h-5 rounded-full bg-gray-200 mt-0.5" />
-          <div class="flex-1 space-y-1">
-            <div class="h-4 bg-gray-200 rounded w-3/4" />
-            <div class="h-3 bg-gray-200 rounded w-1/4" />
+          <div class="w-5 h-5 rounded-full bg-amber-100 dark:bg-gray-700 mt-0.5" />
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-amber-100 dark:bg-gray-700 rounded w-3/4" />
+            <div class="h-3 bg-amber-50 dark:bg-gray-600 rounded w-1/4" />
           </div>
         </div>
       </div>
