@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PluginRenderer from './PluginRenderer.vue'
+import PluginRenderer from '~/components/plugins/PluginRenderer.vue'
 
 defineProps<{ postId?: string }>()
 </script>

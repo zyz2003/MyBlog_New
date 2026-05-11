@@ -2,7 +2,7 @@
 import type { ArticleWithRelations } from '~/server/services/article.service'
 
 definePageMeta({
-  layout: 'admin',
+  layout: 'admin-default',
 })
 
 const route = useRoute()

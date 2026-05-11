@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: 'admin',
+  layout: 'admin-default',
 })
 
 const api = useAdminApi()

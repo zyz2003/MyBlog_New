@@ -25,12 +25,17 @@ export default {
     },
   },
   mountPoints: ['body-end'],
-  onMount(container: HTMLElement, config: Record<string, unknown>) {
-    const message = (config.message as string) || 'Hello from plugin!'
-    const el = document.createElement('div')
-    el.style.cssText = 'position:fixed;bottom:16px;right:16px;background:#3B82F6;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:9999;cursor:pointer;'
-    el.textContent = message
-    el.onclick = () => el.remove()
-    container.appendChild(el)
-  },
+  clientScript: `
+    (function() {
+      const container = document.currentScript?.parentElement;
+      if (!container) return;
+      const config = window.__PLUGIN_CONFIG__?.['test-hello'] || {};
+      const message = config.message || 'Hello from plugin!';
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;bottom:16px;right:16px;background:#3B82F6;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:9999;cursor:pointer;';
+      el.textContent = message;
+      el.onclick = function() { el.remove(); };
+      container.appendChild(el);
+    })();
+  `,
 } satisfies PluginAdapter

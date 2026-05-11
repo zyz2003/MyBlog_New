@@ -2,7 +2,7 @@
 import { CSSVariablesMap } from '~/server/core/theme/types'
 
 definePageMeta({
-  layout: 'admin',
+  layout: 'admin-default',
 })
 
 const api = useAdminApi()

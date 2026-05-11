@@ -70,6 +70,8 @@ export interface PluginAdapter {
   component?: AsyncComponentLoader
   /** Callback for script-injection plugins (runs on client after mount) */
   onMount?(container: HTMLElement, config: Record<string, unknown>): void
+  /** Client-side script content to inject (alternative to onMount for simple plugins) */
+  clientScript?: string
 }
 
 /** Plugin page definition */

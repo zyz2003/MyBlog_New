@@ -27,6 +27,15 @@ export default defineNuxtConfig({
     '/admin/**': { ssr: false },
   },
 
+  // Auto-import from composables subdirectories
+  imports: {
+    dirs: [
+      'composables',
+      'composables/admin',
+      'composables/frontend',
+    ],
+  },
+
   modules: [
     '@unocss/nuxt',
     '@pinia/nuxt',
@@ -35,6 +44,7 @@ export default defineNuxtConfig({
 
   css: [
     '@unocss/reset/tailwind-compat.css',
+    '~/assets/css/variables.css',
   ],
 
   // TypeScript strict mode

@@ -129,10 +129,11 @@ export class PageService {
   /**
    * Get pages that should appear in navigation
    */
-  static async getNavPages(): Promise<Array<Pick<PageWithAuthor, 'id' | 'slug' | 'navLabel' | 'navOrder'>>> {
+  static async getNavPages(): Promise<Array<Pick<PageWithAuthor, 'id' | 'slug' | 'title' | 'navLabel' | 'navOrder'>>> {
     const result = await db.select({
       id: pages.id,
       slug: pages.slug,
+      title: pages.title,
       navLabel: pages.navLabel,
       navOrder: pages.navOrder,
     }).from(pages)

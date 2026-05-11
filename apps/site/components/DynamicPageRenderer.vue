@@ -14,7 +14,8 @@ const component = computed(() => {
     const templateMatch = props.code.match(/<template>([\s\S]*?)<\/template>/)
     const scriptMatch = props.code.match(/<script[^>]*setup[^>]*>([\s\S]*?)<\/script>/)
 
-    const template = templateMatch?.[1] || ''
+    // Support both SFC format and plain HTML
+    const template = templateMatch?.[1] || props.code
     const scriptContent = scriptMatch?.[1] || ''
 
     // Parse const declarations as setup return values

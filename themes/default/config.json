@@ -1,8 +1,9 @@
 {
-  "name": "Default",
+  "name": "default",
   "version": "1.0.0",
-  "author": "Blog System",
-  "description": "Default blog theme with clean, minimal design",
+  "author": "Blog Team",
+  "description": "博客默认主题，采用温暖的琥珀色配色方案",
+  "screenshot": "/themes/default/screenshot.png",
   "colors": {
     "primary": "#3B82F6",
     "secondary": "#64748B",
@@ -10,16 +11,18 @@
     "background": "#FFFFFF",
     "surface": "#F8FAFC",
     "text": "#0F172A",
-    "textMuted": "#64748B"
+    "textMuted": "#64748B",
+    "surface-2": "#F1F5F9",
+    "border": "#E2E8F0"
   },
   "fonts": {
-    "heading": "system-ui, -apple-system, sans-serif",
-    "body": "Inter, system-ui, -apple-system, sans-serif",
-    "mono": "JetBrains Mono, Fira Code, monospace"
+    "heading": "Inter, system-ui, sans-serif",
+    "body": "Inter, system-ui, sans-serif",
+    "mono": "JetBrains Mono, monospace"
   },
   "spacing": {
     "unit": "8px",
-    "containerMax": "720px",
+    "containerMax": "1152px",
     "contentPadding": "24px"
   },
   "borderRadius": {
@@ -28,8 +31,32 @@
     "large": "16px"
   },
   "layout": {
-    "headerPosition": "top",
+    "headerPosition": "sticky",
     "sidebarPosition": "right",
-    "footerStyle": "simple"
+    "footerStyle": "detailed",
+    "showSidebar": true
+  },
+  "shadows": {
+    "sm": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    "md": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+    "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+  },
+  "transitions": {
+    "fast": "150ms ease",
+    "normal": "200ms ease",
+    "slow": "300ms ease"
+  },
+  "components": {
+    "articleCard": {
+      "showExcerpt": true,
+      "showDate": true,
+      "showCover": true,
+      "excerptLines": 2
+    },
+    "articleContent": {
+      "maxWidth": "720px",
+      "lineHeight": 1.75,
+      "codeTheme": "github-dark"
+    }
   }
 }

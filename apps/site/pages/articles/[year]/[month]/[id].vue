@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'frontend-default' })
 
 const route = useRoute()
 const id = Number(route.params.id)

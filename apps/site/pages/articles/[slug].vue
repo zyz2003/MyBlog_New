@@ -3,7 +3,7 @@
  * Legacy slug-based route — redirects to new date+ID format
  * Keeps old links working while migrating to /articles/:year/:month/:id
  */
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'frontend-default' })
 
 const route = useRoute()
 const slug = route.params.slug as string

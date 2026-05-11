@@ -2,7 +2,7 @@
 import type { CategoryTreeNode } from '~/server/services/category.service'
 
 definePageMeta({
-  layout: 'admin',
+  layout: 'admin-default',
 })
 
 const api = useAdminApi()

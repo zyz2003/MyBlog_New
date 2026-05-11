@@ -40,7 +40,15 @@ export class ThemeManager {
   private themesDir: string
 
   constructor() {
-    this.themesDir = path.join(process.cwd(), 'themes')
+    // Support both apps/site/themes and root themes/ directories
+    const siteThemesDir = path.join(process.cwd(), 'themes')
+    const rootThemesDir = path.join(process.cwd(), '..', '..', 'themes')
+    if (fs.existsSync(rootThemesDir) && fs.statSync(rootThemesDir).isDirectory()) {
+      this.themesDir = rootThemesDir
+    }
+    else {
+      this.themesDir = siteThemesDir
+    }
   }
 
   /**

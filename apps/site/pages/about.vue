@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'frontend-default' })
 
 if (import.meta.server) {
   useSeoMeta({

@@ -24,7 +24,11 @@ export default defineConfig({
       secondary: 'var(--color-secondary, #64748B)',
       accent: 'var(--color-accent, #8B5CF6)',
       surface: 'var(--color-surface, #F8FAFC)',
+      'surface-2': 'var(--color-surface-2, #F1F5F9)',
       muted: 'var(--color-text-muted, #64748B)',
+      background: 'var(--color-background, #FFFFFF)',
+      border: 'var(--color-border, #E2E8F0)',
+      'text-primary': 'var(--color-text, #0F172A)',
     },
   },
 

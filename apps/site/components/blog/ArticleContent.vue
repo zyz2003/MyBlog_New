@@ -48,31 +48,30 @@ const articleStyle = computed(() => ({
 </template>
 
 <style>
-.article-content a,
 .prose a {
-  color: #4F46E5;
+  color: var(--color-primary, #3B82F6);
 }
 .prose-headings {
   font-family: var(--font-heading, system-ui);
-  color: #1F2937;
+  color: var(--color-text, #0F172A);
 }
 .prose code {
   font-family: var(--font-mono, JetBrains Mono, monospace);
-  background: #F3F4F6;
+  background: var(--color-surface-2, #F1F5F9);
   padding: 0.15em 0.4em;
   border-radius: 4px;
   font-size: 0.9em;
 }
 .prose pre {
-  background: #1F2937;
+  background: var(--color-surface, #1E293B);
   border-radius: 8px;
   overflow-x: auto;
 }
 .prose blockquote {
-  border-left-color: #4F46E5;
-  color: #6B7280;
+  border-left-color: var(--color-primary, #3B82F6);
+  color: var(--color-text-muted, #64748B);
 }
-.hljs { color: #E5E7EB; background: #1F2937; padding: 1em; border-radius: 0.5em; overflow-x: auto; }
+.hljs { color: #E5E7EB; background: #1E293B; padding: 1em; border-radius: 0.5em; overflow-x: auto; }
 .hljs-keyword { color: #F472B6; }
 .hljs-string { color: #A5F3FC; }
 .hljs-comment { color: #9CA3AF; }

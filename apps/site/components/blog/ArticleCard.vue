@@ -34,10 +34,10 @@ const coverUrl = computed(() => {
 </script>
 
 <template>
-  <article class="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-amber-100 dark:border-gray-700">
+  <article class="group bg-surface rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-border">
     <NuxtLink :to="articleUrl" class="block">
       <!-- Cover image -->
-      <div class="relative h-48 overflow-hidden bg-amber-100 dark:bg-gray-700">
+      <div class="relative h-48 overflow-hidden bg-surface-2">
         <img
           :src="coverUrl"
           :alt="article.title"
@@ -45,7 +45,7 @@ const coverUrl = computed(() => {
         >
         <!-- Category badge -->
         <div v-if="article.categories?.length" class="absolute top-4 left-4">
-          <span class="px-3 py-1 text-xs font-medium bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-amber-700 dark:text-amber-400 rounded-full shadow-sm">
+          <span class="px-3 py-1 text-xs font-medium bg-surface/90 backdrop-blur-sm text-accent rounded-full shadow-sm">
             {{ article.categories[0].name }}
           </span>
         </div>
@@ -53,15 +53,15 @@ const coverUrl = computed(() => {
 
       <!-- Content -->
       <div class="p-5">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors line-clamp-2 mb-2">
+        <h2 class="text-lg font-semibold text-primary group-hover:text-accent transition-colors line-clamp-2 mb-2">
           {{ article.title }}
         </h2>
-        <p v-if="article.excerpt" class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
+        <p v-if="article.excerpt" class="text-sm text-muted line-clamp-2 mb-4">
           {{ article.excerpt }}
         </p>
 
         <!-- Meta -->
-        <div class="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+        <div class="flex items-center justify-between text-xs text-muted">
           <div class="flex items-center gap-3">
             <span class="flex items-center gap-1">
               <span class="i-heroicons-calendar w-4 h-4" />
@@ -78,7 +78,7 @@ const coverUrl = computed(() => {
             <span
               v-for="tag in article.tags.slice(0, 2)"
               :key="tag.id"
-              class="px-2 py-0.5 text-xs rounded-full bg-amber-100 dark:bg-gray-700 text-amber-600 dark:text-gray-400"
+              class="px-2 py-0.5 text-xs rounded-full bg-surface-2 text-accent"
             >
               {{ tag.name }}
             </span>

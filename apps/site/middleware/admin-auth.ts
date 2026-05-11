@@ -6,6 +6,12 @@ export default defineNuxtRouteMiddleware((to) => {
     return
   }
 
+  // On server-side, allow rendering — client-side plugin will restore auth from localStorage
+  // This prevents SSR redirect loops since localStorage is not available during SSR
+  if (import.meta.server) {
+    return
+  }
+
   const store = useAuthStore()
 
   if (!store.isAuthenticated) {

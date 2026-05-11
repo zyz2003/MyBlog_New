@@ -11,13 +11,13 @@ export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
 
   // Public routes — no auth required
-  const publicPaths = ['/api/auth/', '/api/plugins/enabled']
+  const publicPaths = ['/api/auth/', '/api/plugins/enabled', '/api/themes/active']
   if (publicPaths.some((p) => path.startsWith(p))) {
     return
   }
 
   // Protected paths that require auth
-  const protectedPaths = ['/api/admin/', '/api/plugins/', '/api/media/']
+  const protectedPaths = ['/api/admin/', '/api/plugins/', '/api/media/', '/api/themes/']
   const needsAuth = protectedPaths.some((p) => path.startsWith(p))
 
   // Extract Bearer token if present

@@ -4,10 +4,11 @@ import PluginMount from './PluginMount.vue'
 
 interface EnabledPlugin {
   name: string
-  componentPath?: string
-  scriptUrl?: string
-  config: Record<string, unknown>
   mountPoints: string[]
+  config: Record<string, unknown>
+  scriptUrl?: string
+  scriptContent?: string
+  hasOnMount?: boolean
 }
 
 const props = defineProps<{
@@ -31,8 +32,8 @@ const mountPlugins = computed(() => {
       v-for="plugin in mountPlugins"
       :key="plugin.name"
       :plugin-name="plugin.name"
-      :component-path="plugin.componentPath"
       :script-url="plugin.scriptUrl"
+      :script-content="plugin.scriptContent"
       :config="plugin.config"
     />
   </div>

@@ -2,7 +2,7 @@
 import { useAuth } from '~/composables/useAuth'
 
 definePageMeta({
-  layout: 'auth',
+  layout: 'admin-auth',
 })
 
 const { login } = useAuth()

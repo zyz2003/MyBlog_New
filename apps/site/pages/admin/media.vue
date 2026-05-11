@@ -10,7 +10,7 @@ interface MediaItem {
 }
 
 definePageMeta({
-  layout: 'admin',
+  layout: 'admin-default',
 })
 
 const api = useAdminApi()
