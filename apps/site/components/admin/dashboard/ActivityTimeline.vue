@@ -29,10 +29,10 @@ const targetLabels: Record<string, string> = {
 }
 
 const actionIcons: Record<string, string> = {
-  create: 'i-heroicons-plus-circle text-green-500',
-  update: 'i-heroicons-pencil-square text-amber-500',
+  create: 'i-heroicons-plus-circle text-primary',
+  update: 'i-heroicons-pencil-square text-secondary',
   delete: 'i-heroicons-trash text-red-500',
-  publish: 'i-heroicons-check-circle text-green-600',
+  publish: 'i-heroicons-check-circle text-primary',
 }
 
 function formatDate(dateStr: string): string {
@@ -52,36 +52,39 @@ function formatDate(dateStr: string): string {
 </script>
 
 <template>
-  <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-amber-100 dark:border-gray-700 p-6">
-    <h3 class="text-lg font-semibold text-amber-900 dark:text-white mb-4">最近活动</h3>
+  <div class="bg-surface rounded-2xl border border-border p-6">
+    <h3 class="text-base font-semibold text-text mb-4 flex items-center gap-2">
+      <span class="i-heroicons-clock w-5 h-5 text-muted" />
+      最近活动
+    </h3>
     <div class="space-y-4">
       <div
         v-for="activity in activities"
         :key="activity.id"
-        class="flex items-start gap-3"
+        class="flex items-start gap-3 group"
       >
         <span
-          :class="actionIcons[activity.action] || 'i-heroicons-circle text-gray-400'"
+          :class="actionIcons[activity.action] || 'i-heroicons-circle text-muted'"
           class="w-5 h-5 mt-0.5 flex-shrink-0"
         />
         <div class="min-w-0 flex-1">
-          <p class="text-sm text-amber-800 dark:text-gray-200">
+          <p class="text-sm text-text">
             <span class="font-medium">{{ actionLabels[activity.action] || activity.action }}</span>
-            <span class="text-amber-600 dark:text-gray-400">{{ targetLabels[activity.targetType] || activity.targetType }}</span>
-            <span class="font-medium truncate">{{ activity.targetTitle || '(无标题)' }}</span>
+            <span class="text-muted">{{ targetLabels[activity.targetType] || activity.targetType }}</span>
+            <span class="font-medium truncate group-hover:text-primary transition-colors">{{ activity.targetTitle || '(无标题)' }}</span>
           </p>
-          <p class="text-xs text-amber-500 dark:text-gray-500 mt-0.5">{{ formatDate(activity.createdAt) }}</p>
+          <p class="text-xs text-muted mt-0.5">{{ formatDate(activity.createdAt) }}</p>
         </div>
       </div>
-      <div v-if="activities.length === 0 && !loading" class="text-center py-6 text-amber-400 dark:text-gray-500 text-sm">
+      <div v-if="activities.length === 0 && !loading" class="text-center py-6 text-muted text-sm">
         暂无活动记录
       </div>
       <div v-if="loading" class="space-y-4">
         <div v-for="i in 3" :key="i" class="flex items-start gap-3 animate-pulse">
-          <div class="w-5 h-5 rounded-full bg-amber-100 dark:bg-gray-700 mt-0.5" />
+          <div class="w-5 h-5 rounded-full bg-surface-2 mt-0.5" />
           <div class="flex-1 space-y-2">
-            <div class="h-4 bg-amber-100 dark:bg-gray-700 rounded w-3/4" />
-            <div class="h-3 bg-amber-50 dark:bg-gray-600 rounded w-1/4" />
+            <div class="h-4 bg-surface-2 rounded w-3/4" />
+            <div class="h-3 bg-surface rounded w-1/4" />
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { successResponse } from '../../utils/response'
 
 /**
  * DELETE /api/media/:id
- * Protected endpoint — removes file from storage + DB record
+ * Protected endpoint — removes file from database
  * Auth handled by middleware (/api/media/ is protected)
  */
 export default defineEventHandler(async (event) => {

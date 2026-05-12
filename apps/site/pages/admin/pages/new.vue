@@ -5,7 +5,6 @@ definePageMeta({
 
 const api = useAdminApi()
 const router = useRouter()
-const loading = ref(false)
 
 const title = ref('')
 const slug = ref('')
@@ -17,84 +16,40 @@ const showInNav = ref(false)
 const navLabel = ref('')
 const navOrder = ref(0)
 const status = ref<'draft' | 'published'>('draft')
+const saving = ref(false)
 
-const templateOptions = [
-  { value: 'default', label: '默认模板' },
-  { value: 'wide', label: '宽屏模板' },
-  { value: 'full', label: '全宽模板' },
+const templates = [
+  { value: 'default', label: '默认', icon: 'layout' },
+  { value: 'wide', label: '宽屏', icon: 'layout-wide' },
+  { value: 'full', label: '全宽', icon: 'layout-full' },
 ]
 
 function applyTemplate(t: string) {
   templateType.value = t as 'default' | 'wide' | 'full'
   if (t === 'default') {
     componentCode.value = `<div class="max-w-4xl mx-auto py-12 px-4">
-  <h1 class="text-3xl font-bold text-amber-900 mb-6">{{ title }}</h1>
-  <div class="prose max-w-none text-gray-700 leading-relaxed space-y-4">
-    <p>这是一个示例页面内容。你可以在这里编写任何 HTML 代码，包括段落、列表、图片等。</p>
-    <p>系统会自动将这个组件代码渲染到前台页面中。支持的特性包括：</p>
-    <ul class="list-disc list-inside space-y-2 ml-4">
-      <li>纯 HTML 标签和 Tailwind CSS 类名</li>
-      <li><code>{{ title }}</code> 插值表达式显示页面标题</li>
-      <li>响应式布局和自定义样式</li>
-    </ul>
-    <p class="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
-      提示：点击上方模板按钮可以切换不同的布局宽度。
-    </p>
+  <h1 class="text-3xl font-bold mb-6">{{ title }}</h1>
+  <div class="space-y-4">
+    <p>页面内容...</p>
   </div>
 </div>`
   } else if (t === 'wide') {
     componentCode.value = `<div class="max-w-6xl mx-auto py-12 px-4">
-  <h1 class="text-3xl font-bold text-amber-900 mb-8">{{ title }}</h1>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <div class="prose text-gray-700 leading-relaxed space-y-4">
-      <p>宽屏模板适合展示更多内容，比如图文并排布局。左侧可以放置文字说明，右侧可以放置图片或其他媒体内容。</p>
-      <p>你可以自由调整这里的 HTML 结构，添加更多列或组件。</p>
-      <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <h3 class="font-semibold text-blue-900 mb-2">特色功能</h3>
-        <ul class="list-disc list-inside space-y-1 text-blue-800">
-          <li>更宽的容器（最大 6xl）</li>
-          <li>适合展示图片画廊</li>
-          <li>支持多列网格布局</li>
-        </ul>
-      </div>
-    </div>
-    <div class="bg-gradient-to-br from-amber-100 to-orange-100 rounded-xl p-8 flex items-center justify-center min-h-[300px]">
-      <div class="text-center">
-        <span class="text-6xl mb-4 block">🖼️</span>
-        <p class="text-amber-800 font-medium">图片展示区域</p>
-      </div>
-    </div>
+  <h1 class="text-3xl font-bold mb-8">{{ title }}</h1>
+  <div class="grid md:grid-cols-2 gap-8">
+    <div><p>左侧内容</p></div>
+    <div class="bg-surface-2 rounded-xl p-8"><p>右侧内容</p></div>
   </div>
 </div>`
   } else {
     componentCode.value = `<div class="w-full">
-  <div class="bg-gradient-to-r from-amber-600 to-orange-600 py-20 px-4">
-    <div class="max-w-4xl mx-auto text-center">
-      <h1 class="text-5xl font-bold text-white mb-6">{{ title }}</h1>
-      <p class="text-xl text-amber-100 mb-8">全宽模板适合打造精美的落地页，标题区域可以添加背景色或背景图。</p>
-      <button class="px-8 py-3 bg-white text-amber-600 font-semibold rounded-full hover:bg-amber-50 transition-colors">
-        立即行动
-      </button>
-    </div>
+  <div class="bg-gradient-to-r from-primary to-accent py-16 text-center text-white">
+    <h1 class="text-4xl font-bold">{{ title }}</h1>
   </div>
-  <div class="max-w-5xl mx-auto py-16 px-4">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-      <div class="p-6 rounded-xl bg-gray-50">
-        <span class="text-4xl mb-3 block">🚀</span>
-        <h3 class="font-bold text-gray-900 mb-2">快速启动</h3>
-        <p class="text-gray-600">几分钟内创建精美的自定义页面</p>
-      </div>
-      <div class="p-6 rounded-xl bg-gray-50">
-        <span class="text-4xl mb-3 block">🎨</span>
-        <h3 class="font-bold text-gray-900 mb-2">灵活定制</h3>
-        <p class="text-gray-600">使用 HTML 和 Tailwind CSS 自由设计</p>
-      </div>
-      <div class="p-6 rounded-xl bg-gray-50">
-        <span class="text-4xl mb-3 block">📱</span>
-        <h3 class="font-bold text-gray-900 mb-2">响应式设计</h3>
-        <p class="text-gray-600">完美适配桌面和移动设备</p>
-      </div>
-    </div>
+  <div class="max-w-5xl mx-auto py-12 grid md:grid-cols-3 gap-6">
+    <div class="p-6 bg-surface-2 rounded-xl"><p>特性一</p></div>
+    <div class="p-6 bg-surface-2 rounded-xl"><p>特性二</p></div>
+    <div class="p-6 bg-surface-2 rounded-xl"><p>特性三</p></div>
   </div>
 </div>`
   }
@@ -108,20 +63,11 @@ function generateSlug() {
 }
 
 async function handleSubmit() {
-  if (!title.value.trim()) {
-    alert('请输入页面标题')
+  if (!title.value.trim() || !slug.value.trim()) {
+    alert('请填写标题和slug')
     return
   }
-  if (!slug.value.trim()) {
-    alert('请输入 slug')
-    return
-  }
-  if (!componentCode.value.trim()) {
-    alert('请输入组件代码')
-    return
-  }
-
-  loading.value = true
+  saving.value = true
   try {
     await api.post('/api/pages', {
       title: title.value,
@@ -137,10 +83,9 @@ async function handleSubmit() {
     })
     router.push('/admin/pages')
   } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : '保存失败'
-    alert(msg)
+    alert(e instanceof Error ? e.message : '保存失败')
   } finally {
-    loading.value = false
+    saving.value = false
   }
 }
 
@@ -150,143 +95,203 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto">
-    <div class="flex items-center gap-4 mb-6">
-      <button
-        class="p-2 rounded-lg transition-colors hover:bg-amber-100"
-        style="background: #FEF3C7; color: #92400E;"
-        @click="router.push('/admin/pages')"
-      >
-        返回
-      </button>
-      <h1 class="text-2xl font-bold text-amber-900">新建页面</h1>
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button
+          class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer transition-all hover:-translate-x-1"
+          @click="router.push('/admin/pages')"
+        >
+          <img src="/icons/arrow-left.svg" class="w-5 h-5" alt="">
+        </button>
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center shadow-sm">
+          <img src="/icons/write.svg" class="w-6 h-6" alt="">
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">新建页面</h1>
+          <p class="text-sm text-gray-500">创建自定义页面内容</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-2 cursor-pointer transition-all"
+          @click="router.push('/admin/pages')"
+        >
+          取消
+        </button>
+        <button
+          class="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 cursor-pointer transition-all"
+          :disabled="saving"
+          @click="status = 'draft'; handleSubmit()"
+        >
+          保存草稿
+        </button>
+        <button
+          class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
+          :disabled="saving"
+          @click="status = 'published'; handleSubmit()"
+        >
+          <img src="/icons/check.svg" class="w-4 h-4" alt="">
+          {{ saving ? '保存中...' : '发布' }}
+        </button>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 space-y-4">
-        <div class="rounded-xl p-6 shadow-sm" style="background: rgba(255,255,255,0.9); border: 1px solid #FDE68A;">
-          <label class="block text-sm font-medium text-amber-800 mb-2">页面标题</label>
+    <div class="grid grid-cols-12 gap-6">
+      <!-- Editor Panel -->
+      <div class="col-span-12 lg:col-span-8 space-y-5">
+        <!-- Title -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
           <input
             v-model="title"
             type="text"
-            class="w-full px-4 py-3 border rounded-xl text-amber-900 placeholder-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
-            placeholder="输入页面标题"
+            class="w-full text-xl font-semibold text-gray-900 placeholder:text-gray-300 focus:outline-none bg-transparent"
+            placeholder="输入页面标题..."
             @blur="generateSlug"
-          />
+          >
         </div>
 
-        <div class="rounded-xl p-6 shadow-sm" style="background: rgba(255,255,255,0.9); border: 1px solid #FDE68A;">
-          <div class="flex items-center justify-between mb-3">
-            <label class="text-sm font-medium text-amber-800">组件代码</label>
-            <div class="flex gap-2">
-              <button
-                v-for="t in templateOptions"
-                :key="t.value"
-                type="button"
-                class="px-3 py-1.5 text-xs rounded-lg border transition-colors cursor-pointer"
-                :class="templateType === t.value ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-amber-200 text-amber-600 hover:bg-amber-50'"
-                @click="applyTemplate(t.value)"
-              >
+        <!-- Template Selection -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="/icons/layout.svg" class="w-5 h-5" alt="">
+            <span class="text-sm font-medium text-gray-700">选择模板</span>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <button
+              v-for="t in templates"
+              :key="t.value"
+              class="p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col items-center gap-2"
+              :class="templateType === t.value
+                ? 'border-amber-500 bg-amber-50'
+                : 'border-gray-200 hover:border-gray-300 bg-gray-50'"
+              @click="applyTemplate(t.value)"
+            >
+              <img :src="`/icons/${t.icon}.svg`" class="w-8 h-8" alt="">
+              <span class="text-sm font-medium" :class="templateType === t.value ? 'text-amber-700' : 'text-gray-600'">
                 {{ t.label }}
-              </button>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Code Editor -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <img src="/icons/code.svg" class="w-5 h-5" alt="">
+              <span class="text-sm font-medium text-gray-700">组件代码</span>
             </div>
+            <span class="text-xs text-gray-400">Vue Template</span>
           </div>
           <textarea
             v-model="componentCode"
-            rows="15"
-            class="w-full px-4 py-3 font-mono text-sm border rounded-xl resize-y focus:outline-none focus:ring-2 focus:ring-amber-500"
-            style="background: #FFFBEB; color: #78350F;"
-            placeholder="输入 HTML 组件代码"
+            rows="18"
+            class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 font-mono text-sm text-gray-800 leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-300"
+            placeholder="输入组件代码..."
           />
-          <p class="text-xs text-gray-500 mt-2">输入 HTML 模板代码，支持 {{ title }} 插值</p>
         </div>
       </div>
 
-      <div class="space-y-4">
-        <div class="rounded-xl p-6 shadow-sm" style="background: rgba(255,255,255,0.9); border: 1px solid #FDE68A;">
-          <h3 class="text-sm font-medium text-amber-800 mb-4">页面设置</h3>
+      <!-- Settings Panel -->
+      <div class="col-span-12 lg:col-span-4 space-y-5">
+        <!-- Basic Settings -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="/icons/settings.svg" class="w-5 h-5" alt="">
+            <span class="text-sm font-semibold text-gray-900">基础设置</span>
+          </div>
+
           <div class="space-y-4">
             <div>
-              <label class="block text-xs text-amber-600 mb-1">Slug</label>
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Slug</label>
               <input
                 v-model="slug"
                 type="text"
-                class="w-full px-3 py-2 border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                class="w-full mt-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-300 font-mono"
                 placeholder="page-slug"
-              />
+              >
             </div>
+
             <div>
-              <label class="block text-xs text-amber-600 mb-1">状态</label>
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">状态</label>
               <select
                 v-model="status"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                class="w-full mt-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 cursor-pointer"
               >
                 <option value="draft">草稿</option>
                 <option value="published">已发布</option>
               </select>
             </div>
-            <div class="flex items-center gap-2">
-              <input
-                id="showInNav"
-                v-model="showInNav"
-                type="checkbox"
-                class="rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-              />
-              <label for="showInNav" class="text-sm text-amber-800">显示在导航栏</label>
-            </div>
-            <div v-if="showInNav">
-              <label class="block text-xs text-amber-600 mb-1">导航标签</label>
-              <input
-                v-model="navLabel"
-                type="text"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="默认使用标题"
-              />
-            </div>
+
             <div>
-              <label class="block text-xs text-amber-600 mb-1">排序</label>
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">排序</label>
               <input
                 v-model.number="navOrder"
                 type="number"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
+                class="w-full mt-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+              >
+            </div>
+
+            <div class="flex items-center justify-between py-2">
+              <div class="flex items-center gap-2">
+                <img src="/icons/nav.svg" class="w-4 h-4" alt="">
+                <span class="text-sm text-gray-700">导航显示</span>
+              </div>
+              <button
+                class="w-11 h-6 rounded-full relative cursor-pointer transition-colors"
+                :class="showInNav ? 'bg-amber-500' : 'bg-gray-200'"
+                @click="showInNav = !showInNav"
+              >
+                <span
+                  class="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all"
+                  :class="showInNav ? 'left-5.5' : 'left-0.5'"
+                />
+              </button>
+            </div>
+
+            <div v-if="showInNav">
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">导航标签</label>
+              <input
+                v-model="navLabel"
+                type="text"
+                class="w-full mt-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                placeholder="导航显示名称"
+              >
             </div>
           </div>
         </div>
 
-        <div class="rounded-xl p-6 shadow-sm" style="background: rgba(255,255,255,0.9); border: 1px solid #FDE68A;">
-          <h3 class="text-sm font-medium text-amber-800 mb-4">SEO 设置</h3>
+        <!-- SEO Settings -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="/icons/search.svg" class="w-5 h-5" alt="">
+            <span class="text-sm font-semibold text-gray-900">SEO 设置</span>
+          </div>
+
           <div class="space-y-4">
             <div>
-              <label class="block text-xs text-amber-600 mb-1">SEO 标题</label>
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">SEO 标题</label>
               <input
                 v-model="seoTitle"
                 type="text"
-                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="留空使用页面标题"
-              />
+                class="w-full mt-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                placeholder="SEO 标题"
+              >
             </div>
+
             <div>
-              <label class="block text-xs text-amber-600 mb-1">SEO 描述</label>
+              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">SEO 描述</label>
               <textarea
                 v-model="seoDescription"
                 rows="3"
-                class="w-full px-3 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="页面描述"
+                class="w-full mt-1.5 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                placeholder="SEO 描述..."
               />
             </div>
           </div>
         </div>
-
-        <button
-          type="button"
-          class="w-full py-3 text-white font-semibold rounded-xl transition-all cursor-pointer"
-          style="background: linear-gradient(to right, #F59E0B, #EA580C);"
-          :disabled="loading"
-          @click="handleSubmit"
-        >
-          {{ loading ? '保存中...' : '保存页面' }}
-        </button>
       </div>
     </div>
   </div>

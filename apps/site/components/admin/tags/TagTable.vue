@@ -1,94 +1,148 @@
 <script setup lang="ts">
-const props = defineProps<{
-  tags: Array<{
-    id: number
-    name: string
-    slug: string
-    color: string | null
-    createdAt: Date | string
-  }>
-  loading: boolean
-}>()
+definePageMeta({
+  layout: 'admin-default',
+})
 
-const emit = defineEmits<{
-  edit: [id: number]
-  delete: [id: number]
-}>()
+const api = useAdminApi()
 
-function formatDate(date: Date | string): string {
-  return new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+const tags = ref<TagItem[]>([])
+const loading = ref(true)
+const showForm = ref(false)
+const editingTag = ref<TagItem | null>(null)
+
+async function fetchTags() {
+  loading.value = true
+  try {
+    tags.value = await api.get<TagItem[]>('/api/tags')
+  } catch (e) {
+    console.error('Failed to fetch tags:', e)
+  } finally {
+    loading.value = false
+  }
 }
+
+function openCreateForm() {
+  editingTag.value = null
+  showForm.value = true
+}
+
+function openEditForm(id: number) {
+  editingTag.value = tags.value.find(t => t.id === id) || null
+  showForm.value = true
+}
+
+async function handleSubmit(data: { name: string; slug: string; color: string }) {
+  try {
+    if (editingTag.value) {
+      await api.put(`/api/tags/${editingTag.value.id}`, data)
+    } else {
+      await api.post('/api/tags', data)
+    }
+    showForm.value = false
+    await fetchTags()
+  } catch (e: unknown) {
+    alert(e instanceof Error ? e.message : '操作失败')
+  }
+}
+
+async function handleDelete(id: number) {
+  if (!confirm('确定删除？')) return
+  try {
+    await api.del(`/api/tags/${id}`)
+    await fetchTags()
+  } catch (e: unknown) {
+    alert(e instanceof Error ? e.message : '删除失败')
+  }
+}
+
+onMounted(() => {
+  fetchTags()
+})
 </script>
 
 <template>
-  <div>
-    <!-- Loading skeleton -->
-    <div v-if="loading" class="space-y-3">
-      <div v-for="i in 5" :key="i" class="h-12 bg-gray-100 rounded animate-pulse" />
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="/icons/tag.svg" class="w-7 h-7" alt="">
+        <div>
+          <h1 class="text-2xl font-bold text-text">标签管理</h1>
+          <p class="text-sm text-muted">{{ tags.length }} 个标签</p>
+        </div>
+      </div>
+      <button
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
+        @click="openCreateForm"
+      >
+        <img src="/icons/add.svg" class="w-4 h-4" alt="">
+        新建
+      </button>
     </div>
 
-    <!-- Empty state -->
-    <div v-else-if="tags.length === 0" class="text-center py-12">
-      <span class="i-heroicons-tag w-16 h-16 mx-auto text-gray-300 block mb-4" />
-      <p class="text-gray-500">暂无标签</p>
-    </div>
+    <!-- Tags Grid -->
+    <div class="bg-surface rounded-2xl border border-border">
+      <!-- Loading -->
+      <div v-if="loading" class="p-6">
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div v-for="i in 8" :key="i" class="h-24 bg-surface-2 rounded-xl animate-pulse" />
+        </div>
+      </div>
 
-    <!-- Table -->
-    <div v-else>
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500 w-10">颜色</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">名称</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">别名</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">创建时间</th>
-              <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="tag in tags"
-              :key="tag.id"
-              class="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-            >
-              <td class="py-3 px-4">
+      <!-- Empty -->
+      <div v-else-if="tags.length === 0" class="flex flex-col items-center justify-center py-16">
+        <img src="/icons/tag.svg" class="w-12 h-12 text-muted/20 mb-3" alt="">
+        <p class="text-muted mb-4">暂无标签</p>
+        <button
+          class="px-4 py-2 rounded-xl bg-primary text-white text-sm cursor-pointer"
+          @click="openCreateForm"
+        >
+          创建标签
+        </button>
+      </div>
+
+      <!-- Tags -->
+      <div v-else class="p-6">
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div
+            v-for="tag in tags"
+            :key="tag.id"
+            class="rounded-xl border border-border bg-surface hover:border-primary/40 hover:shadow-lg transition-all p-4 cursor-pointer group"
+            @click="openEditForm(tag.id)"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div
+                class="w-8 h-8 rounded-lg flex items-center justify-center"
+                :style="{ backgroundColor: (tag.color || '#C4956A') + '20' }"
+              >
                 <div
-                  class="w-5 h-5 rounded-full border border-gray-200"
-                  :style="{ backgroundColor: tag.color || '#3B82F6' }"
+                  class="w-4 h-4 rounded-full"
+                  :style="{ backgroundColor: tag.color || '#C4956A' }"
                 />
-              </td>
-              <td class="py-3 px-4 text-sm font-medium text-gray-900">
-                {{ tag.name }}
-              </td>
-              <td class="py-3 px-4">
-                <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">{{ tag.slug }}</span>
-              </td>
-              <td class="py-3 px-4 text-sm text-gray-500">
-                {{ formatDate(tag.createdAt) }}
-              </td>
-              <td class="py-3 px-4 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button
-                    class="p-1 text-gray-400 hover:text-primary rounded transition-colors"
-                    title="编辑"
-                    @click="emit('edit', tag.id)"
-                  >
-                    <span class="i-heroicons-pencil w-4 h-4" />
-                  </button>
-                  <button
-                    class="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
-                    title="删除"
-                    @click="emit('delete', tag.id)"
-                  >
-                    <span class="i-heroicons-trash w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+              <span class="text-sm font-medium text-text group-hover:text-primary truncate">{{ tag.name }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-muted font-mono truncate">{{ tag.slug }}</span>
+              <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" @click.stop>
+                <button
+                  class="p-1.5 rounded-lg hover:bg-surface-2 cursor-pointer"
+                  @click="handleDelete(tag.id)"
+                >
+                  <img src="/icons/trash.svg" class="w-3.5 h-3.5 text-muted" alt="">
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <AdminTagsTagForm
+      v-if="showForm"
+      :tag="editingTag"
+      @submit="handleSubmit"
+      @close="showForm = false"
+    />
   </div>
 </template>

@@ -41,3 +41,6 @@ npm-debug.log*
 
 # GSD planning (local only)
 .planning/
+
+# Theme override map (generated at runtime)
+.theme-overrides.json

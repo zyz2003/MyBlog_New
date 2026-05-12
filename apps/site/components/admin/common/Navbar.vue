@@ -38,7 +38,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header class="h-16 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 border-b border-amber-100 dark:border-gray-700 flex items-center justify-between px-6">
+  <header class="h-16 bg-surface border-b border-border flex items-center justify-between px-6">
     <div class="flex items-center">
       <slot />
     </div>
@@ -46,31 +46,31 @@ onUnmounted(() => {
     <div class="flex items-center gap-3">
       <!-- Search button -->
       <button
-        class="flex items-center gap-2 px-3 py-2 text-sm text-amber-700 dark:text-gray-400 bg-white dark:bg-gray-700 rounded-lg hover:bg-amber-100 dark:hover:bg-gray-600 transition-colors cursor-pointer shadow-sm"
+        class="flex items-center gap-2 px-3 py-2 text-sm text-text bg-background rounded-lg hover:bg-surface-2 transition-colors cursor-pointer shadow-sm border border-border"
         @click="$emit('search')"
       >
         <span class="i-heroicons-magnifying-glass w-4 h-4" />
         <span class="hidden sm:inline">搜索</span>
-        <kbd class="hidden sm:inline text-xs bg-amber-100 dark:bg-gray-600 px-1.5 py-0.5 rounded border border-amber-200 dark:border-gray-600">⌘K</kbd>
+        <kbd class="hidden sm:inline text-xs bg-surface-2 px-1.5 py-0.5 rounded border border-border">⌘K</kbd>
       </button>
 
       <!-- User dropdown -->
       <div ref="dropdownRef" class="relative">
         <button
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-amber-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
           @click="toggleDropdown"
         >
           <div
             v-if="user?.avatar"
-            class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white dark:ring-gray-700"
+            class="w-8 h-8 rounded-full bg-surface-2 overflow-hidden ring-2 ring-background"
           >
             <img :src="user.avatar" :alt="user.displayName || user.username" class="w-full h-full object-cover">
           </div>
-          <div v-else class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center ring-2 ring-white dark:ring-gray-700">
+          <div v-else class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-background">
             <span class="i-heroicons-user w-4 h-4 text-white" />
           </div>
-          <span class="hidden sm:block text-sm font-medium text-amber-800 dark:text-gray-300">{{ user?.displayName || user?.username || '管理员' }}</span>
-          <span class="i-heroicons-chevron-down w-4 h-4 text-amber-600 dark:text-gray-400" />
+          <span class="hidden sm:block text-sm font-medium text-text">{{ user?.displayName || user?.username || '管理员' }}</span>
+          <span class="i-heroicons-chevron-down w-4 h-4 text-muted" />
         </button>
 
         <!-- Dropdown menu -->
@@ -84,15 +84,15 @@ onUnmounted(() => {
         >
           <div
             v-if="showDropdown"
-            class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-amber-100 dark:border-gray-700 py-2 z-50"
+            class="absolute right-0 mt-2 w-56 bg-surface rounded-xl shadow-lg border border-border py-2 z-50"
           >
-            <div class="px-4 py-2 border-b border-amber-100 dark:border-gray-700">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ user?.displayName || user?.username }}</p>
-              <p class="text-xs text-amber-600 dark:text-gray-400">{{ user?.email || 'admin@example.com' }}</p>
+            <div class="px-4 py-2 border-b border-border">
+              <p class="text-sm font-medium text-text">{{ user?.displayName || user?.username }}</p>
+              <p class="text-xs text-muted">{{ user?.email || 'admin@example.com' }}</p>
             </div>
             <div class="py-1">
               <button
-                class="w-full text-left px-4 py-2.5 text-sm text-amber-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                class="w-full text-left px-4 py-2.5 text-sm text-text hover:bg-surface-2 flex items-center gap-2 transition-colors"
                 @click="handleLogout"
               >
                 <span class="i-heroicons-arrow-right-on-rectangle w-4 h-4" />

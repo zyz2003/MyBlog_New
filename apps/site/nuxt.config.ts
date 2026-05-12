@@ -1,7 +1,36 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { readFileSync, existsSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+/**
+ * Read .theme-overrides.json to get theme extends configuration.
+ * When a theme is activated, ThemeManager writes this file with:
+ * { "extends": ["../../apps/site", "../themes/butterfly"] }
+ * Nuxt will use the later entries to override base layer files.
+ */
+function getThemeExtends(): string[] | undefined {
+  const mapPath = resolve(__dirname, '.theme-overrides.json')
+  if (!existsSync(mapPath)) return undefined
+
+  try {
+    const config = JSON.parse(readFileSync(mapPath, 'utf-8'))
+    if (config.extends && Array.isArray(config.extends)) {
+      console.log(`[Theme] Extends config: ${JSON.stringify(config.extends)}`)
+      return config.extends
+    }
+    return undefined
+  }
+  catch {
+    return undefined
+  }
+}
+
+const themeExtends = getThemeExtends()
+
 export default defineNuxtConfig({
-  // Nuxt 3 SSR is enabled by default
-  // Hybrid rendering via routeRules (per A004)
+  // Nuxt Layer extends - later entries override earlier ones
+  // If themeExtends is set, theme files will override base app files
+  ...(themeExtends ? { extends: themeExtends } : {}),
 
   app: {
     head: {
@@ -44,7 +73,6 @@ export default defineNuxtConfig({
 
   css: [
     '@unocss/reset/tailwind-compat.css',
-    '~/assets/css/variables.css',
   ],
 
   // TypeScript strict mode

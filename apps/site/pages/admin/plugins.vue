@@ -110,19 +110,22 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">插件管理</h1>
+      <div class="flex items-center gap-3">
+        <span class="i-heroicons-puzzle-piece w-6 h-6 text-primary" />
+        <h1 class="text-2xl font-bold text-text">插件管理</h1>
+      </div>
     </div>
 
     <!-- Filter bar -->
     <div class="mb-6 space-y-3">
       <!-- Search -->
       <div class="relative">
-        <span class="i-heroicons-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <span class="i-heroicons-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="搜索插件名称或描述..."
-          class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          class="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-text placeholder-muted cursor-text"
         >
       </div>
 
@@ -131,10 +134,10 @@ onMounted(() => {
         <button
           v-for="type in pluginTypes"
           :key="type.value"
-          class="px-3 py-1.5 text-sm rounded-full transition-colors"
+          class="px-3 py-1.5 text-sm rounded-full transition-colors cursor-pointer"
           :class="selectedType === type.value
             ? 'bg-primary text-white'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            : 'bg-surface-2 text-muted hover:bg-surface hover:text-text'"
           @click="selectedType = type.value"
         >
           {{ type.label }}
@@ -143,7 +146,7 @@ onMounted(() => {
         </button>
         <button
           v-if="searchQuery || selectedType"
-          class="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+          class="px-3 py-1.5 text-sm text-muted hover:text-text transition-colors cursor-pointer"
           @click="clearFilters"
         >
           清除筛选
@@ -153,13 +156,13 @@ onMounted(() => {
 
     <!-- Loading skeleton -->
     <div v-if="loading" class="space-y-4">
-      <div v-for="i in 3" :key="i" class="h-32 bg-gray-100 rounded-lg animate-pulse" />
+      <div v-for="i in 3" :key="i" class="h-32 bg-surface-2 rounded-lg animate-pulse" />
     </div>
 
     <!-- Empty state -->
     <div v-else-if="filteredPlugins.length === 0" class="text-center py-12 card">
-      <span class="i-heroicons-puzzle-piece w-16 h-16 mx-auto text-gray-300 block mb-4" />
-      <p class="text-gray-500">{{ plugins.length === 0 ? '暂无插件' : '没有匹配的插件' }}</p>
+      <span class="i-heroicons-puzzle-piece w-16 h-16 mx-auto text-muted/30 block mb-4" />
+      <p class="text-muted">{{ plugins.length === 0 ? '暂无插件' : '没有匹配的插件' }}</p>
     </div>
 
     <!-- Plugin cards -->

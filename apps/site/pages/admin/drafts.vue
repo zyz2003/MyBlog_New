@@ -59,35 +59,38 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">草稿箱</h1>
+      <div class="flex items-center gap-3">
+        <span class="i-heroicons-archive-box w-6 h-6 text-primary" />
+        <h1 class="text-2xl font-bold text-text">草稿箱</h1>
+      </div>
     </div>
 
     <!-- Tabs -->
-    <div class="border-b border-gray-200 mb-6">
+    <div class="border-b border-border mb-6">
       <nav class="flex gap-4">
         <button
-          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors"
+          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
           :class="activeTab === 'all'
             ? 'border-primary text-primary'
-            : 'border-transparent text-gray-500 hover:text-gray-700'"
+            : 'border-transparent text-muted hover:text-text'"
           @click="activeTab = 'all'"
         >
           全部
         </button>
         <button
-          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors"
+          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
           :class="activeTab === 'article'
             ? 'border-primary text-primary'
-            : 'border-transparent text-gray-500 hover:text-gray-700'"
+            : 'border-transparent text-muted hover:text-text'"
           @click="activeTab = 'article'"
         >
           文章草稿
         </button>
         <button
-          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors"
+          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
           :class="activeTab === 'page'
             ? 'border-primary text-primary'
-            : 'border-transparent text-gray-500 hover:text-gray-700'"
+            : 'border-transparent text-muted hover:text-text'"
           @click="activeTab = 'page'"
         >
           页面草稿

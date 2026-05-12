@@ -28,11 +28,17 @@ useSeoMeta({
 
 <template>
   <ClientOnly v-if="pageData">
-    <DynamicPageRenderer :code="pageData.componentCode" />
+    <DynamicPageRenderer v-if="pageData.componentCode" :code="pageData.componentCode" />
+    <div v-else class="py-12 text-center text-gray-400">
+      页面内容为空
+    </div>
     <template #fallback>
       <div class="py-12 text-center text-gray-400">
         加载中...
       </div>
     </template>
   </ClientOnly>
+  <div v-else class="py-12 text-center text-gray-400">
+    页面不存在或未发布
+  </div>
 </template>

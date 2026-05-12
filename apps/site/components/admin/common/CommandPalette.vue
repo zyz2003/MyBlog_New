@@ -139,7 +139,7 @@ onUnmounted(() => {
               v-for="(item, index) in results"
               :key="`${item.type}-${item.id}`"
               class="w-full flex items-center gap-3 px-4 py-2.5 transition-colors"
-              :class="index === selectedIndex ? 'bg-primary/10' : 'hover:bg-gray-50'"
+              :class="index === selectedIndex ? 'bg-surface-2' : 'hover:bg-surface'"
               @click="handleSelect(item)"
               @mouseenter="selectedIndex = index"
             >

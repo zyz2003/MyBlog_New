@@ -19,20 +19,30 @@ const items = ref<MediaItem[]>([])
 const loading = ref(true)
 const page = ref(1)
 const totalPages = ref(0)
-const pageSize = 20
+const total = ref(0)
+const pageSize = 18
+
+// Filters
+const searchKeyword = ref('')
+const typeFilter = ref('')
 
 async function fetchMedia() {
   loading.value = true
   try {
+    const params: Record<string, unknown> = { page: page.value, pageSize }
+    if (searchKeyword.value) params.keyword = searchKeyword.value
+    if (typeFilter.value) params.type = typeFilter.value
+
     const result = await api.get<{
       items: MediaItem[]
       total: number
       page: number
       pageSize: number
       totalPages: number
-    }>('/api/media', { page: page.value, pageSize })
+    }>('/api/media', params)
 
     items.value = result.items
+    total.value = result.total
     totalPages.value = result.totalPages
   }
   catch (e) {
@@ -48,19 +58,24 @@ function handleUploaded() {
   fetchMedia()
 }
 
-async function handleDelete(id: number) {
-  try {
-    await api.del(`/api/media/${id}`)
-    await fetchMedia()
-  }
-  catch (e: unknown) {
+function handleDelete(id: number) {
+  api.del(`/api/media/${id}`).then(() => {
+    fetchMedia()
+  }).catch((e: unknown) => {
     const message = e instanceof Error ? e.message : '删除失败'
     alert(message)
-  }
+  })
 }
 
 function handlePageChange(newPage: number) {
   page.value = newPage
+  fetchMedia()
+}
+
+function handleSearch(keyword: string, type: string) {
+  searchKeyword.value = keyword
+  typeFilter.value = type
+  page.value = 1
   fetchMedia()
 }
 
@@ -70,26 +85,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">媒体库</h1>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl bg-surface-2 flex items-center justify-center">
+          <span class="i-heroicons-photo w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-text">媒体库</h1>
+          <p class="text-sm text-muted">管理您的图片和文档</p>
+        </div>
+      </div>
     </div>
 
     <!-- Uploader -->
-    <div class="mb-6">
-      <AdminMediaUploader @uploaded="handleUploaded" />
-    </div>
+    <AdminMediaUploader @uploaded="handleUploaded" />
 
     <!-- Gallery -->
-    <div class="card p-4">
+    <div class="card">
       <AdminMediaGallery
         :items="items"
         :loading="loading"
         :page="page"
         :total-pages="totalPages"
+        :total="total"
         @delete="handleDelete"
         @page-change="handlePageChange"
+        @search="handleSearch"
       />
     </div>
   </div>

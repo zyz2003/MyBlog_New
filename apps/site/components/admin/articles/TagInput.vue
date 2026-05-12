@@ -107,7 +107,7 @@ onUnmounted(() => {
       <span
         v-for="tag in selectedTags"
         :key="tag.id"
-        class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 text-primary rounded-full text-sm"
+        class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-2 text-primary rounded-full text-sm"
       >
         {{ tag.name }}
         <button

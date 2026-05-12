@@ -18,7 +18,9 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const page = Number(query.page) || 1
   const pageSize = Number(query.pageSize) || 20
+  const keyword = query.keyword as string || undefined
+  const type = query.type as string || undefined
 
-  const result = await MediaService.list({ page, pageSize })
+  const result = await MediaService.list({ page, pageSize, keyword, type })
   return successResponse(result)
 })

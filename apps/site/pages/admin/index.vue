@@ -34,7 +34,7 @@ async function fetchDashboard() {
     const [statsData, activityData, articlesData] = await Promise.all([
       api.get<typeof stats.value>('/api/admin/stats'),
       api.get<typeof activities.value>('/api/admin/activity'),
-      api.get<{ total: number; items: ArticleWithRelations[] }>('/api/articles', { pageSize: 5 }),
+      api.get<{ total: number; items: ArticleWithRelations[] }>('/api/articles', { pageSize: 6 }),
     ])
     stats.value = statsData
     activities.value = activityData
@@ -48,17 +48,6 @@ async function fetchDashboard() {
   }
 }
 
-const statItems = computed(() => [
-  { label: '文章总数', value: stats.value.articles, icon: 'i-heroicons-document-text', color: 'text-amber-600', bgColor: 'bg-amber-50' },
-  { label: '已发布', value: stats.value.publishedArticles, icon: 'i-heroicons-check-circle', color: 'text-green-600', bgColor: 'bg-green-50' },
-  { label: '草稿', value: stats.value.draftArticles, icon: 'i-heroicons-pencil-square', color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
-  { label: '浏览量', value: stats.value.totalViews, icon: 'i-heroicons-eye', color: 'text-purple-600', bgColor: 'bg-purple-50' },
-  { label: '自定义页面', value: stats.value.pages, icon: 'i-heroicons-document-duplicate', color: 'text-orange-600', bgColor: 'bg-orange-50' },
-  { label: '媒体文件', value: stats.value.media, icon: 'i-heroicons-photo', color: 'text-pink-600', bgColor: 'bg-pink-50' },
-  { label: '分类', value: stats.value.categories, icon: 'i-heroicons-folder', color: 'text-teal-600', bgColor: 'bg-teal-50' },
-  { label: '标签', value: stats.value.tags, icon: 'i-heroicons-tag', color: 'text-cyan-600', bgColor: 'bg-cyan-50' },
-])
-
 function formatDate(date: Date | string | null): string {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
@@ -71,9 +60,39 @@ const statusLabels: Record<string, string> = {
 }
 
 const statusColors: Record<string, string> = {
-  published: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  draft: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-  scheduled: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  published: 'text-primary',
+  draft: 'text-secondary',
+  scheduled: 'text-accent',
+}
+
+const actionLabels: Record<string, string> = {
+  create: '创建了',
+  update: '更新了',
+  delete: '删除了',
+  publish: '发布了',
+}
+
+const targetLabels: Record<string, string> = {
+  article: '文章',
+  page: '页面',
+  media: '媒体',
+  category: '分类',
+  tag: '标签',
+}
+
+function formatTimeAgo(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  if (hours < 24) return `${hours}小时前`
+  if (days < 7) return `${days}天前`
+  return date.toLocaleDateString('zh-CN')
 }
 
 onMounted(() => {
@@ -83,81 +102,230 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- Header with quick actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-amber-900 dark:text-white">仪表盘</h1>
-        <p class="text-sm text-amber-600 dark:text-gray-400 mt-1">欢迎回来！以下是博客的概览。</p>
+        <h1 class="text-2xl font-bold text-text">
+          仪表盘
+        </h1>
+        <p class="text-muted mt-1">欢迎回来！实时查看博客运营状态</p>
       </div>
-      <AdminDashboardQuickActions />
+      <NuxtLink
+        to="/admin/articles/new"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
+      >
+        <img src="/icons/write.svg" class="w-4 h-4" alt="">
+        写文章
+      </NuxtLink>
     </div>
 
-    <!-- Stat cards -->
-    <AdminDashboardStatCards :stats="statItems" :loading="loading" />
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <NuxtLink
+        v-for="(item, idx) in [
+          { label: '文章总数', value: stats.articles, sub: `${stats.publishedArticles} 已发布`, icon: '/icons/article.svg', color: 'text-primary' },
+          { label: '总浏览量', value: stats.totalViews, sub: '累计访问', icon: '/icons/views.svg', color: 'text-accent' },
+          { label: '自定义页面', value: stats.pages, sub: '独立页面', icon: '/icons/page.svg', color: 'text-secondary' },
+          { label: '媒体文件', value: stats.media, sub: '已上传', icon: '/icons/media.svg', color: 'text-primary' },
+        ]"
+        :key="idx"
+        :to="idx === 0 ? '/admin/articles' : idx === 2 ? '/admin/pages' : idx === 3 ? '/admin/media' : ''"
+        class="group bg-surface rounded-2xl border border-border p-5 hover:shadow-lg transition-all duration-200 cursor-pointer"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <img :src="item.icon" class="w-5 h-5" :alt="item.label">
+              <span class="text-sm text-muted">{{ item.label }}</span>
+            </div>
+            <p class="text-3xl font-bold text-text">
+              {{ loading ? '—' : item.value.toLocaleString() }}
+            </p>
+            <p class="text-xs text-muted mt-1">{{ item.sub }}</p>
+          </div>
+        </div>
+      </NuxtLink>
+    </div>
 
-    <!-- Two column layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Activity timeline -->
-      <div class="lg:col-span-1">
-        <AdminDashboardActivityTimeline :activities="activities" :loading="loading" />
-      </div>
-
-      <!-- Recent articles -->
-      <div class="lg:col-span-2">
-        <div class="bg-white/80 dark:bg-gray-800 rounded-2xl border border-amber-100 dark:border-gray-700 p-6 backdrop-blur-sm">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-amber-900 dark:text-white">最近文章</h3>
+    <!-- Main Content -->
+    <div class="grid grid-cols-12 gap-4">
+      <!-- Recent Articles -->
+      <div class="col-span-12 lg:col-span-8">
+        <div class="bg-surface rounded-2xl border border-border h-full">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+            <div class="flex items-center gap-2">
+              <img src="/icons/chart.svg" class="w-5 h-5" alt="">
+              <h3 class="font-semibold text-text">最新文章</h3>
+            </div>
             <NuxtLink
               to="/admin/articles"
-              class="text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium"
+              class="text-sm text-primary hover:text-primary/80 font-medium transition-colors flex items-center gap-1"
             >
               查看全部
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </NuxtLink>
           </div>
 
-          <div v-if="loading" class="space-y-3">
-            <div v-for="i in 5" :key="i" class="h-14 bg-amber-100/50 dark:bg-gray-700 rounded-xl animate-pulse" />
-          </div>
+          <div class="p-4">
+            <div v-if="loading" class="space-y-2">
+              <div v-for="i in 4" :key="i" class="h-14 bg-surface-2 rounded-xl animate-pulse" />
+            </div>
 
-          <div v-else-if="recentArticles.length === 0" class="text-center py-12">
-            <span class="i-heroicons-document-text w-12 h-12 mx-auto block mb-4 text-amber-300 dark:text-gray-600" />
-            <p class="text-amber-600 dark:text-gray-400">暂无文章</p>
-            <NuxtLink
-              to="/admin/articles/new"
-              class="inline-block mt-4 text-sm text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium"
-            >
-              撰写第一篇文章
-            </NuxtLink>
-          </div>
-
-          <div v-else class="space-y-3">
-            <NuxtLink
-              v-for="article in recentArticles"
-              :key="article.id"
-              :to="`/admin/articles/${article.id}`"
-              class="flex items-center justify-between p-4 rounded-xl hover:bg-amber-50 dark:hover:bg-gray-700/50 transition-colors group border border-transparent hover:border-amber-100 dark:hover:border-gray-600"
-            >
-              <div class="flex items-center gap-4 min-w-0">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
-                  <span class="i-heroicons-document-text w-5 h-5 text-white" />
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-sm font-medium text-amber-900 dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-400 truncate transition-colors">
-                    {{ article.title }}
-                  </h4>
-                  <p class="text-xs text-amber-500 dark:text-gray-400 mt-0.5">{{ formatDate(article.createdAt) }}</p>
-                </div>
-              </div>
-              <span
-                class="px-2.5 py-1 rounded-full text-xs font-medium shrink-0"
-                :class="statusColors[article.status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'"
+            <div v-else-if="recentArticles.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+              <img src="/icons/article.svg" class="w-10 h-10 text-muted/30 mb-3" alt="">
+              <p class="text-muted text-sm mb-3">暂无文章</p>
+              <NuxtLink
+                to="/admin/articles/new"
+                class="px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors"
               >
-                {{ statusLabels[article.status] || article.status }}
-              </span>
-            </NuxtLink>
+                撰写第一篇
+              </NuxtLink>
+            </div>
+
+            <div v-else class="space-y-1">
+              <NuxtLink
+                v-for="article in recentArticles"
+                :key="article.id"
+                :to="`/admin/articles/${article.id}`"
+                class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 transition-all duration-200 group cursor-pointer"
+              >
+                <img src="/icons/article.svg" class="w-5 h-5 text-muted group-hover:text-primary transition-colors flex-shrink-0" alt="">
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-text group-hover:text-primary truncate transition-colors">
+                    {{ article.title }}
+                  </p>
+                  <p class="text-xs text-muted">{{ formatDate(article.createdAt) }}</p>
+                </div>
+                <span
+                  class="px-2 py-0.5 rounded-full text-xs font-medium shrink-0 border"
+                  :class="statusColors[article.status] || 'text-muted border-border'"
+                >
+                  {{ statusLabels[article.status] || article.status }}
+                </span>
+              </NuxtLink>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Right Sidebar -->
+      <div class="col-span-12 lg:col-span-4 space-y-4">
+        <!-- Activity -->
+        <div class="bg-surface rounded-2xl border border-border">
+          <div class="flex items-center gap-2 px-5 py-4 border-b border-border">
+            <img src="/icons/clock.svg" class="w-5 h-5 text-accent" alt="">
+            <h3 class="font-semibold text-text">最新动态</h3>
+          </div>
+          <div class="p-4">
+            <div v-if="loading" class="space-y-3">
+              <div v-for="i in 4" :key="i" class="flex items-start gap-3 animate-pulse">
+                <div class="w-5 h-5 rounded-full bg-surface-2 flex-shrink-0 mt-0.5" />
+                <div class="flex-1 space-y-1.5">
+                  <div class="h-3.5 bg-surface-2 rounded w-3/4" />
+                  <div class="h-3 bg-surface rounded w-1/4" />
+                </div>
+              </div>
+            </div>
+
+            <div v-else-if="activities.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
+              <img src="/icons/clock.svg" class="w-10 h-10 text-muted/30 mb-3" alt="">
+              <p class="text-muted text-sm">暂无动态</p>
+            </div>
+
+            <div v-else class="space-y-3">
+              <div
+                v-for="activity in activities.slice(0, 6)"
+                :key="activity.id"
+                class="flex items-start gap-3"
+              >
+                <img
+                  v-if="activity.action === 'create'"
+                  src="/icons/article.svg"
+                  class="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
+                  alt=""
+                >
+                <img
+                  v-else-if="activity.action === 'update'"
+                  src="/icons/settings.svg"
+                  class="w-4 h-4 text-secondary flex-shrink-0 mt-0.5"
+                  alt=""
+                >
+                <img
+                  v-else-if="activity.action === 'delete'"
+                  src="/icons/trash.svg"
+                  class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"
+                  alt=""
+                >
+                <img
+                  v-else-if="activity.action === 'publish'"
+                  src="/icons/check.svg"
+                  class="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
+                  alt=""
+                >
+                <img
+                  v-else
+                  src="/icons/clock.svg"
+                  class="w-4 h-4 text-muted flex-shrink-0 mt-0.5"
+                  alt=""
+                >
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm text-text leading-snug">
+                    <span class="font-medium">{{ actionLabels[activity.action] || activity.action }}</span>
+                    <span class="text-muted">{{ targetLabels[activity.targetType] || activity.targetType }}</span>
+                    <span class="font-medium block truncate">{{ activity.targetTitle || '(无标题)' }}</span>
+                  </p>
+                  <p class="text-xs text-muted mt-0.5">{{ formatTimeAgo(activity.createdAt) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini Stats -->
+        <div class="bg-surface rounded-2xl border border-border p-4">
+          <div class="flex items-center gap-3 mb-3">
+            <img src="/icons/chart.svg" class="w-6 h-6 text-primary" alt="">
+            <h3 class="font-semibold text-text text-sm">内容概览</h3>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex items-center gap-3">
+              <img src="/icons/folder.svg" class="w-5 h-5 text-secondary" alt="">
+              <div>
+                <p class="text-lg font-bold text-text leading-none">{{ stats.categories }}</p>
+                <p class="text-xs text-muted">分类</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <img src="/icons/tag.svg" class="w-5 h-5 text-secondary" alt="">
+              <div>
+                <p class="text-lg font-bold text-text leading-none">{{ stats.tags }}</p>
+                <p class="text-xs text-muted">标签</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <NuxtLink
+        v-for="(link, idx) in [
+          { label: '文章管理', sub: '查看与编辑', to: '/admin/articles', icon: '/icons/article.svg', color: 'text-primary' },
+          { label: '分类管理', sub: '管理分类', to: '/admin/categories', icon: '/icons/folder.svg', color: 'text-secondary' },
+          { label: '媒体库', sub: '上传与管理', to: '/admin/media', icon: '/icons/media.svg', color: 'text-accent' },
+          { label: '系统设置', sub: '配置选项', to: '/admin/settings', icon: '/icons/settings.svg', color: 'text-primary' },
+        ]"
+        :key="idx"
+        :to="link.to"
+        class="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border hover:shadow-md hover:border-primary/30 transition-all duration-200 group cursor-pointer"
+      >
+        <img :src="link.icon" :class="link.color" class="w-7 h-7 flex-shrink-0" alt="">
+        <div>
+          <p class="text-sm font-semibold text-text">{{ link.label }}</p>
+          <p class="text-xs text-muted">{{ link.sub }}</p>
+        </div>
+      </NuxtLink>
     </div>
   </div>
 </template>

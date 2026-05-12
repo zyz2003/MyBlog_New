@@ -46,13 +46,13 @@ const visiblePages = computed(() => {
   <div>
     <!-- Loading skeleton -->
     <div v-if="loading" class="space-y-3">
-      <div v-for="i in 5" :key="i" class="h-16 bg-gray-100 rounded animate-pulse" />
+      <div v-for="i in 5" :key="i" class="h-16 bg-surface-2 rounded animate-pulse" />
     </div>
 
     <!-- Empty state -->
     <div v-else-if="articles.length === 0" class="text-center py-12">
-      <span class="i-heroicons-document-text w-16 h-16 mx-auto text-gray-300 block mb-4" />
-      <p class="text-gray-500">暂无文章</p>
+      <span class="i-heroicons-document-text w-16 h-16 mx-auto text-muted/30 block mb-4" />
+      <p class="text-muted">暂无文章</p>
     </div>
 
     <!-- Table -->
@@ -60,23 +60,23 @@ const visiblePages = computed(() => {
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">标题</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">状态</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">分类</th>
-              <th class="text-left py-3 px-4 text-sm font-medium text-gray-500">日期</th>
-              <th class="text-right py-3 px-4 text-sm font-medium text-gray-500">操作</th>
+            <tr class="border-b border-border">
+              <th class="text-left py-3 px-4 text-sm font-medium text-muted">标题</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-muted">状态</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-muted">分类</th>
+              <th class="text-left py-3 px-4 text-sm font-medium text-muted">日期</th>
+              <th class="text-right py-3 px-4 text-sm font-medium text-muted">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="article in articles"
               :key="article.id"
-              class="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+              class="border-b border-border hover:bg-surface-2/50 transition-colors"
             >
               <td class="py-3 px-4">
                 <button
-                  class="text-sm font-medium text-gray-900 hover:text-primary text-left"
+                  class="text-sm font-medium text-text hover:text-primary text-left cursor-pointer"
                   @click="emit('edit', article.id)"
                 >
                   {{ article.title }}
@@ -85,27 +85,27 @@ const visiblePages = computed(() => {
               <td class="py-3 px-4">
                 <span
                   class="px-2 py-0.5 rounded-full text-xs font-medium"
-                  :class="statusColors[article.status] || 'bg-gray-100 text-gray-700'"
+                  :class="statusColors[article.status] || 'bg-surface-2 text-muted'"
                 >
                   {{ article.status }}
                 </span>
               </td>
-              <td class="py-3 px-4 text-sm text-gray-500">
+              <td class="py-3 px-4 text-sm text-muted">
                 {{ getPrimaryCategory(article) }}
               </td>
-              <td class="py-3 px-4 text-sm text-gray-500">
+              <td class="py-3 px-4 text-sm text-muted">
                 {{ formatDate(article.createdAt) }}
               </td>
               <td class="py-3 px-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                   <button
-                    class="px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded transition-colors"
+                    class="px-3 py-1 text-sm text-primary hover:bg-surface-2 rounded transition-colors cursor-pointer"
                     @click="emit('edit', article.id)"
                   >
                     编辑
                   </button>
                   <button
-                    class="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
+                    class="px-3 py-1 text-sm text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
                     @click="emit('delete', article.id)"
                   >
                     删除
@@ -118,14 +118,14 @@ const visiblePages = computed(() => {
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
-        <p class="text-sm text-gray-500">
+      <div v-if="totalPages > 1" class="flex items-center justify-between mt-6 pt-4 border-t border-border">
+        <p class="text-sm text-muted">
           第 {{ currentPage }} 页，共 {{ totalPages }} 页
         </p>
         <div class="flex items-center gap-1">
           <button
             :disabled="currentPage <= 1"
-            class="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-3 py-1.5 text-sm rounded border border-border hover:bg-surface-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             @click="emit('page-change', currentPage - 1)"
           >
             上一页
@@ -133,17 +133,17 @@ const visiblePages = computed(() => {
           <button
             v-for="page in visiblePages"
             :key="page"
-            class="px-3 py-1.5 text-sm rounded border transition-colors"
+            class="px-3 py-1.5 text-sm rounded border transition-colors cursor-pointer"
             :class="page === currentPage
               ? 'bg-primary text-white border-primary'
-              : 'border-gray-300 hover:bg-gray-50'"
+              : 'border-border hover:bg-surface-2 text-text'"
             @click="emit('page-change', page)"
           >
             {{ page }}
           </button>
           <button
             :disabled="currentPage >= totalPages"
-            class="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-3 py-1.5 text-sm rounded border border-border hover:bg-surface-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             @click="emit('page-change', currentPage + 1)"
           >
             下一页

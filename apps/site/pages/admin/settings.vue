@@ -163,7 +163,10 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">系统设置</h1>
+      <div class="flex items-center gap-3">
+        <span class="i-heroicons-cog-6-tooth w-6 h-6 text-primary" />
+        <h1 class="text-2xl font-bold text-text">系统设置</h1>
+      </div>
       <div class="flex items-center gap-3">
         <span v-if="saveSuccess" class="text-sm text-green-600 flex items-center gap-1">
           <span class="i-heroicons-check-circle w-4 h-4" />
@@ -183,22 +186,22 @@ onMounted(() => {
 
     <!-- Loading -->
     <div v-if="loading" class="space-y-4">
-      <div class="h-10 bg-gray-100 rounded animate-pulse" />
-      <div class="h-64 bg-gray-100 rounded animate-pulse" />
+      <div class="h-10 bg-surface-2 rounded animate-pulse" />
+      <div class="h-64 bg-surface rounded animate-pulse" />
     </div>
 
     <!-- Settings content -->
     <div v-else>
       <!-- Tab navigation -->
-      <div class="border-b border-gray-200 mb-6">
+      <div class="border-b border-border mb-6">
         <nav class="flex gap-4">
           <button
             v-for="tab in tabs"
             :key="tab.id"
-            class="flex items-center gap-2 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors"
+            class="flex items-center gap-2 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
             :class="activeTab === tab.id
               ? 'border-primary text-primary'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              : 'border-transparent text-muted hover:text-text hover:border-border'"
             @click="activeTab = tab.id"
           >
             <span :class="tab.icon" class="w-4 h-4" />

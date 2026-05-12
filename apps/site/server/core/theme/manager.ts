@@ -155,7 +155,7 @@ export class ThemeManager {
 
   /**
    * Activate a theme
-   * Persists to database and dispatches hook events
+   * Persists to database, generates override map, and dispatches hook events
    */
   async activate(themeName: string): Promise<void> {
     const manifest = this.loadTheme(themeName)
@@ -184,6 +184,9 @@ export class ThemeManager {
     // Update in-memory state
     this.activeTheme = themeName
 
+    // Generate file override map for Vite alias resolution
+    this.generateOverrideMap(themeName)
+
     // Dispatch activated hook
     hookEmitter.dispatch('theme:activated', {
       themeName,
@@ -199,6 +202,26 @@ export class ThemeManager {
         timestamp: Date.now(),
       })
     }
+  }
+
+  /**
+   * Scan a theme directory for overridable files (.vue, .ts, .css)
+   * and generate .theme-overrides.json for Nuxt Layer extends resolution
+   */
+  generateOverrideMap(themeName: string): void {
+    const themeDir = path.join(this.themesDir, themeName)
+    if (!fs.existsSync(themeDir)) return
+
+    // Write theme path for extends configuration
+    // Format: { "extends": ["../../apps/site", "../themes/butterfly"] }
+    const extendsPath = path.join(this.themesDir, themeName)
+    const extendsConfig = {
+      extends: [`../../apps/site`, path.relative(process.cwd(), extendsPath).replace(/\\/g, '/')]
+    }
+
+    const outputPath = path.join(process.cwd(), '.theme-overrides.json')
+    fs.writeFileSync(outputPath, JSON.stringify(extendsConfig, null, 2), 'utf-8')
+    console.log(`[ThemeManager] Generated extends config for theme "${themeName}":`, extendsConfig.extends)
   }
 
   /**

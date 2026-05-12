@@ -57,40 +57,40 @@ async function handleLogin() {
 
     <!-- Username -->
     <div>
-      <label for="username" class="block text-sm font-medium text-amber-800 dark:text-gray-300 mb-2">
+      <label for="username" class="block text-sm font-medium text-text mb-2">
         用户名
       </label>
       <div class="relative">
-        <span class="i-heroicons-user absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-400" />
+        <span class="i-heroicons-user absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
         <input
           id="username"
           v-model="username"
           type="text"
           placeholder="请输入用户名"
           autocomplete="username"
-          class="w-full pl-10 pr-4 py-3 bg-amber-50 dark:bg-gray-700 border border-amber-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-amber-900 dark:text-white placeholder-amber-300 dark:placeholder-gray-400 transition-all"
+          class="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-text placeholder-muted transition-all cursor-text"
         >
       </div>
     </div>
 
     <!-- Password -->
     <div>
-      <label for="password" class="block text-sm font-medium text-amber-800 dark:text-gray-300 mb-2">
+      <label for="password" class="block text-sm font-medium text-text mb-2">
         密码
       </label>
       <div class="relative">
-        <span class="i-heroicons-lock-closed absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-amber-400" />
+        <span class="i-heroicons-lock-closed absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
         <input
           id="password"
           v-model="password"
           :type="showPassword ? 'text' : 'password'"
           placeholder="请输入密码"
           autocomplete="current-password"
-          class="w-full pl-10 pr-12 py-3 bg-amber-50 dark:bg-gray-700 border border-amber-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent text-amber-900 dark:text-white placeholder-amber-300 dark:placeholder-gray-400 transition-all"
+          class="w-full pl-10 pr-12 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-text placeholder-muted transition-all cursor-text"
         >
         <button
           type="button"
-          class="absolute right-3 top-1/2 -translate-y-1/2 text-amber-400 hover:text-amber-600 dark:hover:text-gray-300 cursor-pointer"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text transition-colors cursor-pointer"
           @click="showPassword = !showPassword"
         >
           <span v-if="showPassword" class="i-heroicons-eye-slash w-5 h-5" />
@@ -103,7 +103,7 @@ async function handleLogin() {
     <button
       type="submit"
       :disabled="loading"
-      class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-200 shadow-lg shadow-amber-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+      class="w-full py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
     >
       <span v-if="loading" class="i-heroicons-arrow-path w-5 h-5 animate-spin" />
       <span>{{ loading ? '登录中...' : '登录' }}</span>
