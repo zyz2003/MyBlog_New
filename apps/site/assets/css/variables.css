@@ -1,25 +1,25 @@
-/* Theme CSS Variables — light mode (default) */
+/* Theme CSS Variables — light mode (cream/暖米色) */
 :root {
-  --color-primary: #3B82F6;
-  --color-secondary: #64748B;
-  --color-accent: #8B5CF6;
-  --color-background: #FFFFFF;
-  --color-surface: #F8FAFC;
-  --color-surface-2: #F1F5F9;
-  --color-text: #0F172A;
-  --color-text-muted: #64748B;
-  --color-border: #E2E8F0;
+  --color-primary: #C4956A;
+  --color-secondary: #9D9489;
+  --color-accent: #9B7BC7;
+  --color-background: #FAF7F2;
+  --color-surface: #F5F0E8;
+  --color-surface-2: #E8E0D5;
+  --color-text: #3D3229;
+  --color-text-muted: #7D7065;
+  --color-border: #E0D5C8;
 }
 
 /* Dark mode overrides */
 .dark {
-  --color-primary: #60A5FA;
-  --color-secondary: #94A3B8;
-  --color-accent: #A78BFA;
-  --color-background: #0F172A;
-  --color-surface: #1E293B;
-  --color-surface-2: #334155;
-  --color-text: #F1F5F9;
-  --color-text-muted: #94A3B8;
-  --color-border: #334155;
+  --color-primary: #D4A576;
+  --color-secondary: #A8A095;
+  --color-accent: #AB8BD7;
+  --color-background: #1A1612;
+  --color-surface: #2D261F;
+  --color-surface-2: #3D352C;
+  --color-text: #F5F0E8;
+  --color-text-muted: #A8A095;
+  --color-border: #4D453B;
 }

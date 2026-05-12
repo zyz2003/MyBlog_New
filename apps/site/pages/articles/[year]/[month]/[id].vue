@@ -95,7 +95,9 @@ const linkStyle = computed(() => ({
     </div>
 
     <!-- Article content -->
-    <BlogArticleContent :content="article.content || ''" />
+    <div class="card mt-8 max-w-3xl mx-auto">
+      <BlogArticleContent :content="article.content || ''" />
+    </div>
 
     <!-- Back link -->
     <div class="mt-12 pt-6" :style="borderStyle">

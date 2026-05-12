@@ -17,26 +17,42 @@ export default defineConfig({
     }),
   ],
 
-  // CSS Variables theme tokens (per A001 + architecture 4.2)
+  // Map ALL Tailwind colors to CSS variables
+  // This ensures bg-surface, text-text, border-border etc all work
   theme: {
     colors: {
-      primary: 'var(--color-primary, #3B82F6)',
-      secondary: 'var(--color-secondary, #64748B)',
-      accent: 'var(--color-accent, #8B5CF6)',
-      surface: 'var(--color-surface, #F8FAFC)',
-      'surface-2': 'var(--color-surface-2, #F1F5F9)',
-      muted: 'var(--color-text-muted, #64748B)',
-      background: 'var(--color-background, #FFFFFF)',
-      border: 'var(--color-border, #E2E8F0)',
-      'text-primary': 'var(--color-text, #0F172A)',
+      // Custom theme colors - use CSS variables directly
+      primary: 'var(--color-primary)',
+      secondary: 'var(--color-secondary)',
+      accent: 'var(--color-accent)',
+      surface: 'var(--color-surface)',
+      'surface-2': 'var(--color-surface-2)',
+      muted: 'var(--color-text-muted)',
+      background: 'var(--color-background)',
+      border: 'var(--color-border)',
+      text: 'var(--color-text)',
+
+      // Override default Tailwind gray to use CSS variables
+      gray: {
+        50: 'var(--color-background)',
+        100: 'var(--color-surface)',
+        200: 'var(--color-surface-2)',
+        300: 'var(--color-border)',
+        400: 'var(--color-text-muted)',
+        500: 'var(--color-secondary)',
+        600: 'var(--color-secondary)',
+        700: 'var(--color-text)',
+        800: 'var(--color-text)',
+        900: 'var(--color-text)',
+      },
     },
   },
 
   // Shortcuts for common patterns
   shortcuts: {
-    'btn': 'px-4 py-2 rounded-md font-medium transition-colors',
+    'btn': 'px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer',
     'btn-primary': 'btn bg-primary text-white hover:bg-primary/90',
     'btn-secondary': 'btn bg-secondary text-white hover:bg-secondary/90',
-    'card': 'bg-white rounded-lg shadow-sm border border-gray-200 p-4',
+    'card': 'bg-surface rounded-xl shadow-sm border border-border p-4',
   },
 })

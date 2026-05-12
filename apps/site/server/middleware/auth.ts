@@ -11,8 +11,19 @@ export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
 
   // Public routes — no auth required
-  const publicPaths = ['/api/auth/', '/api/plugins/enabled', '/api/themes/active']
+  const publicPaths = [
+    '/api/auth/',
+    '/api/plugins/enabled',
+    '/api/themes/active',
+    // Media file downloads (served from database)
+  ]
+  // Media file download: /api/media/{filename} — public for displaying images in articles
   if (publicPaths.some((p) => path.startsWith(p))) {
+    return
+  }
+
+  // Media file download: GET /api/media/:filename is public
+  if (path.match(/^\/api\/media\/[^/]+$/) && event.method === 'GET') {
     return
   }
 

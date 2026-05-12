@@ -1,34 +1,47 @@
-import { eq, desc, sql } from 'drizzle-orm'
-import { join } from 'path'
-import { randomUUID } from 'crypto'
+import { eq, desc, sql, like, or, and } from 'drizzle-orm'
 import { db } from '../utils/db'
 import { media } from '../db/schema'
-import { createStorageAdapter } from '../storage'
-import type { StorageConfig } from '../storage'
 
 /** Allowed MIME types for upload */
 const ALLOWED_MIMES = [
+  // 图片
   'image/jpeg',
   'image/png',
   'image/gif',
   'image/webp',
   'image/svg+xml',
+  'image/bmp',
+  'image/x-icon',
+  'image/tiff',
+  // 文档
   'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'text/markdown',
+  // 音视频
+  'audio/mpeg',
+  'audio/wav',
+  'audio/ogg',
+  'video/mp4',
+  'video/webm',
+  'video/x-msvideo',
+  // 压缩包
+  'application/zip',
+  'application/x-rar-compressed',
+  'application/x-7z-compressed',
 ] as const
 
 /** Maximum file size: 10MB */
 const MAX_SIZE = 10 * 1024 * 1024
 
-/** Default storage config — local filesystem */
-const defaultStorageConfig: StorageConfig = {
-  type: 'local',
-  basePath: join(process.cwd(), 'uploads'),
-  baseUrl: '/uploads',
-}
-
-/** Media service — CRUD operations with storage integration */
+/** Media service — CRUD operations with database storage */
 export class MediaService {
-  /** Upload a file: validate, store, and create DB record */
+  /** Upload a file: validate, store in DB */
   static async upload(
     buffer: Buffer,
     originalName: string,
@@ -52,19 +65,11 @@ export class MediaService {
       })
     }
 
-    // Generate unique filename
+    // Generate filename
     const ext = originalName.split('.').pop() || ''
-    const filename = `${randomUUID()}.${ext}`
-    const now = new Date()
-    const year = now.getFullYear().toString()
-    const month = (now.getMonth() + 1).toString().padStart(2, '0')
-    const storagePath = `images/${year}/${month}/${filename}`
+    const filename = `${crypto.randomUUID()}.${ext}`
 
-    // Upload via storage adapter
-    const storage = createStorageAdapter(defaultStorageConfig)
-    const url = await storage.upload(buffer, storagePath, mimeType)
-
-    // Insert DB record
+    // Store in database
     const [record] = await db
       .insert(media)
       .values({
@@ -74,31 +79,67 @@ export class MediaService {
         mimeType,
         size,
         extension: ext,
-        storageType: 'local',
-        storagePath,
-        url,
+        storageType: 'database',
+        url: `/api/media/${filename}`, // URL will be served by file endpoint
+        data: buffer,
       })
       .returning()
 
     return record
   }
 
-  /** List media with pagination, ordered by createdAt DESC */
-  static async list(query: { page?: number; pageSize?: number } = {}) {
+  /** List media with pagination, optional search and type filter, ordered by createdAt DESC */
+  static async list(query: { page?: number; pageSize?: number; keyword?: string; type?: string } = {}) {
     const page = Math.max(1, query.page || 1)
     const pageSize = Math.min(100, Math.max(1, query.pageSize || 20))
     const offset = (page - 1) * pageSize
 
+    // Build where conditions
+    const conditions = []
+    if (query.keyword) {
+      const kw = `%${query.keyword}%`
+      conditions.push(or(
+        like(media.filename, kw),
+        like(media.originalName, kw),
+      ))
+    }
+    if (query.type === 'image') {
+      conditions.push(like(media.mimeType, 'image/%'))
+    } else if (query.type === 'document') {
+      conditions.push(sql`${media.mimeType} NOT LIKE 'image/%'`)
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
     const [items, countResult] = await Promise.all([
       db
-        .select()
+        .select({
+          id: media.id,
+          userId: media.userId,
+          filename: media.filename,
+          originalName: media.originalName,
+          title: media.title,
+          alt: media.alt,
+          caption: media.caption,
+          mimeType: media.mimeType,
+          size: media.size,
+          extension: media.extension,
+          storageType: media.storageType,
+          url: media.url,
+          cdnUrl: media.cdnUrl,
+          width: media.width,
+          height: media.height,
+          createdAt: media.createdAt,
+        })
         .from(media)
+        .where(whereClause)
         .orderBy(desc(media.createdAt))
         .limit(pageSize)
         .offset(offset),
       db
         .select({ count: sql<number>`count(*)` })
-        .from(media),
+        .from(media)
+        .where(whereClause),
     ])
 
     const total = countResult[0]?.count || 0
@@ -107,10 +148,27 @@ export class MediaService {
     return { items, total, page, pageSize, totalPages }
   }
 
-  /** Get single media record by ID */
+  /** Get single media record by ID (without data buffer) */
   static async getById(id: number) {
     const [record] = await db
-      .select()
+      .select({
+        id: media.id,
+        userId: media.userId,
+        filename: media.filename,
+        originalName: media.originalName,
+        title: media.title,
+        alt: media.alt,
+        caption: media.caption,
+        mimeType: media.mimeType,
+        size: media.size,
+        extension: media.extension,
+        storageType: media.storageType,
+        url: media.url,
+        cdnUrl: media.cdnUrl,
+        width: media.width,
+        height: media.height,
+        createdAt: media.createdAt,
+      })
       .from(media)
       .where(eq(media.id, id))
       .limit(1)
@@ -118,7 +176,24 @@ export class MediaService {
     return record || null
   }
 
-  /** Delete media: remove file from storage + DB record */
+  /** Get file data by filename (for serving files) */
+  static async getFileByFilename(filename: string) {
+    const [record] = await db
+      .select({
+        data: media.data,
+        mimeType: media.mimeType,
+        filename: media.filename,
+        originalName: media.originalName,
+        size: media.size,
+      })
+      .from(media)
+      .where(eq(media.filename, filename))
+      .limit(1)
+
+    return record || null
+  }
+
+  /** Delete media: remove from DB */
   static async delete(id: number) {
     const record = await MediaService.getById(id)
     if (!record) {
@@ -128,13 +203,7 @@ export class MediaService {
       })
     }
 
-    // Remove file from storage
-    const storage = createStorageAdapter(defaultStorageConfig)
-    await storage.delete(record.storagePath)
-
-    // Remove DB record
     await db.delete(media).where(eq(media.id, id))
-
     return true
   }
 }
