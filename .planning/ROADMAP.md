@@ -28,13 +28,14 @@ This roadmap covers the v2.0 milestone: fixing architectural debt first, then pe
   3. Any admin page can call useAdminSettings() to load and save settings in ~5 lines instead of ~50 lines of repeated fetch/save logic
   4. The frontend layout loads theme CSS from /api/themes/active.css and applies it dynamically -- theme color changes are visible immediately after save
   5. Batch settings updates succeed or fail atomically (no partial writes), and invalid setting values are caught by Zod validation with clear error messages
-**Plans**: 5 plans
+**Plans**: 6 plans
 Plans:
-- [ ] 01-01-PLAN.md — Data integrity: transaction-wrapped batch updates + Zod schema validation for settings
-- [ ] 01-02-PLAN.md — Theme config unification: DB-driven ThemeManager with saveConfig() dual-write
-- [ ] 01-03-PLAN.md — Theme CSS injection: /api/themes/active.css endpoint + frontend layout link
-- [ ] 01-04-PLAN.md — Composables: useSiteSettings() and useAdminSettings() with useState +  pattern
-- [ ] 01-05-PLAN.md — Layout chain fix + @apply cleanup: admin.vue layout inheritance + UnoCSS inline classes
+- [ ] 01-01-PLAN.md — Data integrity: transaction-wrapped batch updates + Zod schema validation for settings (DATA-01, DATA-02)
+- [ ] 01-02-PLAN.md — Theme config unification: DB-driven ThemeManager with saveConfig() dual-write (ARCH-01)
+- [ ] 01-03-PLAN.md — Theme CSS injection: /api/themes/active.css endpoint + frontend layout link (ARCH-04)
+- [ ] 01-04-PLAN.md — Composables: useSiteSettings() and useAdminSettings() (ARCH-02, ARCH-03)
+- [ ] 01-05-PLAN.md — Layout chain fix (part 1): admin.vue layout inheritance + 14 child page cleanup (ARCH-05)
+- [ ] 01-06-PLAN.md — Layout chain fix (part 2) + @apply to UnoCSS: remaining 8 pages + 6 @apply cleanups (ARCH-05, ARCH-06)
 
 ### Phase 2: Frontend Core Shell
 **Goal**: Visitors see a navigation bar and footer that match the AnZhiYu theme exactly, the archive page works, and all existing components have been audited against the Pug templates
@@ -87,7 +88,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Architecture Refactoring | 0/5 | Not started | - |
+| 1. Architecture Refactoring | 0/6 | Planned | - |
 | 2. Frontend Core Shell | 0/? | Not started | - |
 | 3. Frontend Post Experience | 0/? | Not started | - |
 | 4. Search & Comments | 0/? | Not started | - |
@@ -95,5 +96,6 @@ Plans:
 
 ---
 *Roadmap created: 2026-05-13*
+*Last updated: 2026-05-14 — Phase 1 split into 6 plans (layout chain split for files_modified limit)*
 *Granularity: fine*
 *Coverage: 36/36 requirements mapped*
