@@ -1,8 +1,10 @@
 import { eq, desc } from 'drizzle-orm'
+import { z } from 'zod'
 import { db } from '../utils/db'
 import { systemSettings } from '../db/schema'
+import { settingSchemas } from './settings.schema'
 
-/** Settings service — CRUD operations for system settings */
+/** Settings service — CRUD operations for system settings with Zod validation and transactional batch updates */
 export class SettingsService {
   /** Get all settings grouped by category */
   static async getAll() {
@@ -11,7 +13,6 @@ export class SettingsService {
       .from(systemSettings)
       .orderBy(systemSettings.category, desc(systemSettings.updatedAt))
 
-    // Group by category
     const grouped: Record<string, typeof rows> = {}
     for (const row of rows) {
       const cat = row.category || 'general'
@@ -35,20 +36,22 @@ export class SettingsService {
     return record || null
   }
 
-  /** Upsert a single setting (insert or update on key conflict) */
+  /** Upsert a single setting (insert or update on key conflict) — validates value with Zod */
   static async upsert(
     key: string,
     value: unknown,
     category?: string,
     description?: string,
   ) {
+    const schema = settingSchemas[key] ?? z.unknown()
+    const parsed = schema.parse(value)
     const now = new Date()
 
     const [record] = await db
       .insert(systemSettings)
       .values({
         key,
-        value: value as any,
+        value: parsed,
         category,
         description,
         updatedAt: now,
@@ -56,7 +59,7 @@ export class SettingsService {
       .onConflictDoUpdate({
         target: systemSettings.key,
         set: {
-          value: value as any,
+          value: parsed,
           updatedAt: now,
           ...(category !== undefined ? { category } : {}),
           ...(description !== undefined ? { description } : {}),
@@ -67,20 +70,43 @@ export class SettingsService {
     return record
   }
 
-  /** Batch update multiple settings */
+  /** Batch update multiple settings — atomic via db.transaction() with Zod validation */
   static async batchUpdate(
     items: Array<{ key: string; value: unknown; category?: string; description?: string }>,
   ) {
-    const results = []
-    for (const item of items) {
-      const record = await SettingsService.upsert(
-        item.key,
-        item.value,
-        item.category,
-        item.description,
-      )
-      results.push(record)
-    }
-    return results
+    return await db.transaction(async (tx) => {
+      const results = []
+      for (const item of items) {
+        const schema = settingSchemas[item.key] ?? z.unknown()
+        const parsed = schema.parse(item.value)
+        const [record] = await tx
+          .insert(systemSettings)
+          .values({
+            key: item.key,
+            value: parsed,
+            category: item.category,
+            description: item.description,
+            updatedAt: new Date(),
+          })
+          .onConflictDoUpdate({
+            target: systemSettings.key,
+            set: {
+              value: parsed,
+              updatedAt: new Date(),
+              ...(item.category !== undefined ? { category: item.category } : {}),
+              ...(item.description !== undefined ? { description: item.description } : {}),
+            },
+          })
+          .returning()
+        results.push(record)
+      }
+      return results
+    })
+  }
+
+  /** Validate a setting value against its Zod schema */
+  static parseValue(key: string, value: unknown): unknown {
+    const schema = settingSchemas[key] ?? z.unknown()
+    return schema.parse(value)
   }
 }
