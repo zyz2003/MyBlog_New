@@ -287,7 +287,3 @@ onMounted(() => fetchSettings())
   </div>
 </template>
 
-<style scoped>
-.toggle-switch { @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer; }
-.toggle-knob { @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform; }
-</style>

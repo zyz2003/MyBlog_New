@@ -219,8 +219,8 @@ onMounted(() => fetchSettings())
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <label class="font-medium text-text">启用复制功能</label>
-              <button class="toggle-switch" :class="copySettings.enable ? 'bg-primary' : 'bg-surface-2'" @click="copySettings.enable = !copySettings.enable">
-                <span class="toggle-knob" :class="copySettings.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="copySettings.enable ? 'bg-primary' : 'bg-surface-2'" @click="copySettings.enable = !copySettings.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="copySettings.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex items-center justify-between">
@@ -228,8 +228,8 @@ onMounted(() => fetchSettings())
                 <label class="text-sm text-text">复制后追加版权信息</label>
                 <p class="text-xs text-muted">超过一定字数后自动追加</p>
               </div>
-              <button class="toggle-switch" :class="copySettings.copyrightEnable ? 'bg-primary' : 'bg-surface-2'" @click="copySettings.copyrightEnable = !copySettings.copyrightEnable">
-                <span class="toggle-knob" :class="copySettings.copyrightEnable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="copySettings.copyrightEnable ? 'bg-primary' : 'bg-surface-2'" @click="copySettings.copyrightEnable = !copySettings.copyrightEnable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="copySettings.copyrightEnable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div v-if="copySettings.copyrightEnable">
@@ -319,8 +319,8 @@ onMounted(() => fetchSettings())
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <label class="font-medium text-text">图片懒加载</label>
-              <button class="toggle-switch" :class="lazyload.enable ? 'bg-primary' : 'bg-surface-2'" @click="lazyload.enable = !lazyload.enable">
-                <span class="toggle-knob" :class="lazyload.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="lazyload.enable ? 'bg-primary' : 'bg-surface-2'" @click="lazyload.enable = !lazyload.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="lazyload.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex gap-4">
@@ -356,8 +356,8 @@ onMounted(() => fetchSettings())
                 <label class="text-sm text-text">中英文自动空格</label>
                 <p class="text-xs text-muted">Pangu.js 在中文和英文/数字间插入空格</p>
               </div>
-              <button class="toggle-switch" :class="pangu.enable ? 'bg-primary' : 'bg-surface-2'" @click="pangu.enable = !pangu.enable">
-                <span class="toggle-knob" :class="pangu.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="pangu.enable ? 'bg-primary' : 'bg-surface-2'" @click="pangu.enable = !pangu.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="pangu.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex items-center justify-between">
@@ -365,8 +365,8 @@ onMounted(() => fetchSettings())
                 <label class="text-sm text-text">Pjax 无刷新加载</label>
                 <p class="text-xs text-muted">可能包含 bug，谨慎开启</p>
               </div>
-              <button class="toggle-switch" :class="pjax.enable ? 'bg-primary' : 'bg-surface-2'" @click="pjax.enable = !pjax.enable">
-                <span class="toggle-knob" :class="pjax.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="pjax.enable ? 'bg-primary' : 'bg-surface-2'" @click="pjax.enable = !pjax.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="pjax.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex items-center justify-between">
@@ -374,8 +374,8 @@ onMounted(() => fetchSettings())
                 <label class="text-sm text-text">Instant.page 预加载</label>
                 <p class="text-xs text-muted">悬停链接时预加载页面</p>
               </div>
-              <button class="toggle-switch" :class="instantpage ? 'bg-primary' : 'bg-surface-2'" @click="instantpage = !instantpage">
-                <span class="toggle-knob" :class="instantpage ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="instantpage ? 'bg-primary' : 'bg-surface-2'" @click="instantpage = !instantpage">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="instantpage ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
           </div>
@@ -397,7 +397,3 @@ onMounted(() => fetchSettings())
   </div>
 </template>
 
-<style scoped>
-.toggle-switch { @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer; }
-.toggle-knob { @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform; }
-</style>

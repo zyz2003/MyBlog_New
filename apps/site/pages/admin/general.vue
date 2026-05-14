@@ -216,20 +216,20 @@ onMounted(() => fetchSettings())
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <label class="font-medium text-text">启用副标题</label>
-              <button class="toggle-switch" :class="homeSubtitle.enabled ? 'bg-primary' : 'bg-surface-2'" @click="homeSubtitle.enabled = !homeSubtitle.enabled">
-                <span class="toggle-knob" :class="homeSubtitle.enabled ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="homeSubtitle.enabled ? 'bg-primary' : 'bg-surface-2'" @click="homeSubtitle.enabled = !homeSubtitle.enabled">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="homeSubtitle.enabled ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">打字效果</label>
-              <button class="toggle-switch" :class="homeSubtitle.effect ? 'bg-primary' : 'bg-surface-2'" @click="homeSubtitle.effect = !homeSubtitle.effect">
-                <span class="toggle-knob" :class="homeSubtitle.effect ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="homeSubtitle.effect ? 'bg-primary' : 'bg-surface-2'" @click="homeSubtitle.effect = !homeSubtitle.effect">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="homeSubtitle.effect ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">循环播放</label>
-              <button class="toggle-switch" :class="homeSubtitle.loop ? 'bg-primary' : 'bg-surface-2'" @click="homeSubtitle.loop = !homeSubtitle.loop">
-                <span class="toggle-knob" :class="homeSubtitle.loop ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="homeSubtitle.loop ? 'bg-primary' : 'bg-surface-2'" @click="homeSubtitle.loop = !homeSubtitle.loop">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="homeSubtitle.loop ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div>
@@ -255,8 +255,8 @@ onMounted(() => fetchSettings())
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <label class="font-medium text-text">显示站长信息</label>
-              <button class="toggle-switch" :class="footer.ownerEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.ownerEnabled = !footer.ownerEnabled">
-                <span class="toggle-knob" :class="footer.ownerEnabled ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="footer.ownerEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.ownerEnabled = !footer.ownerEnabled">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="footer.ownerEnabled ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div>
@@ -272,8 +272,8 @@ onMounted(() => fetchSettings())
             <div class="border-t border-border pt-4">
               <div class="flex items-center justify-between mb-3">
                 <label class="font-medium text-text">运行时间统计</label>
-                <button class="toggle-switch" :class="runtime.enabled ? 'bg-primary' : 'bg-surface-2'" @click="runtime.enabled = !runtime.enabled">
-                  <span class="toggle-knob" :class="runtime.enabled ? 'translate-x-6' : 'translate-x-1'" />
+                <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="runtime.enabled ? 'bg-primary' : 'bg-surface-2'" @click="runtime.enabled = !runtime.enabled">
+                  <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="runtime.enabled ? 'translate-x-6' : 'translate-x-1'" />
                 </button>
               </div>
               <input v-if="runtime.enabled" v-model="runtime.launchTime" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="04/01/2021 00:00:00">
@@ -283,8 +283,8 @@ onMounted(() => fetchSettings())
             <div class="border-t border-border pt-4">
               <div class="flex items-center justify-between mb-3">
                 <label class="font-medium text-text">显示页脚链接栏</label>
-                <button class="toggle-switch" :class="footer.footerBarEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.footerBarEnabled = !footer.footerBarEnabled">
-                  <span class="toggle-knob" :class="footer.footerBarEnabled ? 'translate-x-6' : 'translate-x-1'" />
+                <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="footer.footerBarEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.footerBarEnabled = !footer.footerBarEnabled">
+                  <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="footer.footerBarEnabled ? 'translate-x-6' : 'translate-x-1'" />
                 </button>
               </div>
               <div v-if="footer.footerBarEnabled">
@@ -297,15 +297,15 @@ onMounted(() => fetchSettings())
             <div class="border-t border-border pt-4">
               <div class="flex items-center justify-between mb-3">
                 <label class="font-medium text-text">页脚打字副标题</label>
-                <button class="toggle-switch" :class="footer.subTitleEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.subTitleEnabled = !footer.subTitleEnabled">
-                  <span class="toggle-knob" :class="footer.subTitleEnabled ? 'translate-x-6' : 'translate-x-1'" />
+                <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="footer.subTitleEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.subTitleEnabled = !footer.subTitleEnabled">
+                  <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="footer.subTitleEnabled ? 'translate-x-6' : 'translate-x-1'" />
                 </button>
               </div>
               <div v-if="footer.subTitleEnabled" class="space-y-3">
                 <div class="flex items-center justify-between">
                   <label class="text-sm text-text">打字效果</label>
-                  <button class="toggle-switch" :class="footer.subTitleEffect ? 'bg-primary' : 'bg-surface-2'" @click="footer.subTitleEffect = !footer.subTitleEffect">
-                    <span class="toggle-knob" :class="footer.subTitleEffect ? 'translate-x-6' : 'translate-x-1'" />
+                  <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="footer.subTitleEffect ? 'bg-primary' : 'bg-surface-2'" @click="footer.subTitleEffect = !footer.subTitleEffect">
+                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="footer.subTitleEffect ? 'translate-x-6' : 'translate-x-1'" />
                   </button>
                 </div>
                 <div>
@@ -352,8 +352,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">显示社交栏</label>
-            <button class="toggle-switch" :class="footer.socialBarEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.socialBarEnabled = !footer.socialBarEnabled">
-              <span class="toggle-knob" :class="footer.socialBarEnabled ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="footer.socialBarEnabled ? 'bg-primary' : 'bg-surface-2'" @click="footer.socialBarEnabled = !footer.socialBarEnabled">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="footer.socialBarEnabled ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div v-if="footer.socialBarEnabled" class="space-y-2">
@@ -386,14 +386,14 @@ onMounted(() => fetchSettings())
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">启用深色模式</label>
-              <button class="toggle-switch" :class="darkmode.enabled ? 'bg-primary' : 'bg-surface-2'" @click="darkmode.enabled = !darkmode.enabled">
-                <span class="toggle-knob" :class="darkmode.enabled ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="darkmode.enabled ? 'bg-primary' : 'bg-surface-2'" @click="darkmode.enabled = !darkmode.enabled">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="darkmode.enabled ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">显示切换按钮</label>
-              <button class="toggle-switch" :class="darkmode.button ? 'bg-primary' : 'bg-surface-2'" @click="darkmode.button = !darkmode.button">
-                <span class="toggle-knob" :class="darkmode.button ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="darkmode.button ? 'bg-primary' : 'bg-surface-2'" @click="darkmode.button = !darkmode.button">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="darkmode.button ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div>
@@ -426,8 +426,8 @@ onMounted(() => fetchSettings())
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">启用卖萌标题</label>
-              <button class="toggle-switch" :class="diytitle.enabled ? 'bg-primary' : 'bg-surface-2'" @click="diytitle.enabled = !diytitle.enabled">
-                <span class="toggle-knob" :class="diytitle.enabled ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="diytitle.enabled ? 'bg-primary' : 'bg-surface-2'" @click="diytitle.enabled = !diytitle.enabled">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="diytitle.enabled ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div>
@@ -448,8 +448,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between">
             <label class="text-sm text-text">启用控制台欢迎信息</label>
-            <button class="toggle-switch" :class="consoleLog.enabled ? 'bg-primary' : 'bg-surface-2'" @click="consoleLog.enabled = !consoleLog.enabled">
-              <span class="toggle-knob" :class="consoleLog.enabled ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="consoleLog.enabled ? 'bg-primary' : 'bg-surface-2'" @click="consoleLog.enabled = !consoleLog.enabled">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="consoleLog.enabled ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
         </div>
@@ -487,11 +487,3 @@ onMounted(() => fetchSettings())
   </div>
 </template>
 
-<style scoped>
-.toggle-switch {
-  @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer;
-}
-.toggle-knob {
-  @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
-}
-</style>

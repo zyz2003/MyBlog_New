@@ -257,8 +257,8 @@ onMounted(() => fetchSettings())
           <div class="space-y-4">
             <div class="flex items-center justify-between">
               <label class="font-medium text-text">显示版权声明</label>
-              <button class="toggle-switch" :class="postCopyright.enable ? 'bg-primary' : 'bg-surface-2'" @click="postCopyright.enable = !postCopyright.enable">
-                <span class="toggle-knob" :class="postCopyright.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="postCopyright.enable ? 'bg-primary' : 'bg-surface-2'" @click="postCopyright.enable = !postCopyright.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="postCopyright.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -288,8 +288,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">显示赞赏码</label>
-            <button class="toggle-switch" :class="reward.enable ? 'bg-primary' : 'bg-surface-2'" @click="reward.enable = !reward.enable">
-              <span class="toggle-knob" :class="reward.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="reward.enable ? 'bg-primary' : 'bg-surface-2'" @click="reward.enable = !reward.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="reward.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div v-if="reward.enable" class="space-y-2">
@@ -313,8 +313,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">显示相关文章</label>
-            <button class="toggle-switch" :class="relatedPost.enable ? 'bg-primary' : 'bg-surface-2'" @click="relatedPost.enable = !relatedPost.enable">
-              <span class="toggle-knob" :class="relatedPost.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="relatedPost.enable ? 'bg-primary' : 'bg-surface-2'" @click="relatedPost.enable = !relatedPost.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="relatedPost.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div class="grid grid-cols-2 gap-3">
@@ -356,8 +356,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">启用过期提醒</label>
-            <button class="toggle-switch" :class="noticeOutdate.enable ? 'bg-primary' : 'bg-surface-2'" @click="noticeOutdate.enable = !noticeOutdate.enable">
-              <span class="toggle-knob" :class="noticeOutdate.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="noticeOutdate.enable ? 'bg-primary' : 'bg-surface-2'" @click="noticeOutdate.enable = !noticeOutdate.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="noticeOutdate.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div v-if="noticeOutdate.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -399,11 +399,3 @@ onMounted(() => fetchSettings())
   </div>
 </template>
 
-<style scoped>
-.toggle-switch {
-  @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer;
-}
-.toggle-knob {
-  @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
-}
-</style>

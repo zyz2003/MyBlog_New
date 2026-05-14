@@ -189,8 +189,8 @@ onMounted(() => fetchSettings())
           <div class="border border-border rounded-lg p-4 mb-3">
             <div class="flex items-center justify-between mb-3">
               <label class="font-medium text-text">静止彩带背景</label>
-              <button class="toggle-switch" :class="canvasRibbon.enable ? 'bg-primary' : 'bg-surface-2'" @click="canvasRibbon.enable = !canvasRibbon.enable">
-                <span class="toggle-knob" :class="canvasRibbon.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="canvasRibbon.enable ? 'bg-primary' : 'bg-surface-2'" @click="canvasRibbon.enable = !canvasRibbon.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="canvasRibbon.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div v-if="canvasRibbon.enable" class="grid grid-cols-3 gap-3">
@@ -212,8 +212,8 @@ onMounted(() => fetchSettings())
           <div class="border border-border rounded-lg p-4 mb-3">
             <div class="flex items-center justify-between mb-3">
               <label class="font-medium text-text">动态线条背景</label>
-              <button class="toggle-switch" :class="canvasNest.enable ? 'bg-primary' : 'bg-surface-2'" @click="canvasNest.enable = !canvasNest.enable">
-                <span class="toggle-knob" :class="canvasNest.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="canvasNest.enable ? 'bg-primary' : 'bg-surface-2'" @click="canvasNest.enable = !canvasNest.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="canvasNest.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div v-if="canvasNest.enable" class="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -236,8 +236,8 @@ onMounted(() => fetchSettings())
           <div class="border border-border rounded-lg p-4 mb-3">
             <div class="flex items-center justify-between">
               <label class="font-medium text-text">点击烟花特效</label>
-              <button class="toggle-switch" :class="fireworks.enable ? 'bg-primary' : 'bg-surface-2'" @click="fireworks.enable = !fireworks.enable">
-                <span class="toggle-knob" :class="fireworks.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="fireworks.enable ? 'bg-primary' : 'bg-surface-2'" @click="fireworks.enable = !fireworks.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="fireworks.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
           </div>
@@ -246,8 +246,8 @@ onMounted(() => fetchSettings())
           <div class="border border-border rounded-lg p-4 mb-3">
             <div class="flex items-center justify-between">
               <label class="font-medium text-text">点击爱心特效</label>
-              <button class="toggle-switch" :class="clickHeart.enable ? 'bg-primary' : 'bg-surface-2'" @click="clickHeart.enable = !clickHeart.enable">
-                <span class="toggle-knob" :class="clickHeart.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="clickHeart.enable ? 'bg-primary' : 'bg-surface-2'" @click="clickHeart.enable = !clickHeart.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="clickHeart.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
           </div>
@@ -256,8 +256,8 @@ onMounted(() => fetchSettings())
           <div class="border border-border rounded-lg p-4 mb-3">
             <div class="flex items-center justify-between mb-3">
               <label class="font-medium text-text">打字特效 (Power Mode)</label>
-              <button class="toggle-switch" :class="activatePowerMode.enable ? 'bg-primary' : 'bg-surface-2'" @click="activatePowerMode.enable = !activatePowerMode.enable">
-                <span class="toggle-knob" :class="activatePowerMode.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="activatePowerMode.enable ? 'bg-primary' : 'bg-surface-2'" @click="activatePowerMode.enable = !activatePowerMode.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="activatePowerMode.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div v-if="activatePowerMode.enable" class="flex gap-4">
@@ -290,8 +290,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">启用音乐播放器</label>
-            <button class="toggle-switch" :class="navMusic.enable ? 'bg-primary' : 'bg-surface-2'" @click="navMusic.enable = !navMusic.enable">
-              <span class="toggle-knob" :class="navMusic.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="navMusic.enable ? 'bg-primary' : 'bg-surface-2'" @click="navMusic.enable = !navMusic.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="navMusic.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div v-if="navMusic.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -328,8 +328,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">启用 AI 摘要</label>
-            <button class="toggle-switch" :class="aiSummary.enable ? 'bg-primary' : 'bg-surface-2'" @click="aiSummary.enable = !aiSummary.enable">
-              <span class="toggle-knob" :class="aiSummary.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="aiSummary.enable ? 'bg-primary' : 'bg-surface-2'" @click="aiSummary.enable = !aiSummary.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="aiSummary.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div v-if="aiSummary.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -362,8 +362,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">启用评论弹幕</label>
-            <button class="toggle-switch" :class="commentBarrage.enable ? 'bg-primary' : 'bg-surface-2'" @click="commentBarrage.enable = !commentBarrage.enable">
-              <span class="toggle-knob" :class="commentBarrage.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="commentBarrage.enable ? 'bg-primary' : 'bg-surface-2'" @click="commentBarrage.enable = !commentBarrage.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="commentBarrage.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div v-if="commentBarrage.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -385,8 +385,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between mb-4">
             <label class="font-medium text-text">启��时间段欢迎语</label>
-            <button class="toggle-switch" :class="greetingBox.enable ? 'bg-primary' : 'bg-surface-2'" @click="greetingBox.enable = !greetingBox.enable">
-              <span class="toggle-knob" :class="greetingBox.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="greetingBox.enable ? 'bg-primary' : 'bg-surface-2'" @click="greetingBox.enable = !greetingBox.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="greetingBox.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
           <div v-if="greetingBox.enable" class="space-y-2">
@@ -419,8 +419,8 @@ onMounted(() => fetchSettings())
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">启用简繁转换</label>
-              <button class="toggle-switch" :class="translate.enable ? 'bg-primary' : 'bg-surface-2'" @click="translate.enable = !translate.enable">
-                <span class="toggle-knob" :class="translate.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="translate.enable ? 'bg-primary' : 'bg-surface-2'" @click="translate.enable = !translate.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="translate.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div>
@@ -439,8 +439,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between">
             <label class="text-sm text-text">启用阅读模式</label>
-            <button class="toggle-switch" :class="readmode ? 'bg-primary' : 'bg-surface-2'" @click="readmode = !readmode">
-              <span class="toggle-knob" :class="readmode ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="readmode ? 'bg-primary' : 'bg-surface-2'" @click="readmode = !readmode">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="readmode ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
         </div>
@@ -452,8 +452,8 @@ onMounted(() => fetchSettings())
           </h2>
           <div class="flex items-center justify-between">
             <label class="text-sm text-text">自定义右键菜单</label>
-            <button class="toggle-switch" :class="rightClickMenu.enable ? 'bg-primary' : 'bg-surface-2'" @click="rightClickMenu.enable = !rightClickMenu.enable">
-              <span class="toggle-knob" :class="rightClickMenu.enable ? 'translate-x-6' : 'translate-x-1'" />
+            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="rightClickMenu.enable ? 'bg-primary' : 'bg-surface-2'" @click="rightClickMenu.enable = !rightClickMenu.enable">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="rightClickMenu.enable ? 'translate-x-6' : 'translate-x-1'" />
             </button>
           </div>
         </div>
@@ -466,14 +466,14 @@ onMounted(() => fetchSettings())
           <div class="space-y-3">
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">启用快捷键</label>
-              <button class="toggle-switch" :class="shortcutKey.enable ? 'bg-primary' : 'bg-surface-2'" @click="shortcutKey.enable = !shortcutKey.enable">
-                <span class="toggle-knob" :class="shortcutKey.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="shortcutKey.enable ? 'bg-primary' : 'bg-surface-2'" @click="shortcutKey.enable = !shortcutKey.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="shortcutKey.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
             <div class="flex items-center justify-between">
               <label class="text-sm text-text">无障碍快捷键 (Shift+?)</label>
-              <button class="toggle-switch" :class="accesskey.enable ? 'bg-primary' : 'bg-surface-2'" @click="accesskey.enable = !accesskey.enable">
-                <span class="toggle-knob" :class="accesskey.enable ? 'translate-x-6' : 'translate-x-1'" />
+              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="accesskey.enable ? 'bg-primary' : 'bg-surface-2'" @click="accesskey.enable = !accesskey.enable">
+                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="accesskey.enable ? 'translate-x-6' : 'translate-x-1'" />
               </button>
             </div>
           </div>
@@ -494,7 +494,3 @@ onMounted(() => fetchSettings())
   </div>
 </template>
 
-<style scoped>
-.toggle-switch { @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer; }
-.toggle-knob { @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform; }
-</style>
