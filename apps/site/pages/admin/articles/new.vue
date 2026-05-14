@@ -1,7 +1,4 @@
 <script setup lang="ts">
-definePageMeta({
-  layout: 'admin-default',
-})
 </script>
 
 <template>

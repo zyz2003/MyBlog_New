@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import type { CategoryTreeNode } from '~/server/services/category.service'
 
-definePageMeta({
-  layout: 'admin-default',
-})
-
 const api = useAdminApi()
 
 const tree = ref<CategoryTreeNode[]>([])

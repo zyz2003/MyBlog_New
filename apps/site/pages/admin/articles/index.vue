@@ -2,10 +2,6 @@
 import type { ArticleWithRelations } from '~/server/services/article.service'
 import { useAuthStore } from '~/stores/auth'
 
-definePageMeta({
-  layout: 'admin-default',
-})
-
 const api = useAdminApi()
 const authStore = useAuthStore()
 

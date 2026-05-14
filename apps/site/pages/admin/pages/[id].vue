@@ -1,8 +1,4 @@
 <script setup lang="ts">
-definePageMeta({
-  layout: 'admin-default',
-})
-
 const route = useRoute()
 const api = useAdminApi()
 const router = useRouter()

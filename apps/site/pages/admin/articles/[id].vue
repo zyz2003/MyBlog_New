@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import type { ArticleWithRelations } from '~/server/services/article.service'
 
-definePageMeta({
-  layout: 'admin-default',
-})
-
 const route = useRoute()
 const api = useAdminApi()
 

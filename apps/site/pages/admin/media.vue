@@ -9,10 +9,6 @@ interface MediaItem {
   createdAt: Date
 }
 
-definePageMeta({
-  layout: 'admin-default',
-})
-
 const api = useAdminApi()
 
 const items = ref<MediaItem[]>([])
