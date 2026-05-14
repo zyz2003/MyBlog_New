@@ -1,15 +1,16 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
-const { initTheme } = useTheme()
-
-// Initialize theme on client
-await initTheme()
+// Theme CSS is now loaded via <link rel="stylesheet" href="/api/themes/active.css"> in useHead
 
 useHead({
   titleTemplate: (titleChunk) => {
     return titleChunk ? `${titleChunk} - ${config.public.siteName}` : config.public.siteName
   },
   link: [
+    {
+      rel: 'stylesheet',
+      href: '/api/themes/active.css',
+    },
     {
       rel: 'stylesheet',
       href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap',
@@ -54,6 +55,8 @@ const dynamicNavLinks = computed(() => {
 const allNavLinks = computed(() => {
   return [...(navLinks.value ?? []), ...dynamicNavLinks.value]
 })
+
+// Load dynamic nav pages
 </script>
 
 <template>
@@ -76,7 +79,7 @@ const allNavLinks = computed(() => {
               v-for="link in allNavLinks"
               :key="link.to"
               :to="link.to"
-              class="px-4 py-2 text-sm font-medium text-secondary hover:text-primary rounded-lg hover:bg-surface-2 transition-colors"
+              class="px-4 py-2 text-sm font-medium text-secondary hover:text-primary hover:bg-surface-2 rounded-lg transition-colors"
               active-class="!text-primary !bg-surface-2 font-medium"
             >
               {{ link.label }}
