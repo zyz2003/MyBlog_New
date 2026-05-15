@@ -22,6 +22,9 @@ useHead({
 </script>
 
 <template>
+  <!-- Preloader: fullscreen loading overlay on initial page load -->
+  <BlogPreloader />
+
   <div class="min-h-screen flex flex-col bg-background transition-colors duration-300">
     <!-- Navbar: replaced by BlogNavbar component (AnZhiYu nav.pug replication) -->
     <BlogNavbar />
@@ -37,4 +40,10 @@ useHead({
     <!-- Footer: replaced by BlogFooter component (AnZhiYu footer.pug replication) -->
     <BlogFooter />
   </div>
+
+  <!-- Rightside action buttons (fixed position) -->
+  <BlogRightsideButtons />
+
+  <!-- Custom right-click context menu -->
+  <BlogRightClickMenu />
 </template>
