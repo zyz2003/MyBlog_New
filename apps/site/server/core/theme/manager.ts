@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { themeSettings } from '../../db/schema/settings'
 import { db } from '../../utils/db'
 import { hookEmitter } from '../hooks/event-emitter'
+import { SettingsService } from '../../services/settings.service'
 import type { ThemeConfig, ThemeManifest, ThemeMeta, ThemeShadows, ThemeTransitions, ThemeComponents } from './types'
 import { CSSVariablesMap } from './types'
 
@@ -63,7 +64,7 @@ export class ThemeManager {
       }
 
       const entries = fs.readdirSync(this.themesDir, { withFileTypes: true })
-      let count = 0
+      let overrideCount = 0
 
       for (const entry of entries) {
         if (!entry.isDirectory()) continue
@@ -74,32 +75,22 @@ export class ThemeManager {
           continue
         }
 
-        const configPath = path.join(this.themesDir, entry.name, 'config.json')
-        if (!fs.existsSync(configPath)) continue
-
+        // Config is DB-driven per D-04 — scan only for override files (.vue, .ts, .css)
+        const themeDir = path.join(this.themesDir, entry.name)
         try {
-          const fileContent = fs.readFileSync(configPath, 'utf-8')
-          const parsed = JSON.parse(fileContent)
-
-          if (this.validateConfig(parsed)) {
-            const raw = parsed as RawThemeJson
-            const manifest: ThemeManifest = {
-              meta: this.extractMeta(raw, entry.name),
-              config: this.extractConfig(raw),
-            }
-            this.themes.set(entry.name, manifest)
-            count++
-          }
-          else {
-            console.warn(`[ThemeManager] Invalid config for theme "${entry.name}"`)
+          const allFiles = fs.readdirSync(themeDir)
+          const overrideFiles = allFiles.filter(f => /\.(vue|ts|css)$/.test(f))
+          if (overrideFiles.length > 0) {
+            console.log(`[ThemeManager] Theme "${entry.name}" has ${overrideFiles.length} override file(s): ${overrideFiles.join(', ')}`)
+            overrideCount++
           }
         }
-        catch (error) {
-          console.warn(`[ThemeManager] Failed to load theme "${entry.name}":`, error)
+        catch {
+          // Skip directories that can't be read
         }
       }
 
-      console.log(`[ThemeManager] Discovered ${count} theme(s)`)
+      console.log(`[ThemeManager] Scanned ${entries.length} theme director(ies), ${overrideCount} with override files`)
     }
     catch (error) {
       console.error('[ThemeManager] Failed to scan themes directory:', error)
@@ -262,6 +253,28 @@ export class ThemeManager {
    */
   getConfig(themeName: string): ThemeConfig | undefined {
     return this.themes.get(themeName)?.config
+  }
+
+  /**
+   * Save theme config to both tables — system_settings.themeConfig + theme_settings
+   * Dual-write sync for ThemeCustomizer: writes to system_settings first, then theme_settings
+   */
+  async saveConfig(themeName: string, config: ThemeConfig): Promise<void> {
+    // Step 1: Write to system_settings.themeConfig (for frontend useSiteSettings consumption)
+    await SettingsService.upsert('themeConfig', config, 'theme', 'Site theme configuration')
+
+    // Step 2: Write to theme_settings table (for ThemeManager internal state)
+    await this.persistToDb(themeName, config)
+
+    // Step 3: Update in-memory cache if this is the active theme
+    if (this.activeTheme === themeName) {
+      const manifest = this.themes.get(themeName)
+      if (manifest) {
+        manifest.config = config
+      }
+    }
+
+    console.log(`[ThemeManager] Config saved for theme "${themeName}"`)
   }
 
   /**
