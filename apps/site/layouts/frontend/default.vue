@@ -18,98 +18,13 @@ useHead({
   ],
 })
 
-// Layout config
-const navLinks = computed(() => [
-  { label: '首页', to: '/' },
-  { label: '文章', to: '/articles' },
-  { label: '关于', to: '/about' },
-])
-
-// Dark mode
-const isDark = ref(false)
-onMounted(() => {
-  const stored = localStorage.getItem('theme')
-  isDark.value = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  document.documentElement.classList.toggle('dark', isDark.value)
-})
-
-function toggleDark() {
-  isDark.value = !isDark.value
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
-// Load dynamic nav pages
-const { data: navPagesData } = await useFetch<{ code: number; data: Array<{ slug: string; title: string; navLabel: string | null; navOrder: number }> }>('/api/pages/nav')
-
-const dynamicNavLinks = computed(() => {
-  return (navPagesData.value?.data ?? [])
-    .slice()
-    .sort((a, b) => (a.navOrder ?? 0) - (b.navOrder ?? 0))
-    .map(p => ({
-      label: p.navLabel || p.title || p.slug,
-      to: `/${p.slug}`,
-    }))
-})
-
-const allNavLinks = computed(() => {
-  return [...(navLinks.value ?? []), ...dynamicNavLinks.value]
-})
-
-// Load dynamic nav pages
+// Navbar, dark mode, nav links — all handled by BlogNavbar component internally
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col bg-background transition-colors duration-300">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md border-b border-border">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <!-- Logo -->
-          <NuxtLink
-            to="/"
-            class="text-xl font-bold text-primary hover:text-accent transition-colors"
-          >
-            {{ config.public.siteName }}
-          </NuxtLink>
-
-          <!-- Desktop Nav -->
-          <nav class="hidden md:flex items-center gap-1">
-            <NuxtLink
-              v-for="link in allNavLinks"
-              :key="link.to"
-              :to="link.to"
-              class="px-4 py-2 text-sm font-medium text-secondary hover:text-primary hover:bg-surface-2 rounded-lg transition-colors"
-              active-class="!text-primary !bg-surface-2 font-medium"
-            >
-              {{ link.label }}
-            </NuxtLink>
-          </nav>
-
-          <!-- Actions -->
-          <div class="flex items-center gap-2">
-            <!-- Dark mode toggle -->
-            <button
-              @click="toggleDark"
-              class="p-2 rounded-lg text-accent hover:bg-surface-2 transition-colors cursor-pointer"
-              aria-label="切换深色模式"
-            >
-              <svg v-if="isDark" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            </button>
-
-            <!-- Mobile menu button -->
-            <button class="md:hidden p-2 rounded-lg text-accent hover:bg-surface-2 transition-colors cursor-pointer">
-              <span class="i-heroicons-bars-3 w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- Navbar: replaced by BlogNavbar component (AnZhiYu nav.pug replication) -->
+    <BlogNavbar />
 
     <!-- Main content -->
     <main class="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
