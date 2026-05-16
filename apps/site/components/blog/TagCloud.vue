@@ -1,23 +1,19 @@
 <script setup lang="ts">
-const { data } = await useFetch('/api/tags')
+const { data } = await useFetch<{ code: number; data: Array<{ id: number; name: string; slug: string; count: number }> }>('/api/tags')
+const tags = computed(() => (data.value as any)?.data ?? [])
 </script>
 
 <template>
-  <div class="bg-surface/80 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-border">
-    <h3 class="text-sm font-semibold text-primary mb-4 flex items-center gap-2">
-      <span class="i-heroicons-tag w-4 h-4 text-accent" />
-      标签
-    </h3>
-    <div v-if="data?.data?.length" class="flex flex-wrap gap-2">
+  <div class="card-widget rounded-2xl bg-[var(--anzhiyu-card-bg)] border border-[var(--style-border-always)] p-4 mb-4">
+    <div class="text-xs font-semibold text-[var(--anzhiyu-secondtext)] mb-3 uppercase tracking-wide">标签</div>
+    <div v-if="!tags.length" class="text-xs text-[var(--anzhiyu-secondtext)] text-center py-2">暂无标签</div>
+    <div v-else class="flex flex-wrap gap-2">
       <NuxtLink
-        v-for="tag in data.data"
-        :key="tag.id"
-        :to="`/tags/${tag.slug}`"
-        class="px-3 py-1 text-sm rounded-full bg-surface-2 text-secondary hover:bg-accent/20 hover:text-accent transition-colors"
+        v-for="tag in tags" :key="tag.id" :to="`/tags/${tag.slug}`"
+        class="no-underline text-[var(--anzhiyu-fontcolor)] hover:text-[var(--anzhiyu-white)] hover:bg-[var(--anzhiyu-main)] transition-colors px-2 py-0.5 rounded-lg bg-[var(--anzhiyu-main)]/5 text-xs"
       >
         {{ tag.name }}
       </NuxtLink>
     </div>
-    <p v-else class="text-sm text-muted text-center py-4">暂无标签</p>
   </div>
 </template>
