@@ -15,6 +15,9 @@ const seo = ref({
   googleVerification: '',
 })
 
+const ogMeta = ref({ ogImage: '', twitterCard: 'summary_large_image' as string })
+const seoBing = ref('')
+
 // Fetch settings
 async function fetchSettings() {
   loading.value = true
@@ -168,6 +171,25 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- Open Graph Meta -->
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold text-text mb-4">Open Graph 社交分享</h2>
+          <p class="text-sm text-muted mb-4">控制微信/Facebook/Twitter 等社交平台分享时的展示效果</p>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-text mb-1.5">OG 图片 URL</label>
+              <input v-model="ogMeta.ogImage" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="默认分享图片 URL">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-text mb-1.5">Twitter Card</label>
+              <select v-model="ogMeta.twitterCard" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
+                <option value="summary">Summary</option>
+                <option value="summary_large_image">Summary Large Image</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <!-- Search Engine Verification -->
         <div class="card p-6">
           <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
@@ -185,9 +207,7 @@ onMounted(() => {
                 class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary"
                 placeholder="百度站长平台验证代码"
               >
-              <p class="text-xs text-muted mt-1">在百度搜索资源平台获取验证代码</p>
             </div>
-
             <div>
               <label class="block text-sm font-medium text-text mb-1.5">Google 验证</label>
               <input
@@ -196,7 +216,10 @@ onMounted(() => {
                 class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary"
                 placeholder="Google Search Console 验证代码"
               >
-              <p class="text-xs text-muted mt-1">在 Google Search Console 获取验证代码</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-text mb-1.5">Bing 验证</label>
+              <input v-model="seoBing" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="Bing Webmaster 验证代码">
             </div>
           </div>
         </div>

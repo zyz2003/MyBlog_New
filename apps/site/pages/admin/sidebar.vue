@@ -20,7 +20,12 @@ const widgetOptions = [
   { value: 'archive', label: '归档', icon: 'i-heroicons-archive' },
   { value: 'friends', label: '友链', icon: 'i-heroicons-link' },
   { value: 'recent', label: '最新文章', icon: 'i-heroicons-clock' },
+  { value: 'announcement', label: '公告栏', icon: 'i-heroicons-megaphone' },
+  { value: 'wechat', label: '微信', icon: 'i-heroicons-chat-bubble-left' },
 ]
+
+// Aside config
+const aside = ref({ enable: true, button: true, hide: false, display: { archive: true, category: true, tag: true } })
 
 // Fetch settings
 async function fetchSettings() {

@@ -66,6 +66,21 @@ const cover = ref({
   position: 'left' as string,
 })
 
+// TOC
+const toc = ref({ enable: true, number: true, expand: false, styleSimple: false, scrollPercent: true })
+// Word count
+const wordcount = ref({ enable: true, count: true })
+// Post tools
+const ptool = ref({ enable: true, categories: false, tags: true, share: true })
+// Anchor
+const anchor = ref({ anchorOption: 1, linkIcon: true, scrollToggle: false })
+// Post edit
+const postEdit = ref({ enable: false })
+// Photo figcaption
+const photofigcaption = ref({ enable: false })
+// H2 divider
+const h2Divider = ref({ enable: false })
+
 async function fetchSettings() {
   loading.value = true
   try {
@@ -83,6 +98,13 @@ async function fetchSettings() {
     if (s.noticeOutdate) noticeOutdate.value = { ...noticeOutdate.value, ...(s.noticeOutdate as typeof noticeOutdate.value) }
     if (s.postPagination !== undefined) postPagination.value = String(s.postPagination)
     if (s.cover) cover.value = { ...cover.value, ...(s.cover as typeof cover.value) }
+    if (s.toc) toc.value = { ...toc.value, ...(s.toc as typeof toc.value) }
+    if (s.wordcount) wordcount.value = { ...wordcount.value, ...(s.wordcount as typeof wordcount.value) }
+    if (s.ptool) ptool.value = { ...ptool.value, ...(s.ptool as typeof ptool.value) }
+    if (s.anchor) anchor.value = { ...anchor.value, ...(s.anchor as typeof anchor.value) }
+    if (s.postEdit) postEdit.value = { ...postEdit.value, ...(s.postEdit as typeof postEdit.value) }
+    if (s.photofigcaption) photofigcaption.value = { ...photofigcaption.value, ...(s.photofigcaption as typeof photofigcaption.value) }
+    if (s.h2Divider) h2Divider.value = { ...h2Divider.value, ...(s.h2Divider as typeof h2Divider.value) }
   } catch (e) {
     console.error('Failed to fetch settings:', e)
   } finally {
@@ -103,6 +125,13 @@ async function handleSave() {
       { key: 'noticeOutdate', value: noticeOutdate.value, category: 'post' },
       { key: 'postPagination', value: postPagination.value, category: 'post' },
       { key: 'cover', value: cover.value, category: 'post' },
+      { key: 'toc', value: toc.value, category: 'post' },
+      { key: 'wordcount', value: wordcount.value, category: 'post' },
+      { key: 'ptool', value: ptool.value, category: 'post' },
+      { key: 'anchor', value: anchor.value, category: 'post' },
+      { key: 'postEdit', value: postEdit.value, category: 'post' },
+      { key: 'photofigcaption', value: photofigcaption.value, category: 'post' },
+      { key: 'h2Divider', value: h2Divider.value, category: 'post' },
     ])
     saveSuccess.value = true
     setTimeout(() => { saveSuccess.value = false }, 3000)
@@ -383,8 +412,28 @@ onMounted(() => fetchSettings())
         </div>
       </div>
 
-      <!-- Right: Preview -->
+      <!-- Right: TOC, Wordcount, Post Tools -->
       <div class="space-y-6">
+        <!-- TOC -->
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold text-text mb-4">文章目录</h2>
+          <div class="flex items-center justify-between mb-3"><label class="text-sm">启用目录</label><button class="toggle" :class="toc.enable ? 'bg-primary' : 'bg-surface-2'" @click="toc.enable = !toc.enable"><span class="toggle-knob" :class="toc.enable ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+          <div class="flex items-center justify-between mb-3"><label class="text-sm">显示序号</label><button class="toggle" :class="toc.number ? 'bg-primary' : 'bg-surface-2'" @click="toc.number = !toc.number"><span class="toggle-knob" :class="toc.number ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+          <div class="flex items-center justify-between"><label class="text-sm">滚动百分比</label><button class="toggle" :class="toc.scrollPercent ? 'bg-primary' : 'bg-surface-2'" @click="toc.scrollPercent = !toc.scrollPercent"><span class="toggle-knob" :class="toc.scrollPercent ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+        </div>
+        <!-- Word Count -->
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold text-text mb-4">字数统计</h2>
+          <div class="flex items-center justify-between mb-3"><label class="text-sm">启用字数统计</label><button class="toggle" :class="wordcount.enable ? 'bg-primary' : 'bg-surface-2'" @click="wordcount.enable = !wordcount.enable"><span class="toggle-knob" :class="wordcount.enable ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+          <div class="flex items-center justify-between"><label class="text-sm">显示字数</label><button class="toggle" :class="wordcount.count ? 'bg-primary' : 'bg-surface-2'" @click="wordcount.count = !wordcount.count"><span class="toggle-knob" :class="wordcount.count ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+        </div>
+        <!-- Post Tools (ptool) -->
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold text-text mb-4">文章工具</h2>
+          <div class="flex items-center justify-between mb-3"><label class="text-sm">启用工具栏</label><button class="toggle" :class="ptool.enable ? 'bg-primary' : 'bg-surface-2'" @click="ptool.enable = !ptool.enable"><span class="toggle-knob" :class="ptool.enable ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+          <div class="flex items-center justify-between"><label class="text-sm">显示分享按钮</label><button class="toggle" :class="ptool.share ? 'bg-primary' : 'bg-surface-2'" @click="ptool.share = !ptool.share"><span class="toggle-knob" :class="ptool.share ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+        </div>
+        <!-- Preview -->
         <div class="card p-6">
           <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
             <span class="i-heroicons-eye w-5 h-5 text-primary" /> 效果预览
