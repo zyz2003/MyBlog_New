@@ -37,8 +37,9 @@ onMounted(() => {
 const backMenuOpen = ref(false)
 function toggleBackMenu() { backMenuOpen.value = !backMenuOpen.value }
 
-// Search (placeholder — Phase 4 will implement)
-function openSearch() { /* Phase 4: search modal */ }
+// Search modal
+const searchOpen = ref(false)
+function openSearch() { searchOpen.value = true }
 
 // Random post
 const allArticles = ref<any[]>([])
@@ -252,4 +253,7 @@ const consoleChecked = ref(false)
       </div>
     </nav>
   </header>
+
+  <!-- Search modal -->
+  <BlogSearchWidget v-if="searchOpen" @close="searchOpen = false" />
 </template>
