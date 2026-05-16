@@ -94,11 +94,9 @@ useSeoMeta({
         :title="article.title"
       />
 
-      <!-- Comment section (Phase 4) -->
-      <div class="max-w-[800px] mx-auto px-4 py-8 border-t border-[var(--style-border-always)] mt-8">
-        <p class="text-center text-sm text-[var(--anzhiyu-secondtext)]">
-          评论功能即将上线
-        </p>
+      <!-- Comment section -->
+      <div class="border-t border-[var(--style-border-always)] mt-8">
+        <BlogCommentWidget />
       </div>
     </article>
   </div>
