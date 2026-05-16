@@ -104,6 +104,14 @@ async function fetchSettings() {
     if (s.translate) translate.value = { ...translate.value, ...(s.translate as typeof translate.value) }
     if (s.readmode !== undefined) readmode.value = Boolean(s.readmode)
     if (s.rightsideItems) rightsideItems.value = { ...rightsideItems.value, ...(s.rightsideItems as typeof rightsideItems.value) }
+    if (s.sharejs) sharejs.value = { ...sharejs.value, ...(s.sharejs as typeof sharejs.value) }
+    if (s.snackbar) snackbar.value = { ...snackbar.value, ...(s.snackbar as typeof snackbar.value) }
+    if (s.preloader) preloader.value = { ...preloader.value, ...(s.preloader as typeof preloader.value) }
+    if (s.centerConsole) centerConsole.value = { ...centerConsole.value, ...(s.centerConsole as typeof centerConsole.value) }
+    if (s.dynamicEffect) dynamicEffect.value = { ...dynamicEffect.value, ...(s.dynamicEffect as typeof dynamicEffect.value) }
+    if (s.agreementPopup) agreementPopup.value = { ...agreementPopup.value, ...(s.agreementPopup as typeof agreementPopup.value) }
+    if (s.friendsVue) friendsVue.value = { ...friendsVue.value, ...(s.friendsVue as typeof friendsVue.value) }
+    if (s.aplayerInject) aplayerInject.value = { ...aplayerInject.value, ...(s.aplayerInject as typeof aplayerInject.value) }
   } catch (e) {
     console.error('Failed to fetch settings:', e)
   } finally {
