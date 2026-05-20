@@ -1,86 +1,243 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'frontend-default' })
 
-const { getArticles } = usePublicApi()
-const route = useRoute()
-const page = computed(() => Number(route.query.page) || 1)
+interface CategoryConfig {
+  name: string
+  path: string
+  icon?: string
+  shadow?: string
+  bgColor?: string
+}
 
-const { data } = await useAsyncData(
-  `home-articles-${page.value}`,
-  () => getArticles({ page: page.value, pageSize: 10 }),
-  { watch: [page] },
+interface TodayCardConfig {
+  tips: string
+  title: string
+  image: string
+  link: string
+}
+
+interface SkillItem {
+  name: string
+  icon: string
+  color: string
+}
+
+const route = useRoute()
+const homeTitle = '首页'
+const homeDescription = '分享技术见解，记录生活感悟'
+const archiveText = '归档'
+const friendsText = '友链'
+const noArticlesText = '暂无文章'
+const page = computed(() => Number(route.query.page) || 1)
+const { getArticles, getCategoryTree } = usePublicApi()
+const { homepage, errorImage, refresh } = useSiteSettings()
+
+await refresh()
+const homepageSkills = computed<SkillItem[]>(() => homepage.value.skills as SkillItem[])
+const homePageSize = computed(() => homepage.value.pageSize)
+
+function resolveCover(coverImage: string | null | undefined, id: number, fallbackSize: string) {
+  const fallback = errorImage.value.post_page || `https://picsum.photos/seed/${id}/${fallbackSize}`
+  const base = coverImage || fallback
+  const suffix = homepage.value.pageThumbnailSuffix
+  return suffix && base ? `${base}${suffix}` : base
+}
+
+const { data: articlesData } = await useAsyncData(
+  'home-articles',
+  () => getArticles({ page: page.value, pageSize: homePageSize.value }),
+  { watch: [page, homePageSize] },
 )
 
-useSeoMeta({
-  title: '首页',
-  ogTitle: '首页',
-  description: '分享技术见解，记录生活感悟',
-  ogDescription: '分享技术见解，记录生活感悟',
+const { data: categoriesData } = await useAsyncData('home-categories', () => getCategoryTree())
+
+const homepageCategoryCards = computed<CategoryConfig[]>(() => {
+  const fallbackGradients = [
+    'linear-gradient(to right, #358bff, #15c6ff)',
+    'linear-gradient(to right, #f65, #ffbf37)',
+    'linear-gradient(to right, #18e7ae, #1eebeb)',
+  ]
+
+  const configuredCards = (homepage.value.categories as CategoryConfig[]).slice(0, 3)
+  const generatedCards = (categoriesData.value?.data || []).slice(0, 3).map((category, index) => ({
+    name: category.name,
+    path: `/categories/${category.slug}`,
+    icon: index === 0
+      ? 'i-heroicons-computer-desktop-solid'
+      : index === 1
+        ? 'i-heroicons-sparkles-solid'
+        : 'i-heroicons-rectangle-group-solid',
+    bgColor: fallbackGradients[index % fallbackGradients.length],
+  }))
+
+  const fallbackCards: CategoryConfig[] = [
+    {
+      name: archiveText,
+      path: '/archives',
+      icon: 'i-heroicons-archive-box-solid',
+      bgColor: fallbackGradients[1],
+    },
+    {
+      name: friendsText,
+      path: '/friends',
+      icon: 'i-heroicons-user-group-solid',
+      bgColor: fallbackGradients[2],
+    },
+  ]
+
+  const sourceCards = configuredCards.length ? configuredCards : generatedCards
+  const mergedCards = [...sourceCards]
+
+  for (const card of fallbackCards) {
+    if (mergedCards.length >= 3) {
+      break
+    }
+    mergedCards.push(card)
+  }
+
+  return mergedCards.slice(0, 3)
 })
 
-const router = useRouter()
-const searchQuery = ref('')
+const allArticles = computed(() => articlesData.value?.data?.items || [])
 
-function handleSearch() {
-  if (searchQuery.value.trim()) {
-    router.push(`/search?q=${encodeURIComponent(searchQuery.value.trim())}`)
+const swiperList = computed(() =>
+  allArticles.value.slice(0, 5).map(article => ({
+    id: article.id,
+    title: article.title,
+    path: `/articles/${new Date(article.publishedAt || article.createdAt).getFullYear()}/${String(new Date(article.publishedAt || article.createdAt).getMonth() + 1).padStart(2, '0')}/${article.id}`,
+    cover: resolveCover(article.coverImage, article.id, '400/240'),
+    date: new Date(article.publishedAt || article.createdAt).toLocaleDateString('zh-CN'),
+    description: article.excerpt || '',
+  })),
+)
+
+const topPostList = computed(() =>
+  allArticles.value.slice(1, 5).map(article => ({
+    id: article.id,
+    title: article.title,
+    path: `/articles/${new Date(article.publishedAt || article.createdAt).getFullYear()}/${String(new Date(article.publishedAt || article.createdAt).getMonth() + 1).padStart(2, '0')}/${article.id}`,
+    cover: resolveCover(article.coverImage, article.id, '400/240'),
+  })),
+)
+
+const topGroupList = computed(() =>
+  allArticles.value.slice(0, 6).map(article => ({
+    id: article.id,
+    title: article.title,
+    path: `/articles/${new Date(article.publishedAt || article.createdAt).getFullYear()}/${String(new Date(article.publishedAt || article.createdAt).getMonth() + 1).padStart(2, '0')}/${article.id}`,
+    cover: resolveCover(article.coverImage, article.id, '400/240'),
+  })),
+)
+
+function toRandomPost() {
+  if (allArticles.value.length === 0) {
+    return
   }
+
+  const randomArticle = allArticles.value[Math.floor(Math.random() * allArticles.value.length)]
+  const date = new Date(randomArticle.publishedAt || randomArticle.createdAt)
+  navigateTo(`/articles/${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${randomArticle.id}`)
 }
+
+useSeoMeta({
+  title: homeTitle,
+  ogTitle: homeTitle,
+  description: homeDescription,
+  ogDescription: homeDescription,
+})
 </script>
 
 <template>
   <div>
-    <!-- Hero Section -->
-    <div class="mb-12 text-center">
-      <h1 class="text-4xl sm:text-5xl font-bold text-primary mb-4">
-        分享技术见解<br class="sm:hidden" /> 记录生活感悟
-      </h1>
-      <p class="text-lg text-muted mb-8 max-w-2xl mx-auto">
-        探索代码的乐趣，品味生活的美好
-      </p>
-      <!-- Search bar -->
-      <form @submit.prevent="handleSearch" class="max-w-xl mx-auto">
-        <div class="relative">
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="搜索文章..."
-            class="w-full px-5 py-3 pr-12 text-base rounded-xl border border-border bg-surface text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm transition-all"
-          >
-          <button
-            type="submit"
-            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-muted hover:text-primary transition-colors cursor-pointer"
-          >
-            <span class="i-heroicons-magnifying-glass w-5 h-5" />
-          </button>
+    <BlogHomeTop
+      :enabled="homepage.enabled"
+      :title="homepage.title"
+      :sub-title="homepage.subTitle"
+      :site-text="homepage.siteText"
+      :skills="homepageSkills"
+      :people-canvas="homepage.peopleCanvas"
+      :top-image="homepage.topImage"
+      :swiper-enabled="homepage.swiperEnabled"
+      :swiper-list="swiperList"
+      :top-post-list="topPostList"
+      :top-group-list="topGroupList"
+      :today-card="homepage.todayCard as TodayCardConfig"
+      :categories="homepageCategoryCards"
+      @random-post="toRandomPost"
+    />
+
+    <div id="content-inner" class="layout">
+      <div id="recent-posts" class="recent-posts">
+        <BlogCategoryBar :categories="categoriesData?.data || []" />
+
+        <div class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
+          <BlogPostItem
+            v-for="(article, index) in allArticles"
+            :key="article.id"
+            :article="article as any"
+            :cover-position="homepage.coverPosition"
+            :cover-enabled="homepage.coverEnabled"
+            :index="index"
+          />
         </div>
-      </form>
-    </div>
 
-    <!-- Section title -->
-    <div class="flex items-center gap-3 mb-6">
-      <h2 class="text-xl font-semibold text-primary">最新文章</h2>
-      <div class="flex-1 h-px bg-border" />
-    </div>
+        <div v-if="!allArticles.length" class="text-center py-16 text-muted">
+          <span class="i-heroicons-document-text w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>{{ noArticlesText }}</p>
+        </div>
 
-    <!-- Articles -->
-    <div v-if="data?.data?.items?.length" class="space-y-4">
-      <BlogArticleCard
-        v-for="article in data.data.items"
-        :key="article.id"
-        :article="article"
+        <BlogPagination
+          v-if="articlesData?.data"
+          :current-page="articlesData.data.page"
+          :total-pages="articlesData.data.totalPages"
+          base-url="/"
+        />
+      </div>
+
+      <BlogSidebar
+        :enabled="homepage.sidebarEnabled"
+        :widgets="homepage.sidebarWidgets"
       />
     </div>
-    <div v-else class="text-center py-16 text-muted">
-      <span class="i-heroicons-document-text w-12 h-12 mx-auto mb-4 opacity-50" />
-      <p>暂无文章</p>
-    </div>
-
-    <BlogPagination
-      v-if="data?.data"
-      :current-page="data.data.page"
-      :total-pages="data.data.totalPages"
-      base-url="/"
-    />
   </div>
 </template>
+
+<style scoped>
+.layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.recent-posts {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 1180px) {
+  .post-grid.post-grid-double {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    gap: 1rem;
+  }
+}
+</style>

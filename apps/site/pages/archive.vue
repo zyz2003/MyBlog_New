@@ -3,98 +3,281 @@ definePageMeta({ layout: 'frontend-default' })
 
 const { data, pending, error } = await useFetch<{
   code: number
-  data: { years: Array<{ year: number; count: number; articles: Array<{ id: number; title: string; publishedAt: number | null; createdAt: number }> }> }
+  data: {
+    years: Array<{
+      year: number
+      count: number
+      articles: Array<{ id: number, title: string, publishedAt: number | null, createdAt: number }>
+    }>
+  }
 }>('/api/articles/archive')
 
-interface ArticleItem { id: number; title: string; publishedAt: number | null; createdAt: number }
-interface YearGroup { year: number; count: number; articles: ArticleItem[] }
+interface ArticleItem {
+  id: number
+  title: string
+  publishedAt: number | null
+  createdAt: number
+}
+
+interface YearGroup {
+  year: number
+  count: number
+  articles: ArticleItem[]
+}
 
 const years = computed<YearGroup[]>(() => data.value?.data?.years ?? [])
-
-const totalArticles = computed(() => years.value.reduce((sum, y) => sum + y.count, 0))
+const totalArticles = computed(() => years.value.reduce((sum, yearGroup) => sum + yearGroup.count, 0))
 
 function formatDate(ts: number | null, fallback: number): string {
-  const d = new Date(ts ?? fallback)
-  return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const date = new Date(ts ?? fallback)
+  return `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
 function articlePath(article: ArticleItem): string {
-  const d = new Date(article.publishedAt ?? article.createdAt)
-  return `/articles/${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${article.id}`
+  const date = new Date(article.publishedAt ?? article.createdAt)
+  return `/articles/${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${article.id}`
 }
 
 useSeoMeta({
-  title: '归档',
-  ogTitle: '归档',
-  description: '文章归档',
-  ogDescription: '文章归档',
+  title: '文章归档',
+  ogTitle: '文章归档',
+  description: '按时间线查看博客文章归档。',
+  ogDescription: '按时间线查看博客文章归档。',
 })
 </script>
 
 <template>
-  <div class="archive-page max-w-[800px] mx-auto py-8 px-4">
-    <!-- Loading -->
-    <div v-if="pending" class="text-center py-16 text-[var(--anzhiyu-secondtext)]">
-      <i class="anzhiyufont anzhiyu-icon-spinner animate-spin text-3xl block mb-4" />
-      <p>加载中...</p>
-    </div>
-
-    <!-- Error -->
-    <div v-else-if="error" class="text-center py-16 text-[var(--anzhiyu-secondtext)]">
-      <p>加载失败，请刷新重试</p>
-    </div>
-
-    <!-- Empty -->
-    <div v-else-if="!years.length" class="text-center py-16 text-[var(--anzhiyu-secondtext)]">
-      <i class="anzhiyufont anzhiyu-icon-box-archive text-5xl block mb-4 opacity-30" />
-      <p>暂无文章</p>
-    </div>
-
-    <!-- Archive content -->
-    <template v-else>
-      <h1 class="text-2xl font-bold text-[var(--anzhiyu-fontcolor)] mb-2 text-center">
-        文章归档
-      </h1>
-      <p class="text-center text-sm text-[var(--anzhiyu-secondtext)] mb-8">
-        共 {{ totalArticles }} 篇文章
+  <div class="archive-page mx-auto max-w-[980px] px-4 py-8">
+    <section class="archive-hero">
+      <span class="archive-badge">Archive</span>
+      <h1 class="archive-title">文章归档</h1>
+      <p class="archive-description">
+        按发布时间回看内容轨迹，把博客从一篇篇文章重新串成时间线。
       </p>
+      <div class="archive-total">
+        当前共收录 {{ totalArticles }} 篇文章
+      </div>
+    </section>
 
-      <div class="timeline relative pl-8 md:pl-12">
-        <!-- Vertical line -->
-        <div class="absolute left-[13px] md:left-[17px] top-0 bottom-0 w-[2px] bg-[var(--anzhiyu-main)] opacity-20" />
+    <div v-if="pending" class="archive-state-card">
+      正在加载归档内容...
+    </div>
 
-        <div v-for="yearGroup in years" :key="yearGroup.year" class="mb-10">
-          <!-- Year heading -->
-          <div class="flex items-center gap-3 mb-4 relative">
-            <div
-              class="absolute -left-[32px] md:-left-[37px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-[var(--anzhiyu-main)] border-3 border-[var(--anzhiyu-card-bg)] z-1"
-            />
-            <h2 class="text-xl font-semibold text-[var(--anzhiyu-fontcolor)]">
-              {{ yearGroup.year }}
-            </h2>
-            <span class="text-sm text-[var(--anzhiyu-secondtext)]">
-              {{ yearGroup.count }} 篇
-            </span>
+    <div v-else-if="error" class="archive-state-card">
+      归档内容加载失败，请稍后重试。
+    </div>
+
+    <div v-else-if="!years.length" class="archive-state-card">
+      暂无文章归档。
+    </div>
+
+    <div v-else id="archive" class="archive-shell">
+      <div class="article-sort-title">
+        文章总览 - {{ totalArticles }}
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-line" />
+
+        <section
+          v-for="yearGroup in years"
+          :key="yearGroup.year"
+          class="timeline-group"
+        >
+          <div class="timeline-heading">
+            <span class="timeline-dot" />
+            <h2 class="timeline-year">{{ yearGroup.year }}</h2>
+            <span class="timeline-count">{{ yearGroup.count }} 篇</span>
           </div>
 
-          <!-- Article list -->
-          <div class="ml-4 space-y-2">
+          <div class="timeline-list">
             <NuxtLink
               v-for="article in yearGroup.articles"
               :key="article.id"
               :to="articlePath(article)"
-              class="flex items-baseline gap-3 py-2 group no-underline hover:bg-[var(--anzhiyu-main)]/5 rounded-lg px-3 -mx-3 transition-colors"
+              class="timeline-item"
             >
-              <span class="text-xs text-[var(--anzhiyu-secondtext)] font-mono whitespace-nowrap min-w-[45px]">
-                {{ formatDate(article.publishedAt, article.createdAt) }}
-              </span>
-              <span class="text-sm text-[var(--anzhiyu-fontcolor)] group-hover:text-[var(--anzhiyu-main)] transition-colors truncate">
-                {{ article.title }}
-              </span>
+              <span class="timeline-date">{{ formatDate(article.publishedAt, article.createdAt) }}</span>
+              <span class="timeline-item-title">{{ article.title }}</span>
             </NuxtLink>
           </div>
-        </div>
+        </section>
       </div>
-    </template>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.archive-hero {
+  margin-bottom: 1.8rem;
+  padding: 1.65rem 1.75rem;
+  border: var(--style-border-always);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--anzhiyu-main) 14%, transparent) 0, transparent 16rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--anzhiyu-card-bg) 88%, white 12%), var(--anzhiyu-card-bg));
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+}
+
+.archive-badge {
+  display: inline-flex;
+  padding: 0.36rem 0.72rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzhiyu-main) 10%, transparent);
+  color: var(--anzhiyu-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.archive-title {
+  margin-top: 0.85rem;
+  color: var(--anzhiyu-fontcolor);
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.archive-description {
+  margin-top: 0.65rem;
+  color: var(--anzhiyu-secondtext);
+  font-size: 0.98rem;
+  line-height: 1.8;
+}
+
+.archive-total {
+  margin-top: 1rem;
+  color: var(--anzhiyu-fontcolor);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.archive-state-card {
+  padding: 2.2rem 1.5rem;
+  border: var(--style-border-always);
+  border-radius: 28px;
+  background: var(--anzhiyu-card-bg);
+  text-align: center;
+  color: var(--anzhiyu-secondtext);
+}
+
+.archive-shell {
+  padding: 1.5rem 1.6rem 1.25rem;
+  border: var(--style-border-always);
+  border-radius: 30px;
+  background: var(--anzhiyu-card-bg);
+  box-shadow: var(--anzhiyu-shadow-border);
+}
+
+.article-sort-title {
+  margin-bottom: 1.5rem;
+  color: var(--anzhiyu-fontcolor);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 2.4rem;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 0.75rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: color-mix(in srgb, var(--anzhiyu-main) 22%, transparent);
+}
+
+.timeline-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.timeline-heading {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -2rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  background: var(--anzhiyu-main);
+  border: 4px solid var(--anzhiyu-card-bg);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--anzhiyu-main) 25%, transparent);
+}
+
+.timeline-year {
+  color: var(--anzhiyu-fontcolor);
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.timeline-count {
+  color: var(--anzhiyu-secondtext);
+  font-size: 0.88rem;
+}
+
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 16px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.timeline-item:hover {
+  background: color-mix(in srgb, var(--anzhiyu-main) 7%, transparent);
+  transform: translateX(2px);
+}
+
+.timeline-date {
+  min-width: 3.5rem;
+  color: var(--anzhiyu-secondtext);
+  font-size: 0.82rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.timeline-item-title {
+  color: var(--anzhiyu-fontcolor);
+  font-size: 0.97rem;
+  line-height: 1.6;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .archive-hero,
+  .archive-shell {
+    padding: 1.2rem 1.1rem;
+  }
+
+  .timeline {
+    padding-left: 1.9rem;
+  }
+
+  .timeline-dot {
+    left: -1.55rem;
+  }
+
+  .timeline-item {
+    padding-inline: 0.65rem;
+  }
+}
+</style>
