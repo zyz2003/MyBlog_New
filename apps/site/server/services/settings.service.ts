@@ -25,6 +25,17 @@ export class SettingsService {
     return grouped
   }
 
+  /** Get settings for a single category */
+  static async getByCategory(category: string) {
+    const rows = await db
+      .select()
+      .from(systemSettings)
+      .where(eq(systemSettings.category, category))
+      .orderBy(desc(systemSettings.updatedAt))
+
+    return rows
+  }
+
   /** Get single setting by key */
   static async getByKey(key: string) {
     const [record] = await db

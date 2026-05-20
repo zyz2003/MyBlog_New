@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-/** Zod schemas for system_settings keys — per DATA-01/DATA-02 */
+/** Zod schemas for system_settings keys */
 export const settingSchemas = {
   // --- general (admin/general.vue) ---
   socialLinks: z.array(z.object({ name: z.string(), url: z.string(), icon: z.string() })),
@@ -13,6 +13,25 @@ export const settingSchemas = {
   injectCode: z.record(z.string(), z.unknown()),
   runtime: z.record(z.string(), z.unknown()),
   homeSubtitle: z.record(z.string(), z.unknown()),
+  favicon: z.string(),
+  avatar: z.record(z.string(), z.unknown()),
+  pwa: z.record(z.string(), z.unknown()),
+  footerSocialBar: z.record(z.string(), z.unknown()),
+  footerList: z.record(z.string(), z.unknown()),
+  footerBar: z.record(z.string(), z.unknown()),
+  footerRuntime: z.record(z.string(), z.unknown()),
+  footerOwner: z.record(z.string(), z.unknown()),
+  footerCustomText: z.string(),
+  footerBdageitem: z.record(z.string(), z.unknown()),
+  nav: z.record(z.string(), z.unknown()),
+  menu: z.record(z.string(), z.unknown()),
+  mourn: z.record(z.string(), z.unknown()),
+  author_status: z.record(z.string(), z.unknown()),
+  error_img: z.record(z.string(), z.unknown()),
+  error_404: z.record(z.string(), z.unknown()),
+  inject: z.record(z.string(), z.unknown()),
+  CDN: z.record(z.string(), z.unknown()),
+  siteTitle: z.string(),
 
   // --- homepage (admin/homepage.vue) ---
   homeTopEnabled: z.boolean(),
@@ -36,6 +55,18 @@ export const settingSchemas = {
   topImage: z.record(z.string(), z.unknown()),
   mainTone: z.record(z.string(), z.unknown()),
   homepageSkills: z.array(z.object({ name: z.string(), icon: z.string(), color: z.string() })),
+  indexImg: z.record(z.string(), z.unknown()),
+  indexTopImgHeight: z.string(),
+  indexSiteInfoTop: z.string(),
+  defaultTopImg: z.string(),
+  subtitle: z.record(z.string(), z.unknown()),
+  banner: z.record(z.string(), z.unknown()),
+  siteInfo: z.record(z.string(), z.unknown()),
+  homepageSidebarEnabled: z.boolean(),
+  homepageSidebarWidgets: z.array(z.string()),
+  peoplecanvas: z.record(z.string(), z.unknown()),
+  linkPageTop: z.record(z.string(), z.unknown()),
+  pageThumbnailSuffix: z.string(),
 
   // --- posts (admin/posts.vue) ---
   postMetaPage: z.record(z.string(), z.unknown()),
@@ -46,8 +77,6 @@ export const settingSchemas = {
   noticeOutdate: z.record(z.string(), z.unknown()),
   postPagination: z.string(),
   cover: z.record(z.string(), z.unknown()),
-
-  // ADMIN-05: posts additional fields
   toc: z.record(z.string(), z.unknown()),
   wordcount: z.record(z.string(), z.unknown()),
   ptool: z.record(z.string(), z.unknown()),
@@ -57,16 +86,7 @@ export const settingSchemas = {
   anchor: z.record(z.string(), z.unknown()),
   postMeta: z.record(z.string(), z.unknown()),
 
-  // ADMIN-01: homepage additional fields
-  indexImg: z.record(z.string(), z.unknown()),
-  indexTopImgHeight: z.string(),
-  indexSiteInfoTop: z.string(),
-  defaultTopImg: z.string(),
-  subtitle: z.record(z.string(), z.unknown()),
-  banner: z.record(z.string(), z.unknown()),
-  siteInfo: z.record(z.string(), z.unknown()),
-
-  // ADMIN-02: sidebar fields
+  // --- sidebar ---
   aside: z.record(z.string(), z.unknown()),
   sidebar: z.record(z.string(), z.unknown()),
   cardAuthor: z.record(z.string(), z.unknown()),
@@ -75,55 +95,72 @@ export const settingSchemas = {
   cardCategories: z.record(z.string(), z.unknown()),
   cardTags: z.record(z.string(), z.unknown()),
   cardArchives: z.record(z.string(), z.unknown()),
+  cardWebinfo: z.record(z.string(), z.unknown()),
   cardWeixin: z.record(z.string(), z.unknown()),
   siteData: z.record(z.string(), z.unknown()),
   menusItems: z.record(z.string(), z.unknown()),
   tagsCloud: z.record(z.string(), z.unknown()),
+  runtimeShow: z.record(z.string(), z.unknown()),
 
-  // ADMIN-03: SEO fields
-  siteVerification: z.record(z.string(), z.unknown()),
+  // --- seo ---
+  seoTitle: z.string(),
+  seoDescription: z.string(),
+  seoKeywords: z.string(),
+  baiduVerification: z.string(),
+  googleVerification: z.string(),
+  bingVerification: z.string(),
   openGraphMeta: z.record(z.string(), z.unknown()),
+  siteVerification: z.array(z.object({ name: z.string(), content: z.string() })),
   structuredData: z.record(z.string(), z.unknown()),
   baiduPush: z.record(z.string(), z.unknown()),
   googleAdsense: z.record(z.string(), z.unknown()),
+  cnzzAnalytics: z.record(z.string(), z.unknown()),
+  cloudflareAnalytics: z.record(z.string(), z.unknown()),
+  microsoftClarity: z.record(z.string(), z.unknown()),
+  Open_Graph_meta: z.boolean(),
+  css_prefix: z.boolean(),
 
-  // ADMIN-04: general additional fields
-  favicon: z.string(),
-  avatar: z.record(z.string(), z.unknown()),
-  pwa: z.record(z.string(), z.unknown()),
-  footerSocialBar: z.record(z.string(), z.unknown()),
-  footerList: z.record(z.string(), z.unknown()),
-  footerBar: z.record(z.string(), z.unknown()),
-  footerRuntime: z.record(z.string(), z.unknown()),
-  footerOwner: z.record(z.string(), z.unknown()),
-  footerCustomText: z.string(),
-  footerBdageitem: z.record(z.string(), z.unknown()),
-  nav: z.record(z.string(), z.unknown()),
-
-  // ADMIN-06: comments fields
+  // --- comments ---
+  comments: z.record(z.string(), z.unknown()),
   twikoo: z.record(z.string(), z.unknown()),
   waline: z.record(z.string(), z.unknown()),
   valine: z.record(z.string(), z.unknown()),
+  artalk: z.record(z.string(), z.unknown()),
   giscus: z.record(z.string(), z.unknown()),
   newestComments: z.record(z.string(), z.unknown()),
   visitorMail: z.record(z.string(), z.unknown()),
   commentBarrage: z.record(z.string(), z.unknown()),
 
-  // ADMIN-07: code & search fields
+  // --- display ---
+  codeBlock: z.record(z.string(), z.unknown()),
+  copySettings: z.record(z.string(), z.unknown()),
+  search: z.record(z.string(), z.unknown()),
   mermaid: z.record(z.string(), z.unknown()),
   note: z.record(z.string(), z.unknown()),
   tableInterlaced: z.record(z.string(), z.unknown()),
+  table_interlaced_discoloration: z.boolean(),
   icons: z.record(z.string(), z.unknown()),
   localSearch: z.record(z.string(), z.unknown()),
   algoliaSearch: z.record(z.string(), z.unknown()),
   docsearch: z.record(z.string(), z.unknown()),
+  math: z.record(z.string(), z.unknown()),
+  mathjax: z.record(z.string(), z.unknown()),
+  katex: z.record(z.string(), z.unknown()),
+  lazyload: z.record(z.string(), z.unknown()),
+  fancybox: z.boolean(),
+  mediumZoom: z.boolean(),
+  pangu: z.record(z.string(), z.unknown()),
+  pjax: z.record(z.string(), z.unknown()),
+  instantpage: z.boolean(),
 
-  // ADMIN-08: analytics fields
-  cnzzAnalytics: z.record(z.string(), z.unknown()),
+  // --- analytics ---
   googleAnalytics: z.record(z.string(), z.unknown()),
   baiduAnalytics: z.record(z.string(), z.unknown()),
+  LA: z.record(z.string(), z.unknown()),
+  umami: z.record(z.string(), z.unknown()),
+  busuanzi: z.record(z.string(), z.unknown()),
 
-  // ADMIN-09: features fields
+  // --- features ---
   sharejs: z.record(z.string(), z.unknown()),
   addtoany: z.record(z.string(), z.unknown()),
   chatBtn: z.record(z.string(), z.unknown()),
@@ -140,17 +177,37 @@ export const settingSchemas = {
   aplayerInject: z.record(z.string(), z.unknown()),
   rightsideItemOrder: z.record(z.string(), z.unknown()),
   navMusic: z.record(z.string(), z.unknown()),
+  musicPageDefault: z.string(),
+  canvasRibbon: z.record(z.string(), z.unknown()),
+  canvasFlutteringRibbon: z.record(z.string(), z.unknown()),
+  canvasNest: z.record(z.string(), z.unknown()),
+  fireworks: z.record(z.string(), z.unknown()),
+  clickHeart: z.record(z.string(), z.unknown()),
+  clickShowText: z.record(z.string(), z.unknown()),
+  activatePowerMode: z.record(z.string(), z.unknown()),
+  universe: z.record(z.string(), z.unknown()),
+  bubble: z.record(z.string(), z.unknown()),
+  aiSummary: z.record(z.string(), z.unknown()),
+  rightClickMenu: z.record(z.string(), z.unknown()),
+  shortcutKey: z.record(z.string(), z.unknown()),
+  accesskey: z.record(z.string(), z.unknown()),
+  greetingBox: z.record(z.string(), z.unknown()),
+  translate: z.record(z.string(), z.unknown()),
+  readmode: z.boolean(),
+  rightsideItems: z.record(z.string(), z.unknown()),
 
-  // ADMIN-10: theme/display fields
+  // --- theme config ---
   beautify: z.record(z.string(), z.unknown()),
   blogTitleFont: z.record(z.string(), z.unknown()),
   displayMode: z.string(),
   themeColor: z.record(z.string(), z.unknown()),
+  category_ui: z.string(),
+  tag_ui: z.string(),
+  footer_bg: z.boolean(),
+  'rightside-bottom': z.string(),
   hrIcon: z.record(z.string(), z.unknown()),
   font: z.record(z.string(), z.unknown()),
   navRight: z.record(z.string(), z.unknown()),
-
-  // --- theme config (used by ThemeManager) ---
   themeConfig: z.record(z.string(), z.unknown()),
 } as Record<string, z.ZodTypeAny>
 

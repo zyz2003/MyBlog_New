@@ -10,7 +10,7 @@ export default defineEventHandler((event) => {
   const css = themeManager.getActiveCSS()
 
   setResponseHeader(event, 'Content-Type', 'text/css; charset=utf-8')
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600')
+  setResponseHeader(event, 'Cache-Control', 'no-store, max-age=0')
 
   return css
 })

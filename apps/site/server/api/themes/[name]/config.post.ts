@@ -1,65 +1,47 @@
-import { readBody } from 'h3'
-import { readFile, writeFile, mkdir } from 'fs/promises'
-import { existsSync } from 'fs'
-import { resolve } from 'path'
+import type { ThemeConfig } from '../../../core/theme/types'
+import { themeManager } from '../../../core/theme'
+import { successResponse, errorResponse, AuthErrors, ValidationErrors } from '../../../utils/response'
 
-interface ThemeConfig {
-  colors: Record<string, string>
-  fonts: Record<string, string>
-  spacing: Record<string, string>
-  borderRadius: Record<string, string>
-  layout: Record<string, string>
-}
-
+/**
+ * POST /api/themes/:name/config
+ * Protected endpoint - saves config through ThemeManager to keep theme state in sync
+ */
 export default defineEventHandler(async (event) => {
+  if (!event.context.user) {
+    throw createError({
+      statusCode: 401,
+      data: errorResponse(AuthErrors.UNAUTHENTICATED.code, AuthErrors.UNAUTHENTICATED.message),
+    })
+  }
+
   const name = getRouterParam(event, 'name')
   if (!name) {
-    throw createError({ statusCode: 400, message: 'Theme name is required' })
+    throw createError({
+      statusCode: 400,
+      data: errorResponse(ValidationErrors.MISSING_PARAM.code, 'Theme name is required'),
+    })
+  }
+
+  const existingTheme = themeManager.loadTheme(name)
+  if (!existingTheme) {
+    throw createError({
+      statusCode: 404,
+      data: errorResponse(3001, `Theme "${name}" not found`),
+    })
   }
 
   const config = await readBody<ThemeConfig>(event)
   if (!config) {
-    throw createError({ statusCode: 400, message: 'Config is required' })
+    throw createError({
+      statusCode: 400,
+      data: errorResponse(3002, 'Theme config is required'),
+    })
   }
 
-  // Get themes directory
-  const themesDir = resolve(process.cwd(), 'apps/site/themes')
-  const themeDir = resolve(themesDir, name)
+  await themeManager.saveConfig(name, config)
 
-  if (!existsSync(themeDir)) {
-    throw createError({ statusCode: 404, message: `Theme "${name}" not found` })
-  }
-
-  // Read existing config.json
-  const configPath = resolve(themeDir, 'config.json')
-  let existingConfig: Record<string, unknown> = {}
-
-  if (existsSync(configPath)) {
-    try {
-      const content = await readFile(configPath, 'utf-8')
-      existingConfig = JSON.parse(content)
-    }
-    catch {
-      // Ignore parse errors
-    }
-  }
-
-  // Update config
-  const newConfig = {
-    ...existingConfig,
-    colors: config.colors,
-    fonts: config.fonts,
-    spacing: config.spacing,
-    borderRadius: config.borderRadius,
-    layout: config.layout,
-  }
-
-  // Write config
-  await writeFile(configPath, JSON.stringify(newConfig, null, 2), 'utf-8')
-
-  return {
-    code: 0,
-    message: 'Theme config saved successfully',
-    data: newConfig,
-  }
+  return successResponse({
+    theme: name,
+    config,
+  }, `Theme "${name}" config saved`)
 })

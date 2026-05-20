@@ -3,11 +3,10 @@ import { successResponse, errorResponse, AuthErrors } from '../../utils/response
 
 /**
  * PUT /api/settings
- * Protected endpoint — update system settings
- * Accepts single { key, value } or array of { key, value } for batch update
+ * Protected endpoint for updating system settings.
+ * Accepts either a single { key, value } object or a batch array.
  */
 export default defineEventHandler(async (event) => {
-  // Manual auth check — settings PUT requires admin
   if (!event.context.user) {
     throw createError({
       statusCode: 401,
@@ -23,7 +22,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Batch update: body is an array
   if (Array.isArray(body)) {
     if (body.length === 0) {
       throw createError({
@@ -36,7 +34,7 @@ export default defineEventHandler(async (event) => {
       if (!item.key) {
         throw createError({
           statusCode: 400,
-          message: '每个设置项必须包含 key',
+          message: '每个设置项都必须包含 key',
         })
       }
     }
@@ -45,7 +43,6 @@ export default defineEventHandler(async (event) => {
     return successResponse(results, '设置已批量更新')
   }
 
-  // Single update: body is { key, value, category?, description? }
   if (!body.key) {
     throw createError({
       statusCode: 400,
@@ -59,5 +56,6 @@ export default defineEventHandler(async (event) => {
     body.category,
     body.description,
   )
+
   return successResponse(record, '设置已更新')
 })

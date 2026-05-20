@@ -178,12 +178,29 @@ export type HookHandler = (event: HookEvent, context: HookContext) => void | Pro
  */
 export function CSSVariablesMap(config: ThemeConfig): Record<string, string> {
   const vars: Record<string, string> = {}
+  const primaryRgb = hexToRgb(config.colors.primary)
 
   // Color variables
   for (const [key, value] of Object.entries(config.colors)) {
     const cssKey = key === 'textMuted' ? 'text-muted' : key
     vars[`--color-${cssKey}`] = value
   }
+
+  if (primaryRgb) {
+    vars['--color-primary-rgb'] = primaryRgb
+  }
+
+  // Anzhiyu compatibility aliases for frontend components that still consume
+  // theme-specific variable names instead of the generic --color-* tokens.
+  vars['--anzhiyu-main'] = config.colors.primary
+  vars['--anzhiyu-main-op'] = `${config.colors.primary}23`
+  vars['--anzhiyu-white'] = '#FFFFFF'
+  vars['--anzhiyu-background'] = config.colors.background
+  vars['--anzhiyu-card-bg'] = config.colors.surface
+  vars['--anzhiyu-card-bg-none'] = 'transparent'
+  vars['--anzhiyu-fontcolor'] = config.colors.text
+  vars['--anzhiyu-secondtext'] = config.colors.textMuted
+  vars['--style-border-always'] = config.colors.textMuted
 
   // Font variables
   for (const [key, value] of Object.entries(config.fonts)) {
@@ -222,4 +239,21 @@ export function CSSVariablesMap(config: ThemeConfig): Record<string, string> {
   }
 
   return vars
+}
+
+function hexToRgb(hex: string): string | null {
+  const normalized = hex.replace('#', '').trim()
+  const fullHex = normalized.length === 3
+    ? normalized.split('').map(char => char + char).join('')
+    : normalized
+
+  if (!/^[\da-fA-F]{6}$/.test(fullHex)) {
+    return null
+  }
+
+  const r = Number.parseInt(fullHex.slice(0, 2), 16)
+  const g = Number.parseInt(fullHex.slice(2, 4), 16)
+  const b = Number.parseInt(fullHex.slice(4, 6), 16)
+
+  return `${r}, ${g}, ${b}`
 }

@@ -1,5 +1,4 @@
 import { readMultipartFormData } from 'h3'
-import { MediaService } from '../../services/media.service'
 import { successResponse } from '../../utils/response'
 import { db } from '../../utils/db'
 import { posts } from '../../db/schema'
@@ -34,6 +33,7 @@ export default defineEventHandler(async (event) => {
 
     const filename = part.filename || 'unknown.md'
     const content = part.data.toString('utf-8')
+    let parsedTitle = filename.replace(/\.(md|markdown)$/, '')
 
     // Validate it's a markdown file
     if (!filename.endsWith('.md') && !filename.endsWith('.markdown')) {
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
 
     try {
       // Parse frontmatter if exists (simple YAML-like parsing)
-      let title = filename.replace(/\.(md|markdown)$/, '')
+      let title = parsedTitle
       let bodyContent = content
       let frontmatter: Record<string, string> = {}
 
@@ -113,11 +113,12 @@ export default defineEventHandler(async (event) => {
         title,
         status: 'success',
       })
+      parsedTitle = title
     }
     catch (e: unknown) {
       results.push({
         filename,
-        title,
+        title: parsedTitle,
         status: 'error',
         message: e instanceof Error ? e.message : '导入失败',
       })

@@ -260,10 +260,10 @@ export class ThemeManager {
    * Dual-write sync for ThemeCustomizer: writes to system_settings first, then theme_settings
    */
   async saveConfig(themeName: string, config: ThemeConfig): Promise<void> {
-    // Step 1: Write to system_settings.themeConfig (for frontend useSiteSettings consumption)
+    // Compatibility mirror for consumers that still read themeConfig via settings.
     await SettingsService.upsert('themeConfig', config, 'theme', 'Site theme configuration')
 
-    // Step 2: Write to theme_settings table (for ThemeManager internal state)
+    // Primary theme-domain persistence path.
     await this.persistToDb(themeName, config)
 
     // Step 3: Update in-memory cache if this is the active theme

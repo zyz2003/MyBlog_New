@@ -15,7 +15,7 @@ export default defineEventHandler(async () => {
     .orderBy(desc(posts.publishedAt))
 
   // Group by year
-  const yearMap = new Map<number, Array<{ id: number; title: string; publishedAt: number | null; createdAt: number }>>()
+  const yearMap = new Map<number, Array<{ id: number; title: string; publishedAt: Date | null; createdAt: Date }>>()
 
   for (const row of rows) {
     const date = row.publishedAt ?? row.createdAt
