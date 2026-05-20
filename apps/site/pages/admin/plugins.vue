@@ -1,5 +1,24 @@
 <script setup lang="ts">
-const api = useAdminApi()
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
+
+interface PluginFieldOption {
+  label: string
+  value: string | number
+}
+
+interface PluginField {
+  type: 'string' | 'number' | 'boolean' | 'select' | 'multi-select' | 'code' | 'textarea' | 'color' | 'image'
+  label: string
+  description?: string
+  required?: boolean
+  default?: unknown
+  options?: PluginFieldOption[]
+  placeholder?: string
+  language?: string
+}
 
 interface PluginItem {
   meta: {
@@ -14,162 +33,210 @@ interface PluginItem {
   mountPoints: string[]
   enabled: boolean
   config: Record<string, unknown>
+  configSchema?: Record<string, PluginField>
 }
+
+const api = useAdminApi()
 
 const plugins = ref<PluginItem[]>([])
 const loading = ref(true)
-const searchQuery = ref('')
-const selectedType = ref('')
+const savingName = ref('')
+const message = ref('')
+const errorMessage = ref('')
+const expandedPlugin = ref('')
+const configDraft = ref<Record<string, unknown>>({})
 
-const pluginTypes = [
-  { value: '', label: '全部' },
-  { value: 'comment', label: '评论' },
-  { value: 'analytics', label: '统计' },
-  { value: 'search', label: '搜索' },
-  { value: 'social', label: '社交' },
-  { value: 'ad', label: '广告' },
-  { value: 'feature', label: '功能' },
-  { value: 'custom', label: '自定义' },
-]
-
-const filteredPlugins = computed(() => {
-  return plugins.value.filter((plugin) => {
-    const matchesType = selectedType.value === '' || plugin.meta.type === selectedType.value
-    const query = searchQuery.value.toLowerCase()
-    const matchesSearch = query === '' ||
-      plugin.meta.name.toLowerCase().includes(query) ||
-      plugin.meta.label.toLowerCase().includes(query) ||
-      (plugin.meta.description?.toLowerCase().includes(query) ?? false)
-    return matchesType && matchesSearch
-  })
-})
-
-const typeCounts = computed(() => {
-  const counts: Record<string, number> = { all: plugins.value.length }
-  for (const plugin of plugins.value) {
-    counts[plugin.meta.type] = (counts[plugin.meta.type] || 0) + 1
-  }
-  return counts
-})
+const enabledCount = computed(() => plugins.value.filter(plugin => plugin.enabled).length)
 
 async function fetchPlugins() {
   loading.value = true
   try {
     plugins.value = await api.get<PluginItem[]>('/api/plugins')
   }
-  catch (e) {
-    console.error('Failed to fetch plugins:', e)
-  }
   finally {
     loading.value = false
   }
 }
 
-async function handleToggle(data: { name: string; enable: boolean }) {
+function toggleExpand(plugin: PluginItem) {
+  if (expandedPlugin.value === plugin.meta.name) {
+    expandedPlugin.value = ''
+    configDraft.value = {}
+    return
+  }
+
+  expandedPlugin.value = plugin.meta.name
+
+  const defaults: Record<string, unknown> = {}
+  if (plugin.configSchema) {
+    for (const [key, field] of Object.entries(plugin.configSchema)) {
+      if (field.default !== undefined) {
+        defaults[key] = field.default
+      }
+    }
+  }
+  configDraft.value = { ...defaults, ...plugin.config }
+}
+
+async function togglePlugin(plugin: PluginItem) {
+  savingName.value = plugin.meta.name
+  message.value = ''
+  errorMessage.value = ''
+
   try {
-    if (data.enable) {
-      await api.post(`/api/plugins/${data.name}/enable`, { config: {} })
+    if (plugin.enabled) {
+      await api.post(`/api/plugins/${plugin.meta.name}/disable`)
     }
     else {
-      await api.post(`/api/plugins/${data.name}/disable`)
+      await api.post(`/api/plugins/${plugin.meta.name}/enable`, {
+        config: plugin.config,
+      })
     }
     await fetchPlugins()
+    message.value = `插件 ${plugin.meta.label || plugin.meta.name} 已${plugin.enabled ? '停用' : '启用'}。`
   }
-  catch (e: unknown) {
-    const message = e instanceof Error ? e.message : '切换插件状态失败'
-    alert(message)
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '插件状态切换失败'
+  }
+  finally {
+    savingName.value = ''
   }
 }
 
-async function handleConfigSave(data: { name: string; config: Record<string, unknown> }) {
+async function saveConfig(plugin: PluginItem) {
+  savingName.value = plugin.meta.name
+  message.value = ''
+  errorMessage.value = ''
+
   try {
-    await api.put(`/api/plugins/${data.name}/config`, { config: data.config })
+    await api.put(`/api/plugins/${plugin.meta.name}/config`, {
+      config: configDraft.value,
+    })
     await fetchPlugins()
+    message.value = `插件 ${plugin.meta.label || plugin.meta.name} 配置已保存。`
   }
-  catch (e: unknown) {
-    const message = e instanceof Error ? e.message : '保存配置失败'
-    alert(message)
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '插件配置保存失败'
+  }
+  finally {
+    savingName.value = ''
   }
 }
 
-function clearFilters() {
-  searchQuery.value = ''
-  selectedType.value = ''
-}
-
-onMounted(() => {
-  fetchPlugins()
-})
+onMounted(fetchPlugins)
 </script>
 
 <template>
-  <div>
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-puzzle-piece w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">插件管理</h1>
+  <div class="space-y-6">
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Platform</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">插件中心</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        查看全部已注册插件，控制启停状态，并维护插件独立配置。
+      </p>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3">
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">插件总数</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ plugins.length }}</p>
+      </article>
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">已启用插件</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ enabledCount }}</p>
+      </article>
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">停用插件</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ Math.max(plugins.length - enabledCount, 0) }}</p>
+      </article>
+    </section>
+
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      {{ message }}
+    </div>
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+      {{ errorMessage }}
+    </div>
+
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <div v-if="loading" class="space-y-3">
+        <div v-for="i in 5" :key="i" class="h-28 animate-pulse rounded-2xl bg-surface-2" />
       </div>
-    </div>
 
-    <!-- Filter bar -->
-    <div class="mb-6 space-y-3">
-      <!-- Search -->
-      <div class="relative">
-        <span class="i-heroicons-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="搜索插件名称或描述..."
-          class="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-text placeholder-muted cursor-text"
+      <div v-else class="space-y-4">
+        <article
+          v-for="plugin in plugins"
+          :key="plugin.meta.name"
+          class="rounded-[24px] border border-border/70 bg-background/72 p-5"
         >
+          <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-lg font-black text-text">{{ plugin.meta.label || plugin.meta.name }}</h2>
+                <span class="rounded-full bg-background/80 px-2.5 py-1 text-xs font-semibold text-muted">
+                  {{ plugin.meta.type }}
+                </span>
+                <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="plugin.enabled ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-200/70 text-slate-600'">
+                  {{ plugin.enabled ? '已启用' : '已停用' }}
+                </span>
+              </div>
+              <p class="mt-2 text-sm leading-7 text-muted">{{ plugin.meta.description || '暂无插件描述' }}</p>
+              <p class="mt-2 text-xs text-muted">版本 {{ plugin.meta.version }}<span v-if="plugin.meta.author"> · {{ plugin.meta.author }}</span></p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <span
+                  v-for="mountPoint in plugin.mountPoints"
+                  :key="mountPoint"
+                  class="rounded-xl bg-white/80 px-3 py-1.5 text-xs text-muted"
+                >
+                  {{ mountPoint }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                class="rounded-xl border border-border bg-white/80 px-4 py-2 text-sm font-semibold text-text transition hover:text-primary"
+                @click="toggleExpand(plugin)"
+              >
+                {{ expandedPlugin === plugin.meta.name ? '收起配置' : '展开配置' }}
+              </button>
+              <button
+                class="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:opacity-60"
+                :disabled="savingName === plugin.meta.name"
+                @click="togglePlugin(plugin)"
+              >
+                {{ savingName === plugin.meta.name ? '处理中...' : (plugin.enabled ? '停用' : '启用') }}
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="expandedPlugin === plugin.meta.name"
+            class="mt-5 rounded-2xl border border-border/70 bg-white/70 p-5"
+          >
+            <div v-if="plugin.configSchema && Object.keys(plugin.configSchema).length > 0" class="space-y-5">
+              <AdminPluginsConfigFormRenderer
+                v-model="configDraft"
+                :schema="plugin.configSchema"
+              />
+
+              <div class="flex justify-end">
+                <button
+                  class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:opacity-60"
+                  :disabled="savingName === plugin.meta.name"
+                  @click="saveConfig(plugin)"
+                >
+                  {{ savingName === plugin.meta.name ? '保存中...' : '保存插件配置' }}
+                </button>
+              </div>
+            </div>
+
+            <div v-else class="text-sm text-muted">
+              这个插件当前没有暴露可编辑配置项。
+            </div>
+          </div>
+        </article>
       </div>
-
-      <!-- Type filter tabs -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <button
-          v-for="type in pluginTypes"
-          :key="type.value"
-          class="px-3 py-1.5 text-sm rounded-full transition-colors cursor-pointer"
-          :class="selectedType === type.value
-            ? 'bg-primary text-white'
-            : 'bg-surface-2 text-muted hover:bg-surface hover:text-text'"
-          @click="selectedType = type.value"
-        >
-          {{ type.label }}
-          <span v-if="type.value === ''" class="ml-1 opacity-70">({{ typeCounts.all }})</span>
-          <span v-else-if="typeCounts[type.value]" class="ml-1 opacity-70">({{ typeCounts[type.value] }})</span>
-        </button>
-        <button
-          v-if="searchQuery || selectedType"
-          class="px-3 py-1.5 text-sm text-muted hover:text-text transition-colors cursor-pointer"
-          @click="clearFilters"
-        >
-          清除筛选
-        </button>
-      </div>
-    </div>
-
-    <!-- Loading skeleton -->
-    <div v-if="loading" class="space-y-4">
-      <div v-for="i in 3" :key="i" class="h-32 bg-surface-2 rounded-lg animate-pulse" />
-    </div>
-
-    <!-- Empty state -->
-    <div v-else-if="filteredPlugins.length === 0" class="text-center py-12 card">
-      <span class="i-heroicons-puzzle-piece w-16 h-16 mx-auto text-muted/30 block mb-4" />
-      <p class="text-muted">{{ plugins.length === 0 ? '暂无插件' : '没有匹配的插件' }}</p>
-    </div>
-
-    <!-- Plugin cards -->
-    <div v-else class="space-y-4">
-      <AdminPluginsPluginCard
-        v-for="plugin in filteredPlugins"
-        :key="plugin.meta.name"
-        :plugin="plugin"
-        @toggle="handleToggle"
-        @config-save="handleConfigSave"
-      />
-    </div>
+    </section>
   </div>
 </template>

@@ -1,327 +1,257 @@
 <script setup lang="ts">
-import type { ArticleWithRelations } from '~/server/services/article.service'
-
-const api = useAdminApi()
-
-const loading = ref(true)
-const stats = ref({
-  articles: 0,
-  publishedArticles: 0,
-  draftArticles: 0,
-  pages: 0,
-  media: 0,
-  categories: 0,
-  tags: 0,
-  totalViews: 0,
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
 })
-const activities = ref<Array<{
+
+interface AdminStats {
+  articles: number
+  publishedArticles: number
+  draftArticles: number
+  pages: number
+  media: number
+  categories: number
+  tags: number
+  totalViews: number
+}
+
+interface DraftItem {
+  id: number
+  title: string
+  status: string
+  updatedAt: string | Date | null
+  type: 'article' | 'page'
+}
+
+interface ActivityItem {
   id: number
   action: string
   targetType: string
   targetId: number
   targetTitle: string | null
-  createdAt: string
-}>>([])
-const recentArticles = ref<ArticleWithRelations[]>([])
+  createdAt: string | Date
+}
 
-async function fetchDashboard() {
+const api = useAdminApi()
+
+const stats = ref<AdminStats | null>(null)
+const drafts = ref<DraftItem[]>([])
+const activities = ref<ActivityItem[]>([])
+const loading = ref(true)
+
+const statCards = computed(() => {
+  if (!stats.value) return []
+
+  return [
+    { label: '文章总数', value: stats.value.articles, icon: 'i-heroicons-newspaper', accent: 'from-sky-500/15 to-cyan-400/10' },
+    { label: '已发布文章', value: stats.value.publishedArticles, icon: 'i-heroicons-check-badge', accent: 'from-emerald-500/15 to-lime-400/10' },
+    { label: '草稿', value: stats.value.draftArticles, icon: 'i-heroicons-pencil-square', accent: 'from-amber-500/15 to-orange-400/10' },
+    { label: '累计浏览', value: stats.value.totalViews, icon: 'i-heroicons-chart-bar', accent: 'from-violet-500/15 to-fuchsia-400/10' },
+  ]
+})
+
+const resourceCards = computed(() => {
+  if (!stats.value) return []
+
+  return [
+    { label: '独立页面', value: stats.value.pages, description: '关于页、分类页和自定义页面', to: '/admin/page-config' },
+    { label: '媒体资源', value: stats.value.media, description: '图片、封面和上传素材', to: '/admin/media' },
+    { label: '分类', value: stats.value.categories, description: '文章归档和内容组织', to: '/admin/categories' },
+    { label: '标签', value: stats.value.tags, description: '专题聚合和检索入口', to: '/admin/tags' },
+  ]
+})
+
+function formatDate(value: string | Date | null | undefined) {
+  if (!value) return '暂无时间'
+  return new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
+
+function draftLink(item: DraftItem) {
+  return item.type === 'page' ? '/admin/page-config' : `/admin/articles/${item.id}`
+}
+
+function activityLabel(item: ActivityItem) {
+  const map: Record<string, string> = {
+    create: '创建',
+    update: '更新',
+    delete: '删除',
+    publish: '发布',
+  }
+
+  return `${map[item.action] || item.action} ${item.targetType}`
+}
+
+async function loadDashboard() {
   loading.value = true
   try {
-    const [statsData, activityData, articlesData] = await Promise.all([
-      api.get<typeof stats.value>('/api/admin/stats'),
-      api.get<typeof activities.value>('/api/admin/activity'),
-      api.get<{ total: number; items: ArticleWithRelations[] }>('/api/articles', { pageSize: 6 }),
+    const [statsResult, draftsResult, activityResult] = await Promise.all([
+      api.get<AdminStats>('/api/admin/stats'),
+      api.get<DraftItem[]>('/api/admin/drafts'),
+      api.get<ActivityItem[]>('/api/admin/activity', { limit: 8 }),
     ])
-    stats.value = statsData
-    activities.value = activityData
-    recentArticles.value = articlesData.items
-  }
-  catch (e) {
-    console.error('Failed to fetch dashboard:', e)
+
+    stats.value = statsResult
+    drafts.value = draftsResult
+    activities.value = activityResult
   }
   finally {
     loading.value = false
   }
 }
 
-function formatDate(date: Date | string | null): string {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
-}
-
-const statusLabels: Record<string, string> = {
-  published: '已发布',
-  draft: '草稿',
-  scheduled: '定时发布',
-}
-
-const statusColors: Record<string, string> = {
-  published: 'text-primary',
-  draft: 'text-secondary',
-  scheduled: 'text-accent',
-}
-
-const actionLabels: Record<string, string> = {
-  create: '创建了',
-  update: '更新了',
-  delete: '删除了',
-  publish: '发布了',
-}
-
-const targetLabels: Record<string, string> = {
-  article: '文章',
-  page: '页面',
-  media: '媒体',
-  category: '分类',
-  tag: '标签',
-}
-
-function formatTimeAgo(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const minutes = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days = Math.floor(diff / 86400000)
-
-  if (minutes < 1) return '刚刚'
-  if (minutes < 60) return `${minutes}分钟前`
-  if (hours < 24) return `${hours}小时前`
-  if (days < 7) return `${days}天前`
-  return date.toLocaleDateString('zh-CN')
-}
-
-onMounted(() => {
-  fetchDashboard()
-})
+onMounted(loadDashboard)
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-text">
-          仪表盘
-        </h1>
-        <p class="text-muted mt-1">欢迎回来！实时查看博客运营状态</p>
-      </div>
-      <NuxtLink
-        to="/admin/articles/new"
-        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
-      >
-        <img src="/icons/write.svg" class="w-4 h-4" alt="">
-        写文章
-      </NuxtLink>
-    </div>
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.12),rgba(34,184,207,0.08),rgba(255,255,255,0.7))] p-6 shadow-sm">
+      <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+        <div class="max-w-3xl">
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Overview</p>
+          <h1 class="mt-3 text-3xl font-black tracking-tight text-text">后台控制台重新上线</h1>
+          <p class="mt-3 text-sm leading-7 text-muted">
+            这里恢复为真正的后台首页，负责承接内容管理、前台配置和主题能力入口。
+            先把高频工作流重新接通，再逐页补齐更细的 AnZhiYu 配置能力。
+          </p>
+        </div>
 
-    <!-- Stats Row -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <NuxtLink
-        v-for="(item, idx) in [
-          { label: '文章总数', value: stats.articles, sub: `${stats.publishedArticles} 已发布`, icon: '/icons/article.svg', color: 'text-primary' },
-          { label: '总浏览量', value: stats.totalViews, sub: '累计访问', icon: '/icons/views.svg', color: 'text-accent' },
-          { label: '自定义页面', value: stats.pages, sub: '独立页面', icon: '/icons/page.svg', color: 'text-secondary' },
-          { label: '媒体文件', value: stats.media, sub: '已上传', icon: '/icons/media.svg', color: 'text-primary' },
-        ]"
-        :key="idx"
-        :to="idx === 0 ? '/admin/articles' : idx === 2 ? '/admin/pages' : idx === 3 ? '/admin/media' : ''"
-        class="group bg-surface rounded-2xl border border-border p-5 hover:shadow-lg transition-all duration-200 cursor-pointer"
+        <div class="flex flex-wrap gap-3">
+          <NuxtLink
+            to="/admin/articles/new"
+            class="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:bg-primary/90"
+          >
+            <span class="i-heroicons-plus h-5 w-5" />
+            新建文章
+          </NuxtLink>
+          <NuxtLink
+            to="/admin/general"
+            class="inline-flex items-center gap-2 rounded-2xl border border-border bg-background/80 px-5 py-3 text-sm font-semibold text-text transition hover:border-primary/30 hover:text-primary"
+          >
+            <span class="i-heroicons-cog-6-tooth h-5 w-5" />
+            站点设置
+          </NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <article
+        v-for="card in statCards"
+        :key="card.label"
+        class="rounded-[24px] border border-border/70 bg-surface/85 p-5 shadow-sm"
       >
-        <div class="flex items-start justify-between">
+        <div class="flex items-start justify-between gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-2">
-              <img :src="item.icon" class="w-5 h-5" :alt="item.label">
-              <span class="text-sm text-muted">{{ item.label }}</span>
-            </div>
-            <p class="text-3xl font-bold text-text">
-              {{ loading ? '—' : item.value.toLocaleString() }}
+            <p class="text-sm font-medium text-muted">{{ card.label }}</p>
+            <p class="mt-3 text-3xl font-black tracking-tight text-text">
+              {{ loading || !stats ? '...' : card.value.toLocaleString() }}
             </p>
-            <p class="text-xs text-muted mt-1">{{ item.sub }}</p>
+          </div>
+          <div :class="`bg-gradient-to-br ${card.accent}`" class="flex h-12 w-12 items-center justify-center rounded-2xl border border-border/60">
+            <span :class="card.icon" class="h-6 w-6 text-primary" />
           </div>
         </div>
-      </NuxtLink>
-    </div>
+      </article>
+    </section>
 
-    <!-- Main Content -->
-    <div class="grid grid-cols-12 gap-4">
-      <!-- Recent Articles -->
-      <div class="col-span-12 lg:col-span-8">
-        <div class="bg-surface rounded-2xl border border-border h-full">
-          <div class="flex items-center justify-between px-5 py-4 border-b border-border">
-            <div class="flex items-center gap-2">
-              <img src="/icons/chart.svg" class="w-5 h-5" alt="">
-              <h3 class="font-semibold text-text">最新文章</h3>
-            </div>
-            <NuxtLink
-              to="/admin/articles"
-              class="text-sm text-primary hover:text-primary/80 font-medium transition-colors flex items-center gap-1"
-            >
-              查看全部
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </NuxtLink>
-          </div>
-
-          <div class="p-4">
-            <div v-if="loading" class="space-y-2">
-              <div v-for="i in 4" :key="i" class="h-14 bg-surface-2 rounded-xl animate-pulse" />
-            </div>
-
-            <div v-else-if="recentArticles.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
-              <img src="/icons/article.svg" class="w-10 h-10 text-muted/30 mb-3" alt="">
-              <p class="text-muted text-sm mb-3">暂无文章</p>
-              <NuxtLink
-                to="/admin/articles/new"
-                class="px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                撰写第一篇
-              </NuxtLink>
-            </div>
-
-            <div v-else class="space-y-1">
-              <NuxtLink
-                v-for="article in recentArticles"
-                :key="article.id"
-                :to="`/admin/articles/${article.id}`"
-                class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-2 transition-all duration-200 group cursor-pointer"
-              >
-                <img src="/icons/article.svg" class="w-5 h-5 text-muted group-hover:text-primary transition-colors flex-shrink-0" alt="">
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-text group-hover:text-primary truncate transition-colors">
-                    {{ article.title }}
-                  </p>
-                  <p class="text-xs text-muted">{{ formatDate(article.createdAt) }}</p>
-                </div>
-                <span
-                  class="px-2 py-0.5 rounded-full text-xs font-medium shrink-0 border"
-                  :class="statusColors[article.status] || 'text-muted border-border'"
-                >
-                  {{ statusLabels[article.status] || article.status }}
-                </span>
-              </NuxtLink>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Sidebar -->
-      <div class="col-span-12 lg:col-span-4 space-y-4">
-        <!-- Activity -->
-        <div class="bg-surface rounded-2xl border border-border">
-          <div class="flex items-center gap-2 px-5 py-4 border-b border-border">
-            <img src="/icons/clock.svg" class="w-5 h-5 text-accent" alt="">
-            <h3 class="font-semibold text-text">最新动态</h3>
-          </div>
-          <div class="p-4">
-            <div v-if="loading" class="space-y-3">
-              <div v-for="i in 4" :key="i" class="flex items-start gap-3 animate-pulse">
-                <div class="w-5 h-5 rounded-full bg-surface-2 flex-shrink-0 mt-0.5" />
-                <div class="flex-1 space-y-1.5">
-                  <div class="h-3.5 bg-surface-2 rounded w-3/4" />
-                  <div class="h-3 bg-surface rounded w-1/4" />
-                </div>
-              </div>
-            </div>
-
-            <div v-else-if="activities.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
-              <img src="/icons/clock.svg" class="w-10 h-10 text-muted/30 mb-3" alt="">
-              <p class="text-muted text-sm">暂无动态</p>
-            </div>
-
-            <div v-else class="space-y-3">
-              <div
-                v-for="activity in activities.slice(0, 6)"
-                :key="activity.id"
-                class="flex items-start gap-3"
-              >
-                <img
-                  v-if="activity.action === 'create'"
-                  src="/icons/article.svg"
-                  class="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
-                  alt=""
-                >
-                <img
-                  v-else-if="activity.action === 'update'"
-                  src="/icons/settings.svg"
-                  class="w-4 h-4 text-secondary flex-shrink-0 mt-0.5"
-                  alt=""
-                >
-                <img
-                  v-else-if="activity.action === 'delete'"
-                  src="/icons/trash.svg"
-                  class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"
-                  alt=""
-                >
-                <img
-                  v-else-if="activity.action === 'publish'"
-                  src="/icons/check.svg"
-                  class="w-4 h-4 text-primary flex-shrink-0 mt-0.5"
-                  alt=""
-                >
-                <img
-                  v-else
-                  src="/icons/clock.svg"
-                  class="w-4 h-4 text-muted flex-shrink-0 mt-0.5"
-                  alt=""
-                >
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm text-text leading-snug">
-                    <span class="font-medium">{{ actionLabels[activity.action] || activity.action }}</span>
-                    <span class="text-muted">{{ targetLabels[activity.targetType] || activity.targetType }}</span>
-                    <span class="font-medium block truncate">{{ activity.targetTitle || '(无标题)' }}</span>
-                  </p>
-                  <p class="text-xs text-muted mt-0.5">{{ formatTimeAgo(activity.createdAt) }}</p>
-                </div>
-              </div>
-            </div>
+    <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-text">核心资源</h2>
+            <p class="mt-2 text-sm text-muted">后台当前可管理的主要内容与配置维度。</p>
           </div>
         </div>
 
-        <!-- Mini Stats -->
-        <div class="bg-surface rounded-2xl border border-border p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <img src="/icons/chart.svg" class="w-6 h-6 text-primary" alt="">
-            <h3 class="font-semibold text-text text-sm">内容概览</h3>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+          <NuxtLink
+            v-for="card in resourceCards"
+            :key="card.label"
+            :to="card.to"
+            class="rounded-[24px] border border-border/70 bg-background/75 p-5 transition hover:border-primary/25 hover:shadow-sm"
+          >
+            <p class="text-sm font-medium text-muted">{{ card.label }}</p>
+            <p class="mt-3 text-3xl font-black tracking-tight text-text">
+              {{ loading || !stats ? '...' : card.value }}
+            </p>
+            <p class="mt-2 text-sm leading-6 text-muted">{{ card.description }}</p>
+          </NuxtLink>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-text">待处理草稿</h2>
+            <p class="mt-2 text-sm text-muted">最近需要继续整理或发布的内容。</p>
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div class="flex items-center gap-3">
-              <img src="/icons/folder.svg" class="w-5 h-5 text-secondary" alt="">
-              <div>
-                <p class="text-lg font-bold text-text leading-none">{{ stats.categories }}</p>
-                <p class="text-xs text-muted">分类</p>
-              </div>
+          <NuxtLink to="/admin/articles" class="text-sm font-semibold text-primary transition hover:opacity-80">
+            查看全部
+          </NuxtLink>
+        </div>
+
+        <div class="mt-5 space-y-3">
+          <NuxtLink
+            v-for="item in drafts.slice(0, 6)"
+            :key="`${item.type}-${item.id}`"
+            :to="draftLink(item)"
+            class="flex items-start justify-between gap-4 rounded-2xl border border-border/70 bg-background/72 px-4 py-4 transition hover:border-primary/20"
+          >
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-text">{{ item.title || '未命名内容' }}</p>
+              <p class="mt-1 text-xs text-muted">
+                {{ item.type === 'page' ? '独立页面' : '文章草稿' }} · {{ formatDate(item.updatedAt) }}
+              </p>
             </div>
-            <div class="flex items-center gap-3">
-              <img src="/icons/tag.svg" class="w-5 h-5 text-secondary" alt="">
-              <div>
-                <p class="text-lg font-bold text-text leading-none">{{ stats.tags }}</p>
-                <p class="text-xs text-muted">标签</p>
-              </div>
-            </div>
+            <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {{ item.type === 'page' ? '页面' : '文章' }}
+            </span>
+          </NuxtLink>
+
+          <div
+            v-if="!loading && drafts.length === 0"
+            class="rounded-2xl border border-dashed border-border bg-background/60 px-4 py-8 text-center text-sm text-muted"
+          >
+            当前没有待处理草稿。
           </div>
         </div>
-      </div>
-    </div>
+      </article>
+    </section>
 
-    <!-- Quick Links -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <NuxtLink
-        v-for="(link, idx) in [
-          { label: '文章管理', sub: '查看与编辑', to: '/admin/articles', icon: '/icons/article.svg', color: 'text-primary' },
-          { label: '分类管理', sub: '管理分类', to: '/admin/categories', icon: '/icons/folder.svg', color: 'text-secondary' },
-          { label: '媒体库', sub: '上传与管理', to: '/admin/media', icon: '/icons/media.svg', color: 'text-accent' },
-          { label: '系统设置', sub: '配置选项', to: '/admin/settings', icon: '/icons/settings.svg', color: 'text-primary' },
-        ]"
-        :key="idx"
-        :to="link.to"
-        class="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border hover:shadow-md hover:border-primary/30 transition-all duration-200 group cursor-pointer"
-      >
-        <img :src="link.icon" :class="link.color" class="w-7 h-7 flex-shrink-0" alt="">
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <div class="flex items-center justify-between gap-3">
         <div>
-          <p class="text-sm font-semibold text-text">{{ link.label }}</p>
-          <p class="text-xs text-muted">{{ link.sub }}</p>
+          <h2 class="text-xl font-black text-text">最近活动</h2>
+          <p class="mt-2 text-sm text-muted">帮助快速判断最近内容变动和后台操作轨迹。</p>
         </div>
-      </NuxtLink>
-    </div>
+      </div>
+
+      <div class="mt-5 space-y-3">
+        <div
+          v-for="item in activities"
+          :key="item.id"
+          class="flex flex-col gap-2 rounded-2xl border border-border/70 bg-background/72 px-4 py-4 md:flex-row md:items-center md:justify-between"
+        >
+          <div>
+            <p class="text-sm font-semibold text-text">{{ activityLabel(item) }}</p>
+            <p class="mt-1 text-xs text-muted">{{ item.targetTitle || `ID ${item.targetId}` }}</p>
+          </div>
+          <p class="text-xs text-muted">{{ formatDate(item.createdAt) }}</p>
+        </div>
+
+        <div
+          v-if="!loading && activities.length === 0"
+          class="rounded-2xl border border-dashed border-border bg-background/60 px-4 py-8 text-center text-sm text-muted"
+        >
+          还没有可展示的活动记录。
+        </div>
+      </div>
+    </section>
   </div>
 </template>

@@ -1,107 +1,120 @@
 <script setup lang="ts">
-const api = useAdminApi()
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
 
 interface DraftItem {
   id: number
   title: string
-  type: 'article' | 'page'
   status: string
   updatedAt: string | null
+  type: 'article' | 'page'
 }
 
-const loading = ref(true)
+const api = useAdminApi()
+
 const drafts = ref<DraftItem[]>([])
-const activeTab = ref<'all' | 'article' | 'page'>('all')
+const loading = ref(true)
+const filter = ref<'all' | 'article' | 'page'>('all')
+
+const filteredDrafts = computed(() => {
+  if (filter.value === 'all') return drafts.value
+  return drafts.value.filter(item => item.type === filter.value)
+})
+
+const articleCount = computed(() => drafts.value.filter(item => item.type === 'article').length)
+const pageCount = computed(() => drafts.value.filter(item => item.type === 'page').length)
 
 async function fetchDrafts() {
   loading.value = true
   try {
     drafts.value = await api.get<DraftItem[]>('/api/admin/drafts')
   }
-  catch (e) {
-    console.error('Failed to fetch drafts:', e)
-  }
   finally {
     loading.value = false
   }
 }
 
-const filteredDrafts = computed(() => {
-  if (activeTab.value === 'all') return drafts.value
-  return drafts.value.filter(d => d.type === activeTab.value)
-})
-
 function handleEdit(item: DraftItem) {
-  navigateTo(`/admin/${item.type}s/${item.id}`)
+  if (item.type === 'page') {
+    navigateTo(`/admin/pages/${item.id}`)
+    return
+  }
+
+  navigateTo(`/admin/articles/${item.id}`)
 }
 
 async function handleDelete(item: DraftItem) {
-  if (!confirm(`确定删除此${item.type === 'article' ? '文章' : '页面'}？`)) return
+  if (!confirm(`确定删除这个${item.type === 'page' ? '页面' : '文章'}草稿吗？`)) return
+
   try {
-    await api.del(`/api/${item.type}s/${item.id}`)
+    if (item.type === 'page') {
+      await api.del(`/api/pages/${item.id}`)
+    }
+    else {
+      await api.del(`/api/articles/${item.id}`)
+    }
     await fetchDrafts()
   }
-  catch (e) {
-    console.error('Failed to delete:', e)
+  catch (error) {
+    alert(error instanceof Error ? error.message : '删除草稿失败')
   }
 }
 
-onMounted(() => {
-  fetchDrafts()
-})
+onMounted(fetchDrafts)
 </script>
 
 <template>
-  <div>
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-archive-box w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">草稿箱</h1>
+  <div class="space-y-6">
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Content Center</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">草稿箱</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        汇总尚未发布的文章和页面草稿，方便快速恢复编辑、检查更新时间并清理废弃内容。
+      </p>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-3">
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">草稿总数</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ drafts.length }}</p>
+      </article>
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">文章草稿</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ articleCount }}</p>
+      </article>
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">页面草稿</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ pageCount }}</p>
+      </article>
+    </section>
+
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-5 shadow-sm">
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="item in [
+            { key: 'all', label: '全部草稿' },
+            { key: 'article', label: '文章草稿' },
+            { key: 'page', label: '页面草稿' },
+          ]"
+          :key="item.key"
+          class="rounded-2xl px-4 py-2 text-sm font-semibold transition"
+          :class="filter === item.key ? 'bg-primary text-white' : 'bg-background/80 text-muted hover:text-text'"
+          @click="filter = item.key as 'all' | 'article' | 'page'"
+        >
+          {{ item.label }}
+        </button>
       </div>
-    </div>
+    </section>
 
-    <!-- Tabs -->
-    <div class="border-b border-border mb-6">
-      <nav class="flex gap-4">
-        <button
-          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
-          :class="activeTab === 'all'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted hover:text-text'"
-          @click="activeTab = 'all'"
-        >
-          全部
-        </button>
-        <button
-          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
-          :class="activeTab === 'article'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted hover:text-text'"
-          @click="activeTab = 'article'"
-        >
-          文章草稿
-        </button>
-        <button
-          class="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer"
-          :class="activeTab === 'page'
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted hover:text-text'"
-          @click="activeTab = 'page'"
-        >
-          页面草稿
-        </button>
-      </nav>
-    </div>
-
-    <!-- Draft list -->
-    <div class="card">
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-5 shadow-sm">
       <AdminDraftsDraftList
         :items="filteredDrafts"
         :loading="loading"
         @edit="handleEdit"
         @delete="handleDelete"
       />
-    </div>
+    </section>
   </div>
 </template>

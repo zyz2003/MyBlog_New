@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import type { ArticleWithRelations } from '~/server/services/article.service'
 
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
+
 const route = useRoute()
 const api = useAdminApi()
 
@@ -30,21 +35,18 @@ onMounted(() => {
 
 <template>
   <div>
-    <!-- Loading state -->
-    <div v-if="loading" class="flex items-center justify-center py-20">
-      <span class="i-heroicons-arrow-path w-8 h-8 text-gray-400 animate-spin" />
+    <div v-if="loading" class="flex items-center justify-center py-24">
+      <span class="i-heroicons-arrow-path h-10 w-10 animate-spin text-primary" />
     </div>
 
-    <!-- Error state -->
-    <div v-else-if="error" class="text-center py-20">
-      <span class="i-heroicons-exclamation-triangle w-16 h-16 mx-auto text-red-400 block mb-4" />
-      <p class="text-gray-600 mb-4">{{ error }}</p>
-      <NuxtLink to="/admin/articles" class="btn-primary">
+    <div v-else-if="error" class="rounded-[28px] border border-rose-200 bg-rose-50 px-6 py-12 text-center">
+      <span class="i-heroicons-exclamation-triangle mx-auto mb-4 block h-12 w-12 text-rose-400" />
+      <p class="text-sm font-medium text-rose-600">{{ error }}</p>
+      <NuxtLink to="/admin/articles" class="mt-5 inline-flex rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white">
         返回文章列表
       </NuxtLink>
     </div>
 
-    <!-- Editor -->
     <AdminArticlesArticleEditor
       v-else-if="article"
       mode="edit"

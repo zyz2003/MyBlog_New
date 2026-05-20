@@ -1,402 +1,700 @@
 <script setup lang="ts">
-const api = useAdminApi()
-const loading = ref(true)
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
+
+const { settings, loading, save, refresh } = useAdminSettings('homepage')
+
+const widgetOptions = [
+  { value: 'profile', label: '作者卡片' },
+  { value: 'stats', label: '站点统计' },
+  { value: 'tags', label: '标签卡片' },
+  { value: 'categories', label: '分类卡片' },
+  { value: 'recent', label: '最近文章' },
+  { value: 'archives', label: '归档卡片' },
+  { value: 'announcement', label: '公告卡片' },
+  { value: 'wechat', label: '微信卡片' },
+]
+
+type HomepageCategoryItem = {
+  name: string
+  path: string
+  icon: string
+  shadow: string
+  bgColor: string
+  cls: string
+}
+
+type HomepageSkillItem = {
+  name: string
+  icon: string
+  color: string
+}
+
+const form = reactive({
+  homeTopEnabled: true,
+  homeTopTitle: '',
+  homeTopSubTitle: '',
+  homeTopSiteText: '',
+  homeTopTimemode: 'date',
+  homeTopDefaultDescr: '',
+  homeTopSwiperEnabled: true,
+
+  homepageCoverEnabled: true,
+  homepageCoverPosition: 'left',
+  homepagePageSize: 10,
+  homepageAsideCover: true,
+  homepageArchivesCover: true,
+  homepageDoubleRow: true,
+  homepageIntroMethod: 'description',
+  homepageIntroLength: 120,
+  pageThumbnailSuffix: '',
+  homepageDefaultCoversText: '',
+
+  homeTopCategories: [] as HomepageCategoryItem[],
+  todayCardTips: '',
+  todayCardTitle: '',
+  todayCardImage: '',
+  todayCardLink: '',
+
+  homepageSidebarEnabled: true,
+  homepageSidebarWidgets: [] as string[],
+  homepageSkills: [] as HomepageSkillItem[],
+
+  peopleCanvasEnable: true,
+  peopleCanvasImg: '',
+
+  linkPageTopEnable: false,
+  linkPageTopTitle: '',
+  linkPageTopPlaceholder: '',
+
+  topImageDisableTopImg: false,
+  topImageIndexImg: '',
+  topImageDefaultTopImg: '',
+  topImageSiteInfoTop: '',
+  topImageTopImgHeight: '',
+
+  mainToneEnable: false,
+  mainToneMode: 'api',
+  mainToneApi: '',
+  mainToneCoverChange: true,
+})
+
 const saving = ref(false)
-const saveSuccess = ref(false)
+const message = ref('')
+const errorMessage = ref('')
 
-// --- HomeTop ---
-const homeTop = ref({
-  enabled: true, title: '', subTitle: '', siteText: '',
-  timemode: 'date' as string, defaultDescr: '', swiperEnabled: true,
-})
-// --- Category shortcuts ---
-const categoryItems = ref<Array<{ name: string; path: string; icon: string; shadow: string; bgColor: string; cls: string }>>([
-  { name: '', path: '', icon: 'i-heroicons-code-bracket', shadow: '', bgColor: '#425AEF', cls: 'blue' },
-  { name: '', path: '', icon: 'i-heroicons-heart', shadow: '', bgColor: '#F47466', cls: 'red' },
-  { name: '', path: '', icon: 'i-heroicons-share', shadow: '', bgColor: '#00c4b6', cls: 'green' },
-  { name: '', path: '', icon: 'i-heroicons-rocket-launch', shadow: '', bgColor: '#FF7242', cls: 'orange' },
-])
-// --- Today Card ---
-const todayCard = ref({ tips: '', title: '', image: '', link: '/' })
-// --- Article List ---
-const articleList = ref({
-  coverEnabled: true, coverPosition: 'left' as 'left'|'right'|'both', pageSize: 10,
-  asideCover: true, archivesCover: true, defaultCovers: [] as string[],
-  doubleRow: true, introMethod: '3' as string, introLength: 500,
-})
-// --- Top Image ---
-const topImage = ref({ disableTopImg: false, indexImg: '', defaultTopImg: '', siteInfoTop: '', topImgHeight: '' })
-// --- Main Tone ---
-const mainTone = ref({ enable: false, mode: 'api' as string, api: '', coverChange: true })
-// --- Skills ---
-const skills = ref<Array<{ name: string; icon: string; color: string }>>([])
-
-// --- Fetch ---
-async function fetchSettings() {
-  loading.value = true
-  try {
-    const data = await api.get<Record<string, Array<{ key: string; value: unknown }>>>('/api/settings')
-    const s: Record<string, unknown> = {}
-    for (const rows of Object.values(data)) for (const row of rows) s[row.key] = row.value
-
-    homeTop.value = {
-      enabled: s.homeTopEnabled !== undefined ? Boolean(s.homeTopEnabled) : true,
-      title: (s.homeTopTitle as string) || '', subTitle: (s.homeTopSubTitle as string) || '',
-      siteText: (s.homeTopSiteText as string) || '', timemode: (s.homeTopTimemode as string) || 'date',
-      defaultDescr: (s.homeTopDefaultDescr as string) || '',
-      swiperEnabled: s.homeTopSwiperEnabled !== undefined ? Boolean(s.homeTopSwiperEnabled) : true,
-    }
-    if (s.homeTopCategories) categoryItems.value = s.homeTopCategories as typeof categoryItems.value
-    if (s.todayCard) todayCard.value = s.todayCard as typeof todayCard.value
-    articleList.value = {
-      coverEnabled: s.homepageCoverEnabled !== undefined ? Boolean(s.homepageCoverEnabled) : true,
-      coverPosition: (s.homepageCoverPosition as 'left'|'right'|'both') || 'left',
-      pageSize: (s.homepagePageSize as number) || 10,
-      asideCover: s.homepageAsideCover !== undefined ? Boolean(s.homepageAsideCover) : true,
-      archivesCover: s.homepageArchivesCover !== undefined ? Boolean(s.homepageArchivesCover) : true,
-      defaultCovers: (s.homepageDefaultCovers as string[]) || [],
-      doubleRow: s.homepageDoubleRow !== undefined ? Boolean(s.homepageDoubleRow) : true,
-      introMethod: (s.homepageIntroMethod as string) || '3',
-      introLength: (s.homepageIntroLength as number) || 500,
-    }
-    if (s.topImage) topImage.value = { ...topImage.value, ...(s.topImage as typeof topImage.value) }
-    if (s.mainTone) mainTone.value = { ...mainTone.value, ...(s.mainTone as typeof mainTone.value) }
-    if (s.homepageSkills) skills.value = s.homepageSkills as typeof skills.value
-  } catch (e) { console.error(e) } finally { loading.value = false }
+function toStringArray(value: unknown) {
+  return Array.isArray(value) ? value.map(item => String(item).trim()).filter(Boolean) : []
 }
 
-// --- Save ---
+function toLines(value: unknown) {
+  return toStringArray(value).join('\n')
+}
+
+function fromLines(value: string) {
+  return value
+    .split(/\r?\n/g)
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
+function toCategory(item: unknown): HomepageCategoryItem {
+  const record = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+  return {
+    name: String(record.name ?? ''),
+    path: String(record.path ?? ''),
+    icon: String(record.icon ?? ''),
+    shadow: String(record.shadow ?? ''),
+    bgColor: String(record.bgColor ?? ''),
+    cls: String(record.cls ?? ''),
+  }
+}
+
+function toSkill(item: unknown): HomepageSkillItem {
+  const record = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+  return {
+    name: String(record.name ?? ''),
+    icon: String(record.icon ?? ''),
+    color: String(record.color ?? ''),
+  }
+}
+
+function toggleWidget(widget: string) {
+  if (form.homepageSidebarWidgets.includes(widget)) {
+    form.homepageSidebarWidgets = form.homepageSidebarWidgets.filter(item => item !== widget)
+    return
+  }
+  form.homepageSidebarWidgets = [...form.homepageSidebarWidgets, widget]
+}
+
+function addCategory() {
+  form.homeTopCategories.push({
+    name: '',
+    path: '',
+    icon: '',
+    shadow: '',
+    bgColor: '',
+    cls: '',
+  })
+}
+
+function removeCategory(index: number) {
+  form.homeTopCategories.splice(index, 1)
+}
+
+function addSkill() {
+  form.homepageSkills.push({
+    name: '',
+    icon: '',
+    color: '',
+  })
+}
+
+function removeSkill(index: number) {
+  form.homepageSkills.splice(index, 1)
+}
+
+function hydrateForm() {
+  const todayCard = (settings.value.todayCard as Record<string, unknown> | undefined) ?? {}
+  const peoplecanvas = (settings.value.peoplecanvas as Record<string, unknown> | undefined) ?? {}
+  const linkPageTop = (settings.value.linkPageTop as Record<string, unknown> | undefined) ?? {}
+  const topImage = (settings.value.topImage as Record<string, unknown> | undefined) ?? {}
+  const mainTone = (settings.value.mainTone as Record<string, unknown> | undefined) ?? {}
+
+  form.homeTopEnabled = settings.value.homeTopEnabled !== undefined ? Boolean(settings.value.homeTopEnabled) : true
+  form.homeTopTitle = String(settings.value.homeTopTitle ?? '')
+  form.homeTopSubTitle = String(settings.value.homeTopSubTitle ?? '')
+  form.homeTopSiteText = String(settings.value.homeTopSiteText ?? '')
+  form.homeTopTimemode = String(settings.value.homeTopTimemode ?? 'date')
+  form.homeTopDefaultDescr = String(settings.value.homeTopDefaultDescr ?? '')
+  form.homeTopSwiperEnabled = settings.value.homeTopSwiperEnabled !== undefined ? Boolean(settings.value.homeTopSwiperEnabled) : true
+
+  form.homepageCoverEnabled = settings.value.homepageCoverEnabled !== undefined ? Boolean(settings.value.homepageCoverEnabled) : true
+  form.homepageCoverPosition = String(settings.value.homepageCoverPosition ?? 'left')
+  form.homepagePageSize = Number(settings.value.homepagePageSize ?? 10) || 10
+  form.homepageAsideCover = settings.value.homepageAsideCover !== undefined ? Boolean(settings.value.homepageAsideCover) : true
+  form.homepageArchivesCover = settings.value.homepageArchivesCover !== undefined ? Boolean(settings.value.homepageArchivesCover) : true
+  form.homepageDoubleRow = settings.value.homepageDoubleRow !== undefined ? Boolean(settings.value.homepageDoubleRow) : true
+  form.homepageIntroMethod = String(settings.value.homepageIntroMethod ?? 'description')
+  form.homepageIntroLength = Number(settings.value.homepageIntroLength ?? 120) || 120
+  form.pageThumbnailSuffix = String(settings.value.pageThumbnailSuffix ?? '')
+  form.homepageDefaultCoversText = toLines(settings.value.homepageDefaultCovers)
+
+  form.homeTopCategories = Array.isArray(settings.value.homeTopCategories)
+    ? settings.value.homeTopCategories.map(toCategory)
+    : []
+
+  form.todayCardTips = String(todayCard.tips ?? '')
+  form.todayCardTitle = String(todayCard.title ?? '')
+  form.todayCardImage = String(todayCard.image ?? '')
+  form.todayCardLink = String(todayCard.link ?? '')
+
+  form.homepageSidebarEnabled = settings.value.homepageSidebarEnabled !== undefined ? Boolean(settings.value.homepageSidebarEnabled) : true
+  form.homepageSidebarWidgets = toStringArray(settings.value.homepageSidebarWidgets)
+  form.homepageSkills = Array.isArray(settings.value.homepageSkills)
+    ? settings.value.homepageSkills.map(toSkill)
+    : []
+
+  form.peopleCanvasEnable = peoplecanvas.enable !== undefined ? Boolean(peoplecanvas.enable) : true
+  form.peopleCanvasImg = String(peoplecanvas.img ?? '')
+
+  form.linkPageTopEnable = linkPageTop.enable !== undefined ? Boolean(linkPageTop.enable) : false
+  form.linkPageTopTitle = String(linkPageTop.title ?? '')
+  form.linkPageTopPlaceholder = String(linkPageTop.addFriendPlaceholder ?? '')
+
+  form.topImageDisableTopImg = topImage.disableTopImg !== undefined ? Boolean(topImage.disableTopImg) : false
+  form.topImageIndexImg = String(topImage.indexImg ?? settings.value.defaultTopImg ?? '')
+  form.topImageDefaultTopImg = String(topImage.defaultTopImg ?? '')
+  form.topImageSiteInfoTop = String(topImage.siteInfoTop ?? settings.value.indexSiteInfoTop ?? '')
+  form.topImageTopImgHeight = String(topImage.topImgHeight ?? settings.value.indexTopImgHeight ?? '')
+
+  form.mainToneEnable = mainTone.enable !== undefined ? Boolean(mainTone.enable) : false
+  form.mainToneMode = String(mainTone.mode ?? 'api')
+  form.mainToneApi = String(mainTone.api ?? '')
+  form.mainToneCoverChange = mainTone.coverChange !== undefined ? Boolean(mainTone.coverChange) : true
+}
+
+watch(
+  settings,
+  () => {
+    hydrateForm()
+  },
+  { deep: true, immediate: true },
+)
+
 async function handleSave() {
-  saving.value = true; saveSuccess.value = false
+  saving.value = true
+  message.value = ''
+  errorMessage.value = ''
+
   try {
-    await api.put('/api/settings', [
-      { key: 'homeTopEnabled', value: homeTop.value.enabled, category: 'homepage' },
-      { key: 'homeTopTitle', value: homeTop.value.title, category: 'homepage' },
-      { key: 'homeTopSubTitle', value: homeTop.value.subTitle, category: 'homepage' },
-      { key: 'homeTopSiteText', value: homeTop.value.siteText, category: 'homepage' },
-      { key: 'homeTopTimemode', value: homeTop.value.timemode, category: 'homepage' },
-      { key: 'homeTopDefaultDescr', value: homeTop.value.defaultDescr, category: 'homepage' },
-      { key: 'homeTopSwiperEnabled', value: homeTop.value.swiperEnabled, category: 'homepage' },
-      { key: 'homeTopCategories', value: categoryItems.value, category: 'homepage' },
-      { key: 'todayCard', value: todayCard.value, category: 'homepage' },
-      { key: 'homepageCoverEnabled', value: articleList.value.coverEnabled, category: 'homepage' },
-      { key: 'homepageCoverPosition', value: articleList.value.coverPosition, category: 'homepage' },
-      { key: 'homepagePageSize', value: articleList.value.pageSize, category: 'homepage' },
-      { key: 'homepageAsideCover', value: articleList.value.asideCover, category: 'homepage' },
-      { key: 'homepageArchivesCover', value: articleList.value.archivesCover, category: 'homepage' },
-      { key: 'homepageDefaultCovers', value: articleList.value.defaultCovers, category: 'homepage' },
-      { key: 'homepageDoubleRow', value: articleList.value.doubleRow, category: 'homepage' },
-      { key: 'homepageIntroMethod', value: articleList.value.introMethod, category: 'homepage' },
-      { key: 'homepageIntroLength', value: articleList.value.introLength, category: 'homepage' },
-      { key: 'topImage', value: topImage.value, category: 'homepage' },
-      { key: 'mainTone', value: mainTone.value, category: 'homepage' },
-      { key: 'homepageSkills', value: skills.value, category: 'homepage' },
-    ])
-    saveSuccess.value = true; setTimeout(() => { saveSuccess.value = false }, 3000)
-  } catch (e: unknown) { alert(e instanceof Error ? e.message : '保存失败') }
-  finally { saving.value = false }
+    await save({
+      homeTopEnabled: form.homeTopEnabled,
+      homeTopTitle: form.homeTopTitle.trim(),
+      homeTopSubTitle: form.homeTopSubTitle.trim(),
+      homeTopSiteText: form.homeTopSiteText.trim(),
+      homeTopTimemode: form.homeTopTimemode,
+      homeTopDefaultDescr: form.homeTopDefaultDescr.trim(),
+      homeTopSwiperEnabled: form.homeTopSwiperEnabled,
+
+      homepageCoverEnabled: form.homepageCoverEnabled,
+      homepageCoverPosition: form.homepageCoverPosition,
+      homepagePageSize: form.homepagePageSize,
+      homepageAsideCover: form.homepageAsideCover,
+      homepageArchivesCover: form.homepageArchivesCover,
+      homepageDoubleRow: form.homepageDoubleRow,
+      homepageIntroMethod: form.homepageIntroMethod,
+      homepageIntroLength: form.homepageIntroLength,
+      pageThumbnailSuffix: form.pageThumbnailSuffix.trim(),
+      homepageDefaultCovers: fromLines(form.homepageDefaultCoversText),
+
+      homeTopCategories: form.homeTopCategories.map(item => ({
+        name: item.name.trim(),
+        path: item.path.trim(),
+        icon: item.icon.trim(),
+        shadow: item.shadow.trim(),
+        bgColor: item.bgColor.trim(),
+        cls: item.cls.trim(),
+      })).filter(item => item.name || item.path || item.icon),
+      todayCard: {
+        tips: form.todayCardTips.trim(),
+        title: form.todayCardTitle.trim(),
+        image: form.todayCardImage.trim(),
+        link: form.todayCardLink.trim(),
+      },
+
+      homepageSidebarEnabled: form.homepageSidebarEnabled,
+      homepageSidebarWidgets: form.homepageSidebarWidgets,
+      homepageSkills: form.homepageSkills.map(item => ({
+        name: item.name.trim(),
+        icon: item.icon.trim(),
+        color: item.color.trim(),
+      })).filter(item => item.name || item.icon || item.color),
+
+      peoplecanvas: {
+        enable: form.peopleCanvasEnable,
+        img: form.peopleCanvasImg.trim(),
+      },
+      linkPageTop: {
+        enable: form.linkPageTopEnable,
+        title: form.linkPageTopTitle.trim(),
+        addFriendPlaceholder: form.linkPageTopPlaceholder.trim(),
+      },
+      topImage: {
+        disableTopImg: form.topImageDisableTopImg,
+        indexImg: form.topImageIndexImg.trim(),
+        defaultTopImg: form.topImageDefaultTopImg.trim(),
+        siteInfoTop: form.topImageSiteInfoTop.trim(),
+        topImgHeight: form.topImageTopImgHeight.trim(),
+      },
+      mainTone: {
+        enable: form.mainToneEnable,
+        mode: form.mainToneMode,
+        api: form.mainToneApi.trim(),
+        coverChange: form.mainToneCoverChange,
+      },
+
+      indexImg: {
+        indexImg: form.topImageIndexImg.trim(),
+      },
+      indexTopImgHeight: form.topImageTopImgHeight.trim(),
+      indexSiteInfoTop: form.topImageSiteInfoTop.trim(),
+      defaultTopImg: form.topImageDefaultTopImg.trim(),
+    })
+
+    message.value = '首页配置已保存。'
+    await refresh()
+  }
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '保存失败，请稍后重试。'
+  }
+  finally {
+    saving.value = false
+  }
 }
-
-function addCategory() { categoryItems.value.push({ name: '', path: '/', icon: 'i-heroicons-folder', shadow: '', bgColor: '#425AEF', cls: 'blue' }) }
-function removeCategory(i: number) { categoryItems.value.splice(i, 1) }
-function addDefaultCover() { articleList.value.defaultCovers.push('') }
-function removeDefaultCover(i: number) { articleList.value.defaultCovers.splice(i, 1) }
-function addSkill() { skills.value.push({ name: '', icon: 'i-heroicons-code-bracket', color: '#425AEF' }) }
-function removeSkill(i: number) { skills.value.splice(i, 1) }
-
-onMounted(() => { fetchSettings() })
 </script>
 
 <template>
-  <div>
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-home w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">首页设置</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <span v-if="saveSuccess" class="text-sm text-green-600">保存成功</span>
-        <button class="btn-primary px-4 py-2 text-sm cursor-pointer" :disabled="saving" @click="handleSave">
-          <span v-if="saving" class="i-heroicons-arrow-path w-4 h-4 animate-spin" />
-          {{ saving ? '保存中...' : '保存设置' }}
+  <div class="space-y-6">
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Homepage</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">首页配置</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        这里直接对应首页 Hero、分类卡片、今日卡片、技能区、右侧栏和顶部背景图配置，保存后前台首页会立刻按同结构读取。
+      </p>
+    </section>
+
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      {{ message }}
+    </div>
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+      {{ errorMessage }}
+    </div>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">首页欢迎区</h2>
+        <div class="mt-5 space-y-5">
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homeTopEnabled = !form.homeTopEnabled">
+              <span class="text-sm text-text">启用首页欢迎区</span>
+              <span class="text-sm text-muted">{{ form.homeTopEnabled ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homeTopSwiperEnabled = !form.homeTopSwiperEnabled">
+              <span class="text-sm text-text">启用首页轮播</span>
+              <span class="text-sm text-muted">{{ form.homeTopSwiperEnabled ? '已开启' : '已关闭' }}</span>
+            </button>
+          </div>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">首页主标题</span>
+            <input v-model="form.homeTopTitle" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：安知鱼" >
+          </label>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">首页副标题</span>
+            <input v-model="form.homeTopSubTitle" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：AnZhiYu" >
+          </label>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">站点文案</span>
+            <input v-model="form.homeTopSiteText" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：生活明朗，万物可爱。" >
+          </label>
+
+          <div class="grid gap-5 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">时间模式</span>
+              <select v-model="form.homeTopTimemode" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="date">日期模式</option>
+                <option value="countdown">倒计时模式</option>
+                <option value="custom">自定义模式</option>
+              </select>
+            </label>
+
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">首页每页文章数</span>
+              <input v-model.number="form.homepagePageSize" type="number" min="1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+          </div>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">默认描述</span>
+            <textarea v-model="form.homeTopDefaultDescr" rows="4" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm leading-7 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="欢迎区的默认说明文本" />
+          </label>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">列表布局与封面</h2>
+        <div class="mt-5 space-y-5">
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageCoverEnabled = !form.homepageCoverEnabled">
+              <span class="text-sm text-text">启用首页封面</span>
+              <span class="text-sm text-muted">{{ form.homepageCoverEnabled ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageDoubleRow = !form.homepageDoubleRow">
+              <span class="text-sm text-text">启用双列布局</span>
+              <span class="text-sm text-muted">{{ form.homepageDoubleRow ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageAsideCover = !form.homepageAsideCover">
+              <span class="text-sm text-text">侧栏显示封面</span>
+              <span class="text-sm text-muted">{{ form.homepageAsideCover ? '显示' : '隐藏' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageArchivesCover = !form.homepageArchivesCover">
+              <span class="text-sm text-text">归档显示封面</span>
+              <span class="text-sm text-muted">{{ form.homepageArchivesCover ? '显示' : '隐藏' }}</span>
+            </button>
+          </div>
+
+          <div class="grid gap-5 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">封面位置</span>
+              <select v-model="form.homepageCoverPosition" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="left">左侧</option>
+                <option value="right">右侧</option>
+                <option value="both">双侧</option>
+              </select>
+            </label>
+
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">摘要生成方式</span>
+              <select v-model="form.homepageIntroMethod" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="description">优先使用描述</option>
+                <option value="summary">从正文截取</option>
+                <option value="auto">自动选择</option>
+                <option value="ai">AI 摘要</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid gap-5 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">摘要长度</span>
+              <input v-model.number="form.homepageIntroLength" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">页面缩略图后缀</span>
+              <input v-model="form.pageThumbnailSuffix" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：?imageView2/1/w/600/h/400" >
+            </label>
+          </div>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">默认封面列表</span>
+            <textarea v-model="form.homepageDefaultCoversText" rows="6" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行一个封面地址" />
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-text">首页分类卡片</h2>
+          <p class="mt-2 text-sm text-muted">用于首页顶部分类按钮区域，支持名称、链接、图标、阴影色和背景色。</p>
+        </div>
+        <button type="button" class="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90" @click="addCategory">
+          新增分类卡
         </button>
       </div>
-    </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="space-y-4">
-      <div class="h-32 bg-surface-2 rounded-xl animate-pulse" />
-      <div class="h-48 bg-surface rounded animate-pulse" />
-    </div>
-
-    <div v-else class="space-y-6">
-      <!-- ====== Section 1: HomeTop (full width) ====== -->
-      <div class="card p-6">
-        <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-          <span class="i-heroicons-sparkles w-5 h-5 text-primary" /> 顶部区域 (HomeTop)
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Left column -->
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div>
-                <label class="font-medium text-text">显示顶部区域</label>
-                <p class="text-xs text-muted">关闭后首页直接显示文章列表</p>
-              </div>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="homeTop.enabled ? 'bg-primary' : 'bg-surface-2'" @click="homeTop.enabled = !homeTop.enabled"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="homeTop.enabled ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">大标题</label>
-              <input v-model="homeTop.title" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primary" placeholder="安知鱼">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">副标题</label>
-              <input v-model="homeTop.subTitle" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primary" placeholder="AnZhiYu">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">网站描述</label>
-              <input v-model="homeTop.siteText" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primary" placeholder="生活明朗，万物可爱">
-            </div>
+      <div v-if="form.homeTopCategories.length" class="mt-5 grid gap-4">
+        <article v-for="(item, index) in form.homeTopCategories" :key="`category-${index}`" class="rounded-3xl border border-border bg-background/70 p-5">
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-sm font-semibold text-text">分类卡 {{ index + 1 }}</p>
+            <button type="button" class="text-sm text-rose-500 transition hover:text-rose-600" @click="removeCategory(index)">
+              删除
+            </button>
           </div>
-          <!-- Right column -->
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">文章排序</label>
-              <select v-model="homeTop.timemode" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primary">
-                <option value="date">按发布日期</option>
-                <option value="updated">按更新日期</option>
+          <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">名称</span>
+              <input v-model="item.name" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">路径</span>
+              <input v-model="item.path" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">图标</span>
+              <input v-model="item.icon" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：i-heroicons-sparkles-solid" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">阴影色</span>
+              <input v-model="item.shadow" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="rgba(66,90,239,.35)" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">背景色</span>
+              <input v-model="item.bgColor" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="#425AEF" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">附加类名</span>
+              <input v-model="item.cls" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="可选" >
+            </label>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="mt-5 rounded-3xl border border-dashed border-border bg-background/45 px-6 py-12 text-center text-sm text-muted">
+        还没有首页分类卡片，点击右上角按钮添加。
+      </div>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">今日卡片与技能区</h2>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">今日卡片提示语</span>
+            <input v-model="form.todayCardTips" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">今日卡片标题</span>
+            <input v-model="form.todayCardTitle" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">今日卡片图片</span>
+            <input v-model="form.todayCardImage" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">今日卡片链接</span>
+            <input v-model="form.todayCardLink" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+        </div>
+
+        <div class="mt-8 flex items-center justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-black text-text">技能卡片</h3>
+            <p class="mt-1 text-sm text-muted">支持图标和颜色，用于首页技能展示区。</p>
+          </div>
+          <button type="button" class="rounded-2xl border border-primary/20 bg-primary/8 px-4 py-2 text-sm font-semibold text-primary transition hover:border-primary/30" @click="addSkill">
+            新增技能卡
+          </button>
+        </div>
+
+        <div v-if="form.homepageSkills.length" class="mt-4 space-y-4">
+          <article v-for="(item, index) in form.homepageSkills" :key="`skill-${index}`" class="rounded-3xl border border-border bg-background/70 p-5">
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-semibold text-text">技能 {{ index + 1 }}</p>
+              <button type="button" class="text-sm text-rose-500 transition hover:text-rose-600" @click="removeSkill(index)">
+                删除
+              </button>
+            </div>
+            <div class="mt-4 grid gap-4 md:grid-cols-3">
+              <label class="block space-y-2">
+                <span class="text-xs font-medium text-muted">名称</span>
+                <input v-model="item.name" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+              </label>
+              <label class="block space-y-2">
+                <span class="text-xs font-medium text-muted">图标</span>
+                <input v-model="item.icon" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+              </label>
+              <label class="block space-y-2">
+                <span class="text-xs font-medium text-muted">颜色</span>
+                <input v-model="item.color" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="#425AEF" >
+              </label>
+            </div>
+          </article>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">友链页头与背景扩展</h2>
+        <div class="mt-5 space-y-5">
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.peopleCanvasEnable = !form.peopleCanvasEnable">
+              <span class="text-sm text-text">人物动效背景</span>
+              <span class="text-sm text-muted">{{ form.peopleCanvasEnable ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.linkPageTopEnable = !form.linkPageTopEnable">
+              <span class="text-sm text-text">启用友链页头</span>
+              <span class="text-sm text-muted">{{ form.linkPageTopEnable ? '已开启' : '已关闭' }}</span>
+            </button>
+          </div>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">人物背景图片</span>
+            <input v-model="form.peopleCanvasImg" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">友链页头标题</span>
+            <input v-model="form.linkPageTopTitle" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">友链申请占位文案</span>
+            <input v-model="form.linkPageTopPlaceholder" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">顶部图片与主色调</h2>
+        <div class="mt-5 space-y-5">
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.topImageDisableTopImg = !form.topImageDisableTopImg">
+              <span class="text-sm text-text">禁用顶部大图</span>
+              <span class="text-sm text-muted">{{ form.topImageDisableTopImg ? '已禁用' : '正常显示' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mainToneEnable = !form.mainToneEnable">
+              <span class="text-sm text-text">启用主色调提取</span>
+              <span class="text-sm text-muted">{{ form.mainToneEnable ? '已开启' : '已关闭' }}</span>
+            </button>
+          </div>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">首页顶部图</span>
+            <input v-model="form.topImageIndexImg" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">默认顶部图</span>
+            <input v-model="form.topImageDefaultTopImg" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+          <div class="grid gap-5 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">站点信息纵向偏移</span>
+              <input v-model="form.topImageSiteInfoTop" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：180px" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">顶部图高度</span>
+              <input v-model="form.topImageTopImgHeight" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：420px" >
+            </label>
+          </div>
+
+          <div class="grid gap-5 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">主色调模式</span>
+              <select v-model="form.mainToneMode" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="api">API</option>
+                <option value="cdn">CDN</option>
+                <option value="colorthief">ColorThief</option>
+                <option value="both">混合模式</option>
               </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">默认描述</label>
-              <input v-model="homeTop.defaultDescr" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primary" placeholder="无描述时的默认文字">
-            </div>
-            <div class="flex items-center justify-between">
-              <div>
-                <label class="font-medium text-text">轮播模式</label>
-                <p class="text-xs text-muted">{{ homeTop.swiperEnabled ? '文章轮播+推荐' : '文章预览+今日推荐' }}</p>
-              </div>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="homeTop.swiperEnabled ? 'bg-primary' : 'bg-surface-2'" @click="homeTop.swiperEnabled = !homeTop.swiperEnabled"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="homeTop.swiperEnabled ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
+            </label>
+            <button type="button" class="mt-7 flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mainToneCoverChange = !form.mainToneCoverChange">
+              <span class="text-sm text-text">封面切换时同步换色</span>
+              <span class="text-sm text-muted">{{ form.mainToneCoverChange ? '已开启' : '已关闭' }}</span>
+            </button>
           </div>
-        </div>
-      </div>
 
-      <!-- ====== Section 2: Two-column cards ====== -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Category Shortcuts -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-rectangle-stack w-5 h-5 text-secondary" /> 分类快捷入口
-          </h2>
-          <div class="space-y-2">
-            <div v-for="(cat, i) in categoryItems" :key="i" class="flex items-center gap-2 p-2 bg-surface-2 rounded-lg">
-              <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" :style="{ background: cat.bgColor }">
-                <span :class="cat.icon" class="w-3.5 h-3.5 text-white" />
-              </div>
-              <input v-model="cat.name" type="text" class="flex-1 min-w-0 px-2 py-1 bg-surface border border-border rounded text-xs text-text" placeholder="名称">
-              <input v-model="cat.path" type="text" class="w-24 px-2 py-1 bg-surface border border-border rounded text-xs text-text font-mono" placeholder="/路径">
-              <input v-model="cat.bgColor" type="color" class="w-6 h-6 rounded cursor-pointer border-0">
-              <button class="p-1 text-red-400 hover:text-red-600 cursor-pointer shrink-0" @click="removeCategory(i)"><span class="i-heroicons-trash w-3.5 h-3.5" /></button>
-            </div>
-            <button class="w-full py-1.5 border-2 border-dashed border-border rounded-lg text-xs text-muted hover:border-primary hover:text-primary transition-colors cursor-pointer" @click="addCategory">+ 添加分类入口</button>
-          </div>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">取色 API 地址</span>
+            <input v-model="form.mainToneApi" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
         </div>
+      </article>
 
-        <!-- Article List -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-document-text w-5 h-5 text-primary" /> 文章列表
-          </h2>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">显示封面图</label>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="articleList.coverEnabled ? 'bg-primary' : 'bg-surface-2'" @click="articleList.coverEnabled = !articleList.coverEnabled"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="articleList.coverEnabled ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">双栏显示</label>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="articleList.doubleRow ? 'bg-primary' : 'bg-surface-2'" @click="articleList.doubleRow = !articleList.doubleRow"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="articleList.doubleRow ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">封面位置</label>
-              <div class="flex gap-3">
-                <label class="flex items-center gap-1.5 cursor-pointer text-sm"><input v-model="articleList.coverPosition" type="radio" value="left" class="accent-primary"><span>左</span></label>
-                <label class="flex items-center gap-1.5 cursor-pointer text-sm"><input v-model="articleList.coverPosition" type="radio" value="right" class="accent-primary"><span>右</span></label>
-                <label class="flex items-center gap-1.5 cursor-pointer text-sm"><input v-model="articleList.coverPosition" type="radio" value="both" class="accent-primary"><span>交替</span></label>
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">摘要方式</label>
-              <select v-model="articleList.introMethod" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm">
-                <option value="1">仅描述</option>
-                <option value="2">描述+自动摘录</option>
-                <option value="3">自动摘录（默认）</option>
-                <option value="">不显示摘要</option>
-              </select>
-            </div>
-            <div v-if="articleList.introMethod && articleList.introMethod !== '1'">
-              <label class="block text-sm font-medium text-text mb-1.5">摘要长度</label>
-              <input v-model.number="articleList.introLength" type="number" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" min="50" max="2000">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">每页文章数</label>
-              <input v-model.number="articleList.pageSize" type="number" min="5" max="50" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm w-24">
-            </div>
-          </div>
-        </div>
-      </div>
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">首页右侧栏</h2>
+        <div class="mt-5 space-y-5">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageSidebarEnabled = !form.homepageSidebarEnabled">
+            <span class="text-sm text-text">启用首页右侧栏</span>
+            <span class="text-sm text-muted">{{ form.homepageSidebarEnabled ? '已开启' : '已关闭' }}</span>
+          </button>
 
-      <!-- ====== Section 3: Two-column cards (Cover & Top Image) ====== -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Cover Settings -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-photo w-5 h-5 text-primary" /> 封面设置
-          </h2>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">侧栏显示封面</label>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="articleList.asideCover ? 'bg-primary' : 'bg-surface-2'" @click="articleList.asideCover = !articleList.asideCover"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="articleList.asideCover ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">归档页显示封面</label>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="articleList.archivesCover ? 'bg-primary' : 'bg-surface-2'" @click="articleList.archivesCover = !articleList.archivesCover"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="articleList.archivesCover ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">默认封面图</label>
-              <div v-for="(url, i) in articleList.defaultCovers" :key="i" class="flex items-center gap-1 mb-1">
-                <input v-model="articleList.defaultCovers[i]" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-xs flex-1" placeholder="/img/default_cover.jpg">
-                <button class="p-1 text-red-400 hover:text-red-600 cursor-pointer shrink-0" @click="removeDefaultCover(i)"><span class="i-heroicons-x-mark w-3.5 h-3.5" /></button>
-              </div>
-              <button class="text-xs text-muted hover:text-primary cursor-pointer" @click="addDefaultCover">+ 添加默认封面</button>
+          <div>
+            <p class="mb-3 text-sm font-medium text-text">首页右侧栏组件</p>
+            <div class="flex flex-wrap gap-3">
+              <button
+                v-for="option in widgetOptions"
+                :key="option.value"
+                type="button"
+                class="rounded-2xl border px-4 py-3 text-sm transition"
+                :class="form.homepageSidebarWidgets.includes(option.value)
+                  ? 'border-primary/30 bg-primary/8 text-primary'
+                  : 'border-border bg-background/75 text-text hover:border-primary/20'"
+                @click="toggleWidget(option.value)"
+              >
+                {{ option.label }}
+              </button>
             </div>
           </div>
         </div>
+      </article>
+    </section>
 
-        <!-- Top Image -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-window w-5 h-5 text-primary" /> 顶部图设置
-          </h2>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">禁用所有 banner</label>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="topImage.disableTopImg ? 'bg-primary' : 'bg-surface-2'" @click="topImage.disableTopImg = !topImage.disableTopImg"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="topImage.disableTopImg ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">首页 banner 图</label>
-              <input v-model="topImage.indexImg" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="background: url(...) top / cover">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">默认顶部图</label>
-              <input v-model="topImage.defaultTopImg" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="页面未设置时使用">
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium text-text mb-1.5">标题距顶</label>
-                <input v-model="topImage.siteInfoTop" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="300px">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-text mb-1.5">图高度</label>
-                <input v-model="topImage.topImgHeight" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="400px">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ====== Section 4: Main Tone + Today Card ====== -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Main Tone -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-swatch w-5 h-5 text-primary" /> 主色调跟随封面
-          </h2>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">启用主色调</label>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="mainTone.enable ? 'bg-primary' : 'bg-surface-2'" @click="mainTone.enable = !mainTone.enable"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="mainTone.enable ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-            <div v-if="mainTone.enable">
-              <label class="block text-sm font-medium text-text mb-1.5">获取模式</label>
-              <select v-model="mainTone.mode" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm">
-                <option value="colorthief">前端 (ColorThief)</option>
-                <option value="cdn">CDN 参数</option>
-                <option value="api">API 请求</option>
-                <option value="both">CDN + API</option>
-              </select>
-            </div>
-            <div v-if="mainTone.enable && (mainTone.mode === 'api' || mainTone.mode === 'both')">
-              <label class="block text-sm font-medium text-text mb-1.5">API 地址</label>
-              <input v-model="mainTone.api" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="https://img2color-go.vercel.app/api?img=">
-            </div>
-            <div v-if="mainTone.enable" class="flex items-center justify-between">
-              <label class="text-sm text-text">整页跟随封面变色</label>
-              <button class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer" :class="mainTone.coverChange ? 'bg-primary' : 'bg-surface-2'" @click="mainTone.coverChange = !mainTone.coverChange"><span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="mainTone.coverChange ? 'translate-x-6' : 'translate-x-1'" /></button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Today Card (only when not swiper mode) -->
-        <div v-if="!homeTop.swiperEnabled" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-star w-5 h-5 text-accent" /> 今日推荐横幅
-          </h2>
-          <div class="space-y-3">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium text-text mb-1.5">提示标签</label>
-                <input v-model="todayCard.tips" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="今日推荐">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-text mb-1.5">标题</label>
-                <input v-model="todayCard.title" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="探索更多精彩内容">
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">封面图 URL</label>
-              <input v-model="todayCard.image" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="https://...">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">跳转链接</label>
-              <input v-model="todayCard.link" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-primarytext-sm" placeholder="/">
-            </div>
-          </div>
-        </div>
-        <!-- Skills (when swiper mode, replaces today card) -->
-        <div v-else class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-wrench-screwdriver w-5 h-5 text-primary" /> Banner 技能图标
-          </h2>
-          <div class="space-y-1.5">
-            <div v-for="(skill, i) in skills" :key="i" class="flex items-center gap-2 p-1.5 bg-surface-2 rounded-lg">
-              <span :class="skill.icon" class="w-5 h-5" />
-              <input v-model="skill.name" type="text" class="flex-1 px-2 py-1 bg-surface border border-border rounded text-xs text-text" placeholder="技能名">
-              <input v-model="skill.color" type="color" class="w-5 h-5 rounded cursor-pointer border-0">
-              <button class="p-0.5 text-red-400 hover:text-red-600 cursor-pointer" @click="removeSkill(i)"><span class="i-heroicons-x-mark w-3 h-3" /></button>
-            </div>
-            <button class="w-full py-1.5 border-2 border-dashed border-border rounded-lg text-xs text-muted hover:border-primary hover:text-primary transition-colors cursor-pointer" @click="addSkill">+ 添加技能</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Skills (when NOT swiper mode and not already shown) -->
-      <div v-if="!homeTop.swiperEnabled" class="card p-6">
-        <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-          <span class="i-heroicons-wrench-screwdriver w-5 h-5 text-primary" /> Banner 技能图标
-        </h2>
-        <div class="flex flex-wrap gap-2">
-          <div v-for="(skill, i) in skills" :key="i" class="flex items-center gap-2 p-2 bg-surface-2 rounded-lg">
-            <span :class="skill.icon" class="w-5 h-5" />
-            <input v-model="skill.name" type="text" class="w-20 px-2 py-1 bg-surface border border-border rounded text-xs text-text" placeholder="技能名">
-            <input v-model="skill.color" type="color" class="w-5 h-5 rounded cursor-pointer border-0">
-            <button class="p-0.5 text-red-400 hover:text-red-600 cursor-pointer" @click="removeSkill(i)"><span class="i-heroicons-x-mark w-3 h-3" /></button>
-          </div>
-          <button class="px-3 py-1.5 border-2 border-dashed border-border rounded-lg text-xs text-muted hover:border-primary hover:text-primary transition-colors cursor-pointer" @click="addSkill">+ 添加技能</button>
-        </div>
-      </div>
+    <div class="flex items-center justify-end gap-3">
+      <button
+        type="button"
+        class="rounded-2xl border border-border bg-background/80 px-5 py-3 text-sm font-semibold text-text transition hover:border-primary/25 hover:text-primary"
+        :disabled="loading || saving"
+        @click="refresh"
+      >
+        刷新
+      </button>
+      <button
+        type="button"
+        class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:bg-primary/90 disabled:opacity-60"
+        :disabled="loading || saving"
+        @click="handleSave"
+      >
+        {{ saving ? '保存中...' : '保存首页配置' }}
+      </button>
     </div>
   </div>
 </template>
-

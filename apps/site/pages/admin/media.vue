@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import MediaGallery from '~/components/admin/media/MediaGallery.vue'
+import MediaUploader from '~/components/admin/media/MediaUploader.vue'
+
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
+
 interface MediaItem {
   id: number
   filename: string
@@ -6,102 +14,114 @@ interface MediaItem {
   mimeType: string
   size: number
   url: string
-  createdAt: Date
+  createdAt: string | Date
+}
+
+interface MediaListResult {
+  items: MediaItem[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
 }
 
 const api = useAdminApi()
 
-const items = ref<MediaItem[]>([])
+const media = ref<MediaItem[]>([])
 const loading = ref(true)
 const page = ref(1)
-const totalPages = ref(0)
+const totalPages = ref(1)
 const total = ref(0)
-const pageSize = 18
+const keyword = ref('')
+const type = ref('all')
 
-// Filters
-const searchKeyword = ref('')
-const typeFilter = ref('')
+const imageCount = computed(() => media.value.filter(item => item.mimeType.startsWith('image/')).length)
+const documentCount = computed(() => media.value.filter(item => !item.mimeType.startsWith('image/')).length)
 
 async function fetchMedia() {
   loading.value = true
   try {
-    const params: Record<string, unknown> = { page: page.value, pageSize }
-    if (searchKeyword.value) params.keyword = searchKeyword.value
-    if (typeFilter.value) params.type = typeFilter.value
+    const result = await api.get<MediaListResult>('/api/media', {
+      page: page.value,
+      pageSize: 24,
+      ...(keyword.value ? { keyword: keyword.value } : {}),
+      ...(type.value !== 'all' ? { type: type.value } : {}),
+    })
 
-    const result = await api.get<{
-      items: MediaItem[]
-      total: number
-      page: number
-      pageSize: number
-      totalPages: number
-    }>('/api/media', params)
-
-    items.value = result.items
+    media.value = result.items
     total.value = result.total
     totalPages.value = result.totalPages
-  }
-  catch (e) {
-    console.error('Failed to fetch media:', e)
   }
   finally {
     loading.value = false
   }
 }
 
-function handleUploaded() {
+async function handleDelete(id: number) {
+  try {
+    await api.del(`/api/media/${id}`)
+    await fetchMedia()
+  }
+  catch (error) {
+    alert(error instanceof Error ? error.message : '媒体删除失败')
+  }
+}
+
+function handleSearch(nextKeyword: string, nextType: string) {
+  keyword.value = nextKeyword
+  type.value = nextType
   page.value = 1
   fetchMedia()
 }
 
-function handleDelete(id: number) {
-  api.del(`/api/media/${id}`).then(() => {
-    fetchMedia()
-  }).catch((e: unknown) => {
-    const message = e instanceof Error ? e.message : '删除失败'
-    alert(message)
-  })
-}
-
-function handlePageChange(newPage: number) {
-  page.value = newPage
+function handlePageChange(nextPage: number) {
+  page.value = nextPage
   fetchMedia()
 }
 
-function handleSearch(keyword: string, type: string) {
-  searchKeyword.value = keyword
-  typeFilter.value = type
-  page.value = 1
-  fetchMedia()
-}
-
-onMounted(() => {
-  fetchMedia()
-})
+onMounted(fetchMedia)
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl bg-surface-2 flex items-center justify-center">
-          <span class="i-heroicons-photo w-6 h-6 text-primary" />
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-text">媒体库</h1>
-          <p class="text-sm text-muted">管理您的图片和文档</p>
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(34,184,207,0.1),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+        <div class="max-w-3xl">
+          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Content Center</p>
+          <h1 class="mt-3 text-3xl font-black tracking-tight text-text">媒体资源库</h1>
+          <p class="mt-3 text-sm leading-7 text-muted">
+            这里负责管理图片、封面和上传素材。媒体页恢复后，文章封面、首页轮播和页面素材才能形成稳定工作流。
+          </p>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Uploader -->
-    <AdminMediaUploader @uploaded="handleUploaded" />
+    <section class="grid gap-4 md:grid-cols-3">
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">当前页文件数</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ media.length }}</p>
+      </article>
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">当前页图片</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ imageCount }}</p>
+      </article>
+      <article class="rounded-[24px] border border-border/70 bg-surface/78 p-5 shadow-sm">
+        <p class="text-sm text-muted">当前页文档 / 其它</p>
+        <p class="mt-3 text-3xl font-black tracking-tight text-text">{{ documentCount }}</p>
+      </article>
+    </section>
 
-    <!-- Gallery -->
-    <div class="card">
-      <AdminMediaGallery
-        :items="items"
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <h2 class="text-xl font-black text-text">上传文件</h2>
+      <p class="mt-2 text-sm text-muted">支持图片、文档、音视频和压缩文件，上传成功后会自动刷新资源列表。</p>
+      <div class="mt-5">
+        <MediaUploader @uploaded="fetchMedia" />
+      </div>
+    </section>
+
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 shadow-sm">
+      <MediaGallery
+        :items="media"
         :loading="loading"
         :page="page"
         :total-pages="totalPages"
@@ -110,6 +130,6 @@ onMounted(() => {
         @page-change="handlePageChange"
         @search="handleSearch"
       />
-    </div>
+    </section>
   </div>
 </template>

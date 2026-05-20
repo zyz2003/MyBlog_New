@@ -1,450 +1,586 @@
 <script setup lang="ts">
-const api = useAdminApi()
-const loading = ref(true)
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
+
+const { settings, loading, save, refresh } = useAdminSettings('posts')
+
+const form = reactive({
+  postPagination: '1',
+
+  pageDateType: 'created',
+  pageDateFormat: 'simple',
+  pageCategories: true,
+  pageTags: true,
+  pageLabel: false,
+  pageUnread: false,
+
+  postDateType: 'both',
+  postDateFormat: 'date',
+  postCategories: true,
+  postTags: true,
+  postLabel: true,
+  postUnread: false,
+
+  tocPost: true,
+  tocPage: false,
+  tocNumber: true,
+  tocExpand: false,
+  tocStyleSimple: false,
+
+  wordcountEnable: false,
+  wordcountPost: true,
+  wordcountMin2read: true,
+  wordcountTotal: true,
+
+  copyrightEnable: true,
+  copyrightDecode: false,
+  copyrightAuthorHref: '/',
+  copyrightLocation: '',
+  copyrightLicense: 'CC BY-NC-SA 4.0',
+  copyrightLicenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+  copyrightAvatarSinks: false,
+  copyrightAuthorLink: '/',
+
+  rewardEnable: false,
+  rewardQrcodesJson: '[]',
+
+  postEditEnable: false,
+  postEditGithub: '',
+  postEditYuque: '',
+
+  relatedEnable: true,
+  relatedLimit: 6,
+  relatedDateType: 'created',
+
+  photoFigcaptionEnable: false,
+  anchorEnable: true,
+
+  noticeEnable: false,
+  noticeStyle: 'flat',
+  noticeLimitDay: 365,
+  noticePosition: 'top',
+  noticeMessagePrev: '距离上次更新已经过去',
+  noticeMessageNext: '天，文章内容可能已经过时，请注意甄别。',
+
+  coverJson: '{\n  "index_enable": true,\n  "aside_enable": true,\n  "archives_enable": true,\n  "position": "left"\n}',
+  ptoolJson: '{\n  "enable": false\n}',
+})
+
 const saving = ref(false)
-const saveSuccess = ref(false)
+const message = ref('')
+const errorMessage = ref('')
 
-// Post meta (home page)
-const postMetaPage = ref({
-  dateType: 'created' as string,
-  dateFormat: 'simple' as string,
-  categories: true,
-  tags: true,
-  label: false,
-})
+function stringifyValue(value: unknown, fallback: string) {
+  if (value === undefined || value === null) {
+    return fallback
+  }
 
-// Post meta (article page)
-const postMetaPost = ref({
-  dateType: 'both' as string,
-  dateFormat: 'date' as string,
-  categories: true,
-  tags: true,
-  label: true,
-  unread: false,
-})
-
-// Post copyright
-const postCopyright = ref({
-  enable: true,
-  license: 'CC BY-NC-SA 4.0',
-  licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
-  location: '',
-  avatarSinks: false,
-})
-
-// Reward / Sponsor
-const reward = ref({
-  enable: false,
-  qrCodes: [] as Array<{ img: string; link: string; text: string }>,
-})
-
-// Related posts
-const relatedPost = ref({
-  enable: true,
-  limit: 6,
-  dateType: 'created' as string,
-})
-
-// Notice outdate
-const noticeOutdate = ref({
-  enable: false,
-  style: 'flat' as string,
-  limitDay: 365,
-  position: 'top' as string,
-  messagePrev: '距离上次更新已经过去',
-  messageNext: '天，文章内容可能已经过时。',
-})
-
-// Post pagination
-const postPagination = ref<string>('2')
-
-// Cover settings
-const cover = ref({
-  indexEnable: true,
-  asideEnable: true,
-  archivesEnable: true,
-  position: 'left' as string,
-})
-
-// TOC
-const toc = ref({ enable: true, number: true, expand: false, styleSimple: false, scrollPercent: true })
-// Word count
-const wordcount = ref({ enable: true, count: true })
-// Post tools
-const ptool = ref({ enable: true, categories: false, tags: true, share: true })
-// Anchor
-const anchor = ref({ anchorOption: 1, linkIcon: true, scrollToggle: false })
-// Post edit
-const postEdit = ref({ enable: false })
-// Photo figcaption
-const photofigcaption = ref({ enable: false })
-// H2 divider
-const h2Divider = ref({ enable: false })
-
-async function fetchSettings() {
-  loading.value = true
   try {
-    const data = await api.get<Record<string, Array<{ key: string; value: unknown }>>>('/api/settings')
-    const s: Record<string, unknown> = {}
-    for (const rows of Object.values(data)) {
-      for (const row of rows) { s[row.key] = row.value }
-    }
+    return JSON.stringify(value, null, 2)
+  }
+  catch {
+    return fallback
+  }
+}
 
-    if (s.postMetaPage) postMetaPage.value = { ...postMetaPage.value, ...(s.postMetaPage as typeof postMetaPage.value) }
-    if (s.postMetaPost) postMetaPost.value = { ...postMetaPost.value, ...(s.postMetaPost as typeof postMetaPost.value) }
-    if (s.postCopyright) postCopyright.value = { ...postCopyright.value, ...(s.postCopyright as typeof postCopyright.value) }
-    if (s.reward) reward.value = { ...reward.value, ...(s.reward as typeof reward.value) }
-    if (s.relatedPost) relatedPost.value = { ...relatedPost.value, ...(s.relatedPost as typeof relatedPost.value) }
-    if (s.noticeOutdate) noticeOutdate.value = { ...noticeOutdate.value, ...(s.noticeOutdate as typeof noticeOutdate.value) }
-    if (s.postPagination !== undefined) postPagination.value = String(s.postPagination)
-    if (s.cover) cover.value = { ...cover.value, ...(s.cover as typeof cover.value) }
-    if (s.toc) toc.value = { ...toc.value, ...(s.toc as typeof toc.value) }
-    if (s.wordcount) wordcount.value = { ...wordcount.value, ...(s.wordcount as typeof wordcount.value) }
-    if (s.ptool) ptool.value = { ...ptool.value, ...(s.ptool as typeof ptool.value) }
-    if (s.anchor) anchor.value = { ...anchor.value, ...(s.anchor as typeof anchor.value) }
-    if (s.postEdit) postEdit.value = { ...postEdit.value, ...(s.postEdit as typeof postEdit.value) }
-    if (s.photofigcaption) photofigcaption.value = { ...photofigcaption.value, ...(s.photofigcaption as typeof photofigcaption.value) }
-    if (s.h2Divider) h2Divider.value = { ...h2Divider.value, ...(s.h2Divider as typeof h2Divider.value) }
-  } catch (e) {
-    console.error('Failed to fetch settings:', e)
-  } finally {
-    loading.value = false
+function hydrateForm() {
+  const postMetaPage = (settings.value.postMetaPage as Record<string, unknown> | undefined) ?? {}
+  const postMetaPost = (settings.value.postMetaPost as Record<string, unknown> | undefined) ?? {}
+  const toc = (settings.value.toc as Record<string, unknown> | undefined) ?? {}
+  const wordcount = (settings.value.wordcount as Record<string, unknown> | undefined) ?? {}
+  const postCopyright = (settings.value.postCopyright as Record<string, unknown> | undefined) ?? {}
+  const reward = (settings.value.reward as Record<string, unknown> | undefined) ?? {}
+  const postEdit = (settings.value.postEdit as Record<string, unknown> | undefined) ?? {}
+  const relatedPost = (settings.value.relatedPost as Record<string, unknown> | undefined) ?? {}
+  const photofigcaption = (settings.value.photofigcaption as Record<string, unknown> | undefined) ?? {}
+  const noticeOutdate = (settings.value.noticeOutdate as Record<string, unknown> | undefined) ?? {}
+
+  form.postPagination = String(settings.value.postPagination ?? '1')
+
+  form.pageDateType = String(postMetaPage.dateType ?? 'created')
+  form.pageDateFormat = String(postMetaPage.dateFormat ?? 'simple')
+  form.pageCategories = postMetaPage.categories !== undefined ? Boolean(postMetaPage.categories) : true
+  form.pageTags = postMetaPage.tags !== undefined ? Boolean(postMetaPage.tags) : true
+  form.pageLabel = postMetaPage.label !== undefined ? Boolean(postMetaPage.label) : false
+  form.pageUnread = postMetaPage.unread !== undefined ? Boolean(postMetaPage.unread) : false
+
+  form.postDateType = String(postMetaPost.dateType ?? 'both')
+  form.postDateFormat = String(postMetaPost.dateFormat ?? 'date')
+  form.postCategories = postMetaPost.categories !== undefined ? Boolean(postMetaPost.categories) : true
+  form.postTags = postMetaPost.tags !== undefined ? Boolean(postMetaPost.tags) : true
+  form.postLabel = postMetaPost.label !== undefined ? Boolean(postMetaPost.label) : true
+  form.postUnread = postMetaPost.unread !== undefined ? Boolean(postMetaPost.unread) : false
+
+  form.tocPost = toc.post !== undefined ? Boolean(toc.post) : Boolean(toc.enable ?? true)
+  form.tocPage = toc.page !== undefined ? Boolean(toc.page) : false
+  form.tocNumber = toc.number !== undefined ? Boolean(toc.number) : true
+  form.tocExpand = toc.expand !== undefined ? Boolean(toc.expand) : false
+  form.tocStyleSimple = toc.styleSimple !== undefined ? Boolean(toc.styleSimple) : Boolean(toc.style_simple ?? false)
+
+  form.wordcountEnable = wordcount.enable !== undefined ? Boolean(wordcount.enable) : false
+  form.wordcountPost = wordcount.postWordcount !== undefined ? Boolean(wordcount.postWordcount) : Boolean(wordcount.post_wordcount ?? true)
+  form.wordcountMin2read = wordcount.min2read !== undefined ? Boolean(wordcount.min2read) : true
+  form.wordcountTotal = wordcount.totalWordcount !== undefined ? Boolean(wordcount.totalWordcount) : Boolean(wordcount.total_wordcount ?? true)
+
+  form.copyrightEnable = postCopyright.enable !== undefined ? Boolean(postCopyright.enable) : true
+  form.copyrightDecode = postCopyright.decode !== undefined ? Boolean(postCopyright.decode) : false
+  form.copyrightAuthorHref = String(postCopyright.authorHref ?? postCopyright.author_href ?? '/')
+  form.copyrightLocation = String(postCopyright.location ?? '')
+  form.copyrightLicense = String(postCopyright.license ?? 'CC BY-NC-SA 4.0')
+  form.copyrightLicenseUrl = String(postCopyright.licenseUrl ?? postCopyright.license_url ?? 'https://creativecommons.org/licenses/by-nc-sa/4.0/')
+  form.copyrightAvatarSinks = postCopyright.avatarSinks !== undefined ? Boolean(postCopyright.avatarSinks) : false
+  form.copyrightAuthorLink = String(postCopyright.copyrightAuthorLink ?? postCopyright.copyright_author_link ?? '/')
+
+  form.rewardEnable = reward.enable !== undefined ? Boolean(reward.enable) : false
+  form.rewardQrcodesJson = stringifyValue(reward.qrCodes ?? reward.QR_code ?? [], '[]')
+
+  form.postEditEnable = postEdit.enable !== undefined ? Boolean(postEdit.enable) : false
+  form.postEditGithub = postEdit.github === false ? '' : String(postEdit.github ?? '')
+  form.postEditYuque = postEdit.yuque === false ? '' : String(postEdit.yuque ?? '')
+
+  form.relatedEnable = relatedPost.enable !== undefined ? Boolean(relatedPost.enable) : true
+  form.relatedLimit = Number(relatedPost.limit ?? 6) || 6
+  form.relatedDateType = String(relatedPost.dateType ?? relatedPost.date_type ?? 'created')
+
+  form.photoFigcaptionEnable = photofigcaption.enable !== undefined ? Boolean(photofigcaption.enable) : false
+  if (typeof settings.value.anchor === 'boolean') {
+    form.anchorEnable = settings.value.anchor
+  }
+  else {
+    const anchor = (settings.value.anchor as Record<string, unknown> | undefined) ?? {}
+    form.anchorEnable = anchor.enable !== undefined ? Boolean(anchor.enable) : true
+  }
+
+  form.noticeEnable = noticeOutdate.enable !== undefined ? Boolean(noticeOutdate.enable) : false
+  form.noticeStyle = String(noticeOutdate.style ?? 'flat')
+  form.noticeLimitDay = Number(noticeOutdate.limitDay ?? noticeOutdate.limit_day ?? 365) || 365
+  form.noticePosition = String(noticeOutdate.position ?? 'top')
+  form.noticeMessagePrev = String(noticeOutdate.messagePrev ?? noticeOutdate.message_prev ?? '距离上次更新已经过去')
+  form.noticeMessageNext = String(noticeOutdate.messageNext ?? noticeOutdate.message_next ?? '天，文章内容可能已经过时，请注意甄别。')
+
+  form.coverJson = stringifyValue(settings.value.cover, form.coverJson)
+  form.ptoolJson = stringifyValue(settings.value.ptool, form.ptoolJson)
+}
+
+watch(
+  settings,
+  () => {
+    hydrateForm()
+  },
+  { deep: true, immediate: true },
+)
+
+function parseJson<T>(value: string, label: string): T {
+  try {
+    return JSON.parse(value) as T
+  }
+  catch {
+    throw new Error(`${label} 不是合法的 JSON，请检查格式后再保存。`)
   }
 }
 
 async function handleSave() {
   saving.value = true
-  saveSuccess.value = false
+  message.value = ''
+  errorMessage.value = ''
+
   try {
-    await api.put('/api/settings', [
-      { key: 'postMetaPage', value: postMetaPage.value, category: 'post' },
-      { key: 'postMetaPost', value: postMetaPost.value, category: 'post' },
-      { key: 'postCopyright', value: postCopyright.value, category: 'post' },
-      { key: 'reward', value: reward.value, category: 'post' },
-      { key: 'relatedPost', value: relatedPost.value, category: 'post' },
-      { key: 'noticeOutdate', value: noticeOutdate.value, category: 'post' },
-      { key: 'postPagination', value: postPagination.value, category: 'post' },
-      { key: 'cover', value: cover.value, category: 'post' },
-      { key: 'toc', value: toc.value, category: 'post' },
-      { key: 'wordcount', value: wordcount.value, category: 'post' },
-      { key: 'ptool', value: ptool.value, category: 'post' },
-      { key: 'anchor', value: anchor.value, category: 'post' },
-      { key: 'postEdit', value: postEdit.value, category: 'post' },
-      { key: 'photofigcaption', value: photofigcaption.value, category: 'post' },
-      { key: 'h2Divider', value: h2Divider.value, category: 'post' },
-    ])
-    saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 3000)
-  } catch (e: unknown) {
-    alert(e instanceof Error ? e.message : '保存失败')
-  } finally {
+    await save({
+      postPagination: form.postPagination,
+      postMetaPage: {
+        dateType: form.pageDateType,
+        dateFormat: form.pageDateFormat,
+        categories: form.pageCategories,
+        tags: form.pageTags,
+        label: form.pageLabel,
+        unread: form.pageUnread,
+      },
+      postMetaPost: {
+        dateType: form.postDateType,
+        dateFormat: form.postDateFormat,
+        categories: form.postCategories,
+        tags: form.postTags,
+        label: form.postLabel,
+        unread: form.postUnread,
+      },
+      toc: {
+        post: form.tocPost,
+        page: form.tocPage,
+        number: form.tocNumber,
+        expand: form.tocExpand,
+        styleSimple: form.tocStyleSimple,
+      },
+      wordcount: {
+        enable: form.wordcountEnable,
+        postWordcount: form.wordcountPost,
+        min2read: form.wordcountMin2read,
+        totalWordcount: form.wordcountTotal,
+      },
+      postCopyright: {
+        enable: form.copyrightEnable,
+        decode: form.copyrightDecode,
+        authorHref: form.copyrightAuthorHref.trim() || '/',
+        location: form.copyrightLocation.trim(),
+        license: form.copyrightLicense.trim(),
+        licenseUrl: form.copyrightLicenseUrl.trim(),
+        avatarSinks: form.copyrightAvatarSinks,
+        copyrightAuthorLink: form.copyrightAuthorLink.trim() || '/',
+      },
+      reward: {
+        enable: form.rewardEnable,
+        qrCodes: parseJson<Array<Record<string, unknown>>>(form.rewardQrcodesJson, '赞赏二维码'),
+      },
+      postEdit: {
+        enable: form.postEditEnable,
+        github: form.postEditGithub.trim() || false,
+        yuque: form.postEditYuque.trim() || false,
+      },
+      relatedPost: {
+        enable: form.relatedEnable,
+        limit: form.relatedLimit,
+        dateType: form.relatedDateType,
+      },
+      photofigcaption: {
+        enable: form.photoFigcaptionEnable,
+      },
+      anchor: {
+        enable: form.anchorEnable,
+      },
+      noticeOutdate: {
+        enable: form.noticeEnable,
+        style: form.noticeStyle,
+        limitDay: form.noticeLimitDay,
+        position: form.noticePosition,
+        messagePrev: form.noticeMessagePrev.trim(),
+        messageNext: form.noticeMessageNext.trim(),
+      },
+      cover: parseJson<Record<string, unknown>>(form.coverJson, '封面配置'),
+      ptool: parseJson<Record<string, unknown>>(form.ptoolJson, '阅读工具配置'),
+    })
+
+    message.value = '文章展示配置已保存。'
+    await refresh()
+  }
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '保存失败，请稍后重试。'
+  }
+  finally {
     saving.value = false
   }
 }
-
-function addQrCode() {
-  reward.value.qrCodes.push({ img: '', link: '', text: '' })
-}
-function removeQrCode(index: number) {
-  reward.value.qrCodes.splice(index, 1)
-}
-
-onMounted(() => fetchSettings())
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-document-text w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">文章设置</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <span v-if="saveSuccess" class="text-sm text-green-600 flex items-center gap-1">
-          <span class="i-heroicons-check-circle w-4 h-4" /> 保存成功
-        </span>
-        <button class="btn-primary px-4 py-2 text-sm flex items-center gap-2 cursor-pointer" :disabled="saving" @click="handleSave">
-          <span v-if="saving" class="i-heroicons-arrow-path w-4 h-4 animate-spin" />
-          {{ saving ? '保存中...' : '保存设置' }}
-        </button>
-      </div>
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Posts</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">文章展示配置</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        这一页负责文章详情页和独立页面的元信息、目录、字数统计、版权、赞赏、相关推荐与过期提示。
+        我优先把前台真实用到的字段拆成表单，剩余复杂项保留 JSON 入口。
+      </p>
+    </section>
+
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      {{ message }}
+    </div>
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+      {{ errorMessage }}
     </div>
 
-    <div v-if="loading" class="space-y-4">
-      <div class="h-48 bg-surface-2 rounded-xl animate-pulse" v-for="i in 3" :key="i" />
-    </div>
-
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Post Meta - Home Page -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-home w-5 h-5 text-primary" /> 首页文章元信息
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">日期类型</label>
-              <select v-model="postMetaPage.dateType" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="created">创建日期</option>
-                <option value="updated">更新日期</option>
-                <option value="both">两者都显示</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">日期格式</label>
-              <select v-model="postMetaPage.dateFormat" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="date">完整日期</option>
-                <option value="relative">相对日期（如"3天前"）</option>
-                <option value="simple">简单日期</option>
-              </select>
-            </div>
-          </div>
-          <div class="flex gap-6 mt-4">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postMetaPage.categories" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">显示分类</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postMetaPage.tags" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">显示标签</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postMetaPage.label" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">显示描述标签</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Post Meta - Article Page -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-document-magnifying-glass w-5 h-5 text-primary" /> 文章详情页元信息
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">日期类型</label>
-              <select v-model="postMetaPost.dateType" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="created">创建日期</option>
-                <option value="updated">更新日期</option>
-                <option value="both">两者都显示</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">日期格式</label>
-              <select v-model="postMetaPost.dateFormat" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="date">完整日期</option>
-                <option value="relative">相对日期</option>
-              </select>
-            </div>
-          </div>
-          <div class="flex gap-6 mt-4 flex-wrap">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postMetaPost.categories" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">显示分类</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postMetaPost.tags" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">显示标签</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postMetaPost.label" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">显示描述标签</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postMetaPost.unread" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">未读标记</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Cover Settings -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-photo w-5 h-5 text-primary" /> 文章封面
-          </h2>
-          <div class="space-y-4">
-            <div class="flex gap-6">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input v-model="cover.indexEnable" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">首页显示封面</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input v-model="cover.asideEnable" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">侧栏显示封面</span>
-              </label>
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input v-model="cover.archivesEnable" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">归档页显示封面</span>
-              </label>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">封面位置</label>
-              <div class="flex gap-4">
-                <label class="flex items-center gap-2 cursor-pointer"><input v-model="cover.position" type="radio" value="left" class="accent-primary"> <span class="text-sm text-text">左侧</span></label>
-                <label class="flex items-center gap-2 cursor-pointer"><input v-model="cover.position" type="radio" value="right" class="accent-primary"> <span class="text-sm text-text">右侧</span></label>
-                <label class="flex items-center gap-2 cursor-pointer"><input v-model="cover.position" type="radio" value="both" class="accent-primary"> <span class="text-sm text-text">交替</span></label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Copyright -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-shield-check w-5 h-5 text-primary" /> 文章版权声明
-          </h2>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <label class="font-medium text-text">显示版权声明</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="postCopyright.enable ? 'bg-primary' : 'bg-surface-2'" @click="postCopyright.enable = !postCopyright.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="postCopyright.enable ? 'translate-x-6' : 'translate-x-1'" />
-              </button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium text-text mb-1.5">许可协议</label>
-                <input v-model="postCopyright.license" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-text mb-1.5">协议链接</label>
-                <input v-model="postCopyright.licenseUrl" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">所在地</label>
-              <input v-model="postCopyright.location" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="如：长沙">
-            </div>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="postCopyright.avatarSinks" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">悬停头像下沉效果</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Reward -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-currency-dollar w-5 h-5 text-primary" /> 赞赏/打赏
-          </h2>
-          <div class="flex items-center justify-between mb-4">
-            <label class="font-medium text-text">显示赞赏码</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="reward.enable ? 'bg-primary' : 'bg-surface-2'" @click="reward.enable = !reward.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="reward.enable ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-          <div v-if="reward.enable" class="space-y-2">
-            <div v-for="(qr, i) in reward.qrCodes" :key="i" class="flex items-center gap-2 p-2 bg-surface-2 rounded-lg">
-              <input v-model="qr.img" placeholder="二维码图片URL" class="flex-1 px-2 py-1 bg-surface border border-border rounded text-xs text-text">
-              <input v-model="qr.text" placeholder="名称" class="w-20 px-2 py-1 bg-surface border border-border rounded text-xs text-text">
-              <button class="p-1 text-red-400 hover:text-red-600 cursor-pointer" @click="removeQrCode(i)">
-                <span class="i-heroicons-x-mark w-4 h-4" />
-              </button>
-            </div>
-            <button class="w-full py-2 border-2 border-dashed border-border rounded-lg text-sm text-muted hover:border-primary hover:text-primary transition-colors cursor-pointer" @click="addQrCode">
-              + 添加收款码
-            </button>
-          </div>
-        </div>
-
-        <!-- Related Posts -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-arrows-right-left w-5 h-5 text-primary" /> 相关文章
-          </h2>
-          <div class="flex items-center justify-between mb-4">
-            <label class="font-medium text-text">显示相关文章</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="relatedPost.enable ? 'bg-primary' : 'bg-surface-2'" @click="relatedPost.enable = !relatedPost.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="relatedPost.enable ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">显示数量</label>
-              <input v-model.number="relatedPost.limit" type="number" min="2" max="12" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">日期类型</label>
-              <select v-model="relatedPost.dateType" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="created">创建日期</option>
-                <option value="updated">更新日期</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Post Pagination -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-chevron-double-left w-5 h-5 text-primary" /> 文章分页导航
-          </h2>
-          <div>
-            <label class="block text-sm font-medium text-text mb-1.5">分页方式</label>
-            <select v-model="postPagination" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-              <option value="1">上一篇（链接到旧文章）</option>
-              <option value="2">下一篇（链接到新文章）</option>
-              <option value="3">仅下一篇（滚动到评论区时显示，旧文章）</option>
-              <option value="4">仅下一篇（显示封面图）</option>
-              <option value="">禁用分页</option>
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">页面元信息</h2>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">日期来源</span>
+            <select v-model="form.pageDateType" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="created">创建时间</option>
+              <option value="updated">更新时间</option>
+              <option value="both">创建 + 更新</option>
             </select>
-          </div>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">日期格式</span>
+            <select v-model="form.pageDateFormat" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="date">完整日期</option>
+              <option value="simple">简洁日期</option>
+              <option value="relative">相对时间</option>
+            </select>
+          </label>
+        </div>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageCategories = !form.pageCategories">
+            <span class="text-sm text-text">显示分类</span>
+            <span class="text-sm text-muted">{{ form.pageCategories ? '显示' : '隐藏' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageTags = !form.pageTags">
+            <span class="text-sm text-text">显示标签</span>
+            <span class="text-sm text-muted">{{ form.pageTags ? '显示' : '隐藏' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageLabel = !form.pageLabel">
+            <span class="text-sm text-text">显示标签徽记</span>
+            <span class="text-sm text-muted">{{ form.pageLabel ? '显示' : '隐藏' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageUnread = !form.pageUnread">
+            <span class="text-sm text-text">显示未读提示</span>
+            <span class="text-sm text-muted">{{ form.pageUnread ? '显示' : '隐藏' }}</span>
+          </button>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">文章元信息</h2>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">日期来源</span>
+            <select v-model="form.postDateType" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="created">创建时间</option>
+              <option value="updated">更新时间</option>
+              <option value="both">创建 + 更新</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">日期格式</span>
+            <select v-model="form.postDateFormat" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="date">完整日期</option>
+              <option value="simple">简洁日期</option>
+              <option value="relative">相对时间</option>
+            </select>
+          </label>
+        </div>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postCategories = !form.postCategories">
+            <span class="text-sm text-text">显示分类</span>
+            <span class="text-sm text-muted">{{ form.postCategories ? '显示' : '隐藏' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postTags = !form.postTags">
+            <span class="text-sm text-text">显示标签</span>
+            <span class="text-sm text-muted">{{ form.postTags ? '显示' : '隐藏' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postLabel = !form.postLabel">
+            <span class="text-sm text-text">显示文章标签徽记</span>
+            <span class="text-sm text-muted">{{ form.postLabel ? '显示' : '隐藏' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postUnread = !form.postUnread">
+            <span class="text-sm text-text">显示未读提示</span>
+            <span class="text-sm text-muted">{{ form.postUnread ? '显示' : '隐藏' }}</span>
+          </button>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">目录与字数统计</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocPost = !form.tocPost">
+            <span class="text-sm text-text">文章页目录</span>
+            <span class="text-sm text-muted">{{ form.tocPost ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocPage = !form.tocPage">
+            <span class="text-sm text-text">独立页目录</span>
+            <span class="text-sm text-muted">{{ form.tocPage ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocNumber = !form.tocNumber">
+            <span class="text-sm text-text">目录编号</span>
+            <span class="text-sm text-muted">{{ form.tocNumber ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocExpand = !form.tocExpand">
+            <span class="text-sm text-text">目录默认展开</span>
+            <span class="text-sm text-muted">{{ form.tocExpand ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20 md:col-span-2" @click="form.tocStyleSimple = !form.tocStyleSimple">
+            <span class="text-sm text-text">简洁目录样式</span>
+            <span class="text-sm text-muted">{{ form.tocStyleSimple ? '开启' : '关闭' }}</span>
+          </button>
         </div>
 
-        <!-- Notice Outdate -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-exclamation-triangle w-5 h-5 text-primary" /> 文章过期提醒
-          </h2>
-          <div class="flex items-center justify-between mb-4">
-            <label class="font-medium text-text">启用过期提醒</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="noticeOutdate.enable ? 'bg-primary' : 'bg-surface-2'" @click="noticeOutdate.enable = !noticeOutdate.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="noticeOutdate.enable ? 'translate-x-6' : 'translate-x-1'" />
+        <div class="mt-6 border-t border-border/60 pt-6">
+          <h3 class="text-base font-bold text-text">字数统计</h3>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountEnable = !form.wordcountEnable">
+              <span class="text-sm text-text">启用字数统计</span>
+              <span class="text-sm text-muted">{{ form.wordcountEnable ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountPost = !form.wordcountPost">
+              <span class="text-sm text-text">显示文章字数</span>
+              <span class="text-sm text-muted">{{ form.wordcountPost ? '显示' : '隐藏' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountMin2read = !form.wordcountMin2read">
+              <span class="text-sm text-text">显示阅读时长</span>
+              <span class="text-sm text-muted">{{ form.wordcountMin2read ? '显示' : '隐藏' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountTotal = !form.wordcountTotal">
+              <span class="text-sm text-text">显示全站字数</span>
+              <span class="text-sm text-muted">{{ form.wordcountTotal ? '显示' : '隐藏' }}</span>
             </button>
           </div>
-          <div v-if="noticeOutdate.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">过期天数</label>
-              <input v-model.number="noticeOutdate.limitDay" type="number" min="30" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">样式</label>
-              <select v-model="noticeOutdate.style" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="flat">扁平</option>
-                <option value="simple">简洁</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">位置</label>
-              <select v-model="noticeOutdate.position" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="top">顶部</option>
-                <option value="bottom">底部</option>
-              </select>
-            </div>
-          </div>
         </div>
-      </div>
+      </article>
 
-      <!-- Right: TOC, Wordcount, Post Tools -->
-      <div class="space-y-6">
-        <!-- TOC -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">文章目录</h2>
-          <div class="flex items-center justify-between mb-3"><label class="text-sm">启用目录</label><button class="toggle" :class="toc.enable ? 'bg-primary' : 'bg-surface-2'" @click="toc.enable = !toc.enable"><span class="toggle-knob" :class="toc.enable ? 'translate-x-6' : 'translate-x-1'" /></button></div>
-          <div class="flex items-center justify-between mb-3"><label class="text-sm">显示序号</label><button class="toggle" :class="toc.number ? 'bg-primary' : 'bg-surface-2'" @click="toc.number = !toc.number"><span class="toggle-knob" :class="toc.number ? 'translate-x-6' : 'translate-x-1'" /></button></div>
-          <div class="flex items-center justify-between"><label class="text-sm">滚动百分比</label><button class="toggle" :class="toc.scrollPercent ? 'bg-primary' : 'bg-surface-2'" @click="toc.scrollPercent = !toc.scrollPercent"><span class="toggle-knob" :class="toc.scrollPercent ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">版权、赞赏与编辑入口</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyrightEnable = !form.copyrightEnable">
+            <span class="text-sm text-text">启用版权声明</span>
+            <span class="text-sm text-muted">{{ form.copyrightEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyrightDecode = !form.copyrightDecode">
+            <span class="text-sm text-text">启用解码提示</span>
+            <span class="text-sm text-muted">{{ form.copyrightDecode ? '开启' : '关闭' }}</span>
+          </button>
         </div>
-        <!-- Word Count -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">字数统计</h2>
-          <div class="flex items-center justify-between mb-3"><label class="text-sm">启用字数统计</label><button class="toggle" :class="wordcount.enable ? 'bg-primary' : 'bg-surface-2'" @click="wordcount.enable = !wordcount.enable"><span class="toggle-knob" :class="wordcount.enable ? 'translate-x-6' : 'translate-x-1'" /></button></div>
-          <div class="flex items-center justify-between"><label class="text-sm">显示字数</label><button class="toggle" :class="wordcount.count ? 'bg-primary' : 'bg-surface-2'" @click="wordcount.count = !wordcount.count"><span class="toggle-knob" :class="wordcount.count ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">作者链接</span>
+            <input v-model="form.copyrightAuthorHref" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">版权地址</span>
+            <input v-model="form.copyrightAuthorLink" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">版权协议</span>
+            <input v-model="form.copyrightLicense" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">版权协议链接</span>
+            <input v-model="form.copyrightLicenseUrl" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2 md:col-span-2">
+            <span class="text-sm font-medium text-text">版权位置说明</span>
+            <input v-model="form.copyrightLocation" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
         </div>
-        <!-- Post Tools (ptool) -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">文章工具</h2>
-          <div class="flex items-center justify-between mb-3"><label class="text-sm">启用工具栏</label><button class="toggle" :class="ptool.enable ? 'bg-primary' : 'bg-surface-2'" @click="ptool.enable = !ptool.enable"><span class="toggle-knob" :class="ptool.enable ? 'translate-x-6' : 'translate-x-1'" /></button></div>
-          <div class="flex items-center justify-between"><label class="text-sm">显示分享按钮</label><button class="toggle" :class="ptool.share ? 'bg-primary' : 'bg-surface-2'" @click="ptool.share = !ptool.share"><span class="toggle-knob" :class="ptool.share ? 'translate-x-6' : 'translate-x-1'" /></button></div>
+
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.rewardEnable = !form.rewardEnable">
+            <span class="text-sm text-text">启用赞赏模块</span>
+            <span class="text-sm text-muted">{{ form.rewardEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postEditEnable = !form.postEditEnable">
+            <span class="text-sm text-text">启用编辑入口</span>
+            <span class="text-sm text-muted">{{ form.postEditEnable ? '开启' : '关闭' }}</span>
+          </button>
         </div>
-        <!-- Preview -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-eye w-5 h-5 text-primary" /> 效果预览
-          </h2>
-          <p class="text-xs text-muted mb-4">保存后访问任意文章查看效果</p>
-          <NuxtLink to="/articles" target="_blank" class="btn-secondary w-full flex items-center justify-center gap-2">
-            <span class="i-heroicons-arrow-top-right-on-square w-4 h-4" /> 查看文章列表
-          </NuxtLink>
+
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">GitHub 编辑地址</span>
+            <input v-model="form.postEditGithub" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">语雀编辑地址</span>
+            <input v-model="form.postEditYuque" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
         </div>
-      </div>
+        <label class="mt-5 block space-y-2">
+          <span class="text-sm font-medium text-text">赞赏二维码 `reward.qrCodes`</span>
+          <textarea v-model="form.rewardQrcodesJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+        </label>
+      </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">相关推荐与过期提醒</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.relatedEnable = !form.relatedEnable">
+            <span class="text-sm text-text">启用相关文章</span>
+            <span class="text-sm text-muted">{{ form.relatedEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.noticeEnable = !form.noticeEnable">
+            <span class="text-sm text-text">启用过期提醒</span>
+            <span class="text-sm text-muted">{{ form.noticeEnable ? '开启' : '关闭' }}</span>
+          </button>
+        </div>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">相关文章数量</span>
+            <input v-model="form.relatedLimit" type="number" min="1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">相关文章排序基准</span>
+            <select v-model="form.relatedDateType" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="created">创建时间</option>
+              <option value="updated">更新时间</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">提醒样式</span>
+            <select v-model="form.noticeStyle" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="flat">平面样式</option>
+              <option value="simple">简洁样式</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">提醒位置</span>
+            <select v-model="form.noticePosition" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="top">顶部</option>
+              <option value="bottom">底部</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">过期天数阈值</span>
+            <input v-model="form.noticeLimitDay" type="number" min="1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">提醒前缀</span>
+            <input v-model="form.noticeMessagePrev" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">提醒后缀</span>
+            <input v-model="form.noticeMessageNext" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">其他文章增强</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.photoFigcaptionEnable = !form.photoFigcaptionEnable">
+            <span class="text-sm text-text">启用图片图注</span>
+            <span class="text-sm text-muted">{{ form.photoFigcaptionEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.anchorEnable = !form.anchorEnable">
+            <span class="text-sm text-text">启用标题锚点</span>
+            <span class="text-sm text-muted">{{ form.anchorEnable ? '开启' : '关闭' }}</span>
+          </button>
+        </div>
+        <label class="mt-5 block space-y-2">
+          <span class="text-sm font-medium text-text">文章分页模式</span>
+          <select v-model="form.postPagination" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+            <option value="1">上一页 / 下一页</option>
+            <option value="2">上一篇 / 下一篇（方向反转）</option>
+            <option value="3">仅下一篇</option>
+            <option value="4">仅下一篇 + 封面</option>
+          </select>
+        </label>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">封面配置 `cover`</span>
+            <textarea v-model="form.coverJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">阅读工具配置 `ptool`</span>
+            <textarea v-model="form.ptoolJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <div class="flex items-center justify-end gap-3">
+      <button type="button" class="rounded-2xl border border-border bg-background/80 px-5 py-3 text-sm font-semibold text-text transition hover:border-primary/25 hover:text-primary" :disabled="loading || saving" @click="refresh">
+        刷新
+      </button>
+      <button type="button" class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:bg-primary/90 disabled:opacity-60" :disabled="loading || saving" @click="handleSave">
+        {{ saving ? '保存中...' : '保存文章展示配置' }}
+      </button>
     </div>
   </div>
 </template>
-

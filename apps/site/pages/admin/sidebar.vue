@@ -1,248 +1,492 @@
 <script setup lang="ts">
-const api = useAdminApi()
-
-const loading = ref(true)
-const saving = ref(false)
-const saveSuccess = ref(false)
-
-// Sidebar settings
-const sidebar = ref({
-  enabled: true,
-  widgets: ['profile', 'stats', 'tags', 'categories', 'recent'] as string[],
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
 })
 
-// Widget options
+const { settings, loading, save, refresh } = useAdminSettings('sidebar')
+
 const widgetOptions = [
-  { value: 'profile', label: '博主信息', icon: 'i-heroicons-user' },
-  { value: 'stats', label: '网站统计', icon: 'i-heroicons-chart-bar' },
-  { value: 'tags', label: '标签云', icon: 'i-heroicons-tag' },
-  { value: 'categories', label: '分类', icon: 'i-heroicons-folder' },
-  { value: 'archive', label: '归档', icon: 'i-heroicons-archive' },
-  { value: 'friends', label: '友链', icon: 'i-heroicons-link' },
-  { value: 'recent', label: '最新文章', icon: 'i-heroicons-clock' },
-  { value: 'announcement', label: '公告栏', icon: 'i-heroicons-megaphone' },
-  { value: 'wechat', label: '微信', icon: 'i-heroicons-chat-bubble-left' },
+  { value: 'profile', label: '作者卡片' },
+  { value: 'stats', label: '站点统计' },
+  { value: 'tags', label: '标签卡片' },
+  { value: 'categories', label: '分类卡片' },
+  { value: 'recent', label: '最近文章' },
+  { value: 'archives', label: '归档卡片' },
+  { value: 'announcement', label: '公告卡片' },
+  { value: 'wechat', label: '微信卡片' },
 ]
 
-// Aside config
-const aside = ref({ enable: true, button: true, hide: false, display: { archive: true, category: true, tag: true } })
+const form = reactive({
+  sidebarEnabled: true,
+  sidebarWidgets: [] as string[],
 
-// Fetch settings
-async function fetchSettings() {
-  loading.value = true
+  authorEnable: true,
+  authorDescription: '',
+  authorNameLink: '/',
+
+  announcementEnable: false,
+  announcementContent: '',
+
+  recentEnable: true,
+  recentLimit: 5,
+  recentSort: 'date',
+
+  categoriesEnable: false,
+  categoriesLimit: 8,
+  categoriesExpand: 'none',
+
+  tagsEnable: true,
+  tagsLimit: 40,
+  tagsColor: false,
+  tagsHighlightLines: '',
+
+  archivesEnable: true,
+  archivesType: 'monthly',
+  archivesFormat: 'MMMM YYYY',
+  archivesOrder: -1,
+  archivesLimit: 8,
+
+  webinfoEnable: true,
+  webinfoPostCount: true,
+  webinfoLastPushDate: false,
+
+  weixinEnable: false,
+  weixinFace: '',
+  weixinBackFace: '',
+
+  runtimeShowEnable: false,
+  runtimeShowPublishDate: '',
+
+  tagsCloudJson: '{\n  "enable": false\n}',
+  menusItemsJson: '{}',
+})
+
+const saving = ref(false)
+const message = ref('')
+const errorMessage = ref('')
+
+function stringifyValue(value: unknown, fallback: string) {
+  if (value === undefined || value === null) {
+    return fallback
+  }
+
   try {
-    const data = await api.get<Record<string, Array<{ key: string; value: unknown }>>>('/api/settings')
-
-    const allSettings: Record<string, unknown> = {}
-    for (const rows of Object.values(data)) {
-      for (const row of rows) {
-        allSettings[row.key] = row.value
-      }
-    }
-
-    sidebar.value = {
-      enabled: allSettings.homepageSidebarEnabled !== undefined ? Boolean(allSettings.homepageSidebarEnabled) : true,
-      widgets: (allSettings.homepageSidebarWidgets as string[]) || ['profile', 'stats', 'tags', 'categories', 'recent'],
-    }
+    return JSON.stringify(value, null, 2)
   }
-  catch (e) {
-    console.error('Failed to fetch settings:', e)
-  }
-  finally {
-    loading.value = false
+  catch {
+    return fallback
   }
 }
 
-// Save settings
+function linesToArray(value: string) {
+  return value
+    .split(/\r?\n/g)
+    .map(item => item.trim())
+    .filter(Boolean)
+}
+
+function arrayToLines(value: unknown) {
+  return Array.isArray(value) ? value.map(item => String(item)).join('\n') : ''
+}
+
+function hydrateForm() {
+  const sidebar = (settings.value.sidebar as Record<string, unknown> | undefined) ?? {}
+  const cardAuthor = (settings.value.cardAuthor as Record<string, unknown> | undefined) ?? {}
+  const cardAnnouncement = (settings.value.cardAnnouncement as Record<string, unknown> | undefined) ?? {}
+  const cardRecentPost = (settings.value.cardRecentPost as Record<string, unknown> | undefined) ?? {}
+  const cardCategories = (settings.value.cardCategories as Record<string, unknown> | undefined) ?? {}
+  const cardTags = (settings.value.cardTags as Record<string, unknown> | undefined) ?? {}
+  const cardArchives = (settings.value.cardArchives as Record<string, unknown> | undefined) ?? {}
+  const cardWebinfo = (settings.value.cardWebinfo as Record<string, unknown> | undefined) ?? {}
+  const cardWeixin = (settings.value.cardWeixin as Record<string, unknown> | undefined) ?? {}
+  const runtimeShow = (settings.value.runtimeShow as Record<string, unknown> | undefined) ?? {}
+
+  form.sidebarEnabled = sidebar.enabled !== undefined ? Boolean(sidebar.enabled) : true
+  form.sidebarWidgets = Array.isArray(sidebar.widgets)
+    ? sidebar.widgets.map(item => String(item))
+    : ['profile', 'stats', 'tags', 'categories', 'recent']
+
+  form.authorEnable = cardAuthor.enable !== undefined ? Boolean(cardAuthor.enable) : true
+  form.authorDescription = String(cardAuthor.description ?? '')
+  form.authorNameLink = String(cardAuthor.nameLink ?? cardAuthor.name_link ?? '/')
+
+  form.announcementEnable = cardAnnouncement.enable !== undefined ? Boolean(cardAnnouncement.enable) : false
+  form.announcementContent = String(cardAnnouncement.content ?? '')
+
+  form.recentEnable = cardRecentPost.enable !== undefined ? Boolean(cardRecentPost.enable) : true
+  form.recentLimit = Number(cardRecentPost.limit ?? 5) || 5
+  form.recentSort = String(cardRecentPost.sort ?? 'date') === 'updated' ? 'updated' : 'date'
+
+  form.categoriesEnable = cardCategories.enable !== undefined ? Boolean(cardCategories.enable) : false
+  form.categoriesLimit = Number(cardCategories.limit ?? 8) || 8
+  form.categoriesExpand = String(cardCategories.expand ?? 'none')
+
+  form.tagsEnable = cardTags.enable !== undefined ? Boolean(cardTags.enable) : true
+  form.tagsLimit = Number(cardTags.limit ?? 40) || 40
+  form.tagsColor = cardTags.color !== undefined ? Boolean(cardTags.color) : false
+  form.tagsHighlightLines = arrayToLines(cardTags.highlightTags)
+
+  form.archivesEnable = cardArchives.enable !== undefined ? Boolean(cardArchives.enable) : true
+  form.archivesType = String(cardArchives.type ?? 'monthly') === 'yearly' ? 'yearly' : 'monthly'
+  form.archivesFormat = String(cardArchives.format ?? 'MMMM YYYY')
+  form.archivesOrder = Number(cardArchives.order ?? -1) >= 0 ? 1 : -1
+  form.archivesLimit = Number(cardArchives.limit ?? 8) || 8
+
+  form.webinfoEnable = cardWebinfo.enable !== undefined ? Boolean(cardWebinfo.enable) : true
+  form.webinfoPostCount = cardWebinfo.postCount !== undefined
+    ? Boolean(cardWebinfo.postCount)
+    : Boolean(cardWebinfo.post_count ?? true)
+  form.webinfoLastPushDate = cardWebinfo.lastPushDate !== undefined
+    ? Boolean(cardWebinfo.lastPushDate)
+    : Boolean(cardWebinfo.last_push_date ?? false)
+
+  form.weixinEnable = cardWeixin.enable !== undefined ? Boolean(cardWeixin.enable) : false
+  form.weixinFace = String(cardWeixin.face ?? '')
+  form.weixinBackFace = String(cardWeixin.backFace ?? cardWeixin.back_face ?? '')
+
+  form.runtimeShowEnable = runtimeShow.enable !== undefined ? Boolean(runtimeShow.enable) : false
+  form.runtimeShowPublishDate = String(runtimeShow.publishDate ?? runtimeShow.publish_date ?? '')
+
+  form.tagsCloudJson = stringifyValue(settings.value.tagsCloud, '{\n  "enable": false\n}')
+  form.menusItemsJson = stringifyValue(settings.value.menusItems, '{}')
+}
+
+watch(
+  settings,
+  () => {
+    hydrateForm()
+  },
+  { deep: true, immediate: true },
+)
+
+function parseJson<T>(value: string, label: string): T {
+  try {
+    return JSON.parse(value) as T
+  }
+  catch {
+    throw new Error(`${label} 不是合法的 JSON，请检查格式后再保存。`)
+  }
+}
+
+function toggleWidget(widget: string) {
+  if (form.sidebarWidgets.includes(widget)) {
+    form.sidebarWidgets = form.sidebarWidgets.filter(item => item !== widget)
+    return
+  }
+  form.sidebarWidgets = [...form.sidebarWidgets, widget]
+}
+
 async function handleSave() {
   saving.value = true
-  saveSuccess.value = false
+  message.value = ''
+  errorMessage.value = ''
 
   try {
-    const items = [
-      { key: 'homepageSidebarEnabled', value: sidebar.value.enabled, category: 'homepage' },
-      { key: 'homepageSidebarWidgets', value: sidebar.value.widgets, category: 'homepage' },
-    ]
-
-    await api.put('/api/settings', items)
-    saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 3000)
+    await save({
+      sidebar: {
+        enabled: form.sidebarEnabled,
+        widgets: form.sidebarWidgets,
+      },
+      cardAuthor: {
+        enable: form.authorEnable,
+        description: form.authorDescription.trim(),
+        nameLink: form.authorNameLink.trim() || '/',
+      },
+      cardAnnouncement: {
+        enable: form.announcementEnable,
+        content: form.announcementContent.trim(),
+      },
+      cardRecentPost: {
+        enable: form.recentEnable,
+        limit: form.recentLimit,
+        sort: form.recentSort,
+      },
+      cardCategories: {
+        enable: form.categoriesEnable,
+        limit: form.categoriesLimit,
+        expand: form.categoriesExpand.trim() || 'none',
+      },
+      cardTags: {
+        enable: form.tagsEnable,
+        limit: form.tagsLimit,
+        color: form.tagsColor,
+        highlightTags: linesToArray(form.tagsHighlightLines),
+      },
+      cardArchives: {
+        enable: form.archivesEnable,
+        type: form.archivesType,
+        format: form.archivesFormat.trim(),
+        order: form.archivesOrder,
+        limit: form.archivesLimit,
+      },
+      cardWebinfo: {
+        enable: form.webinfoEnable,
+        postCount: form.webinfoPostCount,
+        lastPushDate: form.webinfoLastPushDate,
+      },
+      cardWeixin: {
+        enable: form.weixinEnable,
+        face: form.weixinFace.trim(),
+        backFace: form.weixinBackFace.trim(),
+      },
+      runtimeShow: {
+        enable: form.runtimeShowEnable,
+        publishDate: form.runtimeShowPublishDate.trim(),
+      },
+      tagsCloud: parseJson<Record<string, unknown>>(form.tagsCloudJson, '标签云配置'),
+      menusItems: parseJson<Record<string, unknown>>(form.menusItemsJson, '菜单块配置'),
+    })
+    message.value = '侧边栏配置已保存。'
+    await refresh()
   }
-  catch (e: unknown) {
-    const message = e instanceof Error ? e.message : '保存失败'
-    alert(message)
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '保存失败，请稍后重试。'
   }
   finally {
     saving.value = false
   }
 }
-
-// Toggle widget
-function toggleWidget(value: string) {
-  const idx = sidebar.value.widgets.indexOf(value)
-  if (idx === -1) {
-    sidebar.value.widgets.push(value)
-  }
-  else {
-    sidebar.value.widgets.splice(idx, 1)
-  }
-}
-
-// Check if widget is selected
-function isWidgetSelected(value: string): boolean {
-  return sidebar.value.widgets.includes(value)
-}
-
-onMounted(() => {
-  fetchSettings()
-})
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-rectangles-stack w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">侧栏设置</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <span v-if="saveSuccess" class="text-sm text-green-600 flex items-center gap-1">
-          <span class="i-heroicons-check-circle w-4 h-4" />
-          保存成功
-        </span>
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Sidebar</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">侧边栏配置</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        这里集中处理首页与文章页右侧栏的结构、作者卡片、最近文章、标签卡片、归档卡片以及站点信息卡片。
+        我保留了少量高级 JSON 入口，用来承接还没拆成可视化表单的复杂配置。
+      </p>
+    </section>
+
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      {{ message }}
+    </div>
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+      {{ errorMessage }}
+    </div>
+
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-text">侧边栏结构</h2>
+          <p class="mt-2 text-sm text-muted">控制侧边栏是否启用，以及默认展示哪些卡片。</p>
+        </div>
         <button
-          class="btn-primary px-4 py-2 text-sm flex items-center gap-2"
-          :disabled="saving"
-          :class="{ 'opacity-50 cursor-not-allowed': saving }"
-          @click="handleSave"
+          type="button"
+          class="flex items-center gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-text transition hover:border-primary/20"
+          @click="form.sidebarEnabled = !form.sidebarEnabled"
         >
-          <span v-if="saving" class="i-heroicons-arrow-path w-4 h-4 animate-spin" />
-          {{ saving ? '保存中...' : '保存设置' }}
+          <span>{{ form.sidebarEnabled ? '当前已开启' : '当前已关闭' }}</span>
+          <span class="relative inline-flex h-7 w-12 items-center rounded-full transition" :class="form.sidebarEnabled ? 'bg-primary' : 'bg-surface-2'">
+            <span class="inline-block h-5 w-5 rounded-full bg-white transition" :class="form.sidebarEnabled ? 'translate-x-6' : 'translate-x-1'" />
+          </span>
         </button>
       </div>
-    </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="space-y-4">
-      <div class="h-32 bg-surface-2 rounded-xl animate-pulse" />
-      <div class="h-64 bg-surface rounded animate-pulse" />
-    </div>
+      <div class="mt-5">
+        <p class="mb-3 text-sm font-medium text-text">默认卡片顺序</p>
+        <div class="flex flex-wrap gap-3">
+          <button
+            v-for="option in widgetOptions"
+            :key="option.value"
+            type="button"
+            class="rounded-2xl border px-4 py-3 text-sm transition"
+            :class="form.sidebarWidgets.includes(option.value)
+              ? 'border-primary/30 bg-primary/8 text-primary'
+              : 'border-border bg-background/75 text-text hover:border-primary/20'"
+            @click="toggleWidget(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
+    </section>
 
-    <!-- Settings -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Main settings -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Sidebar Toggle -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-view-columns w-5 h-5 text-primary" />
-            侧栏显示
-          </h2>
-          <p class="text-sm text-muted mb-4">控制前台首页侧边栏的显示</p>
-
-          <div class="flex items-center justify-between py-3 border-b border-border">
-            <div>
-              <label class="font-medium text-text">显示侧边栏</label>
-              <p class="text-xs text-muted">关闭后文章列表将占满宽度</p>
-            </div>
-            <button
-              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer"
-              :class="sidebar.enabled ? 'bg-primary' : 'bg-surface-2'"
-              @click="sidebar.enabled = !sidebar.enabled"
-            >
-              <span
-                class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                :class="sidebar.enabled ? 'translate-x-6' : 'translate-x-1'"
-              />
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">作者与公告卡片</h2>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">作者卡片说明</span>
+            <textarea v-model="form.authorDescription" rows="4" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm leading-7 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：记录日常、技术与长期项目。" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">作者名称跳转链接</span>
+            <input v-model="form.authorNameLink" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/" />
+          </label>
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.authorEnable = !form.authorEnable">
+              <span class="text-sm text-text">启用作者卡片</span>
+              <span class="text-sm text-muted">{{ form.authorEnable ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.announcementEnable = !form.announcementEnable">
+              <span class="text-sm text-text">启用公告卡片</span>
+              <span class="text-sm text-muted">{{ form.announcementEnable ? '已开启' : '已关闭' }}</span>
             </button>
           </div>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">公告内容</span>
+            <textarea v-model="form.announcementContent" rows="4" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm leading-7 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：欢迎来到我的博客，最近正在重构安知鱼主题体验。" />
+          </label>
         </div>
+      </article>
 
-        <!-- Widget Selection -->
-        <div v-if="sidebar.enabled" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-squares-2x2 w-5 h-5 text-primary" />
-            侧栏组件
-          </h2>
-          <p class="text-sm text-muted mb-4">选择要在侧栏显示的组件（拖拽可调整顺序）</p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div
-              v-for="widget in widgetOptions"
-              :key="widget.value"
-              class="flex items-center gap-3 p-4 rounded-xl border-2 transition-all cursor-pointer"
-              :class="isWidgetSelected(widget.value)
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-primary/50'"
-              @click="toggleWidget(widget.value)"
-            >
-              <div
-                class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-                :class="isWidgetSelected(widget.value) ? 'bg-primary text-white' : 'bg-surface-2 text-muted'"
-              >
-                <span :class="widget.icon" class="w-5 h-5" />
-              </div>
-              <div class="flex-1">
-                <span class="font-medium text-text">{{ widget.label }}</span>
-              </div>
-              <div
-                class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
-                :class="isWidgetSelected(widget.value)
-                  ? 'border-primary bg-primary'
-                  : 'border-muted'"
-              >
-                <span v-if="isWidgetSelected(widget.value)" class="i-heroicons-check w-3 h-3 text-white" />
-              </div>
-            </div>
-          </div>
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">最近文章与分类卡片</h2>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">最近文章数量</span>
+            <input v-model="form.recentLimit" type="number" min="1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">最近文章排序</span>
+            <select v-model="form.recentSort" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="date">按发布时间</option>
+              <option value="updated">按更新时间</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">分类卡片数量</span>
+            <input v-model="form.categoriesLimit" type="number" min="1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">分类展开策略</span>
+            <input v-model="form.categoriesExpand" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="none / all / parent" />
+          </label>
         </div>
-      </div>
-
-      <!-- Sidebar - Preview -->
-      <div class="space-y-6">
-        <!-- Preview -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-eye w-5 h-5 text-primary" />
-            效果预览
-          </h2>
-          <p class="text-xs text-muted mb-4">保存后访问前台查看效果</p>
-          <NuxtLink
-            to="/"
-            target="_blank"
-            class="btn-secondary w-full flex items-center justify-center gap-2"
-          >
-            <span class="i-heroicons-arrow-top-right-on-square w-4 h-4" />
-            预览首页
-          </NuxtLink>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.recentEnable = !form.recentEnable">
+            <span class="text-sm text-text">启用最近文章</span>
+            <span class="text-sm text-muted">{{ form.recentEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.categoriesEnable = !form.categoriesEnable">
+            <span class="text-sm text-text">启用分类卡片</span>
+            <span class="text-sm text-muted">{{ form.categoriesEnable ? '已开启' : '已关闭' }}</span>
+          </button>
         </div>
+      </article>
+    </section>
 
-        <!-- Selected Widgets Order -->
-        <div v-if="sidebar.enabled" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-list-bullet w-5 h-5 text-primary" />
-            当前顺序
-          </h2>
-          <div class="space-y-2">
-            <div
-              v-for="(widgetValue, index) in sidebar.widgets"
-              :key="widgetValue"
-              class="flex items-center gap-3 p-2 bg-surface-2 rounded-lg"
-            >
-              <span class="text-xs text-muted w-6">{{ index + 1 }}</span>
-              <span
-                :class="widgetOptions.find(w => w.value === widgetValue)?.icon"
-                class="w-4 h-4 text-muted"
-              />
-              <span class="text-sm text-text">
-                {{ widgetOptions.find(w => w.value === widgetValue)?.label }}
-              </span>
-            </div>
-          </div>
-          <p class="text-xs text-muted mt-3">点击组件卡片可添加/移除</p>
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">标签与归档卡片</h2>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">标签数量</span>
+            <input v-model="form.tagsLimit" type="number" min="1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">归档数量</span>
+            <input v-model="form.archivesLimit" type="number" min="1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">归档维度</span>
+            <select v-model="form.archivesType" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="monthly">按月</option>
+              <option value="yearly">按年</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">归档顺序</span>
+            <select v-model="form.archivesOrder" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option :value="-1">最新优先</option>
+              <option :value="1">最旧优先</option>
+            </select>
+          </label>
         </div>
-      </div>
+        <label class="mt-5 block space-y-2">
+          <span class="text-sm font-medium text-text">高亮标签，每行一个</span>
+          <textarea v-model="form.tagsHighlightLines" rows="5" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm leading-7 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Nuxt&#10;Vue&#10;TypeScript" />
+        </label>
+        <label class="mt-5 block space-y-2">
+          <span class="text-sm font-medium text-text">归档日期格式</span>
+          <input v-model="form.archivesFormat" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="MMMM YYYY" />
+        </label>
+        <div class="mt-5 grid gap-4 md:grid-cols-3">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tagsEnable = !form.tagsEnable">
+            <span class="text-sm text-text">启用标签卡片</span>
+            <span class="text-sm text-muted">{{ form.tagsEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tagsColor = !form.tagsColor">
+            <span class="text-sm text-text">标签着色</span>
+            <span class="text-sm text-muted">{{ form.tagsColor ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.archivesEnable = !form.archivesEnable">
+            <span class="text-sm text-text">启用归档卡片</span>
+            <span class="text-sm text-muted">{{ form.archivesEnable ? '开启' : '关闭' }}</span>
+          </button>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">站点信息与微信卡片</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.webinfoEnable = !form.webinfoEnable">
+            <span class="text-sm text-text">启用站点信息卡片</span>
+            <span class="text-sm text-muted">{{ form.webinfoEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.weixinEnable = !form.weixinEnable">
+            <span class="text-sm text-text">启用微信卡片</span>
+            <span class="text-sm text-muted">{{ form.weixinEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.webinfoPostCount = !form.webinfoPostCount">
+            <span class="text-sm text-text">显示文章总数</span>
+            <span class="text-sm text-muted">{{ form.webinfoPostCount ? '显示' : '隐藏' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.webinfoLastPushDate = !form.webinfoLastPushDate">
+            <span class="text-sm text-text">显示最近更新</span>
+            <span class="text-sm text-muted">{{ form.webinfoLastPushDate ? '显示' : '隐藏' }}</span>
+          </button>
+        </div>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">微信正面图片</span>
+            <input v-model="form.weixinFace" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/images/wechat-front.png" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">微信背面图片</span>
+            <input v-model="form.weixinBackFace" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/images/wechat-back.png" />
+          </label>
+        </div>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.runtimeShowEnable = !form.runtimeShowEnable">
+            <span class="text-sm text-text">启用运行时间卡片</span>
+            <span class="text-sm text-muted">{{ form.runtimeShowEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">运行时间发布日期</span>
+            <input v-model="form.runtimeShowPublishDate" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="2024-01-01" />
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">高级补充配置</h2>
+        <p class="mt-2 text-sm text-muted">这些项目暂时保留为 JSON 编辑，避免在不清楚前台消费结构时误伤现有行为。</p>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">标签云配置 `tagsCloud`</span>
+            <textarea v-model="form.tagsCloudJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">菜单块配置 `menusItems`</span>
+            <textarea v-model="form.menusItemsJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <div class="flex items-center justify-end gap-3">
+      <button type="button" class="rounded-2xl border border-border bg-background/80 px-5 py-3 text-sm font-semibold text-text transition hover:border-primary/25 hover:text-primary" :disabled="loading || saving" @click="refresh">
+        刷新
+      </button>
+      <button type="button" class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:bg-primary/90 disabled:opacity-60" :disabled="loading || saving" @click="handleSave">
+        {{ saving ? '保存中...' : '保存侧边栏配置' }}
+      </button>
     </div>
   </div>
 </template>

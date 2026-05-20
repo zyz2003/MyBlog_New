@@ -1,504 +1,519 @@
 <script setup lang="ts">
-const api = useAdminApi()
-const loading = ref(true)
-const saving = ref(false)
-const saveSuccess = ref(false)
-
-// Background effects
-const canvasRibbon = ref({ enable: false, size: 150, alpha: 0.6, mobile: false })
-const canvasNest = ref({ enable: false, color: '0,0,255', opacity: 0.7, count: 99, mobile: false })
-const fireworks = ref({ enable: false, mobile: false })
-const clickHeart = ref({ enable: false, mobile: false })
-const clickShowText = ref({ enable: false, text: [] as string[], fontSize: '15px', random: false, mobile: false })
-const activatePowerMode = ref({ enable: false, colorful: true, shake: false, mobile: false })
-const universe = ref({ enable: true })
-const bubble = ref({ enable: false })
-
-// Music
-const navMusic = ref({
-  enable: false,
-  id: '',
-  server: 'netease' as string,
-  volume: 0.7,
-  allPlaylist: '',
-})
-const musicPageDefault = ref('nav_music' as string)
-
-// AI Summary
-const aiSummary = ref({
-  enable: false,
-  gptName: 'AI助手',
-  mode: 'local' as string,
-  switchBtn: false,
-  basicWordCount: 1000,
-  randomNum: 3,
-  key: '',
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
 })
 
-// Right-click menu
-const rightClickMenu = ref({ enable: false })
+const { settings, loading, save, refresh } = useAdminSettings('features')
 
-// Shortcut keys
-const shortcutKey = ref({ enable: false, delay: 100, shiftDelay: 200 })
-const accesskey = ref({ enable: true })
+const rightsideOptions = [
+  { value: 'readmode', label: '阅读模式' },
+  { value: 'translate', label: '翻译切换' },
+  { value: 'darkmode', label: '明暗切换' },
+  { value: 'hide-aside-btn', label: '侧栏开关' },
+  { value: 'mobile-toc-button', label: '移动目录' },
+  { value: 'to_comment', label: '跳转评论' },
+  { value: 'go-up', label: '回到顶部' },
+]
 
-// Greeting box
-const greetingBox = ref({
-  enable: false,
-  defaultGreeting: '晚上好',
-  greetings: [] as Array<{ greeting: string; startTime: number; endTime: number }>,
-})
+const form = reactive({
+  readmode: false,
 
-// Comment barrage
-const commentBarrage = ref({
-  enable: false,
-  maxBarrage: 1,
-  barrageTime: 4000,
-  accessToken: '',
-  mailMd5: '',
-})
+  preloaderEnable: true,
+  preloaderSource: 3,
+  preloaderAvatar: '',
 
-// Translate
-const translate = ref({
-  enable: true,
-  default: '繁',
-  defaultEncoding: 2,
+  rightsideEnableOrder: false,
+  rightsideShow: [] as string[],
+  rightsideHide: [] as string[],
+
+  navMusicEnable: true,
+  navMusicConsoleWidescreen: false,
+  navMusicId: '',
+  navMusicServer: 'netease',
+  navMusicVolume: 0.7,
+  navMusicPlaylist: '',
+
+  translateEnable: false,
+  translateDefaultEncoding: 2,
   translateDelay: 0,
+  translateTraditionalLabel: '繁',
+  translateSimplifiedLabel: '简',
+  translateMenuTraditional: '',
+  translateMenuSimplified: '',
+
+  snackbarEnable: false,
+  snackbarPosition: 'top-center',
+  snackbarBgLight: '#425AEF',
+  snackbarBgDark: '#1f1f1f',
+
+  rightClickMenuEnable: false,
+
+  greetingBoxEnable: false,
+  greetingBoxDefault: '晚上好，欢迎来到这里。',
+  greetingBoxListJson: '[]',
+
+  centerConsoleEnable: false,
+  centerConsoleJson: '{\n  "card_tags": {\n    "enable": true,\n    "limit": 40,\n    "color": false,\n    "highlightTags": []\n  },\n  "card_archives": {\n    "enable": true,\n    "type": "monthly",\n    "format": "MMMM YYYY",\n    "order": -1,\n    "limit": 8\n  }\n}',
+
+  effectsJson: '{\n  "dynamicEffect": {},\n  "canvasRibbon": {},\n  "canvasFlutteringRibbon": {},\n  "canvasNest": {},\n  "fireworks": {},\n  "clickHeart": {},\n  "clickShowText": {},\n  "activatePowerMode": {},\n  "universe": {},\n  "bubble": {}\n}',
+  aiSummaryJson: '{\n  "gptName": "AnZhiYu",\n  "btnLink": ""\n}',
+  agreementPopupJson: '{\n  "enable": false,\n  "url": "/privacy"\n}',
+  friendsVueJson: '{\n  "enable": false,\n  "vueJs": "",\n  "apiurl": "",\n  "topTips": "",\n  "topBackground": ""\n}',
 })
 
-// Read mode
-const readmode = ref(true)
+const saving = ref(false)
+const message = ref('')
+const errorMessage = ref('')
 
-// Rightside item order
-const rightsideItems = ref({
-  enableOrder: false,
-  hide: [] as string[],
-  show: [] as string[],
-})
-
-async function fetchSettings() {
-  loading.value = true
-  try {
-    const data = await api.get<Record<string, Array<{ key: string; value: unknown }>>>('/api/settings')
-    const s: Record<string, unknown> = {}
-    for (const rows of Object.values(data)) {
-      for (const row of rows) { s[row.key] = row.value }
-    }
-
-    if (s.canvasRibbon) canvasRibbon.value = { ...canvasRibbon.value, ...(s.canvasRibbon as typeof canvasRibbon.value) }
-    if (s.canvasNest) canvasNest.value = { ...canvasNest.value, ...(s.canvasNest as typeof canvasNest.value) }
-    if (s.fireworks) fireworks.value = { ...fireworks.value, ...(s.fireworks as typeof fireworks.value) }
-    if (s.clickHeart) clickHeart.value = { ...clickHeart.value, ...(s.clickHeart as typeof clickHeart.value) }
-    if (s.clickShowText) clickShowText.value = { ...clickShowText.value, ...(s.clickShowText as typeof clickShowText.value) }
-    if (s.activatePowerMode) activatePowerMode.value = { ...activatePowerMode.value, ...(s.activatePowerMode as typeof activatePowerMode.value) }
-    if (s.universe) universe.value = { ...universe.value, ...(s.universe as typeof universe.value) }
-    if (s.bubble) bubble.value = { ...bubble.value, ...(s.bubble as typeof bubble.value) }
-    if (s.navMusic) navMusic.value = { ...navMusic.value, ...(s.navMusic as typeof navMusic.value) }
-    if (s.musicPageDefault) musicPageDefault.value = s.musicPageDefault as string
-    if (s.aiSummary) aiSummary.value = { ...aiSummary.value, ...(s.aiSummary as typeof aiSummary.value) }
-    if (s.rightClickMenu) rightClickMenu.value = { ...rightClickMenu.value, ...(s.rightClickMenu as typeof rightClickMenu.value) }
-    if (s.shortcutKey) shortcutKey.value = { ...shortcutKey.value, ...(s.shortcutKey as typeof shortcutKey.value) }
-    if (s.accesskey) accesskey.value = { ...accesskey.value, ...(s.accesskey as typeof accesskey.value) }
-    if (s.greetingBox) greetingBox.value = { ...greetingBox.value, ...(s.greetingBox as typeof greetingBox.value) }
-    if (s.commentBarrage) commentBarrage.value = { ...commentBarrage.value, ...(s.commentBarrage as typeof commentBarrage.value) }
-    if (s.translate) translate.value = { ...translate.value, ...(s.translate as typeof translate.value) }
-    if (s.readmode !== undefined) readmode.value = Boolean(s.readmode)
-    if (s.rightsideItems) rightsideItems.value = { ...rightsideItems.value, ...(s.rightsideItems as typeof rightsideItems.value) }
-    if (s.sharejs) sharejs.value = { ...sharejs.value, ...(s.sharejs as typeof sharejs.value) }
-    if (s.snackbar) snackbar.value = { ...snackbar.value, ...(s.snackbar as typeof snackbar.value) }
-    if (s.preloader) preloader.value = { ...preloader.value, ...(s.preloader as typeof preloader.value) }
-    if (s.centerConsole) centerConsole.value = { ...centerConsole.value, ...(s.centerConsole as typeof centerConsole.value) }
-    if (s.dynamicEffect) dynamicEffect.value = { ...dynamicEffect.value, ...(s.dynamicEffect as typeof dynamicEffect.value) }
-    if (s.agreementPopup) agreementPopup.value = { ...agreementPopup.value, ...(s.agreementPopup as typeof agreementPopup.value) }
-    if (s.friendsVue) friendsVue.value = { ...friendsVue.value, ...(s.friendsVue as typeof friendsVue.value) }
-    if (s.aplayerInject) aplayerInject.value = { ...aplayerInject.value, ...(s.aplayerInject as typeof aplayerInject.value) }
-  } catch (e) {
-    console.error('Failed to fetch settings:', e)
-  } finally {
-    loading.value = false
+function stringifyValue(value: unknown, fallback: string) {
+  if (value === undefined || value === null) {
+    return fallback
   }
+
+  try {
+    return JSON.stringify(value, null, 2)
+  }
+  catch {
+    return fallback
+  }
+}
+
+function hydrateForm() {
+  const preloader = (settings.value.preloader as Record<string, unknown> | undefined) ?? {}
+  const rightsideItems = (settings.value.rightsideItems as Record<string, unknown> | undefined) ?? {}
+  const navMusic = (settings.value.navMusic as Record<string, unknown> | undefined) ?? {}
+  const translate = (settings.value.translate as Record<string, unknown> | undefined) ?? {}
+  const snackbar = (settings.value.snackbar as Record<string, unknown> | undefined) ?? {}
+  const rightClickMenu = (settings.value.rightClickMenu as Record<string, unknown> | undefined) ?? {}
+  const greetingBox = (settings.value.greetingBox as Record<string, unknown> | undefined) ?? {}
+  const centerConsole = (settings.value.centerConsole as Record<string, unknown> | undefined) ?? {}
+
+  form.readmode = Boolean(settings.value.readmode)
+
+  form.preloaderEnable = preloader.enable !== undefined ? Boolean(preloader.enable) : true
+  form.preloaderSource = Number(preloader.source ?? 3) || 3
+  form.preloaderAvatar = String(preloader.avatar ?? '')
+
+  form.rightsideEnableOrder = rightsideItems.enableOrder !== undefined ? Boolean(rightsideItems.enableOrder) : false
+  form.rightsideShow = Array.isArray(rightsideItems.show)
+    ? rightsideItems.show.map(item => String(item))
+    : ['readmode', 'darkmode', 'hide-aside-btn', 'mobile-toc-button', 'to_comment', 'go-up']
+  form.rightsideHide = Array.isArray(rightsideItems.hide)
+    ? rightsideItems.hide.map(item => String(item))
+    : []
+
+  form.navMusicEnable = navMusic.enable !== undefined ? Boolean(navMusic.enable) : true
+  form.navMusicConsoleWidescreen = navMusic.consoleWidescreenMusic !== undefined
+    ? Boolean(navMusic.consoleWidescreenMusic)
+    : Boolean(navMusic.console_widescreen_music ?? false)
+  form.navMusicId = String(navMusic.id ?? '')
+  form.navMusicServer = String(navMusic.server ?? 'netease')
+  form.navMusicVolume = Number(navMusic.volume ?? 0.7) || 0.7
+  form.navMusicPlaylist = String(navMusic.allPlaylist ?? '')
+
+  form.translateEnable = translate.enable !== undefined ? Boolean(translate.enable) : false
+  form.translateDefaultEncoding = Number(translate.defaultEncoding ?? 2) || 2
+  form.translateDelay = Number(translate.translateDelay ?? 0) || 0
+  form.translateTraditionalLabel = String(translate.msgToTraditionalChinese ?? '繁')
+  form.translateSimplifiedLabel = String(translate.msgToSimplifiedChinese ?? '简')
+  form.translateMenuTraditional = String(translate.rightMenuMsgToTraditionalChinese ?? '')
+  form.translateMenuSimplified = String(translate.rightMenuMsgToSimplifiedChinese ?? '')
+
+  form.snackbarEnable = snackbar.enable !== undefined ? Boolean(snackbar.enable) : false
+  form.snackbarPosition = String(snackbar.position ?? 'top-center')
+  form.snackbarBgLight = String(snackbar.bg_light ?? '#425AEF')
+  form.snackbarBgDark = String(snackbar.bg_dark ?? '#1f1f1f')
+
+  form.rightClickMenuEnable = rightClickMenu.enable !== undefined ? Boolean(rightClickMenu.enable) : false
+
+  form.greetingBoxEnable = greetingBox.enable !== undefined ? Boolean(greetingBox.enable) : false
+  form.greetingBoxDefault = String(greetingBox.default ?? '晚上好，欢迎来到这里。')
+  form.greetingBoxListJson = stringifyValue(greetingBox.list, '[]')
+
+  form.centerConsoleEnable = centerConsole.enable !== undefined ? Boolean(centerConsole.enable) : false
+  form.centerConsoleJson = stringifyValue(centerConsole, form.centerConsoleJson)
+
+  form.effectsJson = stringifyValue({
+    dynamicEffect: settings.value.dynamicEffect ?? {},
+    canvasRibbon: settings.value.canvasRibbon ?? {},
+    canvasFlutteringRibbon: settings.value.canvasFlutteringRibbon ?? {},
+    canvasNest: settings.value.canvasNest ?? {},
+    fireworks: settings.value.fireworks ?? {},
+    clickHeart: settings.value.clickHeart ?? {},
+    clickShowText: settings.value.clickShowText ?? {},
+    activatePowerMode: settings.value.activatePowerMode ?? {},
+    universe: settings.value.universe ?? {},
+    bubble: settings.value.bubble ?? {},
+  }, form.effectsJson)
+  form.aiSummaryJson = stringifyValue(settings.value.aiSummary, form.aiSummaryJson)
+  form.agreementPopupJson = stringifyValue(settings.value.agreementPopup, form.agreementPopupJson)
+  form.friendsVueJson = stringifyValue(settings.value.friendsVue, form.friendsVueJson)
+}
+
+watch(
+  settings,
+  () => {
+    hydrateForm()
+  },
+  { deep: true, immediate: true },
+)
+
+function parseJson<T>(value: string, label: string): T {
+  try {
+    return JSON.parse(value) as T
+  }
+  catch {
+    throw new Error(`${label} 不是合法的 JSON，请检查格式后再保存。`)
+  }
+}
+
+function toggleSelection(target: 'rightsideShow' | 'rightsideHide', value: string) {
+  if (form[target].includes(value)) {
+    form[target] = form[target].filter(item => item !== value)
+    return
+  }
+  form[target] = [...form[target], value]
 }
 
 async function handleSave() {
   saving.value = true
-  saveSuccess.value = false
+  message.value = ''
+  errorMessage.value = ''
+
   try {
-    await api.put('/api/settings', [
-      { key: 'canvasRibbon', value: canvasRibbon.value, category: 'features' },
-      { key: 'canvasNest', value: canvasNest.value, category: 'features' },
-      { key: 'fireworks', value: fireworks.value, category: 'features' },
-      { key: 'clickHeart', value: clickHeart.value, category: 'features' },
-      { key: 'clickShowText', value: clickShowText.value, category: 'features' },
-      { key: 'activatePowerMode', value: activatePowerMode.value, category: 'features' },
-      { key: 'universe', value: universe.value, category: 'features' },
-      { key: 'bubble', value: bubble.value, category: 'features' },
-      { key: 'navMusic', value: navMusic.value, category: 'features' },
-      { key: 'musicPageDefault', value: musicPageDefault.value, category: 'features' },
-      { key: 'aiSummary', value: aiSummary.value, category: 'features' },
-      { key: 'rightClickMenu', value: rightClickMenu.value, category: 'features' },
-      { key: 'shortcutKey', value: shortcutKey.value, category: 'features' },
-      { key: 'accesskey', value: accesskey.value, category: 'features' },
-      { key: 'greetingBox', value: greetingBox.value, category: 'features' },
-      { key: 'commentBarrage', value: commentBarrage.value, category: 'features' },
-      { key: 'translate', value: translate.value, category: 'features' },
-      { key: 'readmode', value: readmode.value, category: 'features' },
-      { key: 'rightsideItems', value: rightsideItems.value, category: 'features' },
-    ])
-    saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 3000)
-  } catch (e: unknown) {
-    alert(e instanceof Error ? e.message : '保存失败')
-  } finally {
+    const greetingList = parseJson<Array<Record<string, unknown>>>(form.greetingBoxListJson, '欢迎语时间段')
+    const centerConsole = parseJson<Record<string, unknown>>(form.centerConsoleJson, '中控台配置')
+    const effects = parseJson<Record<string, Record<string, unknown>>>(form.effectsJson, '动效配置')
+
+    await save({
+      readmode: form.readmode,
+      preloader: {
+        enable: form.preloaderEnable,
+        source: form.preloaderSource,
+        avatar: form.preloaderAvatar.trim(),
+      },
+      rightsideItems: {
+        enableOrder: form.rightsideEnableOrder,
+        show: form.rightsideShow,
+        hide: form.rightsideHide,
+      },
+      navMusic: {
+        enable: form.navMusicEnable,
+        consoleWidescreenMusic: form.navMusicConsoleWidescreen,
+        id: form.navMusicId.trim(),
+        server: form.navMusicServer.trim() || 'netease',
+        volume: form.navMusicVolume,
+        allPlaylist: form.navMusicPlaylist.trim(),
+      },
+      translate: {
+        enable: form.translateEnable,
+        defaultEncoding: form.translateDefaultEncoding,
+        translateDelay: form.translateDelay,
+        msgToTraditionalChinese: form.translateTraditionalLabel.trim() || '繁',
+        msgToSimplifiedChinese: form.translateSimplifiedLabel.trim() || '简',
+        rightMenuMsgToTraditionalChinese: form.translateMenuTraditional.trim(),
+        rightMenuMsgToSimplifiedChinese: form.translateMenuSimplified.trim(),
+      },
+      snackbar: {
+        enable: form.snackbarEnable,
+        position: form.snackbarPosition.trim() || 'top-center',
+        bg_light: form.snackbarBgLight.trim() || '#425AEF',
+        bg_dark: form.snackbarBgDark.trim() || '#1f1f1f',
+      },
+      rightClickMenu: {
+        enable: form.rightClickMenuEnable,
+      },
+      greetingBox: {
+        enable: form.greetingBoxEnable,
+        default: form.greetingBoxDefault.trim(),
+        list: greetingList,
+      },
+      centerConsole: {
+        ...centerConsole,
+        enable: form.centerConsoleEnable,
+      },
+      dynamicEffect: effects.dynamicEffect ?? {},
+      canvasRibbon: effects.canvasRibbon ?? {},
+      canvasFlutteringRibbon: effects.canvasFlutteringRibbon ?? {},
+      canvasNest: effects.canvasNest ?? {},
+      fireworks: effects.fireworks ?? {},
+      clickHeart: effects.clickHeart ?? {},
+      clickShowText: effects.clickShowText ?? {},
+      activatePowerMode: effects.activatePowerMode ?? {},
+      universe: effects.universe ?? {},
+      bubble: effects.bubble ?? {},
+      aiSummary: parseJson<Record<string, unknown>>(form.aiSummaryJson, 'AI 摘要配置'),
+      agreementPopup: parseJson<Record<string, unknown>>(form.agreementPopupJson, '协议弹窗配置'),
+      friendsVue: parseJson<Record<string, unknown>>(form.friendsVueJson, '友链朋友圈配置'),
+    })
+
+    message.value = '增强功能配置已保存。'
+    await refresh()
+  }
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '保存失败，请稍后重试。'
+  }
+  finally {
     saving.value = false
   }
 }
-
-function addGreeting() {
-  greetingBox.value.greetings.push({ greeting: '', startTime: 0, endTime: 0 })
-}
-function removeGreeting(index: number) {
-  greetingBox.value.greetings.splice(index, 1)
-}
-
-onMounted(() => fetchSettings())
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-sparkles w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">特效与功能</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <span v-if="saveSuccess" class="text-sm text-green-600 flex items-center gap-1">
-          <span class="i-heroicons-check-circle w-4 h-4" /> 保存成功
-        </span>
-        <button class="btn-primary px-4 py-2 text-sm flex items-center gap-2 cursor-pointer" :disabled="saving" @click="handleSave">
-          <span v-if="saving" class="i-heroicons-arrow-path w-4 h-4 animate-spin" />
-          {{ saving ? '保存中...' : '保存设置' }}
-        </button>
-      </div>
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Features</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">增强功能配置</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        这里承接右侧按钮、预加载、导航音乐、翻译、提示消息、欢迎语和部分互动增强功能。
+        先把高频操作拆成表单，复杂动效继续保留 JSON 入口，保证后台先可用、可管、可联调。
+      </p>
+    </section>
+
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      {{ message }}
+    </div>
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+      {{ errorMessage }}
     </div>
 
-    <div v-if="loading" class="space-y-4">
-      <div class="h-48 bg-surface-2 rounded-xl animate-pulse" v-for="i in 4" :key="i" />
-    </div>
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">阅读与预加载</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.readmode = !form.readmode">
+            <span class="text-sm text-text">启用阅读模式按钮</span>
+            <span class="text-sm text-muted">{{ form.readmode ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.preloaderEnable = !form.preloaderEnable">
+            <span class="text-sm text-text">启用预加载动画</span>
+            <span class="text-sm text-muted">{{ form.preloaderEnable ? '开启' : '关闭' }}</span>
+          </button>
+        </div>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">预加载类型</span>
+            <select v-model="form.preloaderSource" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option :value="1">旋转加载动画</option>
+              <option :value="2">Pace 进度条</option>
+              <option :value="3">头像加载</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">预加载头像</span>
+            <input v-model="form.preloaderAvatar" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/images/avatar.jpg" />
+          </label>
+        </div>
+      </article>
 
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Background Effects -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-paint-brush w-5 h-5 text-primary" /> 背景特效
-          </h2>
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">右侧按钮组</h2>
+        <div class="mt-5 space-y-5">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.rightsideEnableOrder = !form.rightsideEnableOrder">
+            <span class="text-sm text-text">启用自定义排序</span>
+            <span class="text-sm text-muted">{{ form.rightsideEnableOrder ? '开启' : '关闭' }}</span>
+          </button>
 
-          <!-- Canvas Ribbon -->
-          <div class="border border-border rounded-lg p-4 mb-3">
-            <div class="flex items-center justify-between mb-3">
-              <label class="font-medium text-text">静止彩带背景</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="canvasRibbon.enable ? 'bg-primary' : 'bg-surface-2'" @click="canvasRibbon.enable = !canvasRibbon.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="canvasRibbon.enable ? 'translate-x-6' : 'translate-x-1'" />
-              </button>
-            </div>
-            <div v-if="canvasRibbon.enable" class="grid grid-cols-3 gap-3">
-              <div>
-                <label class="block text-xs text-muted mb-1">大小</label>
-                <input v-model.number="canvasRibbon.size" type="number" class="w-full px-2 py-1 bg-surface-2 border border-border rounded text-xs text-text">
-              </div>
-              <div>
-                <label class="block text-xs text-muted mb-1">透明度</label>
-                <input v-model.number="canvasRibbon.alpha" type="number" step="0.1" min="0" max="1" class="w-full px-2 py-1 bg-surface-2 border border-border rounded text-xs text-text">
-              </div>
-              <label class="flex items-center gap-1 cursor-pointer text-xs">
-                <input v-model="canvasRibbon.mobile" type="checkbox" class="w-3 h-3 rounded accent-primary"> 移动端
-              </label>
-            </div>
-          </div>
-
-          <!-- Canvas Nest -->
-          <div class="border border-border rounded-lg p-4 mb-3">
-            <div class="flex items-center justify-between mb-3">
-              <label class="font-medium text-text">动态线条背景</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="canvasNest.enable ? 'bg-primary' : 'bg-surface-2'" @click="canvasNest.enable = !canvasNest.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="canvasNest.enable ? 'translate-x-6' : 'translate-x-1'" />
-              </button>
-            </div>
-            <div v-if="canvasNest.enable" class="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div>
-                <label class="block text-xs text-muted mb-1">线条颜色 (RGB)</label>
-                <input v-model="canvasNest.color" type="text" class="w-full px-2 py-1 bg-surface-2 border border-border rounded text-xs text-text">
-              </div>
-              <div>
-                <label class="block text-xs text-muted mb-1">透明度</label>
-                <input v-model.number="canvasNest.opacity" type="number" step="0.1" min="0" max="1" class="w-full px-2 py-1 bg-surface-2 border border-border rounded text-xs text-text">
-              </div>
-              <div>
-                <label class="block text-xs text-muted mb-1">线条数量</label>
-                <input v-model.number="canvasNest.count" type="number" class="w-full px-2 py-1 bg-surface-2 border border-border rounded text-xs text-text">
-              </div>
-            </div>
-          </div>
-
-          <!-- Fireworks -->
-          <div class="border border-border rounded-lg p-4 mb-3">
-            <div class="flex items-center justify-between">
-              <label class="font-medium text-text">点击烟花特效</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="fireworks.enable ? 'bg-primary' : 'bg-surface-2'" @click="fireworks.enable = !fireworks.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="fireworks.enable ? 'translate-x-6' : 'translate-x-1'" />
+          <div>
+            <p class="mb-3 text-sm font-medium text-text">显示按钮</p>
+            <div class="flex flex-wrap gap-3">
+              <button
+                v-for="option in rightsideOptions"
+                :key="`show-${option.value}`"
+                type="button"
+                class="rounded-2xl border px-4 py-3 text-sm transition"
+                :class="form.rightsideShow.includes(option.value)
+                  ? 'border-primary/30 bg-primary/8 text-primary'
+                  : 'border-border bg-background/75 text-text hover:border-primary/20'"
+                @click="toggleSelection('rightsideShow', option.value)"
+              >
+                {{ option.label }}
               </button>
             </div>
           </div>
 
-          <!-- Click Heart -->
-          <div class="border border-border rounded-lg p-4 mb-3">
-            <div class="flex items-center justify-between">
-              <label class="font-medium text-text">点击爱心特效</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="clickHeart.enable ? 'bg-primary' : 'bg-surface-2'" @click="clickHeart.enable = !clickHeart.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="clickHeart.enable ? 'translate-x-6' : 'translate-x-1'" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Activate Power Mode -->
-          <div class="border border-border rounded-lg p-4 mb-3">
-            <div class="flex items-center justify-between mb-3">
-              <label class="font-medium text-text">打字特效 (Power Mode)</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="activatePowerMode.enable ? 'bg-primary' : 'bg-surface-2'" @click="activatePowerMode.enable = !activatePowerMode.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="activatePowerMode.enable ? 'translate-x-6' : 'translate-x-1'" />
-              </button>
-            </div>
-            <div v-if="activatePowerMode.enable" class="flex gap-4">
-              <label class="flex items-center gap-1 cursor-pointer text-xs">
-                <input v-model="activatePowerMode.colorful" type="checkbox" class="w-3 h-3 rounded accent-primary"> 彩色粒子
-              </label>
-              <label class="flex items-center gap-1 cursor-pointer text-xs">
-                <input v-model="activatePowerMode.shake" type="checkbox" class="w-3 h-3 rounded accent-primary"> 抖动
-              </label>
-            </div>
-          </div>
-
-          <!-- Universe & Bubble -->
-          <div class="flex gap-6 flex-wrap mt-3">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="universe.enable" type="checkbox" class="w-4 h-4 rounded accent-primary">
-              <span class="text-sm text-text">深色模式粒子效果</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="bubble.enable" type="checkbox" class="w-4 h-4 rounded accent-primary">
-              <span class="text-sm text-text">卡片气泡升起效果</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Music -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-musical-note w-5 h-5 text-primary" /> 左下角音乐
-          </h2>
-          <div class="flex items-center justify-between mb-4">
-            <label class="font-medium text-text">启用音乐播放器</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="navMusic.enable ? 'bg-primary' : 'bg-surface-2'" @click="navMusic.enable = !navMusic.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="navMusic.enable ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-          <div v-if="navMusic.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">音乐平台</label>
-              <select v-model="navMusic.server" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="netease">网易云音乐</option>
-                <option value="tencent">QQ音乐</option>
-                <option value="xiami">虾米</option>
-                <option value="kugou">酷狗</option>
-                <option value="baidu">百度</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">歌单/歌曲 ID</label>
-              <input v-model="navMusic.id" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="如: 8152976493">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">默认音量</label>
-              <input v-model.number="navMusic.volume" type="range" min="0" max="1" step="0.1" class="w-full">
-              <span class="text-xs text-muted">{{ Math.round(navMusic.volume * 100) }}%</span>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">全部歌单链接</label>
-              <input v-model="navMusic.allPlaylist" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="QQ音乐歌单链接">
-            </div>
-          </div>
-        </div>
-
-        <!-- AI Summary -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-cpu-chip w-5 h-5 text-primary" /> 文章 AI 摘要
-          </h2>
-          <div class="flex items-center justify-between mb-4">
-            <label class="font-medium text-text">启用 AI 摘要</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="aiSummary.enable ? 'bg-primary' : 'bg-surface-2'" @click="aiSummary.enable = !aiSummary.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="aiSummary.enable ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-          <div v-if="aiSummary.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">AI 名称</label>
-              <input v-model="aiSummary.gptName" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">模式</label>
-              <select v-model="aiSummary.mode" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="local">本地</option>
-                <option value="tianli">Tianli API</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">最低字数</label>
-              <input v-model.number="aiSummary.basicWordCount" type="number" min="1000" max="1999" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">随机数量</label>
-              <input v-model.number="aiSummary.randomNum" type="number" min="1" max="10" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-          </div>
-        </div>
-
-        <!-- Comment Barrage -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-bars-arrow-up w-5 h-5 text-primary" /> 评论弹幕
-          </h2>
-          <div class="flex items-center justify-between mb-4">
-            <label class="font-medium text-text">启用评论弹幕</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="commentBarrage.enable ? 'bg-primary' : 'bg-surface-2'" @click="commentBarrage.enable = !commentBarrage.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="commentBarrage.enable ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-          <div v-if="commentBarrage.enable" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">最大弹幕数</label>
-              <input v-model.number="commentBarrage.maxBarrage" type="number" min="1" max="10" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">弹幕间隔 (ms)</label>
-              <input v-model.number="commentBarrage.barrageTime" type="number" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-          </div>
-        </div>
-
-        <!-- Greeting Box -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-hand-raised w-5 h-5 text-primary" /> 欢迎语
-          </h2>
-          <div class="flex items-center justify-between mb-4">
-            <label class="font-medium text-text">启��时间段欢迎语</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="greetingBox.enable ? 'bg-primary' : 'bg-surface-2'" @click="greetingBox.enable = !greetingBox.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="greetingBox.enable ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-          <div v-if="greetingBox.enable" class="space-y-2">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">默认问候</label>
-              <input v-model="greetingBox.defaultGreeting" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div v-for="(g, i) in greetingBox.greetings" :key="i" class="flex items-center gap-2 p-2 bg-surface-2 rounded-lg">
-              <input v-model="g.greeting" placeholder="问候语" class="w-40 px-2 py-1 bg-surface border border-border rounded text-xs text-text">
-              <input v-model.number="g.startTime" type="number" min="0" max="23" placeholder="开始时间" class="w-16 px-2 py-1 bg-surface border border-border rounded text-xs text-text">
-              <input v-model.number="g.endTime" type="number" min="0" max="23" placeholder="结束时间" class="w-16 px-2 py-1 bg-surface border border-border rounded text-xs text-text">
-              <button class="p-1 text-red-400 hover:text-red-600 cursor-pointer" @click="removeGreeting(i)">
-                <span class="i-heroicons-x-mark w-4 h-4" />
-              </button>
-            </div>
-            <button class="w-full py-2 border-2 border-dashed border-border rounded-lg text-sm text-muted hover:border-primary hover:text-primary transition-colors cursor-pointer" @click="addGreeting">
-              + 添加时间段
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right column -->
-      <div class="space-y-6">
-        <!-- Translate & Read Mode -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-language w-5 h-5 text-primary" /> 简繁转换
-          </h2>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">启用简繁转换</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="translate.enable ? 'bg-primary' : 'bg-surface-2'" @click="translate.enable = !translate.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="translate.enable ? 'translate-x-6' : 'translate-x-1'" />
-              </button>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">默认编码</label>
-              <select v-model="translate.defaultEncoding" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option :value="1">繁体中文</option>
-                <option :value="2">简体中文</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-book-open w-5 h-5 text-primary" /> 阅读模式
-          </h2>
-          <div class="flex items-center justify-between">
-            <label class="text-sm text-text">启用阅读模式</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="readmode ? 'bg-primary' : 'bg-surface-2'" @click="readmode = !readmode">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="readmode ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Right-click Menu -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-cursor-arrow-ripple w-5 h-5 text-primary" /> 右键菜单
-          </h2>
-          <div class="flex items-center justify-between">
-            <label class="text-sm text-text">自定义右键菜单</label>
-            <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="rightClickMenu.enable ? 'bg-primary' : 'bg-surface-2'" @click="rightClickMenu.enable = !rightClickMenu.enable">
-              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="rightClickMenu.enable ? 'translate-x-6' : 'translate-x-1'" />
-            </button>
-          </div>
-        </div>
-
-        <!-- Shortcut Keys -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-key w-5 h-5 text-primary" /> 快捷键
-          </h2>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">启用快捷键</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="shortcutKey.enable ? 'bg-primary' : 'bg-surface-2'" @click="shortcutKey.enable = !shortcutKey.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="shortcutKey.enable ? 'translate-x-6' : 'translate-x-1'" />
-              </button>
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="text-sm text-text">无障碍快捷键 (Shift+?)</label>
-              <button class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer" :class="accesskey.enable ? 'bg-primary' : 'bg-surface-2'" @click="accesskey.enable = !accesskey.enable">
-                <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform" :class="accesskey.enable ? 'translate-x-6' : 'translate-x-1'" />
+          <div>
+            <p class="mb-3 text-sm font-medium text-text">隐藏按钮</p>
+            <div class="flex flex-wrap gap-3">
+              <button
+                v-for="option in rightsideOptions"
+                :key="`hide-${option.value}`"
+                type="button"
+                class="rounded-2xl border px-4 py-3 text-sm transition"
+                :class="form.rightsideHide.includes(option.value)
+                  ? 'border-rose-200 bg-rose-50 text-rose-600'
+                  : 'border-border bg-background/75 text-text hover:border-rose-200'"
+                @click="toggleSelection('rightsideHide', option.value)"
+              >
+                {{ option.label }}
               </button>
             </div>
           </div>
         </div>
+      </article>
+    </section>
 
-        <!-- Preview -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-eye w-5 h-5 text-primary" /> 效果预览
-          </h2>
-          <p class="text-xs text-muted mb-4">保存后访问前台查看各项特效</p>
-          <NuxtLink to="/" target="_blank" class="btn-secondary w-full flex items-center justify-center gap-2">
-            <span class="i-heroicons-arrow-top-right-on-square w-4 h-4" /> 预览前台
-          </NuxtLink>
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">导航音乐</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navMusicEnable = !form.navMusicEnable">
+            <span class="text-sm text-text">启用导航音乐</span>
+            <span class="text-sm text-muted">{{ form.navMusicEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navMusicConsoleWidescreen = !form.navMusicConsoleWidescreen">
+            <span class="text-sm text-text">宽屏控制台音乐</span>
+            <span class="text-sm text-muted">{{ form.navMusicConsoleWidescreen ? '开启' : '关闭' }}</span>
+          </button>
         </div>
-      </div>
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">歌单 / 歌曲 ID</span>
+            <input v-model="form.navMusicId" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">音乐服务商</span>
+            <select v-model="form.navMusicServer" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="netease">网易云</option>
+              <option value="tencent">QQ 音乐</option>
+              <option value="kugou">酷狗</option>
+              <option value="xiami">虾米</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">音量</span>
+            <input v-model="form.navMusicVolume" type="number" min="0" max="1" step="0.1" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">全部歌单入口</span>
+            <input v-model="form.navMusicPlaylist" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/music/" />
+          </label>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">翻译、提示与右键菜单</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-3">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.translateEnable = !form.translateEnable">
+            <span class="text-sm text-text">启用翻译</span>
+            <span class="text-sm text-muted">{{ form.translateEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.snackbarEnable = !form.snackbarEnable">
+            <span class="text-sm text-text">启用消息提醒</span>
+            <span class="text-sm text-muted">{{ form.snackbarEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.rightClickMenuEnable = !form.rightClickMenuEnable">
+            <span class="text-sm text-text">启用右键菜单</span>
+            <span class="text-sm text-muted">{{ form.rightClickMenuEnable ? '开启' : '关闭' }}</span>
+          </button>
+        </div>
+
+        <div class="mt-5 grid gap-5 md:grid-cols-2">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">默认编码</span>
+            <select v-model="form.translateDefaultEncoding" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option :value="1">默认繁体</option>
+              <option :value="2">默认简体</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">翻译延迟（毫秒）</span>
+            <input v-model="form.translateDelay" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">切换到繁体时按钮文案</span>
+            <input v-model="form.translateTraditionalLabel" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">切换到简体时按钮文案</span>
+            <input v-model="form.translateSimplifiedLabel" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">右键菜单繁体提示</span>
+            <input v-model="form.translateMenuTraditional" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">右键菜单简体提示</span>
+            <input v-model="form.translateMenuSimplified" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+
+        <div class="mt-5 grid gap-5 md:grid-cols-3">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">消息位置</span>
+            <input v-model="form.snackbarPosition" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="top-center" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">亮色背景</span>
+            <input v-model="form.snackbarBgLight" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">暗色背景</span>
+            <input v-model="form.snackbarBgDark" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">欢迎语与中控台</h2>
+        <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.greetingBoxEnable = !form.greetingBoxEnable">
+            <span class="text-sm text-text">启用欢迎弹层</span>
+            <span class="text-sm text-muted">{{ form.greetingBoxEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleEnable = !form.centerConsoleEnable">
+            <span class="text-sm text-text">启用右侧设置面板</span>
+            <span class="text-sm text-muted">{{ form.centerConsoleEnable ? '开启' : '关闭' }}</span>
+          </button>
+        </div>
+        <label class="mt-5 block space-y-2">
+          <span class="text-sm font-medium text-text">默认欢迎语</span>
+          <input v-model="form.greetingBoxDefault" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+        </label>
+        <label class="mt-5 block space-y-2">
+          <span class="text-sm font-medium text-text">欢迎语时间段 `greetingBox.list`</span>
+          <textarea v-model="form.greetingBoxListJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+        </label>
+        <label class="mt-5 block space-y-2">
+          <span class="text-sm font-medium text-text">右侧设置面板 `centerConsole`</span>
+          <textarea v-model="form.centerConsoleJson" rows="10" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+        </label>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">高级扩展 JSON</h2>
+        <p class="mt-2 text-sm text-muted">特效、AI 摘要、协议弹窗和友链朋友圈仍保留 JSON 入口，便于继续对齐安知鱼原始配置。</p>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">动效合集</span>
+            <textarea v-model="form.effectsJson" rows="10" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">AI 摘要配置</span>
+            <textarea v-model="form.aiSummaryJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">协议弹窗配置</span>
+            <textarea v-model="form.agreementPopupJson" rows="7" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">友链朋友圈配置</span>
+            <textarea v-model="form.friendsVueJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <div class="flex items-center justify-end gap-3">
+      <button type="button" class="rounded-2xl border border-border bg-background/80 px-5 py-3 text-sm font-semibold text-text transition hover:border-primary/25 hover:text-primary" :disabled="loading || saving" @click="refresh">
+        刷新
+      </button>
+      <button type="button" class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:bg-primary/90 disabled:opacity-60" :disabled="loading || saving" @click="handleSave">
+        {{ saving ? '保存中...' : '保存增强功能配置' }}
+      </button>
     </div>
   </div>
 </template>
-

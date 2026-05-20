@@ -1,231 +1,230 @@
 <script setup lang="ts">
-const api = useAdminApi()
-const loading = ref(true)
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
+
+const { settings, loading, save, refresh } = useAdminSettings('analytics')
+const { toRecord } = useAdminFormHelpers()
+
+const form = reactive({
+  googleAnalyticsId: '',
+  googleAnalyticsDebug: false,
+
+  baiduAnalyticsEnable: false,
+  baiduAnalyticsId: '',
+  baiduAnalyticsToken: '',
+  baiduAnalyticsScript: '',
+
+  busuanziSiteUv: false,
+  busuanziSitePv: false,
+  busuanziPagePv: false,
+
+  laEnable: false,
+  laCk: '',
+  laLingQueMonitorId: '',
+
+  umamiEnable: false,
+  umamiApiHost: '',
+  umamiWebsiteId: '',
+  umamiToken: '',
+})
+
 const saving = ref(false)
-const saveSuccess = ref(false)
+const message = ref('')
+const errorMessage = ref('')
 
-// Analytics provider
-const analytics = ref({
-  provider: '' as string, // '' | 'baidu' | 'google' | 'cloudflare' | 'microsoft' | 'umami' | 'la51'
-})
+function hydrateForm() {
+  const googleAnalytics = toRecord(settings.value.googleAnalytics)
+  const baiduAnalytics = toRecord(settings.value.baiduAnalytics)
+  const busuanzi = toRecord(settings.value.busuanzi)
+  const la = toRecord(settings.value.LA ?? settings.value.la51)
+  const umami = toRecord(settings.value.umami)
 
-const baiduAnalytics = ref({ id: '' })
-const googleAnalytics = ref({ id: '' })
-const cloudflareAnalytics = ref({ id: '' })
-const microsoftClarity = ref({ id: '' })
-const la51 = ref({ ck: '', LingQueMonitorID: '' })
-const umami = ref({
-  apiHost: '',
-  websiteId: '',
-  token: '',
-})
+  form.googleAnalyticsId = String(googleAnalytics.id ?? '')
+  form.googleAnalyticsDebug = googleAnalytics.debug !== undefined ? Boolean(googleAnalytics.debug) : false
 
-// Busuanzi
-const busuanzi = ref({
-  siteUv: false,
-  sitePv: false,
-  pagePv: false,
-})
+  form.baiduAnalyticsEnable = baiduAnalytics.enable !== undefined ? Boolean(baiduAnalytics.enable) : false
+  form.baiduAnalyticsId = String(baiduAnalytics.id ?? '')
+  form.baiduAnalyticsToken = String(baiduAnalytics.token ?? '')
+  form.baiduAnalyticsScript = String(baiduAnalytics.script ?? '')
 
-async function fetchSettings() {
-  loading.value = true
-  try {
-    const data = await api.get<Record<string, Array<{ key: string; value: unknown }>>>('/api/settings')
-    const s: Record<string, unknown> = {}
-    for (const rows of Object.values(data)) {
-      for (const row of rows) { s[row.key] = row.value }
-    }
+  form.busuanziSiteUv = busuanzi.siteUv !== undefined ? Boolean(busuanzi.siteUv) : Boolean(busuanzi.site_uv)
+  form.busuanziSitePv = busuanzi.sitePv !== undefined ? Boolean(busuanzi.sitePv) : Boolean(busuanzi.site_pv)
+  form.busuanziPagePv = busuanzi.pagePv !== undefined ? Boolean(busuanzi.pagePv) : Boolean(busuanzi.page_pv)
 
-    if (s.analytics) analytics.value = { ...analytics.value, ...(s.analytics as typeof analytics.value) }
-    if (s.baiduAnalytics) baiduAnalytics.value = { ...baiduAnalytics.value, ...(s.baiduAnalytics as typeof baiduAnalytics.value) }
-    if (s.googleAnalytics) googleAnalytics.value = { ...googleAnalytics.value, ...(s.googleAnalytics as typeof googleAnalytics.value) }
-    if (s.cloudflareAnalytics) cloudflareAnalytics.value = { ...cloudflareAnalytics.value, ...(s.cloudflareAnalytics as typeof cloudflareAnalytics.value) }
-    if (s.microsoftClarity) microsoftClarity.value = { ...microsoftClarity.value, ...(s.microsoftClarity as typeof microsoftClarity.value) }
-    if (s.la51) la51.value = { ...la51.value, ...(s.la51 as typeof la51.value) }
-    if (s.umami) umami.value = { ...umami.value, ...(s.umami as typeof umami.value) }
-    if (s.busuanzi) busuanzi.value = { ...busuanzi.value, ...(s.busuanzi as typeof busuanzi.value) }
-  } catch (e) {
-    console.error('Failed to fetch settings:', e)
-  } finally {
-    loading.value = false
-  }
+  form.laEnable = la.enable !== undefined ? Boolean(la.enable) : false
+  form.laCk = String(la.ck ?? '')
+  form.laLingQueMonitorId = String(la.LingQueMonitorID ?? '')
+
+  form.umamiEnable = umami.enable !== undefined ? Boolean(umami.enable) : false
+  form.umamiApiHost = String(umami.apiHost ?? '')
+  form.umamiWebsiteId = String(umami.websiteId ?? '')
+  form.umamiToken = String(umami.token ?? '')
 }
+
+watch(
+  settings,
+  () => {
+    hydrateForm()
+  },
+  { deep: true, immediate: true },
+)
 
 async function handleSave() {
   saving.value = true
-  saveSuccess.value = false
+  message.value = ''
+  errorMessage.value = ''
+
   try {
-    await api.put('/api/settings', [
-      { key: 'analytics', value: analytics.value, category: 'analytics' },
-      { key: 'baiduAnalytics', value: baiduAnalytics.value, category: 'analytics' },
-      { key: 'googleAnalytics', value: googleAnalytics.value, category: 'analytics' },
-      { key: 'cloudflareAnalytics', value: cloudflareAnalytics.value, category: 'analytics' },
-      { key: 'microsoftClarity', value: microsoftClarity.value, category: 'analytics' },
-      { key: 'la51', value: la51.value, category: 'analytics' },
-      { key: 'umami', value: umami.value, category: 'analytics' },
-      { key: 'busuanzi', value: busuanzi.value, category: 'analytics' },
-    ])
-    saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 3000)
-  } catch (e: unknown) {
-    alert(e instanceof Error ? e.message : '保存失败')
-  } finally {
+    await save({
+      googleAnalytics: {
+        id: form.googleAnalyticsId.trim(),
+        debug: form.googleAnalyticsDebug,
+      },
+      baiduAnalytics: {
+        enable: form.baiduAnalyticsEnable,
+        id: form.baiduAnalyticsId.trim(),
+        token: form.baiduAnalyticsToken.trim(),
+        script: form.baiduAnalyticsScript.trim(),
+      },
+      busuanzi: {
+        siteUv: form.busuanziSiteUv,
+        sitePv: form.busuanziSitePv,
+        pagePv: form.busuanziPagePv,
+      },
+      LA: {
+        enable: form.laEnable,
+        ck: form.laCk.trim(),
+        LingQueMonitorID: form.laLingQueMonitorId.trim(),
+      },
+      umami: {
+        enable: form.umamiEnable,
+        apiHost: form.umamiApiHost.trim(),
+        websiteId: form.umamiWebsiteId.trim(),
+        token: form.umamiToken.trim(),
+      },
+    })
+
+    message.value = '统计配置已保存。'
+    await refresh()
+  }
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '保存失败，请稍后重试。'
+  }
+  finally {
     saving.value = false
   }
 }
-
-onMounted(() => fetchSettings())
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-chart-bar w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">统计分析</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <span v-if="saveSuccess" class="text-sm text-green-600 flex items-center gap-1">
-          <span class="i-heroicons-check-circle w-4 h-4" /> 保存成功
-        </span>
-        <button class="btn-primary px-4 py-2 text-sm flex items-center gap-2 cursor-pointer" :disabled="saving" @click="handleSave">
-          <span v-if="saving" class="i-heroicons-arrow-path w-4 h-4 animate-spin" />
-          {{ saving ? '保存中...' : '保存设置' }}
-        </button>
-      </div>
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Analytics</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">统计分析配置</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        这里统一接管 Google Analytics、百度统计、不蒜子、灵雀监控和 Umami，保存后前台脚本和计数器会按配置生效。
+      </p>
+    </section>
+
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      {{ message }}
+    </div>
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+      {{ errorMessage }}
     </div>
 
-    <div v-if="loading" class="space-y-4">
-      <div class="h-48 bg-surface-2 rounded-xl animate-pulse" v-for="i in 3" :key="i" />
-    </div>
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">Google / 百度</h2>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">Google Analytics ID</span>
+            <input v-model="form.googleAnalyticsId" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="G-XXXXXXXXXX" >
+          </label>
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.googleAnalyticsDebug = !form.googleAnalyticsDebug">
+            <span class="text-sm text-text">Google Analytics 调试模式</span>
+            <span class="text-sm text-muted">{{ form.googleAnalyticsDebug ? '已开启' : '已关闭' }}</span>
+          </button>
 
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Provider -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-presentation-chart-line w-5 h-5 text-primary" /> 统计服务
-          </h2>
-          <p class="text-sm text-muted mb-4">选择一个统计服务来跟踪网站访问数据</p>
-          <div>
-            <label class="block text-sm font-medium text-text mb-1.5">选择服务</label>
-            <select v-model="analytics.provider" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-              <option value="">不使用统计</option>
-              <option value="baidu">百度统计</option>
-              <option value="google">Google Analytics</option>
-              <option value="cloudflare">Cloudflare Analytics</option>
-              <option value="microsoft">Microsoft Clarity</option>
-              <option value="umami">Umami</option>
-              <option value="la51">51LA 统计</option>
-            </select>
-          </div>
-        </div>
+          <div class="mt-2 h-px bg-border/70" />
 
-        <!-- Baidu -->
-        <div v-if="analytics.provider === 'baidu'" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">百度统计</h2>
-          <div>
-            <label class="block text-sm font-medium text-text mb-1.5">统计 ID</label>
-            <input v-model="baiduAnalytics.id" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="在百度统计后台获取">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.baiduAnalyticsEnable = !form.baiduAnalyticsEnable">
+            <span class="text-sm text-text">启用百度统计</span>
+            <span class="text-sm text-muted">{{ form.baiduAnalyticsEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <div class="grid gap-4 md:grid-cols-2">
+            <input v-model="form.baiduAnalyticsId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="统计 ID" >
+            <input v-model="form.baiduAnalyticsToken" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Token" >
           </div>
+          <input v-model="form.baiduAnalyticsScript" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="脚本地址或片段标识" >
         </div>
+      </article>
 
-        <!-- Google -->
-        <div v-if="analytics.provider === 'google'" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">Google Analytics</h2>
-          <div>
-            <label class="block text-sm font-medium text-text mb-1.5">测量 ID (G-XXXXXXXX)</label>
-            <input v-model="googleAnalytics.id" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="G-XXXXXXXX">
-          </div>
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">不蒜子</h2>
+        <div class="mt-5 grid gap-4">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.busuanziSiteUv = !form.busuanziSiteUv">
+            <span class="text-sm text-text">显示站点访客数</span>
+            <span class="text-sm text-muted">{{ form.busuanziSiteUv ? '已开启' : '已关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.busuanziSitePv = !form.busuanziSitePv">
+            <span class="text-sm text-text">显示站点浏览量</span>
+            <span class="text-sm text-muted">{{ form.busuanziSitePv ? '已开启' : '已关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.busuanziPagePv = !form.busuanziPagePv">
+            <span class="text-sm text-text">显示页面浏览量</span>
+            <span class="text-sm text-muted">{{ form.busuanziPagePv ? '已开启' : '已关闭' }}</span>
+          </button>
         </div>
+      </article>
+    </section>
 
-        <!-- Cloudflare -->
-        <div v-if="analytics.provider === 'cloudflare'" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">Cloudflare Analytics</h2>
-          <div>
-            <label class="block text-sm font-medium text-text mb-1.5">Token</label>
-            <input v-model="cloudflareAnalytics.id" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-          </div>
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">灵雀监控</h2>
+        <div class="mt-5 space-y-5">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.laEnable = !form.laEnable">
+            <span class="text-sm text-text">启用灵雀监控</span>
+            <span class="text-sm text-muted">{{ form.laEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <input v-model="form.laCk" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="CK" >
+          <input v-model="form.laLingQueMonitorId" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="LingQueMonitorID" >
         </div>
+      </article>
 
-        <!-- Microsoft Clarity -->
-        <div v-if="analytics.provider === 'microsoft'" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">Microsoft Clarity</h2>
-          <div>
-            <label class="block text-sm font-medium text-text mb-1.5">项目 ID</label>
-            <input v-model="microsoftClarity.id" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-          </div>
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">Umami</h2>
+        <div class="mt-5 space-y-5">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.umamiEnable = !form.umamiEnable">
+            <span class="text-sm text-text">启用 Umami</span>
+            <span class="text-sm text-muted">{{ form.umamiEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <input v-model="form.umamiApiHost" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Host" >
+          <input v-model="form.umamiWebsiteId" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Website ID" >
+          <input v-model="form.umamiToken" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Token" >
         </div>
+      </article>
+    </section>
 
-        <!-- 51LA -->
-        <div v-if="analytics.provider === 'la51'" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">51LA 统计</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">CK</label>
-              <input v-model="la51.ck" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">灵雀监控 ID</label>
-              <input v-model="la51.LingQueMonitorID" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-          </div>
-        </div>
-
-        <!-- Umami -->
-        <div v-if="analytics.provider === 'umami'" class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">Umami</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">API 地址</label>
-              <input v-model="umami.apiHost" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="https://analytics.example.com">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">网站 ID</label>
-              <input v-model="umami.websiteId" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-text mb-1.5">API Token</label>
-              <input v-model="umami.token" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-            </div>
-          </div>
-        </div>
-
-        <!-- Busuanzi -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-users w-5 h-5 text-primary" /> 不蒜子统计
-          </h2>
-          <p class="text-sm text-muted mb-4">轻量级访客统计（可与上述统计共存）</p>
-          <div class="flex gap-6">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="busuanzi.siteUv" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">全站 UV</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="busuanzi.sitePv" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">全站 PV</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="busuanzi.pagePv" type="checkbox" class="w-4 h-4 rounded accent-primary"> <span class="text-sm text-text">页面 PV</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-6">
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-light-bulb w-5 h-5 text-primary" /> 推荐
-          </h2>
-          <div class="text-sm text-muted space-y-2">
-            <p><strong>百度统计</strong> — 适合中文站点</p>
-            <p><strong>Google Analytics</strong> — 国际通用</p>
-            <p><strong>Umami</strong> — 自托管、隐私友好</p>
-            <p><strong>Microsoft Clarity</strong> — 免费热力图</p>
-            <p><strong>不蒜子</strong> — 极简计数，零配置</p>
-          </div>
-        </div>
-      </div>
+    <div class="flex items-center justify-end gap-3">
+      <button
+        type="button"
+        class="rounded-2xl border border-border bg-background/80 px-5 py-3 text-sm font-semibold text-text transition hover:border-primary/25 hover:text-primary"
+        :disabled="loading || saving"
+        @click="refresh"
+      >
+        刷新
+      </button>
+      <button
+        type="button"
+        class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:bg-primary/90 disabled:opacity-60"
+        :disabled="loading || saving"
+        @click="handleSave"
+      >
+        {{ saving ? '保存中...' : '保存统计配置' }}
+      </button>
     </div>
   </div>
 </template>
-

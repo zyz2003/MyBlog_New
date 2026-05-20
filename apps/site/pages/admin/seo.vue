@@ -1,277 +1,391 @@
 <script setup lang="ts">
-const api = useAdminApi()
+definePageMeta({
+  layout: 'admin-default',
+  middleware: ['admin-auth'],
+})
 
-const loading = ref(true)
-const saving = ref(false)
-const saveSuccess = ref(false)
+const { settings, loading, save, refresh } = useAdminSettings('seo')
+const { toRecord, objectToKeyValueText, keyValueTextToObject } = useAdminFormHelpers()
 
-// SEO settings
-const seo = ref({
-  siteTitle: '',
+type VerificationItem = {
+  name: string
+  content: string
+}
+
+const form = reactive({
   seoTitle: '',
   seoDescription: '',
   seoKeywords: '',
   baiduVerification: '',
   googleVerification: '',
+  bingVerification: '',
+
+  openGraphEnabled: true,
+  openGraphImage: '',
+  openGraphTwitterCard: 'summary_large_image',
+  cssPrefix: false,
+
+  googleAdsenseEnable: false,
+  googleAdsenseJs: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  googleAdsenseClient: '',
+
+  cloudflareAnalyticsId: '',
+  microsoftClarityId: '',
+
+  baiduPushEnable: false,
+  baiduPushToken: '',
+  baiduPushPath: '',
+
+  cnzzEnable: false,
+  cnzzId: '',
+  cnzzWebId: '',
+  cnzzScript: '',
+
+  structuredDataEnable: false,
+  structuredDataType: 'WebSite',
+  structuredDataPublisher: '',
+  structuredDataLogo: '',
+  structuredDataImage: '',
+  structuredDataUrl: '',
+  structuredDataExtraText: '',
 })
 
-const ogMeta = ref({ ogImage: '', twitterCard: 'summary_large_image' as string })
-const seoBing = ref('')
+const siteVerificationItems = ref<VerificationItem[]>([])
+const saving = ref(false)
+const message = ref('')
+const errorMessage = ref('')
 
-// Fetch settings
-async function fetchSettings() {
-  loading.value = true
-  try {
-    const data = await api.get<Record<string, Array<{ key: string; value: unknown }>>>('/api/settings')
+function addVerificationItem() {
+  siteVerificationItems.value.push({ name: '', content: '' })
+}
 
-    const allSettings: Record<string, unknown> = {}
-    for (const rows of Object.values(data)) {
-      for (const row of rows) {
-        allSettings[row.key] = row.value
-      }
-    }
+function removeVerificationItem(index: number) {
+  siteVerificationItems.value.splice(index, 1)
+}
 
-    seo.value = {
-      siteTitle: (allSettings.siteTitle as string) || '',
-      seoTitle: (allSettings.seoTitle as string) || '',
-      seoDescription: (allSettings.seoDescription as string) || '',
-      seoKeywords: (allSettings.seoKeywords as string) || '',
-      baiduVerification: (allSettings.baiduVerification as string) || '',
-      googleVerification: (allSettings.googleVerification as string) || '',
-    }
-  }
-  catch (e) {
-    console.error('Failed to fetch settings:', e)
-  }
-  finally {
-    loading.value = false
+function hydrateForm() {
+  const openGraphMeta = toRecord(settings.value.openGraphMeta)
+  const googleAdsense = toRecord(settings.value.googleAdsense)
+  const cloudflareAnalytics = toRecord(settings.value.cloudflareAnalytics)
+  const microsoftClarity = toRecord(settings.value.microsoftClarity)
+  const baiduPush = toRecord(settings.value.baiduPush)
+  const cnzzAnalytics = toRecord(settings.value.cnzzAnalytics)
+  const structuredData = toRecord(settings.value.structuredData)
+
+  form.seoTitle = String(settings.value.seoTitle ?? '')
+  form.seoDescription = String(settings.value.seoDescription ?? '')
+  form.seoKeywords = String(settings.value.seoKeywords ?? '')
+  form.baiduVerification = String(settings.value.baiduVerification ?? '')
+  form.googleVerification = String(settings.value.googleVerification ?? '')
+  form.bingVerification = String(settings.value.bingVerification ?? '')
+
+  form.openGraphEnabled = settings.value.Open_Graph_meta !== false
+  form.openGraphImage = String(openGraphMeta.ogImage ?? '')
+  form.openGraphTwitterCard = String(openGraphMeta.twitterCard ?? 'summary_large_image')
+  form.cssPrefix = Boolean(settings.value.css_prefix)
+
+  form.googleAdsenseEnable = googleAdsense.enable !== undefined ? Boolean(googleAdsense.enable) : false
+  form.googleAdsenseJs = String(googleAdsense.js ?? 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js')
+  form.googleAdsenseClient = String(googleAdsense.client ?? '')
+
+  form.cloudflareAnalyticsId = String(cloudflareAnalytics.id ?? '')
+  form.microsoftClarityId = String(microsoftClarity.id ?? '')
+
+  form.baiduPushEnable = baiduPush.enable !== undefined ? Boolean(baiduPush.enable) : false
+  form.baiduPushToken = String(baiduPush.token ?? '')
+  form.baiduPushPath = String(baiduPush.path ?? '')
+
+  form.cnzzEnable = cnzzAnalytics.enable !== undefined ? Boolean(cnzzAnalytics.enable) : false
+  form.cnzzId = String(cnzzAnalytics.id ?? '')
+  form.cnzzWebId = String(cnzzAnalytics.webId ?? cnzzAnalytics.web_id ?? '')
+  form.cnzzScript = String(cnzzAnalytics.script ?? '')
+
+  form.structuredDataEnable = structuredData.enable !== undefined ? Boolean(structuredData.enable) : false
+  form.structuredDataType = String(structuredData.type ?? 'WebSite')
+  form.structuredDataPublisher = String(structuredData.publisher ?? '')
+  form.structuredDataLogo = String(structuredData.logo ?? '')
+  form.structuredDataImage = String(structuredData.image ?? '')
+  form.structuredDataUrl = String(structuredData.url ?? '')
+
+  const extra = { ...structuredData }
+  delete extra.enable
+  delete extra.type
+  delete extra.publisher
+  delete extra.logo
+  delete extra.image
+  delete extra.url
+  form.structuredDataExtraText = objectToKeyValueText(extra)
+
+  siteVerificationItems.value = Array.isArray(settings.value.siteVerification)
+    ? settings.value.siteVerification.map((item) => {
+        const record = toRecord(item)
+        return {
+          name: String(record.name ?? ''),
+          content: String(record.content ?? ''),
+        }
+      })
+    : [
+        settings.value.googleVerification ? { name: 'google-site-verification', content: String(settings.value.googleVerification) } : null,
+        settings.value.baiduVerification ? { name: 'baidu-site-verification', content: String(settings.value.baiduVerification) } : null,
+        settings.value.bingVerification ? { name: 'msvalidate.01', content: String(settings.value.bingVerification) } : null,
+      ].filter(Boolean) as VerificationItem[]
+
+  if (!siteVerificationItems.value.length) {
+    addVerificationItem()
   }
 }
 
-// Save settings
+watch(
+  settings,
+  () => {
+    hydrateForm()
+  },
+  { deep: true, immediate: true },
+)
+
 async function handleSave() {
   saving.value = true
-  saveSuccess.value = false
+  message.value = ''
+  errorMessage.value = ''
 
   try {
-    const items = [
-      { key: 'siteTitle', value: seo.value.siteTitle, category: 'site' },
-      { key: 'seoTitle', value: seo.value.seoTitle, category: 'seo' },
-      { key: 'seoDescription', value: seo.value.seoDescription, category: 'seo' },
-      { key: 'seoKeywords', value: seo.value.seoKeywords, category: 'seo' },
-      { key: 'baiduVerification', value: seo.value.baiduVerification, category: 'seo' },
-      { key: 'googleVerification', value: seo.value.googleVerification, category: 'seo' },
-    ]
+    await save({
+      seoTitle: form.seoTitle.trim(),
+      seoDescription: form.seoDescription.trim(),
+      seoKeywords: form.seoKeywords.trim(),
+      baiduVerification: form.baiduVerification.trim(),
+      googleVerification: form.googleVerification.trim(),
+      bingVerification: form.bingVerification.trim(),
+      Open_Graph_meta: form.openGraphEnabled,
+      openGraphMeta: {
+        ogImage: form.openGraphImage.trim(),
+        twitterCard: form.openGraphTwitterCard.trim() || 'summary_large_image',
+      },
+      siteVerification: siteVerificationItems.value
+        .map(item => ({
+          name: item.name.trim(),
+          content: item.content.trim(),
+        }))
+        .filter(item => item.name && item.content),
+      css_prefix: form.cssPrefix,
+      googleAdsense: {
+        enable: form.googleAdsenseEnable,
+        js: form.googleAdsenseJs.trim() || 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+        client: form.googleAdsenseClient.trim(),
+      },
+      cloudflareAnalytics: {
+        id: form.cloudflareAnalyticsId.trim(),
+      },
+      microsoftClarity: {
+        id: form.microsoftClarityId.trim(),
+      },
+      baiduPush: {
+        enable: form.baiduPushEnable,
+        token: form.baiduPushToken.trim(),
+        path: form.baiduPushPath.trim(),
+      },
+      cnzzAnalytics: {
+        enable: form.cnzzEnable,
+        id: form.cnzzId.trim(),
+        webId: form.cnzzWebId.trim(),
+        script: form.cnzzScript.trim(),
+      },
+      structuredData: {
+        enable: form.structuredDataEnable,
+        type: form.structuredDataType.trim(),
+        publisher: form.structuredDataPublisher.trim(),
+        logo: form.structuredDataLogo.trim(),
+        image: form.structuredDataImage.trim(),
+        url: form.structuredDataUrl.trim(),
+        ...keyValueTextToObject(form.structuredDataExtraText),
+      },
+    })
 
-    await api.put('/api/settings', items)
-    saveSuccess.value = true
-    setTimeout(() => { saveSuccess.value = false }, 3000)
+    message.value = 'SEO 配置已保存。'
+    await refresh()
   }
-  catch (e: unknown) {
-    const message = e instanceof Error ? e.message : '保存失败'
-    alert(message)
+  catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '保存失败，请稍后重试。'
   }
   finally {
     saving.value = false
   }
 }
-
-onMounted(() => {
-  fetchSettings()
-})
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="i-heroicons-magnifying-glass w-6 h-6 text-primary" />
-        <h1 class="text-2xl font-bold text-text">SEO 设置</h1>
-      </div>
-      <div class="flex items-center gap-3">
-        <span v-if="saveSuccess" class="text-sm text-green-600 flex items-center gap-1">
-          <span class="i-heroicons-check-circle w-4 h-4" />
-          保存成功
-        </span>
-        <button
-          class="btn-primary px-4 py-2 text-sm flex items-center gap-2"
-          :disabled="saving"
-          :class="{ 'opacity-50 cursor-not-allowed': saving }"
-          @click="handleSave"
-        >
-          <span v-if="saving" class="i-heroicons-arrow-path w-4 h-4 animate-spin" />
-          {{ saving ? '保存中...' : '保存设置' }}
+    <section class="rounded-[28px] border border-border/70 bg-[linear-gradient(135deg,rgba(75,141,248,0.08),rgba(255,255,255,0.74))] p-6 shadow-sm">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">SEO</p>
+      <h1 class="mt-3 text-3xl font-black tracking-tight text-text">SEO 配置</h1>
+      <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
+        这里集中管理标题描述、验证 Meta、Open Graph、广告脚本和结构化数据，保存后前台头部标签与脚本会同步更新。
+      </p>
+    </section>
+
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+      {{ message }}
+    </div>
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+      {{ errorMessage }}
+    </div>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">基础 SEO</h2>
+        <div class="mt-5 space-y-5">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">SEO 标题</span>
+            <input v-model="form.seoTitle" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">SEO 描述</span>
+            <textarea v-model="form.seoDescription" rows="4" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm leading-7 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">SEO 关键词</span>
+            <input v-model="form.seoKeywords" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="逗号分隔" >
+          </label>
+          <div class="grid gap-4 md:grid-cols-3">
+            <input v-model="form.baiduVerification" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="百度验证" >
+            <input v-model="form.googleVerification" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Google 验证" >
+            <input v-model="form.bingVerification" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Bing 验证" >
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">Open Graph</h2>
+        <div class="mt-5 space-y-5">
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.openGraphEnabled = !form.openGraphEnabled">
+              <span class="text-sm text-text">启用 Open Graph</span>
+              <span class="text-sm text-muted">{{ form.openGraphEnabled ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.cssPrefix = !form.cssPrefix">
+              <span class="text-sm text-text">启用 CSS Prefix</span>
+              <span class="text-sm text-muted">{{ form.cssPrefix ? '已开启' : '已关闭' }}</span>
+            </button>
+          </div>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">OG 图片</span>
+            <input v-model="form.openGraphImage" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">Twitter Card</span>
+            <input v-model="form.openGraphTwitterCard" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-text">自定义站点验证</h2>
+          <p class="mt-2 text-sm text-muted">这里会直接输出到前台 `<meta name="..." content="...">` 中。</p>
+        </div>
+        <button type="button" class="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90" @click="addVerificationItem">
+          新增验证项
         </button>
       </div>
-    </div>
-
-    <!-- Loading -->
-    <div v-if="loading" class="space-y-4">
-      <div class="h-48 bg-surface-2 rounded-xl animate-pulse" />
-      <div class="h-64 bg-surface rounded animate-pulse" />
-    </div>
-
-    <!-- Settings -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Main settings -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Basic SEO -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-document-magnifying-glass w-5 h-5 text-primary" />
-            基础信息
-          </h2>
-          <p class="text-sm text-muted mb-4">设置搜索引擎可见性的基本信息</p>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">站点标题</label>
-              <input
-                v-model="seo.siteTitle"
-                type="text"
-                class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary"
-                placeholder="我的博客"
-              >
-              <p class="text-xs text-muted mt-1">显示在浏览器标签和搜索结果中的名称</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">SEO 标题</label>
-              <input
-                v-model="seo.seoTitle"
-                type="text"
-                class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary"
-                placeholder="留空则使用站点标题"
-              >
-              <p class="text-xs text-muted mt-1">自定义搜索结果中显示的标题，留空使用站点标题</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">SEO 描述</label>
-              <textarea
-                v-model="seo.seoDescription"
-                rows="3"
-                class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary resize-none"
-                placeholder="博客的简短描述，用于搜索结果摘要"
-              />
-              <p class="text-xs text-muted mt-1">建议 150-200 字符，搜索引擎会截取前 160 字符</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">SEO 关键词</label>
-              <input
-                v-model="seo.seoKeywords"
-                type="text"
-                class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary"
-                placeholder="博客, 文章, 技术, 分享"
-              >
-              <p class="text-xs text-muted mt-1">用逗号分隔关键词，例如：博客, 技术, 前端, Vue</p>
-            </div>
+      <div class="mt-5 space-y-4">
+        <article v-for="(item, index) in siteVerificationItems" :key="`verification-${index}`" class="rounded-3xl border border-border bg-background/70 p-5">
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-sm font-semibold text-text">验证项 {{ index + 1 }}</p>
+            <button type="button" class="text-sm text-rose-500 transition hover:text-rose-600" @click="removeVerificationItem(index)">
+              删除
+            </button>
           </div>
-        </div>
-
-        <!-- Open Graph Meta -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4">Open Graph 社交分享</h2>
-          <p class="text-sm text-muted mb-4">控制微信/Facebook/Twitter 等社交平台分享时的展示效果</p>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">OG 图片 URL</label>
-              <input v-model="ogMeta.ogImage" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="默认分享图片 URL">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">Twitter Card</label>
-              <select v-model="ogMeta.twitterCard" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text">
-                <option value="summary">Summary</option>
-                <option value="summary_large_image">Summary Large Image</option>
-              </select>
-            </div>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <input v-model="item.name" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="meta name" >
+            <input v-model="item.content" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="meta content" >
           </div>
-        </div>
-
-        <!-- Search Engine Verification -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-check-badge w-5 h-5 text-primary" />
-            搜索引擎验证
-          </h2>
-          <p class="text-sm text-muted mb-4">用于验证站点所有权，提升搜索排名</p>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">百度验证</label>
-              <input
-                v-model="seo.baiduVerification"
-                type="text"
-                class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary"
-                placeholder="百度站长平台验证代码"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">Google 验证</label>
-              <input
-                v-model="seo.googleVerification"
-                type="text"
-                class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-muted focus:outline-none focus:border-primary"
-                placeholder="Google Search Console 验证代码"
-              >
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-text mb-1.5">Bing 验证</label>
-              <input v-model="seoBing" type="text" class="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-text" placeholder="Bing Webmaster 验证代码">
-            </div>
-          </div>
-        </div>
+        </article>
       </div>
+    </section>
 
-      <!-- Sidebar - Tips -->
-      <div class="space-y-6">
-        <!-- SEO Tips -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-light-bulb w-5 h-5 text-primary" />
-            SEO 小贴士
-          </h2>
-          <div class="space-y-3 text-sm text-muted">
-            <div class="flex items-start gap-2">
-              <span class="i-heroicons-check-circle w-4 h-4 text-green-500 mt-0.5" />
-              <p>标题包含核心关键词，控制在 60 字符内</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="i-heroicons-check-circle w-4 h-4 text-green-500 mt-0.5" />
-              <p>描述简洁有吸引力，包含关键词和行动号召</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="i-heroicons-check-circle w-4 h-4 text-green-500 mt-0.5" />
-              <p>关键词选择与内容相关的核心词汇</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="i-heroicons-check-circle w-4 h-4 text-green-500 mt-0.5" />
-              <p>提交网站地图给搜索引擎加速收录</p>
-            </div>
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">广告与统计脚本</h2>
+        <div class="mt-5 space-y-5">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.googleAdsenseEnable = !form.googleAdsenseEnable">
+            <span class="text-sm text-text">启用 Google Adsense</span>
+            <span class="text-sm text-muted">{{ form.googleAdsenseEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <input v-model="form.googleAdsenseJs" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Adsense JS 地址" >
+          <input v-model="form.googleAdsenseClient" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Adsense Client" >
+          <div class="grid gap-4 md:grid-cols-2">
+            <input v-model="form.cloudflareAnalyticsId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Cloudflare Analytics ID" >
+            <input v-model="form.microsoftClarityId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Microsoft Clarity ID" >
           </div>
         </div>
+      </article>
 
-        <!-- Sitemap -->
-        <div class="card p-6">
-          <h2 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-            <span class="i-heroicons-map w-5 h-5 text-primary" />
-            网站地图
-          </h2>
-          <p class="text-xs text-muted mb-4">站点地图帮助搜索引擎更好地收录</p>
-          <div class="space-y-2">
-            <NuxtLink
-              to="/sitemap.xml"
-              target="_blank"
-              class="flex items-center gap-2 px-3 py-2 bg-surface-2 rounded-lg text-sm text-text hover:text-primary transition-colors"
-            >
-              <span class="i-heroicons-document-text w-4 h-4" />
-              XML 站点地图
-            </NuxtLink>
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">百度推送与 CNZZ</h2>
+        <div class="mt-5 space-y-5">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.baiduPushEnable = !form.baiduPushEnable">
+            <span class="text-sm text-text">启用百度推送</span>
+            <span class="text-sm text-muted">{{ form.baiduPushEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <div class="grid gap-4 md:grid-cols-2">
+            <input v-model="form.baiduPushToken" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="推送 token" >
+            <input v-model="form.baiduPushPath" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="推送路径" >
           </div>
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.cnzzEnable = !form.cnzzEnable">
+            <span class="text-sm text-text">启用 CNZZ</span>
+            <span class="text-sm text-muted">{{ form.cnzzEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <div class="grid gap-4 md:grid-cols-2">
+            <input v-model="form.cnzzId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="CNZZ ID" >
+            <input v-model="form.cnzzWebId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Web ID" >
+          </div>
+          <input v-model="form.cnzzScript" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="脚本地址或片段标识" >
         </div>
+      </article>
+    </section>
+
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <h2 class="text-xl font-black text-text">结构化数据</h2>
+      <div class="mt-5 space-y-5">
+        <div class="grid gap-4 md:grid-cols-2">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.structuredDataEnable = !form.structuredDataEnable">
+            <span class="text-sm text-text">启用结构化数据</span>
+            <span class="text-sm text-muted">{{ form.structuredDataEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <input v-model="form.structuredDataType" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="类型，例如 WebSite / Blog" >
+        </div>
+        <div class="grid gap-4 md:grid-cols-2">
+          <input v-model="form.structuredDataPublisher" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="发布者" >
+          <input v-model="form.structuredDataUrl" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="站点地址" >
+          <input v-model="form.structuredDataLogo" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Logo 地址" >
+          <input v-model="form.structuredDataImage" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="封面图地址" >
+        </div>
+        <label class="block space-y-2">
+          <span class="text-sm font-medium text-text">附加字段</span>
+          <textarea v-model="form.structuredDataExtraText" rows="5" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行 key=value" />
+        </label>
       </div>
+    </section>
+
+    <div class="flex items-center justify-end gap-3">
+      <button
+        type="button"
+        class="rounded-2xl border border-border bg-background/80 px-5 py-3 text-sm font-semibold text-text transition hover:border-primary/25 hover:text-primary"
+        :disabled="loading || saving"
+        @click="refresh"
+      >
+        刷新
+      </button>
+      <button
+        type="button"
+        class="rounded-2xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/20 transition hover:bg-primary/90 disabled:opacity-60"
+        :disabled="loading || saving"
+        @click="handleSave"
+      >
+        {{ saving ? '保存中...' : '保存 SEO 配置' }}
+      </button>
     </div>
   </div>
 </template>
