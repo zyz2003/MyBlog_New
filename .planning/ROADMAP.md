@@ -1,101 +1,180 @@
-# Roadmap: 个人博客系统 v2.0 安知鱼完美复刻
+# Roadmap: 重构恢复路线图
 
 ## Overview
 
-This roadmap covers the v2.0 milestone: fixing architectural debt first, then perfectly replicating the AnZhiYu Hexo theme's frontend components and backend configuration. The journey starts with a foundation phase that unifies the configuration system, adds composables, and fixes CSS injection -- because all subsequent UI work depends on these being correct. From there, we build outward: navigation shell, post experience with sidebar, search/comments, and finally backend configuration field completion.
+当前重构分为四个阶段：
+
+1. 先修复架构链路与前后台设置读取的一致性
+2. 再完成前台壳层与首页结构重建
+3. 然后补齐前台搜索、评论、文章详情等交互能力
+4. 最后收口后台配置页、管理体验与前后台配置闭环
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3, 4, 5): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+- [x] **Phase 1: Recovery**  
+  收口主题链路、前后台设置读取链路与页面层重复逻辑。
 
-- [ ] **Phase 1: Architecture Refactoring** - Fix the foundation: unified config, composables, CSS injection, layout chain, style system, data integrity
-- [ ] **Phase 2: Frontend Core Shell** - Navbar, Footer, existing component audit, Archive page
-- [ ] **Phase 3: Frontend Post Experience** - PostHeader, Copyright, AiSummary, Preloader, RightsideButtons, MusicPlayer, RightClickMenu, 5 sidebar widgets
-- [ ] **Phase 4: Search & Comments** - SearchWidget, CommentWidget
-- [ ] **Phase 5: Backend Configuration Complete** - All 10 admin pages field completion
+- [x] **Phase 2: Frontend Shell**  
+  完成首页、导航、页脚、归档页等前台壳层重建，让整体结构贴近安知鱼主题。
 
-## Phase Details
+- [x] **Phase 3: Frontend Features**  
+  完成搜索、评论、文章增强组件与剩余前台交互能力。
 
-### Phase 1: Architecture Refactoring
-**Goal**: The codebase has a single source of truth for settings, shared composables for frontend and admin, working CSS injection, correct layout inheritance, and data integrity guarantees
-**Depends on**: Nothing (first phase)
-**Requirements**: ARCH-01, ARCH-02, ARCH-03, ARCH-04, ARCH-05, ARCH-06, DATA-01, DATA-02
-**Success Criteria** (what must be TRUE):
-  1. Saving settings from ThemeCustomizer writes to both system_settings and theme_settings tables in one operation -- no dual-save workaround needed
-  2. Any frontend page can call useSiteSettings() and receive the full site config without manual fetch calls, and the data is consistent between SSR and client hydration
-  3. Any admin page can call useAdminSettings() to load and save settings in ~5 lines instead of ~50 lines of repeated fetch/save logic
-  4. The frontend layout loads theme CSS from /api/themes/active.css and applies it dynamically -- theme color changes are visible immediately after save
-  5. Batch settings updates succeed or fail atomically (no partial writes), and invalid setting values are caught by Zod validation with clear error messages
-**Plans**: 6 plans
+- [x] **Phase 4: Admin Completion**  
+  统一后台设置页、补齐保存链路、修复乱码文案，并打通“后台可改 -> 数据持久化 -> 前台真实生效”的闭环。
+
+## Phase 1 Summary
+
+### Goal
+
+让代码库从“半重构”状态回到“单一路径、单一入口、可继续开发”的稳定状态。
+
+### Achieved
+
+1. 首页、主题与后台设置链路统一到更稳定的 composable 和 theme manager。
+2. `useSiteSettings()` / `useAdminSettings()` 成为核心配置消费路径。
+3. 关键后台设置页完成迁移。
+4. `.planning` 与真实执行状态重新对齐。
+
+## Phase 2 Summary
+
+### Goal
+
+让首页、导航、页脚、归档页不再像通用博客模板，而是具备明确的安知鱼风格壳层。
+
+### Achieved
+
+1. 首页 top/banner/category/post 组合完成重建。
+2. 导航壳层与右侧悬浮按钮完成前台可用性修复。
+3. 页脚三段式结构与归档页壳层补齐。
+4. 前台可见乱码、分页点透明、按钮空心等问题完成清理。
+5. `pnpm.cmd type-check` 通过，前台页面未引入新的阻断性错误。
+
+### Deferred
+
+- 更高保真的像素级对齐
+- 顶部 banner、推荐卡片与文章流的视觉细磨
+- 页脚与文章流的进一步细节精修
+
+## Phase 3 Summary
+
+### Goal
+
+补齐前台剩余核心交互，让搜索、评论与文章详情页从“占位状态”升级为可实际使用的完整链路。
+
+### Achieved
+
+1. 搜索弹层改为真实调用 `/api/search`，支持防抖、键盘选择与正确跳转。
+2. 独立搜索页补齐分页、空状态、错误状态与更清晰的搜索体验。
+3. 评论模块增加 `post-comment` 锚点、Twikoo 安全加载与未配置时的友好提示。
+4. 最新评论卡片从占位符改为真实状态卡，避免继续暴露假数据。
+5. 文章详情页统一到日期路由，补齐 AI 摘要、目录、版权卡片与评论区联动。
+6. Markdown 标题自动生成稳定锚点，目录组件能跟随标题工作。
+7. `pnpm.cmd type-check` 通过，搜索页与文章页链路已完成功能级联调。
+
+### Residual Risk
+
+- 开发环境仍存在既有 hydration warning，主要集中在旧壳层区域与富文本渲染链路，属于后续 SSR 细修项。
+- `Nuxt Site Config` 仍提示 localhost 构建地址，该问题并非本阶段新增。
+
+## Phase 4 Summary
+
+### Goal
+
+把后台管理端从“部分可编辑、部分无效、文案乱码”的状态，收口到“配置页结构统一、保存字段完整、前台能真实消费”的可维护状态。
+
+### Achieved
+
+1. `comments`、`features`、`seo`、`posts`、`sidebar`、`display`、`general` 等后台页完成统一整理，文案恢复可读中文。
+2. 多个设置页迁移为统一的 `useAdminSettings()` 保存模式，减少各页手写请求导致的漂移。
+3. `settings.schema.ts` 补齐 Phase 4 相关 key 的 Zod 校验覆盖，避免后台新增字段绕过结构约束。
+4. `useSiteSettings()` 与前台类型定义更新，评论、侧边栏、右侧按钮等配置可被前台真实消费。
+5. 右侧悬浮按钮接入 `rightsideItems` 配置，后台保存后前台显隐会同步生效。
+6. 侧边栏设置同时写入新 `sidebar` 对象和兼容字段，修复“后台保存了但首页没变化”的链路问题。
+7. 设置写入接口的错误提示恢复为正常中文，后台异常更容易排查。
+8. `pnpm.cmd type-check` 通过。
+
+## Current Status
+
+四个阶段已按当前重构路线完成。后续如果继续推进，建议进入“验收与精修”路线，而不是再回到结构性重写。
+
+### Phase 5: Frontend Settings Consumption
+
+**Goal:** Close the remaining admin-to-frontend configuration loop so backend-managed settings produce real public-site changes
+**Requirements**: Consume the highest-impact existing admin settings on the homepage, global shell, and selected fallback paths
+**Depends on:** Phase 4
+**Plans:** 1 plan
+
 Plans:
-- [ ] 01-01-PLAN.md — Data integrity: transaction-wrapped batch updates + Zod schema validation for settings (DATA-01, DATA-02)
-- [ ] 01-02-PLAN.md — Theme config unification: DB-driven ThemeManager with saveConfig() dual-write (ARCH-01)
-- [ ] 01-03-PLAN.md — Theme CSS injection: /api/themes/active.css endpoint + frontend layout link (ARCH-04)
-- [ ] 01-04-PLAN.md — Composables: useSiteSettings() and useAdminSettings() (ARCH-02, ARCH-03)
-- [ ] 01-05-PLAN.md — Layout chain fix (part 1): admin.vue layout inheritance + 14 child page cleanup (ARCH-05)
-- [ ] 01-06-PLAN.md — Layout chain fix (part 2) + @apply to UnoCSS: remaining 8 pages + 6 @apply cleanups (ARCH-05, ARCH-06)
+- [x] 05-01 Frontend Consumption Of Admin-Controlled Settings
 
-### Phase 2: Frontend Core Shell
-**Goal**: Visitors see a navigation bar and footer that match the AnZhiYu theme exactly, the archive page works, and all existing components have been audited against the Pug templates
-**Depends on**: Phase 1
-**Requirements**: FNAV-01, FNAV-02, FNAV-03, FPAGE-01
-**Success Criteria** (what must be TRUE):
-  1. The top navigation bar shows Logo, menu items, social icons, and dark mode toggle, matching the AnZhiYu header/index.pug layout on both desktop and mobile viewports
-  2. The footer displays copyright, badges, social bar, runtime counter, and link lists, matching footer.pug exactly
-  3. The archive page displays posts in a timeline layout matching layout/archive.pug, grouped by year/month
-  4. All 17 existing frontend components have been reviewed against their Pug template counterparts -- non-conforming components are either rewritten to match or deleted
-**Plans**: TBD
-**UI hint**: yes
+### Phase 5 Summary
 
-### Phase 3: Frontend Post Experience
-**Goal**: Readers experience a complete AnZhiYu-style post page with rich metadata, copyright notice, AI summary, loading animation, sidebar controls, music player, and right-click menu, plus 5 sidebar widgets
-**Depends on**: Phase 2
-**Requirements**: FPOST-01, FPOST-02, FPOST-03, FPOST-04, FPOST-05, FPOST-06, FPOST-07, FSIDE-01, FSIDE-02, FSIDE-03, FSIDE-04, FSIDE-05
-**Success Criteria** (what must be TRUE):
-  1. The post page header shows title, date, categories, tags, word count, and reading time, matching post-info.pug
-  2. Below each post, a copyright block shows author, permalink, and license, matching post-copyright.pug
-  3. An AI summary section appears on posts that have AI-generated summaries, matching ai-info.pug
-  4. The page loading animation (fullpage or pace mode) and right-side button group (scroll-to-top, dark toggle, TOC toggle) both function as in the AnZhiYu theme
-  5. All 5 sidebar widgets (Announce, Archive, Categories, WeChat, RecentComments) render and display data, matching their respective Pug widget templates
-**Plans**: TBD
-**UI hint**: yes
+#### Goal
 
-### Phase 4: Search & Comments
-**Goal**: Visitors can search posts and leave/read comments using the same integrations AnZhiYu supports
-**Depends on**: Phase 2
-**Requirements**: FPAGE-02, FPAGE-03
-**Success Criteria** (what must be TRUE):
-  1. The search widget supports local search and (optionally) Algolia, matching third-party/search/ templates
-  2. The comment widget supports at least Twikoo and Waline, with UI matching third-party/comments/ templates
-**Plans**: TBD
-**UI hint**: yes
+Make the backend configuration center a real frontend driver so public-site behavior changes when
+admins update the corresponding settings, rather than leaving AnZhiYu-aligned keys stored but
+unused.
 
-### Phase 5: Backend Configuration Complete
-**Goal**: Every AnZhiYu _config.yml field is available in the admin UI -- no missing configuration options
-**Depends on**: Phase 1
-**Requirements**: ADMIN-01, ADMIN-02, ADMIN-03, ADMIN-04, ADMIN-05, ADMIN-06, ADMIN-07, ADMIN-08, ADMIN-09, ADMIN-10
-**Success Criteria** (what must be TRUE):
-  1. The homepage settings page contains all fields from the _config.yml homepage section (post_meta, cover, category, peoplecanvas, etc.) and saving them persists correctly
-  2. The sidebar settings page contains all fields from the _config.yml aside/sidebar section (site_data, menus_items, tags_cloud, display_mode, card_* configs) and saving them persists correctly
-  3. All remaining admin pages (SEO, global, post, comment, code, analytics, effects, theme) have their missing fields added and functional -- every _config.yml key that the AnZhiYu theme uses is present in the corresponding admin page
-  4. Configuration coverage reaches 100% of the 1343-line _config.yml (no orphaned keys that the theme actually reads)
-**Plans**: TBD
-**UI hint**: yes
+#### Achieved
 
-## Progress
+1. `useSiteSettings()` now normalizes more of the admin-managed frontend contract, including
+   `peoplecanvas`, `linkPageTop`, `pageThumbnailSuffix`, `topImage`, `mourn`, `error_404`,
+   `error_img`, footer subtitle/cc, and rightside button ordering
+2. Homepage top-area rendering is now config-driven for peoplecanvas mode, top image behavior,
+   category cards, thumbnail suffixes, and fallback cover strategy
+3. Public shell and detail surfaces now consume settings more broadly:
+   navbar/profile/footer/rightside buttons/article detail/friends page all honor backend-managed
+   values instead of relying on hardcoded-only output
+4. Previously dead settings paths were activated, including friends-page top copy, footer bar
+   subtitle and cc display, homepage comment-count toggles, mourn-day grayscale behavior, and
+   article/recent-post image fallback chains
+5. `pnpm.cmd type-check` passes after the settings-consumption wave
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Architecture Refactoring | 0/6 | Planned | - |
-| 2. Frontend Core Shell | 0/? | Not started | - |
-| 3. Frontend Post Experience | 0/? | Not started | - |
-| 4. Search & Comments | 0/? | Not started | - |
-| 5. Backend Configuration Complete | 0/? | Not started | - |
+#### Residual Risk
+
+- Verification has reached code-level and type-level completion, but a final manual admin-save ->
+  frontend-visible-change smoke pass is still valuable before calling the whole frontend migration
+  fully stabilized
+- `nuxt-site-config` still warns about localhost build URL; this predates the phase and was not
+  introduced here
+
+### Phase 6: Frontend Parity Polish
+
+**Goal:** Shrink the remaining visual, structural, and interaction gap between the current public frontend and the AnZhiYu reference theme
+**Requirements**: Audit the highest-traffic public pages first, fix the largest parity deviations before expanding page count, and preserve the working admin-to-frontend config loop from Phase 5
+**Depends on:** Phase 5
+**Plans:** 1 plan
+
+Plans:
+- [x] 06-01 High-Traffic Frontend Parity Audit And First Repair Wave
+
+### Phase 6 Summary
+
+#### Goal
+
+Shrink the remaining visual, structural, and interaction gap between the current public frontend
+and the AnZhiYu reference on the pages users notice most.
+
+#### Achieved
+
+1. Completed a concrete parity audit for the highest-traffic public frontend surfaces rather than
+   relying on vague visual complaints
+2. Rebuilt the search page, archive page, sidebar recent-post hierarchy, homepage article stream,
+   article detail hero/summary/copyright shell, friends page wrapper, homepage top section, and
+   footer shell to more closely follow the reference structure and rhythm
+3. Removed or reduced visible garbled fallback copy across key public-facing surfaces, including
+   homepage, detail pages, friends page, dynamic-page fallback, and footer/top-level shell text
+4. Preserved the admin-driven settings-consumption chain established in Phase 5 while increasing
+   public-theme parity
+5. Re-ran `pnpm.cmd type-check` throughout the repair waves and kept the frontend type-clean aside
+   from the pre-existing `nuxt-site-config` localhost warning
+
+#### Result
+
+Phase 6 closed the highest-value public parity gap. Further frontend work should now be treated as
+fine polish, screenshot-level comparison, or incremental UX refinement instead of core parity
+recovery.
 
 ---
-*Roadmap created: 2026-05-13*
-*Last updated: 2026-05-14 — Phase 1 split into 6 plans (layout chain split for files_modified limit)*
-*Granularity: fine*
-*Coverage: 36/36 requirements mapped*
+*Last updated: 2026-05-19*

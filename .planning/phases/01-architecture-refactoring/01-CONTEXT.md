@@ -1,54 +1,54 @@
 # Phase 1: Architecture Refactoring - Context
 
-**Gathered:** 2026-05-13
+**Gathered:** 2026-05-18
 **Status:** Ready for planning
 
 <domain>
 ## Phase Boundary
 
-Fix the project's architectural foundation: unify the dual configuration system, establish composables layer to eliminate code duplication, create theme CSS injection channel, fix admin layout nesting, unify styling approach, and add data integrity guarantees (transactions + validation).
+This phase is a recovery phase for the existing half-migrated settings and theme architecture.
+It does not add new user-facing capabilities. It only reduces split configuration paths and
+stabilizes the real runtime model for:
 
-This phase produces ZERO user-visible features. All work is internal plumbing that enables later UI work.
+- frontend site settings consumption
+- admin settings page load/save behavior
+- theme configuration save/read/injection flow
+
+Out of scope for this phase:
+
+- navbar/footer/archive implementation
+- search/comments
+- post experience enhancements
+- broad admin field completion beyond what is required to stabilize settings flow
+
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Configuration Unification
-- **D-01:** Keep two DB tables (system_settings + theme_settings) — they serve different purposes (K-V settings vs theme configs)
-- **D-02:** ThemeCustomizer must sync writes to both tables: `system_settings.themeConfig` key AND `theme_settings` via ThemeManager
-- **D-03:** Add `ThemeManager.saveConfig()` method that accepts theme config and handles dual-write atomically
-- **D-04:** ThemeManager no longer scans file system for theme discovery — config is purely DB-driven. File system only used for theme overrides (.vue, .css files)
+### Frontend Settings Consumption
+- **D-01:** Frontend pages and components must use `useSiteSettings()` as the single configuration read path.
+- **D-02:** Frontend code must stop calling `/api/settings` directly from pages or blog components. Existing exceptions such as the homepage page and `BannerGroup.vue` must be migrated in this phase.
 
-### Composables API Design
-- **D-05:** `useSiteSettings()` — returns `{ settings: Ref<SiteSettings>, loading: Ref<boolean>, refresh(): Promise<void> }`. Fetches `/api/settings` once, shared via `useState` across SSR/client. All fields are typed via inferred TypeScript from the settings schema
-- **D-06:** `useAdminSettings(category: string)` — returns `{ settings: Ref<Record<string, any>>, loading: Ref<boolean>, save(values): Promise<void>, refresh(): Promise<void> }`. Encapsulates the fetch/save pattern duplicated across 11 pages. Category parameter scopes to one admin page's settings group
-- **D-07:** Both composables live in `apps/site/composables/admin/` and `apps/site/composables/frontend/` respectively
+### Admin Settings Consolidation
+- **D-03:** This phase will migrate **2-3 key admin settings pages**, not all settings pages.
+- **D-04:** The first migration target is the homepage settings page. After that, planning should choose 1-2 additional high-value pages from the most duplicated settings pages, likely `general` and/or `display`.
+- **D-05:** The goal is to establish a repeatable `useAdminSettings()` pattern, not to finish every admin settings page in one pass.
 
-### Theme CSS Injection
-- **D-08:** Add `GET /api/themes/active.css` endpoint returning `text/css; charset=utf-8`
-- **D-09:** Frontend layout injects via `<link rel="stylesheet" href="/api/themes/active.css">` — benefits from browser caching, no FOUC
-- **D-10:** Endpoint reads theme config from `theme_settings` table (post-unification), calls `CSSVariablesMap(config)` to generate CSS
+### Theme Domain Ownership
+- **D-06:** Theme configuration belongs to the **theme domain**, not the generic settings domain.
+- **D-07:** `/api/themes/*` is the only developer-facing primary entry point for theme save/read flows.
+- **D-08:** If `system_settings.themeConfig` remains, it is compatibility or mirror data only and must not be treated as the primary mental model for theme persistence.
 
-### Layout Chain Fix
-- **D-11:** `pages/admin.vue` adds `definePageMeta({ layout: 'admin-default' })`
-- **D-12:** All child admin pages (homepage, seo, sidebar, general, etc.) remove their `definePageMeta({ layout: 'admin-default' })` declarations — they inherit from the parent
-- **D-13:** This eliminates the double scrollbar issue (frontend default wrapping admin-default)
+### Settings Read Semantics
+- **D-09:** This phase must do more than replace duplicated code with hooks; it must also improve the semantics of settings retrieval.
+- **D-10:** `useAdminSettings(category)` should move toward a model where its reads better reflect the category it claims to manage, instead of permanently remaining a full-store fetch wrapper with local flattening.
+- **D-11:** This phase should not fully redesign the entire settings API, but it should reduce the mismatch between the hook abstraction and the actual retrieval behavior.
 
-### Styling Unification
-- **D-14:** Replace all scoped `<style>` blocks using `@apply` with inline UnoCSS utility classes directly in templates
-- **D-15:** No lint rules or tooling added — simple search-and-replace, verified by visual inspection
+### the agent's Discretion
+- Prioritize the smallest set of changes that collapse duplicate paths without broad API churn.
+- If one additional admin settings page must be chosen after `homepage.vue`, prefer the page with the highest duplication and widest downstream reuse.
 
-### Data Integrity
-- **D-16:** `SettingsService.batchUpdate()` wraps the loop in `db.transaction()` — commits atomically or rolls back entirely
-- **D-17:** Zod schemas defined in `server/services/settings.schema.ts`, co-located with settings service. Each setting key gets a typed schema definition
-- **D-18:** `SettingsService.upsert()` validates value against Zod schema before write, returns typed result
-
-### Claude's Discretion
-- Exact file organization for composables (directory structure)
-- Zod schema structure (one schema per key vs. grouped schemas)
-- CSS generation caching strategy in the active.css endpoint
-- Whether to add `definePageMeta` type-hints in admin.vue
 </decisions>
 
 <canonical_refs>
@@ -56,56 +56,67 @@ This phase produces ZERO user-visible features. All work is internal plumbing th
 
 **Downstream agents MUST read these before planning or implementing.**
 
-### Requirements & Roadmap
-- `.planning/REQUIREMENTS.md` — 36 requirements for v2.0, ARCH-01~06 & DATA-01~02 are in this phase
-- `.planning/ROADMAP.md` §Phase 1 — Success criteria for architecture refactoring
+### Project Scope And Recovery Baseline
+- `.planning/PROJECT.md` - current recovered project baseline and phase framing
+- `.planning/REQUIREMENTS.md` - reset requirements for recovery and phase 1
+- `.planning/ROADMAP.md` - current recovery-first roadmap
+- `docs/project-vision.md` - project vision, architecture pain points, config mapping, and target system behavior
 
-### Project Context
-- `docs/project-vision.md` §已知问题与重构计划(一) — Detailed analysis of the dual config system, composables gap, CSS injection gap, and layout chain problem
-- `docs/architecture.md` — Technical architecture, data flow, and directory structure
+### Settings And Theme Runtime
+- `apps/site/composables/frontend/useSiteSettings.ts` - current frontend settings read hook
+- `apps/site/composables/admin/useAdminSettings.ts` - current admin settings load/save hook
+- `apps/site/pages/index.vue` - current homepage direct `/api/settings` consumer that must be migrated
+- `apps/site/components/blog/BannerGroup.vue` - secondary direct `/api/settings` frontend consumer that must be migrated
+- `apps/site/pages/admin/homepage.vue` - largest remaining manual settings page
+- `apps/site/pages/admin/sidebar.vue` - current migrated example using `useAdminSettings()`
+- `apps/site/pages/admin/themes.vue` - theme admin page and current theme-domain entry point
+- `apps/site/server/api/themes/[name]/config.post.ts` - canonical theme config save endpoint
+- `apps/site/server/core/theme/manager.ts` - source of truth for theme save behavior and CSS generation
+- `apps/site/server/api/themes/active.css.get.ts` - runtime theme CSS output endpoint
+- `apps/site/layouts/frontend/default.vue` - current frontend layout that injects active theme CSS
 
-### Code Reference (AnZhiYu)
-- `docs/anzhiyu-reference/hexo-theme-anzhiyu/_config.yml` — The 1343-line AnZhiYu config to be 100% mapped by admin pages
 </canonical_refs>
 
 <code_context>
 ## Existing Code Insights
 
 ### Reusable Assets
-- `useTheme.ts` (composables/) — Already uses `useState` + `$fetch` pattern. `useSiteSettings` can follow the same structure
-- `ThemeManager.getActiveCSS()` — Generates `:root { ... }` CSS string from ThemeConfig. The new `/api/themes/active.css` endpoint calls this directly
-- `CSSVariablesMap()` — Already maps ThemeConfig → CSS variable key-value pairs. No need to rewrite
+- `useSiteSettings()` - already exists and is already adopted by several blog components, so it should be extended rather than replaced.
+- `useAdminSettings()` - already exists and can serve as the base abstraction for admin settings page migration.
+- `ThemeManager.saveConfig()` - already provides a central theme save path and should remain the core theme persistence mechanism.
+- `sidebar.vue` - already demonstrates one migrated admin settings page using `useAdminSettings()`.
 
 ### Established Patterns
-- `useState()` for SSR-safe shared state (already used in useTheme, should be used in useSiteSettings)
-- `$fetch()` for API calls (already used across composables and pages)
-- Drizzle ORM with `onConflictDoUpdate` for upserts (used in SettingsService.upsert)
+- Settings pages commonly flatten `GET /api/settings` results into a local `Record<string, unknown>`, then batch-save via `PUT /api/settings`.
+- Theme runtime styling is already applied through `/api/themes/active.css` in the frontend layout.
+- Theme saving and generic settings saving are currently both present, which creates a split mental model that this phase must collapse.
 
 ### Integration Points
-- `layouts/frontend/default.vue` `<head>` section — Add `<link rel="stylesheet">` to load theme CSS
-- `layouts/admin/default.vue` — Already has correct admin layout structure (flex h-screen + sidebar + main)
-- `pages/admin.vue` — Missing layout declaration, needs `definePageMeta({ layout: 'admin-default' })`
-- `server/api/themes/` — Existing theme API directory, add `active.css.get.ts` here
-- `server/services/settings.service.ts` — Modify `batchUpdate()` to use transaction, `upsert()` to validate with Zod
-- `server/core/theme/manager.ts` — Modify to stop scanning file system for config, accept DB-pushed config
+- Frontend homepage migration touches `index.vue` and any child components still independently fetching settings.
+- Admin settings consolidation should anchor on `homepage.vue`, then copy the same pattern into 1-2 additional high-value settings pages.
+- Theme validation must connect admin save -> theme API -> `ThemeManager.saveConfig()` -> active CSS endpoint -> frontend layout consumption.
+
 </code_context>
 
 <specifics>
 ## Specific Ideas
 
-- ThemeCustomizer in admin saves → calls unified API → writes both tables → frontend sees change immediately via `/api/themes/active.css`
-- useSiteSettings() should feel like "just destructure and use" — no manual fetch calls in any page or component
-- useAdminSettings() should reduce each admin page's settings handling from ~50 lines to ~5 lines
+- Recovery should be treated as a structural cleanup phase, not a feature phase.
+- The most valuable immediate result is reducing the number of active configuration read/write paths, even if a full settings API redesign is deferred.
+
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-- Settings cache layer (Nitro memory cache) — Phase 5 or v2.1
-- CSRF protection — Only relevant if switching from Bearer token to cookie auth
-- Rate limiting audit — Existing middleware may already cover this
+- Full migration of every admin settings page
+- Any Phase 2 frontend shell work
+- Any Phase 3 search/comments/post enhancement work
+- Broad settings API redesign beyond what is required to reduce abstraction mismatch in this phase
+
 </deferred>
 
 ---
-*Phase: 01-architecture-refactoring*
-*Context gathered: 2026-05-13*
+
+*Phase: 1-Architecture Refactoring*
+*Context gathered: 2026-05-18*
