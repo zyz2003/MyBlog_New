@@ -19,7 +19,6 @@ const allTags = ref<Tag[]>([])
 const loading = ref(true)
 const searchQuery = ref('')
 const showDropdown = ref(false)
-const inputRef = ref<HTMLInputElement | null>(null)
 const dropdownRef = ref<HTMLElement | null>(null)
 
 async function fetchTags() {
@@ -35,22 +34,21 @@ async function fetchTags() {
   }
 }
 
-const selectedTags = computed(() => {
-  return allTags.value.filter(t => props.modelValue.includes(t.id))
-})
+const selectedTags = computed(() => allTags.value.filter(tag => props.modelValue.includes(tag.id)))
 
 const filteredTags = computed(() => {
   const query = searchQuery.value.toLowerCase()
-  return allTags.value.filter(t =>
-    !props.modelValue.includes(t.id) &&
-    t.name.toLowerCase().includes(query),
+  return allTags.value.filter(tag =>
+    !props.modelValue.includes(tag.id) && tag.name.toLowerCase().includes(query),
   )
 })
 
 const showCreateOption = computed(() => {
-  if (!searchQuery.value) return false
-  const query = searchQuery.value.toLowerCase()
-  return !allTags.value.some(t => t.name.toLowerCase() === query)
+  if (!searchQuery.value.trim()) {
+    return false
+  }
+  const query = searchQuery.value.trim().toLowerCase()
+  return !allTags.value.some(tag => tag.name.toLowerCase() === query)
 })
 
 function addTag(id: number) {
@@ -62,15 +60,17 @@ function addTag(id: number) {
 }
 
 function removeTag(id: number) {
-  emit('update:modelValue', props.modelValue.filter(tid => tid !== id))
+  emit('update:modelValue', props.modelValue.filter(tagId => tagId !== id))
 }
 
 async function createTag() {
   const name = searchQuery.value.trim()
-  if (!name) return
+  if (!name) {
+    return
+  }
 
   try {
-    const slug = name.toLowerCase().replace(/[^a-z0-9一-鿿]+/g, '-').replace(/^-|-$/g, '')
+    const slug = name.toLowerCase().replace(/[^\w\u4e00-\u9fa5-]+/g, '-').replace(/^-+|-+$/g, '')
     const newTag = await api.post<Tag>('/api/tags', { name, slug })
     allTags.value.push(newTag)
     addTag(newTag.id)
@@ -78,10 +78,6 @@ async function createTag() {
   catch (e) {
     console.error('Failed to create tag:', e)
   }
-}
-
-function onInputFocus() {
-  showDropdown.value = true
 }
 
 function handleClickOutside(event: MouseEvent) {
@@ -102,58 +98,50 @@ onUnmounted(() => {
 
 <template>
   <div ref="dropdownRef" class="relative">
-    <!-- Selected tags -->
-    <div v-if="selectedTags.length > 0" class="flex flex-wrap gap-1.5 mb-2">
+    <div v-if="selectedTags.length > 0" class="mb-3 flex flex-wrap gap-2">
       <span
         v-for="tag in selectedTags"
         :key="tag.id"
-        class="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-2 text-primary rounded-full text-sm"
+        class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
       >
         {{ tag.name }}
-        <button
-          class="hover:text-primary/70"
-          @click="removeTag(tag.id)"
-        >
-          <span class="i-heroicons-x-mark w-3.5 h-3.5" />
+        <button class="rounded-full p-0.5 transition hover:bg-primary/10 hover:text-primary/70" @click="removeTag(tag.id)">
+          <span class="i-heroicons-x-mark h-3.5 w-3.5" />
         </button>
       </span>
     </div>
 
-    <!-- Input -->
-    <div class="relative">
-      <input
-        ref="inputRef"
-        v-model="searchQuery"
-        type="text"
-        placeholder="输入以搜索或创建标签..."
-        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-        @focus="onInputFocus"
-      >
-    </div>
+    <input
+      v-model="searchQuery"
+      type="text"
+      placeholder="输入标签名称，支持搜索或直接创建"
+      class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
+      @focus="showDropdown = true"
+    >
 
-    <!-- Dropdown -->
     <div
       v-if="showDropdown && (filteredTags.length > 0 || showCreateOption)"
-      class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto"
+      class="absolute z-10 mt-2 max-h-56 w-full overflow-y-auto rounded-3xl border border-border bg-surface/95 p-2 shadow-xl backdrop-blur"
     >
-      <div
+      <button
         v-for="tag in filteredTags"
         :key="tag.id"
-        class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
+        class="flex w-full items-center justify-between rounded-2xl px-3 py-2 text-left text-sm text-text transition hover:bg-primary/6"
         @click="addTag(tag.id)"
       >
-        {{ tag.name }}
-      </div>
-      <div
+        <span>{{ tag.name }}</span>
+        <span class="text-xs text-muted">选择</span>
+      </button>
+      <button
         v-if="showCreateOption"
-        class="px-3 py-2 text-sm cursor-pointer hover:bg-primary/5 text-primary border-t border-gray-100"
+        class="mt-1 flex w-full items-center justify-between rounded-2xl border border-dashed border-primary/25 bg-primary/5 px-3 py-2 text-left text-sm text-primary transition hover:bg-primary/10"
         @click="createTag"
       >
-        创建标签: "{{ searchQuery }}"
-      </div>
+        <span>创建标签：{{ searchQuery }}</span>
+        <span class="text-xs">新建</span>
+      </button>
     </div>
 
-    <!-- Loading state -->
-    <p v-if="loading" class="text-xs text-gray-400 mt-1">加载标签中...</p>
+    <p v-if="loading" class="mt-2 text-xs text-muted">标签加载中...</p>
   </div>
 </template>

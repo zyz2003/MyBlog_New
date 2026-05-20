@@ -5,6 +5,13 @@ definePageMeta({
 
 const api = useAdminApi()
 
+interface TagItem {
+  id: number
+  name: string
+  slug: string
+  color: string | null
+}
+
 const tags = ref<TagItem[]>([])
 const loading = ref(true)
 const showForm = ref(false)
@@ -31,7 +38,7 @@ function openEditForm(id: number) {
   showForm.value = true
 }
 
-async function handleSubmit(data: { name: string; slug: string; color: string }) {
+async function handleSubmit(data: { name: string; slug?: string; color: string }) {
   try {
     if (editingTag.value) {
       await api.put(`/api/tags/${editingTag.value.id}`, data)

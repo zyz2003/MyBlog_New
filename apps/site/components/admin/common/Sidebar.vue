@@ -7,168 +7,135 @@ const emit = defineEmits<{
   'toggle-collapse': []
 }>()
 
-const route = useRoute()
+const { groups, currentGroup, getItemsByGroup, isActive } = useAdminNavigation()
 
-// Track expanded groups
-const expandedGroups = ref<Set<string>>(new Set(['content', 'system']))
+const expandedGroups = ref<Set<string>>(new Set(groups.map(group => group.key)))
+
+watch(currentGroup, (group) => {
+  if (group?.key && !expandedGroups.value.has(group.key)) {
+    expandedGroups.value.add(group.key)
+  }
+}, { immediate: true })
 
 function toggleGroup(key: string) {
   if (expandedGroups.value.has(key)) {
     expandedGroups.value.delete(key)
-  } else {
+  }
+  else {
     expandedGroups.value.add(key)
   }
 }
 
-const navItems = [
-  { label: '仪表盘', icon: 'i-heroicons-squares-2x2', path: '/admin', group: 'main' },
-  { label: '内容管理', icon: 'i-heroicons-document-text', path: '', group: 'content', isGroup: true },
-  { label: '文章', icon: 'i-heroicons-newspaper', path: '/admin/articles', group: 'content' },
-  { label: '分类管理', icon: 'i-heroicons-folder-open', path: '/admin/categories', group: 'content' },
-  { label: '标签管理', icon: 'i-heroicons-tag', path: '/admin/tags', group: 'content' },
-  { label: '页面管理', icon: 'i-heroicons-document-duplicate', path: '/admin/pages', group: 'content' },
-  { label: '草稿箱', icon: 'i-heroicons-archive-box', path: '/admin/drafts', group: 'content' },
-  { label: '媒体库', icon: 'i-heroicons-photo', path: '/admin/media', group: 'content' },
-  { label: '系统设置', icon: 'i-heroicons-cog-6-tooth', path: '', group: 'system', isGroup: true },
-  { label: '主题管理', icon: 'i-heroicons-paint-brush', path: '/admin/themes', group: 'system' },
-  { label: '插件中心', icon: 'i-heroicons-puzzle-piece', path: '/admin/plugins', group: 'system' },
-  { label: '系统设置', icon: 'i-heroicons-cog-8-tooth', path: '/admin/settings', group: 'system' },
-]
-
-const groups = [
-  { key: 'main', label: '概览', icon: 'i-heroicons-home' },
-  { key: 'content', label: '内容管理', icon: 'i-heroicons-folder' },
-  { key: 'system', label: '系统设置', icon: 'i-heroicons-cog-6-tooth' },
-]
-
-function isActive(path: string): boolean {
-  if (path === '/admin') {
-    return route.path === '/admin'
-  }
-  return route.path.startsWith(path)
-}
-
-function isGroupActive(groupKey: string): boolean {
-  return navItems.some(item => !item.isGroup && item.group === groupKey && isActive(item.path))
+function isGroupActive(groupKey: string) {
+  return getItemsByGroup(groupKey).some(item => isActive(item.path))
 }
 </script>
 
 <template>
   <aside
-    class="flex flex-col bg-surface border-r border-border transition-all duration-300 h-screen"
-    :class="collapsed ? 'w-20' : 'w-68'"
+    class="admin-sidebar flex h-screen flex-col border-r border-white/50 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,251,255,0.88))] backdrop-blur-xl transition-all duration-300 dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(13,18,30,0.92),rgba(11,15,24,0.88))]"
+    :class="collapsed ? 'w-24' : 'w-80'"
   >
-    <!-- Logo / Title -->
-    <div class="h-16 flex items-center justify-between px-4 border-b border-border">
+    <div class="border-b border-border/60 px-5 py-5">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md">
-          <span class="i-heroicons-command-line w-5 h-5 text-white" />
+        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,var(--color-primary),var(--color-accent))] text-white shadow-lg shadow-sky-500/20">
+          <span class="i-heroicons-command-line h-6 w-6" />
         </div>
-        <span v-if="!collapsed" class="text-xl font-extrabold text-text tracking-tight">博客管理</span>
+        <div v-if="!collapsed" class="min-w-0">
+          <p class="truncate text-sm font-medium text-primary/90">AnZhiYu Admin</p>
+          <h1 class="truncate text-xl font-black tracking-tight text-text">博客控制台</h1>
+          <p class="mt-1 text-xs leading-5 text-muted">内容、站点体验与平台扩展的统一入口</p>
+        </div>
       </div>
       <button
-        v-if="!collapsed"
-        class="p-1.5 rounded-lg text-muted hover:text-primary hover:bg-surface-2 transition-colors cursor-pointer"
+        class="mt-4 flex items-center gap-2 rounded-xl border border-border/70 bg-surface/70 px-3 py-2 text-sm text-muted transition-colors hover:border-primary/30 hover:text-primary"
+        :class="collapsed ? 'mx-auto mt-4 h-10 w-10 justify-center px-0' : ''"
         @click="emit('toggle-collapse')"
       >
-        <span class="i-heroicons-chevron-left w-4 h-4" />
-      </button>
-      <button
-        v-else
-        class="p-1.5 rounded-lg text-muted hover:text-primary hover:bg-surface-2 transition-colors cursor-pointer mx-auto"
-        @click="emit('toggle-collapse')"
-      >
-        <span class="i-heroicons-chevron-right w-4 h-4" />
+        <span :class="collapsed ? 'i-heroicons-chevron-right' : 'i-heroicons-chevron-left'" class="h-4 w-4" />
+        <span v-if="!collapsed">{{ collapsed ? '展开' : '收起侧栏' }}</span>
       </button>
     </div>
 
-    <!-- Navigation -->
-    <nav class="flex-1 py-4 overflow-y-auto scrollbar-thin">
-      <template v-for="group in groups" :key="group.key">
-        <!-- Group header with expand/collapse -->
-        <div v-if="!collapsed" class="px-3 mb-2">
-          <button
-            class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200"
-            :class="isGroupActive(group.key)
-              ? 'bg-surface-2/80 text-text'
-              : 'text-muted hover:bg-surface-2/50 hover:text-text'"
-            @click="toggleGroup(group.key)"
-          >
-            <div class="flex items-center gap-2">
-              <span :class="group.icon" class="w-4 h-4" />
-              <span class="text-base font-semibold text-muted uppercase tracking-widest">{{ group.label }}</span>
+    <div class="admin-scrollbar flex-1 overflow-y-auto px-3 py-4">
+      <div v-for="group in groups" :key="group.key" class="mb-4">
+        <button
+          v-if="!collapsed"
+          class="mb-2 flex w-full items-center justify-between rounded-2xl px-3 py-3 text-left transition-all"
+          :class="isGroupActive(group.key)
+            ? 'bg-primary/8 text-text ring-1 ring-primary/10'
+            : 'text-muted hover:bg-surface-2/70 hover:text-text'"
+          @click="toggleGroup(group.key)"
+        >
+          <div class="flex min-w-0 items-start gap-3">
+            <span :class="group.icon" class="mt-0.5 h-5 w-5 flex-none" />
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold">{{ group.label }}</p>
+              <p class="truncate text-xs text-muted">{{ group.description }}</p>
             </div>
+          </div>
+          <span
+            :class="expandedGroups.has(group.key) ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
+            class="h-4 w-4 flex-none"
+          />
+        </button>
+
+        <div
+          class="space-y-1"
+          :class="collapsed ? '' : (expandedGroups.has(group.key) ? 'block' : 'hidden')"
+        >
+          <NuxtLink
+            v-for="item in getItemsByGroup(group.key)"
+            :key="item.path"
+            :to="item.path"
+            class="group flex items-center gap-3 rounded-2xl border px-3 py-3 transition-all duration-200"
+            :class="[
+              collapsed ? 'justify-center px-0' : '',
+              isActive(item.path)
+                ? 'border-primary/20 bg-[linear-gradient(135deg,rgba(75,141,248,0.12),rgba(34,184,207,0.05))] text-primary shadow-sm'
+                : 'border-transparent text-text hover:border-border/70 hover:bg-surface/80 hover:text-primary',
+            ]"
+            :title="collapsed ? item.label : item.description"
+          >
             <span
-              :class="expandedGroups.has(group.key) ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-right'"
-              class="w-4 h-4 text-xs transition-transform duration-200"
+              :class="item.icon"
+              class="h-5 w-5 flex-none transition-transform duration-200 group-hover:scale-110"
             />
-          </button>
+            <div v-if="!collapsed" class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium">{{ item.label }}</p>
+              <p class="truncate text-xs text-muted">{{ item.description }}</p>
+            </div>
+          </NuxtLink>
         </div>
+      </div>
+    </div>
 
-        <!-- Group items (collapsible) -->
-        <ul v-show="!collapsed && expandedGroups.has(group.key)" class="space-y-1 px-2 mb-4">
-          <template v-for="item in navItems.filter(i => i.group === group.key)" :key="item.path">
-            <!-- Nav item -->
-            <li v-if="!item.isGroup">
-              <NuxtLink
-                :to="item.path"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
-                :class="isActive(item.path)
-                  ? 'bg-surface-2 text-primary shadow-sm border border-primary/20'
-                  : 'text-text hover:bg-surface-2 hover:text-primary'"
-                :title="collapsed ? item.label : undefined"
-              >
-                <span :class="item.icon" class="w-5 h-5 flex-shrink-0" />
-                <span class="font-light text-sm truncate">{{ item.label }}</span>
-              </NuxtLink>
-            </li>
-          </template>
-        </ul>
-
-        <!-- Collapsed view: show items directly -->
-        <ul v-if="collapsed" class="space-y-1 px-2 mb-4">
-          <template v-for="item in navItems.filter(i => i.group === group.key && !i.isGroup)" :key="item.path">
-            <li>
-              <NuxtLink
-                :to="item.path"
-                class="flex items-center justify-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
-                :class="isActive(item.path)
-                  ? 'bg-surface-2 text-primary shadow-sm border border-primary/20'
-                  : 'text-text hover:bg-surface-2 hover:text-primary'"
-                :title="item.label"
-              >
-                <span :class="item.icon" class="w-5 h-5" />
-              </NuxtLink>
-            </li>
-          </template>
-        </ul>
-      </template>
-    </nav>
-
-    <!-- Footer -->
-    <div class="p-4 border-t border-border">
+    <div class="border-t border-border/60 p-4">
       <NuxtLink
         to="/"
         target="_blank"
-        class="flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-muted hover:text-primary transition-colors rounded-xl hover:bg-surface-2"
+        class="flex items-center gap-3 rounded-2xl border border-border/70 bg-surface/75 px-4 py-3 text-sm text-muted transition-all hover:border-primary/30 hover:text-primary"
+        :class="collapsed ? 'justify-center px-0' : ''"
         :title="collapsed ? '访问前台' : undefined"
       >
-        <span class="i-heroicons-arrow-top-right-on-square w-5 h-5" />
-        <span v-if="!collapsed">访问前台</span>
+        <span class="i-heroicons-arrow-top-right-on-square h-5 w-5" />
+        <span v-if="!collapsed">访问前台站点</span>
       </NuxtLink>
     </div>
   </aside>
 </template>
 
 <style scoped>
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+.admin-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
-.scrollbar-thin::-webkit-scrollbar-track {
+
+.admin-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 2px;
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  border-radius: 999px;
 }
 </style>

@@ -1,11 +1,17 @@
 <script setup lang="ts">
+interface SelectOption {
+  label: string
+  value: string
+}
+
 interface FieldDef {
   key: string
   label: string
-  type: 'text' | 'textarea' | 'number' | 'boolean'
+  type: 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'multi-select'
   placeholder?: string
   min?: number
   max?: number
+  options?: SelectOption[]
 }
 
 const props = defineProps<{
@@ -29,7 +35,7 @@ function updateField(key: string, value: unknown) {
       v-for="field in fields"
       :key="field.key"
     >
-      <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+      <label class="block text-sm font-medium text-text mb-1">{{ field.label }}</label>
 
       <!-- Text input -->
       <input
@@ -37,7 +43,7 @@ function updateField(key: string, value: unknown) {
         type="text"
         :value="(modelValue[field.key] as string) || ''"
         :placeholder="field.placeholder"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+        class="w-full px-3 py-2 border border-border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-text"
         @input="updateField(field.key, ($event.target as HTMLInputElement).value)"
       />
 
@@ -47,7 +53,7 @@ function updateField(key: string, value: unknown) {
         :value="(modelValue[field.key] as string) || ''"
         :placeholder="field.placeholder"
         rows="3"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+        class="w-full px-3 py-2 border border-border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-text"
         @input="updateField(field.key, ($event.target as HTMLTextAreaElement).value)"
       />
 
@@ -58,7 +64,7 @@ function updateField(key: string, value: unknown) {
         :value="(modelValue[field.key] as number) ?? 0"
         :min="field.min"
         :max="field.max"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+        class="w-full px-3 py-2 border border-border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-text"
         @input="updateField(field.key, Number(($event.target as HTMLInputElement).value))"
       />
 
@@ -67,7 +73,7 @@ function updateField(key: string, value: unknown) {
         <button
           type="button"
           class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-          :class="modelValue[field.key] ? 'bg-primary' : 'bg-gray-300'"
+          :class="modelValue[field.key] ? 'bg-primary' : 'bg-surface-2'"
           @click="updateField(field.key, !modelValue[field.key])"
         >
           <span
@@ -75,7 +81,40 @@ function updateField(key: string, value: unknown) {
             :class="modelValue[field.key] ? 'translate-x-6' : 'translate-x-1'"
           />
         </button>
-        <span class="text-sm text-gray-500">{{ modelValue[field.key] ? '已启用' : '已禁用' }}</span>
+        <span class="text-sm text-muted">{{ modelValue[field.key] ? '已启用' : '已禁用' }}</span>
+      </div>
+
+      <!-- Select -->
+      <select
+        v-else-if="field.type === 'select'"
+        :value="(modelValue[field.key] as string) || ''"
+        class="w-full px-3 py-2 border border-border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-text cursor-pointer"
+        @change="updateField(field.key, ($event.target as HTMLSelectElement).value)"
+      >
+        <option value="" disabled>请选择</option>
+        <option v-for="opt in field.options" :key="opt.value" :value="opt.value">
+          {{ opt.label }}
+        </option>
+      </select>
+
+      <!-- Multi-select -->
+      <div v-else-if="field.type === 'multi-select'" class="flex flex-wrap gap-2">
+        <button
+          v-for="opt in field.options"
+          :key="opt.value"
+          type="button"
+          class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+          :class="(modelValue[field.key] as string[])?.includes(opt.value)
+            ? 'bg-primary text-white'
+            : 'bg-surface-2 text-muted hover:bg-surface'"
+          @click="
+            updateField(field.key, (modelValue[field.key] as string[])?.includes(opt.value)
+              ? (modelValue[field.key] as string[]).filter(v => v !== opt.value)
+              : [...((modelValue[field.key] as string[]) || []), opt.value])
+          "
+        >
+          {{ opt.label }}
+        </button>
       </div>
     </div>
   </div>

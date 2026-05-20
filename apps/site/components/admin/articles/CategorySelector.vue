@@ -5,7 +5,7 @@ interface Category {
   slug: string
 }
 
-const props = defineProps<{
+defineProps<{
   modelValue: number | null
 }>()
 
@@ -44,11 +44,11 @@ onMounted(() => {
 <template>
   <select
     :value="modelValue ?? ''"
-    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+    class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
     :disabled="loading"
     @change="onChange"
   >
-    <option value="" disabled>{{ loading ? 'Loading...' : 'Select category...' }}</option>
+    <option value="" disabled>{{ loading ? '分类加载中...' : '选择主分类' }}</option>
     <option
       v-for="cat in categories"
       :key="cat.id"

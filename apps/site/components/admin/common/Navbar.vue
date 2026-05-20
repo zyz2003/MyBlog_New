@@ -10,6 +10,8 @@ const emit = defineEmits<{
   search: []
 }>()
 
+const { currentGroup, currentMeta } = useAdminNavigation()
+
 const showDropdown = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 
@@ -38,69 +40,85 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header class="h-16 bg-surface border-b border-border flex items-center justify-between px-6">
-    <div class="flex items-center">
-      <slot />
-    </div>
-
-    <div class="flex items-center gap-3">
-      <!-- Search button -->
-      <button
-        class="flex items-center gap-2 px-3 py-2 text-sm text-text bg-background rounded-lg hover:bg-surface-2 transition-colors cursor-pointer shadow-sm border border-border"
-        @click="$emit('search')"
-      >
-        <span class="i-heroicons-magnifying-glass w-4 h-4" />
-        <span class="hidden sm:inline">搜索</span>
-        <kbd class="hidden sm:inline text-xs bg-surface-2 px-1.5 py-0.5 rounded border border-border">⌘K</kbd>
-      </button>
-
-      <!-- User dropdown -->
-      <div ref="dropdownRef" class="relative">
-        <button
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
-          @click="toggleDropdown"
-        >
-          <div
-            v-if="user?.avatar"
-            class="w-8 h-8 rounded-full bg-surface-2 overflow-hidden ring-2 ring-background"
+  <header class="border-b border-border/70 bg-[rgba(255,255,255,0.72)] px-6 py-4 backdrop-blur-xl dark:bg-[rgba(10,14,22,0.72)]">
+    <div class="flex items-start justify-between gap-4">
+      <div class="min-w-0">
+        <div class="mb-2 flex items-center gap-3">
+          <slot />
+        </div>
+        <div class="flex items-center gap-3">
+          <span
+            v-if="currentGroup"
+            class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
           >
-            <img :src="user.avatar" :alt="user.displayName || user.username" class="w-full h-full object-cover">
+            {{ currentGroup.label }}
+          </span>
+          <div class="min-w-0">
+            <h2 class="truncate text-2xl font-black tracking-tight text-text">{{ currentMeta.title }}</h2>
+            <p class="truncate text-sm text-muted">{{ currentMeta.description }}</p>
           </div>
-          <div v-else class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ring-2 ring-background">
-            <span class="i-heroicons-user w-4 h-4 text-white" />
-          </div>
-          <span class="hidden sm:block text-sm font-medium text-text">{{ user?.displayName || user?.username || '管理员' }}</span>
-          <span class="i-heroicons-chevron-down w-4 h-4 text-muted" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button
+          class="hidden items-center gap-2 rounded-2xl border border-border/70 bg-surface/80 px-4 py-2.5 text-sm text-text shadow-sm transition-colors hover:border-primary/25 hover:text-primary md:flex"
+          @click="$emit('search')"
+        >
+          <span class="i-heroicons-magnifying-glass h-4 w-4" />
+          <span>搜索后台</span>
+          <kbd class="rounded-lg border border-border bg-surface-2 px-1.5 py-0.5 text-xs text-muted">Ctrl K</kbd>
         </button>
 
-        <!-- Dropdown menu -->
-        <Transition
-          enter-active-class="transition ease-out duration-100"
-          enter-from-class="transform opacity-0 scale-95"
-          enter-to-class="transform opacity-100 scale-100"
-          leave-active-class="transition ease-in duration-75"
-          leave-from-class="transform opacity-100 scale-100"
-          leave-to-class="transform opacity-0 scale-95"
-        >
-          <div
-            v-if="showDropdown"
-            class="absolute right-0 mt-2 w-56 bg-surface rounded-xl shadow-lg border border-border py-2 z-50"
+        <div ref="dropdownRef" class="relative">
+          <button
+            class="flex items-center gap-3 rounded-2xl border border-border/70 bg-surface/80 px-3 py-2 shadow-sm transition-colors hover:border-primary/25"
+            @click="toggleDropdown"
           >
-            <div class="px-4 py-2 border-b border-border">
-              <p class="text-sm font-medium text-text">{{ user?.displayName || user?.username }}</p>
-              <p class="text-xs text-muted">{{ user?.email || 'admin@example.com' }}</p>
+            <div
+              v-if="user?.avatar"
+              class="h-10 w-10 overflow-hidden rounded-2xl bg-surface-2 ring-2 ring-white/70 dark:ring-white/10"
+            >
+              <img :src="user.avatar" :alt="user.displayName || user.username" class="h-full w-full object-cover">
             </div>
-            <div class="py-1">
-              <button
-                class="w-full text-left px-4 py-2.5 text-sm text-text hover:bg-surface-2 flex items-center gap-2 transition-colors"
-                @click="handleLogout"
-              >
-                <span class="i-heroicons-arrow-right-on-rectangle w-4 h-4" />
-                退出登录
-              </button>
+            <div v-else class="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white ring-2 ring-white/70 dark:ring-white/10">
+              <span class="i-heroicons-user h-5 w-5" />
             </div>
-          </div>
-        </Transition>
+            <div class="hidden text-left md:block">
+              <p class="max-w-[12rem] truncate text-sm font-semibold text-text">{{ user?.displayName || user?.username || '管理员' }}</p>
+              <p class="max-w-[12rem] truncate text-xs text-muted">{{ user?.email || 'admin@example.com' }}</p>
+            </div>
+            <span class="i-heroicons-chevron-down h-4 w-4 text-muted" />
+          </button>
+
+          <Transition
+            enter-active-class="transition ease-out duration-100"
+            enter-from-class="transform opacity-0 scale-95"
+            enter-to-class="transform opacity-100 scale-100"
+            leave-active-class="transition ease-in duration-75"
+            leave-from-class="transform opacity-100 scale-100"
+            leave-to-class="transform opacity-0 scale-95"
+          >
+            <div
+              v-if="showDropdown"
+              class="absolute right-0 z-50 mt-2 w-64 rounded-2xl border border-border bg-surface p-2 shadow-xl"
+            >
+              <div class="rounded-xl bg-surface-2/80 px-4 py-3">
+                <p class="text-sm font-semibold text-text">{{ user?.displayName || user?.username || '管理员' }}</p>
+                <p class="mt-1 text-xs text-muted">{{ user?.email || 'admin@example.com' }}</p>
+              </div>
+              <div class="mt-2">
+                <button
+                  class="flex w-full items-center gap-2 rounded-xl px-4 py-3 text-left text-sm text-text transition-colors hover:bg-surface-2 hover:text-primary"
+                  @click="handleLogout"
+                >
+                  <span class="i-heroicons-arrow-right-on-rectangle h-4 w-4" />
+                  退出登录
+                </button>
+              </div>
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
   </header>
