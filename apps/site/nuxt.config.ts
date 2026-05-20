@@ -115,6 +115,9 @@ export default defineNuxtConfig({
   // Vue runtime compiler for dynamic component rendering
   vue: {
     runtimeCompiler: true,
+    compilerOptions: {
+      isCustomElement: tag => tag === 'meting-js',
+    },
   },
 
   // Compatibility

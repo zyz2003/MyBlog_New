@@ -1,14 +1,14 @@
 import { useAuthStore } from '~/stores/auth'
 
 /**
- * useAdminSettings — unified admin settings fetch/save
- * Per ARCH-03 / D-06: replaces ~50 lines of duplicated fetch/save logic in each admin page
+ * Unified admin settings fetch/save.
+ * Reads are scoped to the requested category when the API supports it.
  */
 export function useAdminSettings(category: string) {
   const authStore = useAuthStore()
   const settings = ref<Record<string, unknown>>({})
-  const loading = ref<boolean>(false)
-  const initialized = ref<boolean>(false)
+  const loading = ref(false)
+  const initialized = ref(false)
 
   function getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {}
@@ -20,11 +20,12 @@ export function useAdminSettings(category: string) {
 
   async function refresh(): Promise<void> {
     loading.value = true
+
     try {
       const response = await $fetch<{
         code: number
-        data: Record<string, Array<{ key: string; value: unknown }>>
-      }>('/api/settings', {
+        data: Record<string, Array<{ key: string, value: unknown }>>
+      }>(`/api/settings?category=${encodeURIComponent(category)}`, {
         headers: getHeaders(),
       })
 
@@ -37,13 +38,15 @@ export function useAdminSettings(category: string) {
         }
         settings.value = flat
       }
-    } catch (error: unknown) {
-      const err = error as { statusCode?: number; data?: { message?: string } }
+    }
+    catch (error: unknown) {
+      const err = error as { statusCode?: number }
       if (err?.statusCode === 401) {
-        console.error('[useAdminSettings] Unauthorized — token may be expired')
+        console.error('[useAdminSettings] Unauthorized - token may be expired')
       }
       console.error(`[useAdminSettings] Failed to fetch settings for category "${category}":`, error)
-    } finally {
+    }
+    finally {
       loading.value = false
       initialized.value = true
     }

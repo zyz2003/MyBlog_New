@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
-const { settings } = useSiteSettings()
-const wechat = computed(() => settings.value?.wechat ?? { qrcode: '', description: '扫一扫赞赏' })
+
+const { wechat } = useSiteSettings()
 </script>
 
 <template>

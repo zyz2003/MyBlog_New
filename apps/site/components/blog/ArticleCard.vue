@@ -15,6 +15,7 @@ interface ArticleCardProps {
 }
 
 const props = defineProps<ArticleCardProps>()
+const { homepage, errorImage } = useSiteSettings()
 
 const displayDate = computed(() => {
   const date = props.article.publishedAt || props.article.createdAt
@@ -28,9 +29,28 @@ const articleUrl = computed(() => {
   return `/articles/${year}/${month}/${props.article.id}`
 })
 
-const coverUrl = computed(() => {
-  return props.article.coverImage || `https://picsum.photos/seed/${props.article.id}/400/240`
-})
+function applyThumbnailSuffix(url: string) {
+  const suffix = homepage.value.pageThumbnailSuffix
+  if (!url || !suffix) {
+    return url
+  }
+
+  return `${url}${suffix}`
+}
+
+const fallbackCover = computed(() => errorImage.value.post_page || `https://picsum.photos/seed/${props.article.id}/400/240`)
+const coverUrl = computed(() => applyThumbnailSuffix(props.article.coverImage || fallbackCover.value))
+const resolvedCover = ref(coverUrl.value)
+
+watch(coverUrl, (value) => {
+  resolvedCover.value = value
+}, { immediate: true })
+
+function handleCoverError() {
+  if (resolvedCover.value !== fallbackCover.value) {
+    resolvedCover.value = fallbackCover.value
+  }
+}
 </script>
 
 <template>
@@ -39,9 +59,10 @@ const coverUrl = computed(() => {
       <!-- Cover image -->
       <div class="relative h-48 overflow-hidden bg-surface-2">
         <img
-          :src="coverUrl"
+          :src="resolvedCover"
           :alt="article.title"
           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          @error="handleCoverError"
         >
         <!-- Category badge -->
         <div v-if="article.categories?.length" class="absolute top-4 left-4">

@@ -1,25 +1,43 @@
 /* Theme CSS Variables — light mode (cream/暖米色) */
 :root {
   --color-primary: #C4956A;
+  --color-primary-rgb: 196 149 106;
   --color-secondary: #9D9489;
+  --color-secondary-rgb: 157 148 137;
   --color-accent: #9B7BC7;
+  --color-accent-rgb: 155 123 199;
   --color-background: #FAF7F2;
+  --color-background-rgb: 250 247 242;
   --color-surface: #F5F0E8;
+  --color-surface-rgb: 245 240 232;
   --color-surface-2: #E8E0D5;
+  --color-surface-2-rgb: 232 224 213;
   --color-text: #3D3229;
+  --color-text-rgb: 61 50 41;
   --color-text-muted: #7D7065;
+  --color-text-muted-rgb: 125 112 101;
   --color-border: #E0D5C8;
+  --color-border-rgb: 224 213 200;
 }
 
 /* Dark mode overrides */
 .dark {
   --color-primary: #D4A576;
+  --color-primary-rgb: 212 165 118;
   --color-secondary: #A8A095;
+  --color-secondary-rgb: 168 160 149;
   --color-accent: #AB8BD7;
+  --color-accent-rgb: 171 139 215;
   --color-background: #1A1612;
+  --color-background-rgb: 26 22 18;
   --color-surface: #2D261F;
+  --color-surface-rgb: 45 38 31;
   --color-surface-2: #3D352C;
+  --color-surface-2-rgb: 61 53 44;
   --color-text: #F5F0E8;
+  --color-text-rgb: 245 240 232;
   --color-text-muted: #A8A095;
+  --color-text-muted-rgb: 168 160 149;
   --color-border: #4D453B;
+  --color-border-rgb: 77 69 59;
 }

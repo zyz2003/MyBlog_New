@@ -1,18 +1,23 @@
 import type { ThemeConfig, ThemeManifest } from '~/server/core/theme/types'
 import { CSSVariablesMap } from '~/server/core/theme/types'
 
-/**
- * useTheme — composable for theme lifecycle management
- * Per architecture doc section 4.1.3
- *
- * Handles: active theme state, CSS Variables injection, layout switching
- */
+const themePreferenceStorageKey = 'anzhiyu-theme-mode'
+
 export function useTheme() {
   const activeTheme = useState<string>('activeTheme', () => 'default')
   const themeConfig = useState<ThemeConfig | null>('themeConfig', () => null)
   const loaded = useState<boolean>('themeLoaded', () => false)
+  const isDark = useState<boolean>('theme-is-dark', () => false)
 
-  /** Apply CSS Variables to document root */
+  function toggleDark() {
+    isDark.value = !isDark.value
+    if (import.meta.client) {
+      document.documentElement.classList.toggle('dark', isDark.value)
+      document.documentElement.dataset.theme = isDark.value ? 'dark' : 'light'
+      window.localStorage.setItem(themePreferenceStorageKey, isDark.value ? 'dark' : 'light')
+    }
+  }
+
   function applyThemeStyles(config: ThemeConfig) {
     if (import.meta.server) return
     const vars = CSSVariablesMap(config)
@@ -22,11 +27,10 @@ export function useTheme() {
     }
   }
 
-  /** Initialize theme on app startup — fetches active theme from API */
   async function initTheme() {
     if (loaded.value) return
     try {
-      const data = await $fetch<{ code: number; data: { theme: ThemeManifest | null; css: string } }>('/api/themes/active')
+      const data = await $fetch<{ code: number, data: { theme: ThemeManifest | null, css: string } }>('/api/themes/active')
       if (data.code === 0 && data.data?.theme) {
         activeTheme.value = data.data.theme.meta.name
         themeConfig.value = data.data.theme.config
@@ -36,14 +40,24 @@ export function useTheme() {
     catch {
       console.warn('[useTheme] Failed to load active theme, using default')
     }
+    if (import.meta.client) {
+      const storedPreference = window.localStorage.getItem(themePreferenceStorageKey)
+      if (storedPreference === 'dark' || storedPreference === 'light') {
+        isDark.value = storedPreference === 'dark'
+        document.documentElement.classList.toggle('dark', isDark.value)
+        document.documentElement.dataset.theme = storedPreference
+      }
+      else {
+        isDark.value = document.documentElement.classList.contains('dark')
+      }
+    }
     loaded.value = true
   }
 
-  /** Switch to a different theme (admin action) */
   async function switchTheme(themeName: string) {
     try {
       await $fetch(`/api/themes/${themeName}/activate`, { method: 'POST' })
-      const data = await $fetch<{ code: number; data: { theme: ThemeManifest | null; css: string } }>('/api/themes/active')
+      const data = await $fetch<{ code: number, data: { theme: ThemeManifest | null, css: string } }>('/api/themes/active')
       if (data.code === 0 && data.data?.theme) {
         activeTheme.value = themeName
         themeConfig.value = data.data.theme.config
@@ -59,8 +73,10 @@ export function useTheme() {
     activeTheme,
     themeConfig,
     loaded,
+    isDark,
     initTheme,
     switchTheme,
+    toggleDark,
     applyThemeStyles,
   }
 }
