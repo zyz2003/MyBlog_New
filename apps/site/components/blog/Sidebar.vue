@@ -52,20 +52,22 @@ const stats = computed(() => ({
   >
     <div class="sticky_layout">
       <template v-for="name in widgetList" :key="name">
-        <BlogProfileWidget v-if="name === 'profile'" />
-        <BlogStatsWidget
-          v-else-if="name === 'stats'"
-          :articles="stats.articles"
-          :categories="stats.categories"
-          :tags="stats.tags"
-        />
-        <BlogTagCloud v-else-if="name === 'tags'" />
-        <BlogCategoriesWidget v-else-if="name === 'categories'" />
-        <BlogRecentPostsWidget v-else-if="name === 'recent'" />
-        <BlogAnnounceWidget v-else-if="name === 'announcement'" />
-        <BlogArchiveWidget v-else-if="name === 'archive'" />
-        <BlogWechatWidget v-else-if="name === 'wechat'" />
-        <BlogRecentCommentsWidget v-else-if="name === 'recent_comments'" />
+        <div class="sidebar-card card-hover">
+          <BlogProfileWidget v-if="name === 'profile'" />
+          <BlogStatsWidget
+            v-else-if="name === 'stats'"
+            :articles="stats.articles"
+            :categories="stats.categories"
+            :tags="stats.tags"
+          />
+          <BlogTagCloud v-else-if="name === 'tags'" />
+          <BlogCategoriesWidget v-else-if="name === 'categories'" />
+          <BlogRecentPostsWidget v-else-if="name === 'recent'" />
+          <BlogAnnounceWidget v-else-if="name === 'announcement'" />
+          <BlogArchiveWidget v-else-if="name === 'archive'" />
+          <BlogWechatWidget v-else-if="name === 'wechat'" />
+          <BlogRecentCommentsWidget v-else-if="name === 'recent_comments'" />
+        </div>
       </template>
     </div>
   </aside>
@@ -82,7 +84,26 @@ const stats = computed(() => ({
   top: 88px;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 1rem;
+}
+
+.sidebar-card {
+  background: var(--anzhiyu-card-bg);
+  border-radius: 12px;
+  border: var(--style-border-always);
+  box-shadow: var(--anzhiyu-shadow-border);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sidebar-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border: var(--style-border-hover);
+}
+
+.card-hover {
+  will-change: transform;
 }
 
 @media (max-width: 1024px) {
