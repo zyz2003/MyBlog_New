@@ -29,44 +29,129 @@ const pages = computed(() => {
 </script>
 
 <template>
-  <nav v-if="totalPages > 1" class="flex items-center justify-center gap-1 mt-8">
-    <NuxtLink
+  <nav v-if="totalPages > 1" class="pagination-container">
+    <button
       v-if="currentPage > 1"
+      type="button"
+      class="pagination-btn pagination-prev"
       :to="`${baseUrl}?page=${currentPage - 1}`"
-      class="px-4 py-2 text-sm font-medium text-secondary bg-surface rounded-lg border border-border hover:bg-surface-2 hover:text-primary transition-colors"
       @click="emit('pageChange', currentPage - 1)"
     >
-      上一页
-    </NuxtLink>
-    <span v-else class="px-4 py-2 text-sm text-muted bg-surface-2 rounded-lg border border-border opacity-50 cursor-not-allowed">
-      上一页
+      <i class="anzhiyufont anzhiyu-icon-angle-left" />
+      <span>上一页</span>
+    </button>
+    <span v-else class="pagination-btn pagination-prev disabled">
+      <i class="anzhiyufont anzhiyu-icon-angle-left" />
+      <span>上一页</span>
     </span>
 
     <template v-for="(page, i) in pages" :key="i">
-      <span v-if="page === '...'" class="px-2 py-2 text-muted">...</span>
-      <NuxtLink
+      <span v-if="page === '...'" class="pagination-ellipsis">...</span>
+      <button
         v-else
-        :to="`${baseUrl}?page=${page}`"
-        class="w-10 h-10 text-sm font-medium rounded-lg flex items-center justify-center transition-colors"
-        :class="page === currentPage
-          ? 'bg-primary text-white'
-          : 'bg-surface text-secondary border border-border hover:bg-surface-2 hover:text-primary'"
+        type="button"
+        class="pagination-page"
+        :class="{ active: page === currentPage }"
         @click="emit('pageChange', page as number)"
       >
         {{ page }}
-      </NuxtLink>
+      </button>
     </template>
 
-    <NuxtLink
+    <button
       v-if="currentPage < totalPages"
+      type="button"
+      class="pagination-btn pagination-next"
       :to="`${baseUrl}?page=${currentPage + 1}`"
-      class="px-4 py-2 text-sm font-medium text-secondary bg-surface rounded-lg border border-border hover:bg-surface-2 hover:text-primary transition-colors"
       @click="emit('pageChange', currentPage + 1)"
     >
-      下一页
-    </NuxtLink>
-    <span v-else class="px-4 py-2 text-sm text-muted bg-surface-2 rounded-lg border border-border opacity-50 cursor-not-allowed">
-      下一页
+      <span>下一页</span>
+      <i class="anzhiyufont anzhiyu-icon-angle-right" />
+    </button>
+    <span v-else class="pagination-btn pagination-next disabled">
+      <span>下一页</span>
+      <i class="anzhiyufont anzhiyu-icon-angle-right" />
     </span>
   </nav>
 </template>
+
+<style scoped>
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.pagination-btn,
+.pagination-page,
+.pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border-radius: 12px;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border-always);
+  color: var(--anzhiyu-fontcolor);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn {
+  gap: 0.35rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.pagination-btn:hover:not(.disabled) {
+  background: var(--anzhiyu-main);
+  border-color: var(--anzhiyu-main);
+  color: var(--anzhiyu-white);
+  transform: translateY(-2px);
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-page {
+  cursor: pointer;
+}
+
+.pagination-page:hover:not(.active) {
+  background: color-mix(in srgb, var(--anzhiyu-main) 10%, white);
+  border-color: var(--anzhiyu-main);
+  color: var(--anzhiyu-main);
+}
+
+.pagination-page.active {
+  background: var(--anzhiyu-main);
+  border-color: var(--anzhiyu-main);
+  color: var(--anzhiyu-white);
+}
+
+.pagination-ellipsis {
+  border: none;
+  background: transparent;
+  color: var(--anzhiyu-secondtext);
+  cursor: default;
+}
+
+@media (max-width: 768px) {
+  .pagination-btn span {
+    display: none;
+  }
+
+  .pagination-btn {
+    min-width: 2.5rem;
+    padding: 0;
+  }
+}
+</style>

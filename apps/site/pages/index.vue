@@ -170,6 +170,8 @@ useSeoMeta({
       <div id="recent-posts" class="recent-posts">
         <BlogCategoryBar :categories="categoriesData?.data || []" />
 
+        <LayoutToggle />
+
         <div class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
           <BlogPostItem
             v-for="(article, index) in allArticles"
