@@ -1,6 +1,6 @@
-import { eq, ne, and, desc } from 'drizzle-orm'
+import { eq, ne, and, desc, sql } from 'drizzle-orm'
 import { db } from '../utils/db'
-import { tags } from '../db/schema'
+import { tags, postTags } from '../db/schema'
 import { BusinessErrors } from '../utils/response'
 
 /** Tag create input */
@@ -15,6 +15,11 @@ export interface TagUpdateInput {
   name?: string
   slug?: string
   color?: string | null
+}
+
+/** Tag with post count */
+export interface TagWithCount extends Omit<typeof tags.$inferSelect, 'count'> {
+  count: number
 }
 
 export class TagService {
@@ -56,12 +61,23 @@ export class TagService {
     return tag ?? null
   }
 
-  /** List all tags */
-  static async list(): Promise<typeof tags.$inferSelect[]> {
-    return db
-      .select()
+  /** List all tags with post count */
+  static async list(): Promise<TagWithCount[]> {
+    const result = await db
+      .select({
+        id: tags.id,
+        name: tags.name,
+        slug: tags.slug,
+        color: tags.color,
+        createdAt: tags.createdAt,
+        count: sql<number>`COUNT(DISTINCT ${postTags.postId})`.mapWith(Number),
+      })
       .from(tags)
+      .leftJoin(postTags, eq(tags.id, postTags.tagId))
+      .groupBy(tags.id, tags.name, tags.slug, tags.color, tags.createdAt)
       .orderBy(desc(tags.createdAt))
+
+    return result
   }
 
   /** Update a tag */

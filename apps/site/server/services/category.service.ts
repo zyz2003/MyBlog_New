@@ -1,4 +1,4 @@
-import { eq, ne, and, asc, count } from 'drizzle-orm'
+import { eq, ne, and, asc, sql } from 'drizzle-orm'
 import { db } from '../utils/db'
 import { categories, postCategories } from '../db/schema'
 import { BusinessErrors } from '../utils/response'
@@ -21,7 +21,7 @@ export interface CategoryUpdateInput {
   sortOrder?: number
 }
 
-/** Category with children (tree node) */
+/** Category with count and children (tree node) */
 export interface CategoryTreeNode {
   id: number
   name: string
@@ -30,7 +30,13 @@ export interface CategoryTreeNode {
   parentId: number | null
   sortOrder: number
   createdAt: Date
+  count: number
   children: CategoryTreeNode[]
+}
+
+/** Category with count (flat) */
+export interface CategoryWithCount extends Omit<typeof categories.$inferSelect, 'count'> {
+  count: number
 }
 
 export class CategoryService {
@@ -90,15 +96,28 @@ export class CategoryService {
     return category ?? null
   }
 
-  /** List all categories flat, sorted by sortOrder */
-  static async list(): Promise<typeof categories.$inferSelect[]> {
-    return db
-      .select()
+  /** List all categories flat with count, sorted by sortOrder */
+  static async list(): Promise<CategoryWithCount[]> {
+    const result = await db
+      .select({
+        id: categories.id,
+        name: categories.name,
+        slug: categories.slug,
+        description: categories.description,
+        parentId: categories.parentId,
+        sortOrder: categories.sortOrder,
+        createdAt: categories.createdAt,
+        count: sql<number>`COUNT(DISTINCT ${postCategories.postId})`.mapWith(Number),
+      })
       .from(categories)
+      .leftJoin(postCategories, eq(categories.id, postCategories.categoryId))
+      .groupBy(categories.id, categories.name, categories.slug, categories.description, categories.parentId, categories.sortOrder, categories.createdAt)
       .orderBy(asc(categories.sortOrder), asc(categories.id))
+
+    return result
   }
 
-  /** Get category tree (nested structure) */
+  /** Get category tree (nested structure) with counts */
   static async tree(): Promise<CategoryTreeNode[]> {
     const allCategories = await this.list()
 

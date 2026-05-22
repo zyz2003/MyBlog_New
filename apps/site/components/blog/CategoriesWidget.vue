@@ -7,7 +7,7 @@ interface CategoryNode {
   children?: CategoryNode[]
 }
 
-const { data } = await useFetch<{ code: number; data: CategoryNode[] }>('/api/categories')
+const { data } = await useFetch<{ code: number; data: CategoryNode[] }>('/api/categories/tree')
 const categories = computed(() => data.value?.data ?? [])
 
 const expanded = ref<Set<string>>(new Set())
