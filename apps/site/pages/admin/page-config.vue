@@ -6,16 +6,74 @@ definePageMeta({
 
 const { settings, loading, save, refresh } = useAdminSettings('page-config')
 
+// --- Menu types ---
+interface MenuItem {
+  name: string
+  path: string
+  icon: string
+}
+
+interface MenuGroup {
+  title: string
+  items: MenuItem[]
+}
+
+// --- Nav types ---
+interface NavSubItem {
+  name: string
+  link: string
+  icon: string
+}
+
+interface NavMenuItem {
+  title: string
+  item: NavSubItem[]
+}
+
 const form = reactive({
-  menuJson: '{}',
-  navJson: '{\n  "enable": false,\n  "travelling": false,\n  "clock": false,\n  "menu": []\n}',
-  mournJson: '{\n  "enable": false,\n  "days": []\n}',
-  codeBlockJson: '{\n  "theme": "light"\n}',
-  copySettingsJson: '{\n  "enable": true,\n  "copyright": {\n    "enable": false,\n    "limit_count": 50\n  }\n}',
-  searchJson: '{\n  "enable": false\n}',
-  localSearchJson: '{\n  "enable": false,\n  "preload": true\n}',
-  mathjaxJson: '{\n  "enable": false,\n  "per_page": false\n}',
-  katexJson: '{\n  "enable": false,\n  "per_page": false,\n  "hide_scrollbar": true\n}',
+  // menu
+  menuGroups: [] as MenuGroup[],
+
+  // nav
+  navEnable: false,
+  navTravelling: false,
+  navClock: false,
+  navMenu: [] as NavMenuItem[],
+
+  // mourn
+  mournEnable: false,
+  mournDaysText: '',
+
+  // codeBlock
+  highlightTheme: 'light',
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  highlightHeightLimit: 330,
+  codeWordWrap: false,
+
+  // copySettings
+  copyEnable: true,
+  copyrightEnable: false,
+  copyrightLimitCount: 50,
+
+  // search
+  searchMode: 'local',
+
+  // localSearch
+  localSearchEnable: false,
+  localSearchPreload: true,
+
+  // mathjax
+  mathjaxEnable: false,
+  mathjaxPerPage: false,
+
+  // katex
+  katexEnable: false,
+  katexPerPage: false,
+  katexHideScrollbar: true,
+
+  // already visual
   pageThumbnailSuffix: '',
   tableInterlacedDiscoloration: false,
 })
@@ -24,66 +82,228 @@ const saving = ref(false)
 const message = ref('')
 const errorMessage = ref('')
 
-function stringifyValue(value: unknown, fallback: string) {
-  if (value === undefined || value === null) return fallback
-  try {
-    return JSON.stringify(value, null, 2)
-  }
-  catch {
-    return fallback
+// --- Helpers ---
+function toMenuGroup(key: string, value: unknown): MenuGroup {
+  const items = Array.isArray(value) ? value : []
+  return {
+    title: String(key),
+    items: items.map((item: unknown) => {
+      const r = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+      return { name: String(r.name ?? ''), path: String(r.path ?? ''), icon: String(r.icon ?? '') }
+    }),
   }
 }
 
+function toNavMenuItem(item: unknown): NavMenuItem {
+  const r = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+  const subItems = Array.isArray(r.item) ? r.item : []
+  return {
+    title: String(r.title ?? ''),
+    item: subItems.map((sub: unknown) => {
+      const s = sub && typeof sub === 'object' ? sub as Record<string, unknown> : {}
+      return { name: String(s.name ?? ''), link: String(s.link ?? ''), icon: String(s.icon ?? '') }
+    }),
+  }
+}
+
+function addMenuGroup() {
+  form.menuGroups.push({ title: '', items: [] })
+}
+
+function removeMenuGroup(index: number) {
+  form.menuGroups.splice(index, 1)
+}
+
+function addMenuItem(groupIndex: number) {
+  form.menuGroups[groupIndex].items.push({ name: '', path: '', icon: '' })
+}
+
+function removeMenuItem(groupIndex: number, itemIndex: number) {
+  form.menuGroups[groupIndex].items.splice(itemIndex, 1)
+}
+
+function addNavMenuItem() {
+  form.navMenu.push({ title: '', item: [] })
+}
+
+function removeNavMenuItem(index: number) {
+  form.navMenu.splice(index, 1)
+}
+
+function addNavSubItem(menuIndex: number) {
+  form.navMenu[menuIndex].item.push({ name: '', link: '', icon: '' })
+}
+
+function removeNavSubItem(menuIndex: number, subIndex: number) {
+  form.navMenu[menuIndex].item.splice(subIndex, 1)
+}
+
+function fromLines(value: string) {
+  return value.split(/\r?\n/g).map(s => s.trim()).filter(Boolean)
+}
+
+function toLines(value: unknown) {
+  return Array.isArray(value) ? value.map(item => String(item).trim()).filter(Boolean).join('\n') : ''
+}
+
+function toRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
+
+// --- Hydrate ---
 function hydrateForm() {
-  form.menuJson = stringifyValue(settings.value.menu, '{}')
-  form.navJson = stringifyValue(settings.value.nav, form.navJson)
-  form.mournJson = stringifyValue(settings.value.mourn, form.mournJson)
-  form.codeBlockJson = stringifyValue(settings.value.codeBlock, form.codeBlockJson)
-  form.copySettingsJson = stringifyValue(settings.value.copySettings, form.copySettingsJson)
-  form.searchJson = stringifyValue(settings.value.search, form.searchJson)
-  form.localSearchJson = stringifyValue(settings.value.localSearch, form.localSearchJson)
-  form.mathjaxJson = stringifyValue(settings.value.mathjax, form.mathjaxJson)
-  form.katexJson = stringifyValue(settings.value.katex, form.katexJson)
-  form.pageThumbnailSuffix = String(settings.value.pageThumbnailSuffix || '')
+  // menu: Record<string, MenuItem[]>
+  const menuRaw = toRecord(settings.value.menu)
+  form.menuGroups = Object.entries(menuRaw).map(([key, val]) => toMenuGroup(key, val))
+
+  // nav
+  const nav = toRecord(settings.value.nav)
+  form.navEnable = Boolean(nav.enable ?? false)
+  form.navTravelling = Boolean(nav.travelling ?? false)
+  form.navClock = Boolean(nav.clock ?? false)
+  form.navMenu = Array.isArray(nav.menu) ? nav.menu.map(toNavMenuItem) : []
+
+  // mourn
+  const mourn = toRecord(settings.value.mourn)
+  form.mournEnable = Boolean(mourn.enable ?? false)
+  form.mournDaysText = toLines(mourn.days)
+
+  // codeBlock
+  const codeBlock = toRecord(settings.value.codeBlock)
+  form.highlightTheme = String(codeBlock.highlight_theme ?? 'light')
+  form.highlightCopy = Boolean(codeBlock.highlight_copy ?? true)
+  form.highlightLang = Boolean(codeBlock.highlight_lang ?? true)
+  form.highlightShrink = String(codeBlock.highlight_shrink ?? 'false')
+  form.highlightHeightLimit = Number(codeBlock.highlight_height_limit ?? 330) || 330
+  form.codeWordWrap = Boolean(codeBlock.code_word_wrap ?? false)
+
+  // copySettings
+  const copySettings = toRecord(settings.value.copySettings)
+  const copyright = toRecord(copySettings.copyright)
+  form.copyEnable = Boolean(copySettings.enable ?? true)
+  form.copyrightEnable = Boolean(copyright.enable ?? false)
+  form.copyrightLimitCount = Number(copyright.limit_count ?? 50) || 50
+
+  // search — determine mode from which sub-search is enabled
+  const search = toRecord(settings.value.search)
+  const localSearch = toRecord(settings.value.localSearch)
+  const algoliaSearch = toRecord(settings.value.algoliaSearch)
+  const docsearch = toRecord(settings.value.docsearch)
+  if (Boolean(algoliaSearch.enable)) {
+    form.searchMode = 'algolia'
+  }
+  else if (Boolean(docsearch.enable)) {
+    form.searchMode = 'docsearch'
+  }
+  else if (Boolean(localSearch.enable) || Boolean(search.enable)) {
+    form.searchMode = 'local'
+  }
+  else {
+    form.searchMode = 'off'
+  }
+
+  // localSearch
+  form.localSearchEnable = Boolean(localSearch.enable ?? false)
+  form.localSearchPreload = Boolean(localSearch.preload ?? true)
+
+  // mathjax
+  const mathjax = toRecord(settings.value.mathjax)
+  form.mathjaxEnable = Boolean(mathjax.enable ?? false)
+  form.mathjaxPerPage = Boolean(mathjax.per_page ?? false)
+
+  // katex
+  const katex = toRecord(settings.value.katex)
+  form.katexEnable = Boolean(katex.enable ?? false)
+  form.katexPerPage = Boolean(katex.per_page ?? false)
+  form.katexHideScrollbar = Boolean(katex.hide_scrollbar ?? true)
+
+  // already visual
+  form.pageThumbnailSuffix = String(settings.value.pageThumbnailSuffix ?? '')
   form.tableInterlacedDiscoloration = Boolean(settings.value.table_interlaced_discoloration)
 }
 
-watch(
-  settings,
-  () => {
-    hydrateForm()
-  },
-  { deep: true, immediate: true },
-)
+watch(settings, () => { hydrateForm() }, { deep: true, immediate: true })
 
-function parseJson<T>(value: string, label: string): T {
-  try {
-    return JSON.parse(value) as T
-  }
-  catch {
-    throw new Error(`${label} 不是合法的 JSON，请检查格式后再保存。`)
-  }
-}
-
+// --- Save ---
 async function handleSave() {
   saving.value = true
   message.value = ''
   errorMessage.value = ''
 
   try {
+    // Reassemble menu from groups
+    const menuObj: Record<string, unknown> = {}
+    for (const group of form.menuGroups) {
+      const key = group.title.trim()
+      if (key) {
+        menuObj[key] = group.items.map(item => ({
+          name: item.name.trim(),
+          path: item.path.trim(),
+          icon: item.icon.trim(),
+        }))
+      }
+    }
+
+    // Reassemble search mode
+    const searchEnable = form.searchMode !== 'off'
+    const localSearchEnable = form.searchMode === 'local' ? form.localSearchEnable : false
+    const algoliaEnable = form.searchMode === 'algolia'
+    const docsearchEnable = form.searchMode === 'docsearch'
+
     await save({
-      menu: parseJson<Record<string, unknown>>(form.menuJson, '菜单配置'),
-      nav: parseJson<Record<string, unknown>>(form.navJson, '导航配置'),
-      mourn: parseJson<Record<string, unknown>>(form.mournJson, '灰色纪念日配置'),
-      codeBlock: parseJson<Record<string, unknown>>(form.codeBlockJson, '代码块配置'),
-      copySettings: parseJson<Record<string, unknown>>(form.copySettingsJson, '复制配置'),
-      search: parseJson<Record<string, unknown>>(form.searchJson, '搜索配置'),
-      localSearch: parseJson<Record<string, unknown>>(form.localSearchJson, '本地搜索配置'),
-      mathjax: parseJson<Record<string, unknown>>(form.mathjaxJson, 'MathJax 配置'),
-      katex: parseJson<Record<string, unknown>>(form.katexJson, 'KaTeX 配置'),
+      menu: menuObj,
+      nav: {
+        enable: form.navEnable,
+        travelling: form.navTravelling,
+        clock: form.navClock,
+        menu: form.navMenu.map(m => ({
+          title: m.title.trim(),
+          item: m.item.map(s => ({
+            name: s.name.trim(),
+            link: s.link.trim(),
+            icon: s.icon.trim(),
+          })),
+        })),
+      },
+      mourn: {
+        enable: form.mournEnable,
+        days: fromLines(form.mournDaysText),
+      },
+      codeBlock: {
+        highlight_theme: form.highlightTheme,
+        highlight_copy: form.highlightCopy,
+        highlight_lang: form.highlightLang,
+        highlight_shrink: form.highlightShrink,
+        highlight_height_limit: form.highlightHeightLimit,
+        code_word_wrap: form.codeWordWrap,
+      },
+      copySettings: {
+        enable: form.copyEnable,
+        copyright: {
+          enable: form.copyrightEnable,
+          limit_count: form.copyrightLimitCount,
+        },
+      },
+      search: { enable: searchEnable },
+      localSearch: {
+        enable: localSearchEnable,
+        preload: form.localSearchPreload,
+      },
+      algoliaSearch: { enable: algoliaEnable },
+      docsearch: { enable: docsearchEnable },
+      mathjax: {
+        enable: form.mathjaxEnable,
+        per_page: form.mathjaxPerPage,
+      },
+      katex: {
+        enable: form.katexEnable,
+        per_page: form.katexPerPage,
+        hide_scrollbar: form.katexHideScrollbar,
+      },
       pageThumbnailSuffix: form.pageThumbnailSuffix.trim(),
       table_interlaced_discoloration: form.tableInterlacedDiscoloration,
     })
+
     message.value = '页面与展示配置已保存。'
     await refresh()
   }
@@ -102,74 +322,336 @@ async function handleSave() {
       <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Page Config</p>
       <h1 class="mt-3 text-3xl font-black tracking-tight text-text">页面与展示配置</h1>
       <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
-        这一页开始承接 `_config.yml` 里偏页面级、展示级的设置项。
-        先恢复菜单、导航、搜索、代码块和数学公式等关键能力，再逐步细化为可视化编辑器。
+        管理菜单、导航、代码高亮、搜索、数学公式等页面级配置。所有配置项均已可视化，保存后前台立刻生效。
       </p>
     </section>
 
-    <div
-      v-if="message"
-      class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
+    <div v-if="message" class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
       {{ message }}
     </div>
-    <div
-      v-if="errorMessage"
-      class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600"
-    >
+    <div v-if="errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
       {{ errorMessage }}
     </div>
 
+    <!-- 菜单 menu -->
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-text">菜单配置</h2>
+          <p class="mt-2 text-sm text-muted">管理顶部菜单分组与子项，每组包含标题和若干菜单条目。</p>
+        </div>
+        <button type="button" class="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90" @click="addMenuGroup">
+          新增分组
+        </button>
+      </div>
+
+      <div v-if="form.menuGroups.length" class="mt-5 space-y-4">
+        <article v-for="(group, gi) in form.menuGroups" :key="`menu-group-${gi}`" class="rounded-3xl border border-border bg-background/70 p-5">
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-sm font-semibold text-text">分组 {{ gi + 1 }}</p>
+            <button type="button" class="text-sm text-rose-500 transition hover:text-rose-600" @click="removeMenuGroup(gi)">
+              删除分组
+            </button>
+          </div>
+          <label class="mt-3 block space-y-2">
+            <span class="text-xs font-medium text-muted">分组标题</span>
+            <input v-model="group.title" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：文章、友链、我的" >
+          </label>
+
+          <div class="mt-4 flex items-center justify-between gap-3">
+            <span class="text-xs font-medium text-muted">菜单条目</span>
+            <button type="button" class="rounded-xl border border-primary/20 bg-primary/8 px-3 py-1.5 text-xs font-semibold text-primary transition hover:border-primary/30" @click="addMenuItem(gi)">
+              新增条目
+            </button>
+          </div>
+
+          <div v-if="group.items.length" class="mt-3 space-y-3">
+            <div v-for="(item, ii) in group.items" :key="`menu-item-${gi}-${ii}`" class="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+              <label class="block space-y-1">
+                <span class="text-xs text-muted">名称</span>
+                <input v-model="item.name" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="隧道" >
+              </label>
+              <label class="block space-y-1">
+                <span class="text-xs text-muted">路径</span>
+                <input v-model="item.path" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/archives/" >
+              </label>
+              <label class="block space-y-1">
+                <span class="text-xs text-muted">图标</span>
+                <input v-model="item.icon" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="anzhiyu-icon-box-archive" >
+              </label>
+              <button type="button" class="mt-5 self-start text-xs text-rose-500 transition hover:text-rose-600" @click="removeMenuItem(gi, ii)">
+                删除
+              </button>
+            </div>
+          </div>
+          <div v-else class="mt-3 text-xs text-muted">暂无条目，点击上方按钮添加。</div>
+        </article>
+      </div>
+      <div v-else class="mt-5 rounded-3xl border border-dashed border-border bg-background/45 px-6 py-12 text-center text-sm text-muted">
+        还没有菜单分组，点击右上角按钮添加。
+      </div>
+    </section>
+
+    <!-- 导航 nav -->
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <h2 class="text-xl font-black text-text">导航配置</h2>
+      <p class="mt-2 text-sm text-muted">控制导航栏开关与导航菜单项。</p>
+
+      <div class="mt-5 space-y-5">
+        <div class="grid gap-4 md:grid-cols-3">
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navEnable = !form.navEnable">
+            <span class="text-sm text-text">启用导航</span>
+            <span class="text-sm text-muted">{{ form.navEnable ? '已开启' : '已关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navTravelling = !form.navTravelling">
+            <span class="text-sm text-text">开往</span>
+            <span class="text-sm text-muted">{{ form.navTravelling ? '已开启' : '已关闭' }}</span>
+          </button>
+          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navClock = !form.navClock">
+            <span class="text-sm text-text">导航时钟</span>
+            <span class="text-sm text-muted">{{ form.navClock ? '已开启' : '已关闭' }}</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between gap-4">
+          <span class="text-sm font-medium text-text">导航菜单项</span>
+          <button type="button" class="rounded-2xl border border-primary/20 bg-primary/8 px-4 py-2 text-sm font-semibold text-primary transition hover:border-primary/30" @click="addNavMenuItem">
+            新增导航项
+          </button>
+        </div>
+
+        <div v-if="form.navMenu.length" class="space-y-4">
+          <article v-for="(navItem, ni) in form.navMenu" :key="`nav-menu-${ni}`" class="rounded-3xl border border-border bg-background/70 p-5">
+            <div class="flex items-center justify-between gap-4">
+              <p class="text-sm font-semibold text-text">导航项 {{ ni + 1 }}</p>
+              <button type="button" class="text-sm text-rose-500 transition hover:text-rose-600" @click="removeNavMenuItem(ni)">
+                删除
+              </button>
+            </div>
+            <label class="mt-3 block space-y-2">
+              <span class="text-xs font-medium text-muted">标题</span>
+              <input v-model="navItem.title" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：网页" >
+            </label>
+
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <span class="text-xs font-medium text-muted">子项</span>
+              <button type="button" class="rounded-xl border border-primary/20 bg-primary/8 px-3 py-1.5 text-xs font-semibold text-primary transition hover:border-primary/30" @click="addNavSubItem(ni)">
+                新增子项
+              </button>
+            </div>
+
+            <div v-if="navItem.item.length" class="mt-3 space-y-3">
+              <div v-for="(sub, si) in navItem.item" :key="`nav-sub-${ni}-${si}`" class="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
+                <label class="block space-y-1">
+                  <span class="text-xs text-muted">名称</span>
+                  <input v-model="sub.name" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="博客" >
+                </label>
+                <label class="block space-y-1">
+                  <span class="text-xs text-muted">链接</span>
+                  <input v-model="sub.link" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="https://example.com/" >
+                </label>
+                <label class="block space-y-1">
+                  <span class="text-xs text-muted">图标</span>
+                  <input v-model="sub.icon" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/img/favicon.ico" >
+                </label>
+                <button type="button" class="mt-5 self-start text-xs text-rose-500 transition hover:text-rose-600" @click="removeNavSubItem(ni, si)">
+                  删除
+                </button>
+              </div>
+            </div>
+            <div v-else class="mt-3 text-xs text-muted">暂无子项，点击上方按钮添加。</div>
+          </article>
+        </div>
+        <div v-else class="rounded-3xl border border-dashed border-border bg-background/45 px-6 py-8 text-center text-sm text-muted">
+          还没有导航菜单项，点击上方按钮添加。
+        </div>
+      </div>
+    </section>
+
+    <!-- 纪念日 -->
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-black text-text">纪念日灰色模式</h2>
+          <p class="mt-2 text-sm text-muted">特定日期首页变灰，如哀悼日、纪念日。</p>
+        </div>
+        <button type="button" class="flex items-center gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-text transition hover:border-primary/20" @click="form.mournEnable = !form.mournEnable">
+          <span>{{ form.mournEnable ? '已开启' : '已关闭' }}</span>
+          <span class="relative inline-flex h-7 w-12 items-center rounded-full transition" :class="form.mournEnable ? 'bg-primary' : 'bg-surface-2'">
+            <span class="inline-block h-5 w-5 rounded-full bg-white transition" :class="form.mournEnable ? 'translate-x-6' : 'translate-x-1'" />
+          </span>
+        </button>
+      </div>
+      <label class="mt-5 block space-y-2">
+        <span class="text-sm font-medium text-text">哀悼日期</span>
+        <textarea v-model="form.mournDaysText" rows="3" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 text-sm leading-7 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行一个日期，例如：4-5" />
+        <span class="text-xs text-muted">仅首页变灰，格式如 4-5、5-12、7-7</span>
+      </label>
+    </section>
+
+    <!-- 代码块 + 复制 -->
     <section class="grid gap-6 xl:grid-cols-2">
+      <!-- codeBlock -->
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">导航与页面入口</h2>
+        <h2 class="text-xl font-black text-text">代码块配置</h2>
+        <div class="mt-5 space-y-4">
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">高亮主题</span>
+              <select v-model="form.highlightTheme" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="light">light</option>
+                <option value="darker">darker</option>
+                <option value="pale night">pale night</option>
+                <option value="ocean">ocean</option>
+                <option value="mac">mac</option>
+                <option value="mac light">mac light</option>
+                <option value="false">关闭高亮</option>
+              </select>
+            </label>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">代码折叠</span>
+              <select v-model="form.highlightShrink" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="true">默认折叠</option>
+                <option value="false">默认展开</option>
+                <option value="none">展开并隐藏按钮</option>
+              </select>
+            </label>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.highlightCopy = !form.highlightCopy">
+              <span class="text-sm text-text">复制按钮</span>
+              <span class="text-sm text-muted">{{ form.highlightCopy ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.highlightLang = !form.highlightLang">
+              <span class="text-sm text-text">显示语言</span>
+              <span class="text-sm text-muted">{{ form.highlightLang ? '已开启' : '已关闭' }}</span>
+            </button>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.codeWordWrap = !form.codeWordWrap">
+              <span class="text-sm text-text">代码自动换行</span>
+              <span class="text-sm text-muted">{{ form.codeWordWrap ? '已开启' : '已关闭' }}</span>
+            </button>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">高度限制 (px)</span>
+              <input v-model.number="form.highlightHeightLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <!-- copySettings -->
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">复制设置</h2>
+        <div class="mt-5 space-y-4">
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyEnable = !form.copyEnable">
+              <span class="text-sm text-text">启用复制提示</span>
+              <span class="text-sm text-muted">{{ form.copyEnable ? '已开启' : '已关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyrightEnable = !form.copyrightEnable">
+              <span class="text-sm text-text">追加版权信息</span>
+              <span class="text-sm text-muted">{{ form.copyrightEnable ? '已开启' : '已关闭' }}</span>
+            </button>
+          </div>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">版权字数限制</span>
+            <input v-model.number="form.copyrightLimitCount" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            <span class="text-xs text-muted">超过此字数才追加版权信息</span>
+          </label>
+        </div>
+      </article>
+    </section>
+
+    <!-- 搜索 + 数学公式 -->
+    <section class="grid gap-6 xl:grid-cols-2">
+      <!-- search -->
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">搜索配置</h2>
         <div class="mt-5 space-y-5">
           <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">菜单 `menu`</span>
-            <textarea v-model="form.menuJson" rows="10" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+            <span class="text-sm font-medium text-text">搜索方式</span>
+            <select v-model="form.searchMode" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="local">本地搜索</option>
+              <option value="algolia">Algolia 搜索</option>
+              <option value="docsearch">DocSearch</option>
+              <option value="off">关闭搜索</option>
+            </select>
           </label>
+
+          <template v-if="form.searchMode === 'local'">
+            <div class="grid gap-4 md:grid-cols-2">
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.localSearchEnable = !form.localSearchEnable">
+                <span class="text-sm text-text">启用本地搜索</span>
+                <span class="text-sm text-muted">{{ form.localSearchEnable ? '已开启' : '已关闭' }}</span>
+              </button>
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.localSearchPreload = !form.localSearchPreload">
+                <span class="text-sm text-text">预加载索引</span>
+                <span class="text-sm text-muted">{{ form.localSearchPreload ? '已开启' : '已关闭' }}</span>
+              </button>
+            </div>
+          </template>
+        </div>
+      </article>
+
+      <!-- mathjax + katex -->
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">数学公式</h2>
+        <div class="mt-5 space-y-5">
+          <div class="rounded-3xl border border-border bg-background/70 p-5">
+            <p class="text-sm font-semibold text-text">MathJax</p>
+            <div class="mt-3 grid gap-4 md:grid-cols-2">
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mathjaxEnable = !form.mathjaxEnable">
+                <span class="text-sm text-text">启用 MathJax</span>
+                <span class="text-sm text-muted">{{ form.mathjaxEnable ? '已开启' : '已关闭' }}</span>
+              </button>
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mathjaxPerPage = !form.mathjaxPerPage">
+                <span class="text-sm text-text">每页加载</span>
+                <span class="text-sm text-muted">{{ form.mathjaxPerPage ? '已开启' : '已关闭' }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-border bg-background/70 p-5">
+            <p class="text-sm font-semibold text-text">KaTeX</p>
+            <div class="mt-3 grid gap-4 md:grid-cols-3">
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexEnable = !form.katexEnable">
+                <span class="text-sm text-text">启用 KaTeX</span>
+                <span class="text-sm text-muted">{{ form.katexEnable ? '已开启' : '已关闭' }}</span>
+              </button>
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexPerPage = !form.katexPerPage">
+                <span class="text-sm text-text">每页加载</span>
+                <span class="text-sm text-muted">{{ form.katexPerPage ? '已开启' : '已关闭' }}</span>
+              </button>
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexHideScrollbar = !form.katexHideScrollbar">
+                <span class="text-sm text-text">隐藏滚动条</span>
+                <span class="text-sm text-muted">{{ form.katexHideScrollbar ? '已开启' : '已关闭' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- 页面缩略图 + 表格斑马纹 -->
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">页面缩略图</h2>
+        <div class="mt-5">
           <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">导航 `nav`</span>
-            <textarea v-model="form.navJson" rows="10" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">纪念日灰色模式 `mourn`</span>
-            <textarea v-model="form.mournJson" rows="7" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">页面缩略图后缀 `pageThumbnailSuffix`</span>
-            <input
-              v-model="form.pageThumbnailSuffix"
-              type="text"
-              class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10"
-              placeholder="例如：webp"
-            >
+            <span class="text-sm font-medium text-text">缩略图后缀</span>
+            <input v-model="form.pageThumbnailSuffix" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：webp" >
+            <span class="text-xs text-muted">用于图片 CDN 裁切参数，如 ?imageView2/1/w/600/h/400</span>
           </label>
         </div>
       </article>
 
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">展示能力</h2>
-        <div class="mt-5 space-y-5">
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">代码块 `codeBlock`</span>
-            <textarea v-model="form.codeBlockJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">复制设置 `copySettings`</span>
-            <textarea v-model="form.copySettingsJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">搜索主配置 `search`</span>
-            <textarea v-model="form.searchJson" rows="7" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">本地搜索 `localSearch`</span>
-            <textarea v-model="form.localSearchJson" rows="7" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
+        <h2 class="text-xl font-black text-text">表格样式</h2>
+        <div class="mt-5">
           <label class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4">
             <div>
-              <p class="text-sm font-medium text-text">表格斑马纹 `table_interlaced_discoloration`</p>
+              <p class="text-sm font-medium text-text">表格斑马纹</p>
               <p class="mt-1 text-xs text-muted">控制文章表格的交错背景效果。</p>
             </div>
             <button
@@ -184,31 +666,6 @@ async function handleSave() {
               />
             </button>
           </label>
-        </div>
-      </article>
-    </section>
-
-    <section class="grid gap-6 xl:grid-cols-2">
-      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">数学公式</h2>
-        <div class="mt-5 space-y-5">
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">MathJax `mathjax`</span>
-            <textarea v-model="form.mathjaxJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">KaTeX `katex`</span>
-            <textarea v-model="form.katexJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-        </div>
-      </article>
-
-      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">恢复策略说明</h2>
-        <div class="mt-5 space-y-4 text-sm leading-7 text-muted">
-          <p>当前这批复杂配置先用 JSON 承接，是为了尽快补回后台替代 `_config.yml` 的能力。</p>
-          <p>等核心链路稳定后，再把菜单编辑、导航项、搜索和代码块配置拆成更细致的可视化表单。</p>
-          <p>这样不会阻塞前台继续对齐安知鱼主题，同时也避免再次出现“大改一轮后整站不可用”的情况。</p>
         </div>
       </article>
     </section>

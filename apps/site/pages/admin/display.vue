@@ -301,10 +301,11 @@ async function handleSave() {
       {{ errorMessage }}
     </div>
 
-    <section class="grid gap-6 xl:grid-cols-2">
+    <section class="grid gap-6 xl:grid-cols-3">
+      <!-- 代码块 -->
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">代码块与复制</h2>
-        <div class="mt-5 space-y-5">
+        <h2 class="text-xl font-black text-text">代码块</h2>
+        <div class="mt-5 space-y-4">
           <div class="grid gap-4 md:grid-cols-2">
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">高亮主题</span>
@@ -317,16 +318,8 @@ async function handleSave() {
                 <option value="true">按配置收缩</option>
               </select>
             </label>
-            <label class="block space-y-2">
-              <span class="text-sm font-medium text-text">高度限制</span>
-              <input v-model.number="form.codeHighlightHeightLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
-            </label>
-            <label class="block space-y-2">
-              <span class="text-sm font-medium text-text">版权复制阈值</span>
-              <input v-model.number="form.copyCopyrightLimitCount" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
-            </label>
           </div>
-          <div class="grid gap-4 md:grid-cols-3">
+          <div class="grid gap-4 md:grid-cols-2">
             <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.codeHighlightCopy = !form.codeHighlightCopy">
               <span class="text-sm text-text">复制按钮</span>
               <span class="text-sm text-muted">{{ form.codeHighlightCopy ? '已开启' : '已关闭' }}</span>
@@ -335,12 +328,27 @@ async function handleSave() {
               <span class="text-sm text-text">语言标签</span>
               <span class="text-sm text-muted">{{ form.codeHighlightLang ? '已开启' : '已关闭' }}</span>
             </button>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
             <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.codeWordWrap = !form.codeWordWrap">
               <span class="text-sm text-text">自动换行</span>
               <span class="text-sm text-muted">{{ form.codeWordWrap ? '已开启' : '已关闭' }}</span>
             </button>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">高度限制</span>
+              <input v-model.number="form.codeHighlightHeightLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <!-- 复制设置 -->
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">复制设置</h2>
+        <div class="mt-5 space-y-4">
+          <div class="grid gap-4 md:grid-cols-2">
             <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyEnable = !form.copyEnable">
-              <span class="text-sm text-text">启用复制版权提示</span>
+              <span class="text-sm text-text">复制版权提示</span>
               <span class="text-sm text-muted">{{ form.copyEnable ? '已开启' : '已关闭' }}</span>
             </button>
             <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyCopyrightEnable = !form.copyCopyrightEnable">
@@ -348,12 +356,17 @@ async function handleSave() {
               <span class="text-sm text-muted">{{ form.copyCopyrightEnable ? '已开启' : '已关闭' }}</span>
             </button>
           </div>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">版权复制阈值</span>
+            <input v-model.number="form.copyCopyrightLimitCount" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+          </label>
         </div>
       </article>
 
+      <!-- 搜索 -->
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">搜索</h2>
-        <div class="mt-5 space-y-5">
+        <div class="mt-5 space-y-4">
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">搜索提供者</span>
             <select v-model="form.searchProvider" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
@@ -369,37 +382,35 @@ async function handleSave() {
               <span class="text-sm text-muted">{{ form.localSearchEnable ? '已开启' : '已关闭' }}</span>
             </button>
             <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.localSearchPreload = !form.localSearchPreload">
-              <span class="text-sm text-text">预加载本地索引</span>
+              <span class="text-sm text-text">预加载索引</span>
               <span class="text-sm text-muted">{{ form.localSearchPreload ? '已开启' : '已关闭' }}</span>
             </button>
-            <input v-model="form.localSearchCDN" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 md:col-span-2" placeholder="本地搜索 CDN 地址" >
           </div>
-          <div class="rounded-3xl border border-border bg-background/60 p-5">
-            <h3 class="text-lg font-black text-text">Algolia</h3>
-            <div class="mt-4 grid gap-4 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.algoliaEnable = !form.algoliaEnable">
-                <span class="text-sm text-text">启用 Algolia</span>
-                <span class="text-sm text-muted">{{ form.algoliaEnable ? '已开启' : '已关闭' }}</span>
+          <input v-model="form.localSearchCDN" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="本地搜索 CDN 地址" >
+          <div class="rounded-3xl border border-border bg-background/60 p-4">
+            <p class="text-sm font-semibold text-text">Algolia</p>
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-3 py-3 text-left transition hover:border-primary/20" @click="form.algoliaEnable = !form.algoliaEnable">
+                <span class="text-xs text-text">启用</span>
+                <span class="text-xs text-muted">{{ form.algoliaEnable ? '开' : '关' }}</span>
               </button>
-              <input v-model.number="form.algoliaPerPage" type="number" min="1" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每页条数" >
-              <input v-model="form.algoliaAppId" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="App ID" >
-              <input v-model="form.algoliaApiKey" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Key" >
-              <input v-model="form.algoliaIndexName" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 md:col-span-2" placeholder="索引名" >
+              <input v-model.number="form.algoliaPerPage" type="number" min="1" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每页条数" >
+              <input v-model="form.algoliaAppId" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="App ID" >
+              <input v-model="form.algoliaApiKey" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Key" >
             </div>
-            <textarea v-model="form.algoliaTagsText" rows="4" class="mt-4 w-full rounded-2xl border border-border bg-white/90 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行一个 tag" />
+            <input v-model="form.algoliaIndexName" type="text" class="mt-3 w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="索引名" >
           </div>
-          <div class="rounded-3xl border border-border bg-background/60 p-5">
-            <h3 class="text-lg font-black text-text">Docsearch</h3>
-            <div class="mt-4 grid gap-4 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.docsearchEnable = !form.docsearchEnable">
-                <span class="text-sm text-text">启用 Docsearch</span>
-                <span class="text-sm text-muted">{{ form.docsearchEnable ? '已开启' : '已关闭' }}</span>
+          <div class="rounded-3xl border border-border bg-background/60 p-4">
+            <p class="text-sm font-semibold text-text">Docsearch</p>
+            <div class="mt-3 grid gap-3 md:grid-cols-2">
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-3 py-3 text-left transition hover:border-primary/20" @click="form.docsearchEnable = !form.docsearchEnable">
+                <span class="text-xs text-text">启用</span>
+                <span class="text-xs text-muted">{{ form.docsearchEnable ? '开' : '关' }}</span>
               </button>
-              <input v-model="form.docsearchAppId" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="App ID" >
-              <input v-model="form.docsearchApiKey" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Key" >
-              <input v-model="form.docsearchIndexName" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 md:col-span-2" placeholder="索引名" >
+              <input v-model="form.docsearchAppId" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="App ID" >
+              <input v-model="form.docsearchApiKey" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Key" >
             </div>
-            <textarea v-model="form.docsearchOptionText" rows="4" class="mt-4 w-full rounded-2xl border border-border bg-white/90 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行 key=value" />
+            <input v-model="form.docsearchIndexName" type="text" class="mt-3 w-full rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="索引名" >
           </div>
         </div>
       </article>

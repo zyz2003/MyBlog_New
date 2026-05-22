@@ -6,6 +6,12 @@ definePageMeta({
 
 const { settings, loading, save, refresh } = useAdminSettings('posts')
 
+interface QrcodeItem {
+  img: string
+  link: string
+  text: string
+}
+
 const form = reactive({
   postPagination: '1',
 
@@ -44,7 +50,7 @@ const form = reactive({
   copyrightAuthorLink: '/',
 
   rewardEnable: false,
-  rewardQrcodesJson: '[]',
+  rewardQrcodes: [] as QrcodeItem[],
 
   postEditEnable: false,
   postEditGithub: '',
@@ -64,26 +70,23 @@ const form = reactive({
   noticeMessagePrev: '距离上次更新已经过去',
   noticeMessageNext: '天，文章内容可能已经过时，请注意甄别。',
 
-  coverJson: '{\n  "index_enable": true,\n  "aside_enable": true,\n  "archives_enable": true,\n  "position": "left"\n}',
-  ptoolJson: '{\n  "enable": false\n}',
+  coverIndexEnable: true,
+  coverAsideEnable: true,
+  coverArchivesEnable: true,
+  coverPosition: 'left',
+  coverDefaultCovers: '',
+
+  ptoolEnable: false,
+  ptoolShareMobile: true,
+  ptoolShareWeibo: true,
+  ptoolShareCopyurl: true,
+  ptoolCategories: false,
+  ptoolMode: '',
 })
 
 const saving = ref(false)
 const message = ref('')
 const errorMessage = ref('')
-
-function stringifyValue(value: unknown, fallback: string) {
-  if (value === undefined || value === null) {
-    return fallback
-  }
-
-  try {
-    return JSON.stringify(value, null, 2)
-  }
-  catch {
-    return fallback
-  }
-}
 
 function hydrateForm() {
   const postMetaPage = (settings.value.postMetaPage as Record<string, unknown> | undefined) ?? {}
@@ -96,6 +99,8 @@ function hydrateForm() {
   const relatedPost = (settings.value.relatedPost as Record<string, unknown> | undefined) ?? {}
   const photofigcaption = (settings.value.photofigcaption as Record<string, unknown> | undefined) ?? {}
   const noticeOutdate = (settings.value.noticeOutdate as Record<string, unknown> | undefined) ?? {}
+  const cover = (settings.value.cover as Record<string, unknown> | undefined) ?? {}
+  const ptool = (settings.value.ptool as Record<string, unknown> | undefined) ?? {}
 
   form.postPagination = String(settings.value.postPagination ?? '1')
 
@@ -134,7 +139,13 @@ function hydrateForm() {
   form.copyrightAuthorLink = String(postCopyright.copyrightAuthorLink ?? postCopyright.copyright_author_link ?? '/')
 
   form.rewardEnable = reward.enable !== undefined ? Boolean(reward.enable) : false
-  form.rewardQrcodesJson = stringifyValue(reward.qrCodes ?? reward.QR_code ?? [], '[]')
+  const rawQrcodes = reward.qrCodes ?? reward.QR_code ?? reward.qr_codes
+  form.rewardQrcodes = Array.isArray(rawQrcodes)
+    ? rawQrcodes.map((item: unknown) => {
+        const r = item as Record<string, unknown>
+        return { img: String(r.img ?? ''), link: String(r.link ?? ''), text: String(r.text ?? '') }
+      })
+    : []
 
   form.postEditEnable = postEdit.enable !== undefined ? Boolean(postEdit.enable) : false
   form.postEditGithub = postEdit.github === false ? '' : String(postEdit.github ?? '')
@@ -160,8 +171,20 @@ function hydrateForm() {
   form.noticeMessagePrev = String(noticeOutdate.messagePrev ?? noticeOutdate.message_prev ?? '距离上次更新已经过去')
   form.noticeMessageNext = String(noticeOutdate.messageNext ?? noticeOutdate.message_next ?? '天，文章内容可能已经过时，请注意甄别。')
 
-  form.coverJson = stringifyValue(settings.value.cover, form.coverJson)
-  form.ptoolJson = stringifyValue(settings.value.ptool, form.ptoolJson)
+  form.coverIndexEnable = cover.index_enable !== undefined ? Boolean(cover.index_enable) : Boolean(cover.indexEnable ?? true)
+  form.coverAsideEnable = cover.aside_enable !== undefined ? Boolean(cover.aside_enable) : Boolean(cover.asideEnable ?? true)
+  form.coverArchivesEnable = cover.archives_enable !== undefined ? Boolean(cover.archives_enable) : Boolean(cover.archivesEnable ?? true)
+  form.coverPosition = String(cover.position ?? 'left')
+  form.coverDefaultCovers = Array.isArray(cover.default_cover ?? cover.defaultCover)
+    ? (cover.default_cover ?? cover.defaultCover).map((s: unknown) => String(s)).join('\n')
+    : ''
+
+  form.ptoolEnable = ptool.enable !== undefined ? Boolean(ptool.enable) : false
+  form.ptoolShareMobile = ptool.shareMobile !== undefined ? Boolean(ptool.shareMobile) : Boolean(ptool.share_mobile ?? true)
+  form.ptoolShareWeibo = ptool.shareWeibo !== undefined ? Boolean(ptool.shareWeibo) : Boolean(ptool.share_weibo ?? true)
+  form.ptoolShareCopyurl = ptool.shareCopyurl !== undefined ? Boolean(ptool.shareCopyurl) : Boolean(ptool.share_copyurl ?? true)
+  form.ptoolCategories = ptool.categories !== undefined ? Boolean(ptool.categories) : false
+  form.ptoolMode = String(ptool.mode ?? '')
 }
 
 watch(
@@ -172,13 +195,19 @@ watch(
   { deep: true, immediate: true },
 )
 
-function parseJson<T>(value: string, label: string): T {
-  try {
-    return JSON.parse(value) as T
-  }
-  catch {
-    throw new Error(`${label} 不是合法的 JSON，请检查格式后再保存。`)
-  }
+function addQrcode() {
+  form.rewardQrcodes.push({ img: '', link: '', text: '' })
+}
+
+function removeQrcode(index: number) {
+  form.rewardQrcodes.splice(index, 1)
+}
+
+function linesToArray(value: string) {
+  return value
+    .split(/\r?\n/g)
+    .map(item => item.trim())
+    .filter(Boolean)
 }
 
 async function handleSave() {
@@ -230,7 +259,7 @@ async function handleSave() {
       },
       reward: {
         enable: form.rewardEnable,
-        qrCodes: parseJson<Array<Record<string, unknown>>>(form.rewardQrcodesJson, '赞赏二维码'),
+        qrCodes: form.rewardQrcodes,
       },
       postEdit: {
         enable: form.postEditEnable,
@@ -256,8 +285,21 @@ async function handleSave() {
         messagePrev: form.noticeMessagePrev.trim(),
         messageNext: form.noticeMessageNext.trim(),
       },
-      cover: parseJson<Record<string, unknown>>(form.coverJson, '封面配置'),
-      ptool: parseJson<Record<string, unknown>>(form.ptoolJson, '阅读工具配置'),
+      cover: {
+        index_enable: form.coverIndexEnable,
+        aside_enable: form.coverAsideEnable,
+        archives_enable: form.coverArchivesEnable,
+        position: form.coverPosition,
+        default_cover: linesToArray(form.coverDefaultCovers),
+      },
+      ptool: {
+        enable: form.ptoolEnable,
+        shareMobile: form.ptoolShareMobile,
+        shareWeibo: form.ptoolShareWeibo,
+        shareCopyurl: form.ptoolShareCopyurl,
+        categories: form.ptoolCategories,
+        mode: form.ptoolMode.trim(),
+      },
     })
 
     message.value = '文章展示配置已保存。'
@@ -279,7 +321,6 @@ async function handleSave() {
       <h1 class="mt-3 text-3xl font-black tracking-tight text-text">文章展示配置</h1>
       <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
         这一页负责文章详情页和独立页面的元信息、目录、字数统计、版权、赞赏、相关推荐与过期提示。
-        我优先把前台真实用到的字段拆成表单，剩余复杂项保留 JSON 入口。
       </p>
     </section>
 
@@ -477,10 +518,42 @@ async function handleSave() {
             <input v-model="form.postEditYuque" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
           </label>
         </div>
-        <label class="mt-5 block space-y-2">
-          <span class="text-sm font-medium text-text">赞赏二维码 `reward.qrCodes`</span>
-          <textarea v-model="form.rewardQrcodesJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-        </label>
+
+        <div class="mt-6 border-t border-border/60 pt-6">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-text">赞赏二维码</h3>
+            <button type="button" class="rounded-2xl border border-primary/30 bg-primary/8 px-3 py-1.5 text-xs font-medium text-primary transition hover:bg-primary/15" @click="addQrcode">
+              + 添加
+            </button>
+          </div>
+          <div v-if="form.rewardQrcodes.length === 0" class="mt-3 text-sm text-muted">
+            暂无二维码，点击"添加"新增一项。
+          </div>
+          <div class="mt-3 space-y-3">
+            <div v-for="(item, index) in form.rewardQrcodes" :key="index" class="rounded-2xl border border-border/60 bg-background/50 p-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-muted">二维码 #{{ index + 1 }}</span>
+                <button type="button" class="rounded-xl border border-rose-200 bg-rose-50 px-2 py-1 text-xs text-rose-500 transition hover:bg-rose-100" @click="removeQrcode(index)">
+                  删除
+                </button>
+              </div>
+              <div class="mt-3 grid gap-3 md:grid-cols-3">
+                <label class="block space-y-1">
+                  <span class="text-xs font-medium text-text">图片地址</span>
+                  <input v-model="item.img" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/img/wechat-pay.png" />
+                </label>
+                <label class="block space-y-1">
+                  <span class="text-xs font-medium text-text">跳转链接</span>
+                  <input v-model="item.link" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="https://..." />
+                </label>
+                <label class="block space-y-1">
+                  <span class="text-xs font-medium text-text">描述文字</span>
+                  <input v-model="item.text" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="微信赞赏" />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
       </article>
     </section>
 
@@ -561,15 +634,65 @@ async function handleSave() {
             <option value="4">仅下一篇 + 封面</option>
           </select>
         </label>
-        <div class="mt-5 space-y-5">
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">封面配置 `cover`</span>
-            <textarea v-model="form.coverJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+
+        <div class="mt-6 border-t border-border/60 pt-6">
+          <h3 class="text-base font-bold text-text">封面配置</h3>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.coverIndexEnable = !form.coverIndexEnable">
+              <span class="text-sm text-text">首页封面</span>
+              <span class="text-sm text-muted">{{ form.coverIndexEnable ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.coverAsideEnable = !form.coverAsideEnable">
+              <span class="text-sm text-text">侧边栏封面</span>
+              <span class="text-sm text-muted">{{ form.coverAsideEnable ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.coverArchivesEnable = !form.coverArchivesEnable">
+              <span class="text-sm text-text">归档页封面</span>
+              <span class="text-sm text-muted">{{ form.coverArchivesEnable ? '开启' : '关闭' }}</span>
+            </button>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">封面位置</span>
+              <select v-model="form.coverPosition" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="left">左侧</option>
+                <option value="right">右侧</option>
+                <option value="both">两侧</option>
+              </select>
+            </label>
+          </div>
+          <label class="mt-4 block space-y-2">
+            <span class="text-sm font-medium text-text">默认封面图片，每行一个 URL</span>
+            <textarea v-model="form.coverDefaultCovers" rows="4" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm leading-7 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="https://cdn.example.com/cover1.jpg" />
           </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">阅读工具配置 `ptool`</span>
-            <textarea v-model="form.ptoolJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
+        </div>
+
+        <div class="mt-6 border-t border-border/60 pt-6">
+          <h3 class="text-base font-bold text-text">阅读工具</h3>
+          <div class="mt-4 grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolEnable = !form.ptoolEnable">
+              <span class="text-sm text-text">启用阅读工具</span>
+              <span class="text-sm text-muted">{{ form.ptoolEnable ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolShareMobile = !form.ptoolShareMobile">
+              <span class="text-sm text-text">移动端分享</span>
+              <span class="text-sm text-muted">{{ form.ptoolShareMobile ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolShareWeibo = !form.ptoolShareWeibo">
+              <span class="text-sm text-text">微博分享</span>
+              <span class="text-sm text-muted">{{ form.ptoolShareWeibo ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolShareCopyurl = !form.ptoolShareCopyurl">
+              <span class="text-sm text-text">复制链接分享</span>
+              <span class="text-sm text-muted">{{ form.ptoolShareCopyurl ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolCategories = !form.ptoolCategories">
+              <span class="text-sm text-text">显示分类</span>
+              <span class="text-sm text-muted">{{ form.ptoolCategories ? '开启' : '关闭' }}</span>
+            </button>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">工具模式</span>
+              <input v-model="form.ptoolMode" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="留空使用默认" />
+            </label>
+          </div>
         </div>
       </article>
     </section>

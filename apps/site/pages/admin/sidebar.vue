@@ -58,26 +58,13 @@ const form = reactive({
   runtimeShowEnable: false,
   runtimeShowPublishDate: '',
 
-  tagsCloudJson: '{\n  "enable": false\n}',
-  menusItemsJson: '{}',
+  tagsCloudEnable: false,
+  menusItemsEnable: false,
 })
 
 const saving = ref(false)
 const message = ref('')
 const errorMessage = ref('')
-
-function stringifyValue(value: unknown, fallback: string) {
-  if (value === undefined || value === null) {
-    return fallback
-  }
-
-  try {
-    return JSON.stringify(value, null, 2)
-  }
-  catch {
-    return fallback
-  }
-}
 
 function linesToArray(value: string) {
   return value
@@ -101,6 +88,8 @@ function hydrateForm() {
   const cardWebinfo = (settings.value.cardWebinfo as Record<string, unknown> | undefined) ?? {}
   const cardWeixin = (settings.value.cardWeixin as Record<string, unknown> | undefined) ?? {}
   const runtimeShow = (settings.value.runtimeShow as Record<string, unknown> | undefined) ?? {}
+  const tagsCloud = (settings.value.tagsCloud as Record<string, unknown> | undefined) ?? {}
+  const menusItems = (settings.value.menusItems as Record<string, unknown> | undefined) ?? {}
 
   form.sidebarEnabled = sidebar.enabled !== undefined ? Boolean(sidebar.enabled) : true
   form.sidebarWidgets = Array.isArray(sidebar.widgets)
@@ -148,8 +137,8 @@ function hydrateForm() {
   form.runtimeShowEnable = runtimeShow.enable !== undefined ? Boolean(runtimeShow.enable) : false
   form.runtimeShowPublishDate = String(runtimeShow.publishDate ?? runtimeShow.publish_date ?? '')
 
-  form.tagsCloudJson = stringifyValue(settings.value.tagsCloud, '{\n  "enable": false\n}')
-  form.menusItemsJson = stringifyValue(settings.value.menusItems, '{}')
+  form.tagsCloudEnable = tagsCloud.enable !== undefined ? Boolean(tagsCloud.enable) : false
+  form.menusItemsEnable = menusItems.enable !== undefined ? Boolean(menusItems.enable) : false
 }
 
 watch(
@@ -159,15 +148,6 @@ watch(
   },
   { deep: true, immediate: true },
 )
-
-function parseJson<T>(value: string, label: string): T {
-  try {
-    return JSON.parse(value) as T
-  }
-  catch {
-    throw new Error(`${label} 不是合法的 JSON，请检查格式后再保存。`)
-  }
-}
 
 function toggleWidget(widget: string) {
   if (form.sidebarWidgets.includes(widget)) {
@@ -234,8 +214,12 @@ async function handleSave() {
         enable: form.runtimeShowEnable,
         publishDate: form.runtimeShowPublishDate.trim(),
       },
-      tagsCloud: parseJson<Record<string, unknown>>(form.tagsCloudJson, '标签云配置'),
-      menusItems: parseJson<Record<string, unknown>>(form.menusItemsJson, '菜单块配置'),
+      tagsCloud: {
+        enable: form.tagsCloudEnable,
+      },
+      menusItems: {
+        enable: form.menusItemsEnable,
+      },
     })
     message.value = '侧边栏配置已保存。'
     await refresh()
@@ -256,7 +240,6 @@ async function handleSave() {
       <h1 class="mt-3 text-3xl font-black tracking-tight text-text">侧边栏配置</h1>
       <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
         这里集中处理首页与文章页右侧栏的结构、作者卡片、最近文章、标签卡片、归档卡片以及站点信息卡片。
-        我保留了少量高级 JSON 入口，用来承接还没拆成可视化表单的复杂配置。
       </p>
     </section>
 
@@ -463,21 +446,19 @@ async function handleSave() {
       </article>
     </section>
 
-    <section class="grid gap-6 xl:grid-cols-2">
-      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">高级补充配置</h2>
-        <p class="mt-2 text-sm text-muted">这些项目暂时保留为 JSON 编辑，避免在不清楚前台消费结构时误伤现有行为。</p>
-        <div class="mt-5 space-y-5">
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">标签云配置 `tagsCloud`</span>
-            <textarea v-model="form.tagsCloudJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-          <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">菜单块配置 `menusItems`</span>
-            <textarea v-model="form.menusItemsJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-          </label>
-        </div>
-      </article>
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <h2 class="text-xl font-black text-text">移动端侧边栏增强</h2>
+      <p class="mt-2 text-sm text-muted">控制移动端侧边栏中标签云和菜单块的显示。</p>
+      <div class="mt-5 grid gap-4 md:grid-cols-2">
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tagsCloudEnable = !form.tagsCloudEnable">
+          <span class="text-sm text-text">启用标签云</span>
+          <span class="text-sm text-muted">{{ form.tagsCloudEnable ? '开启' : '关闭' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.menusItemsEnable = !form.menusItemsEnable">
+          <span class="text-sm text-text">启用菜单块</span>
+          <span class="text-sm text-muted">{{ form.menusItemsEnable ? '开启' : '关闭' }}</span>
+        </button>
+      </div>
     </section>
 
     <div class="flex items-center justify-end gap-3">

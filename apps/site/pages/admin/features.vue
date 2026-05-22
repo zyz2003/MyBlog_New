@@ -16,6 +16,12 @@ const rightsideOptions = [
   { value: 'go-up', label: '回到顶部' },
 ]
 
+interface GreetingItem {
+  greeting: string
+  startTime: number
+  endTime: number
+}
+
 const form = reactive({
   readmode: false,
 
@@ -51,43 +57,92 @@ const form = reactive({
 
   greetingBoxEnable: false,
   greetingBoxDefault: '晚上好，欢迎来到这里。',
-  greetingBoxListJson: '[]',
+  greetingBoxList: [] as GreetingItem[],
 
   centerConsoleEnable: false,
-  centerConsoleJson: '{\n  "card_tags": {\n    "enable": true,\n    "limit": 40,\n    "color": false,\n    "highlightTags": []\n  },\n  "card_archives": {\n    "enable": true,\n    "type": "monthly",\n    "format": "MMMM YYYY",\n    "order": -1,\n    "limit": 8\n  }\n}',
+  centerConsoleCardTagsEnable: true,
+  centerConsoleCardTagsLimit: 40,
+  centerConsoleCardTagsColor: false,
+  centerConsoleCardArchivesEnable: true,
+  centerConsoleCardArchivesType: 'monthly',
+  centerConsoleCardArchivesFormat: 'MMMM YYYY',
+  centerConsoleCardArchivesOrder: -1,
+  centerConsoleCardArchivesLimit: 8,
 
-  effectsJson: '{\n  "dynamicEffect": {},\n  "canvasRibbon": {},\n  "canvasFlutteringRibbon": {},\n  "canvasNest": {},\n  "fireworks": {},\n  "clickHeart": {},\n  "clickShowText": {},\n  "activatePowerMode": {},\n  "universe": {},\n  "bubble": {}\n}',
-  aiSummaryJson: '{\n  "gptName": "AnZhiYu",\n  "btnLink": ""\n}',
-  agreementPopupJson: '{\n  "enable": false,\n  "url": "/privacy"\n}',
-  friendsVueJson: '{\n  "enable": false,\n  "vueJs": "",\n  "apiurl": "",\n  "topTips": "",\n  "topBackground": ""\n}',
+  dynamicEffectPostTopWave: true,
+  dynamicEffectPostTopRollZoomInfo: false,
+  dynamicEffectPageCommentsRollZoom: false,
+
+  canvasRibbonEnable: false,
+  canvasFlutteringRibbonEnable: false,
+  canvasNestEnable: false,
+  fireworksEnable: false,
+  fireworksMobile: false,
+  clickHeartEnable: false,
+  clickHeartMobile: false,
+  clickShowTextEnable: false,
+  clickShowTextMobile: false,
+  activatePowerModeEnable: false,
+  activatePowerModeColorful: true,
+  activatePowerModeShake: false,
+  activatePowerModeMobile: false,
+  universeEnable: false,
+  bubbleEnable: false,
+
+  aiSummaryEnable: false,
+  aiSummaryGptName: 'AnZhiYu',
+  aiSummaryMode: 'local',
+  aiSummarySwitchBtn: false,
+  aiSummaryBtnLink: '',
+
+  agreementPopupEnable: false,
+  agreementPopupUrl: '/privacy',
+
+  friendsVueEnable: false,
+  friendsVueJs: '',
+  friendsVueApiurl: '',
+  friendsVueTopTips: '',
+  friendsVueTopBackground: '',
 })
 
 const saving = ref(false)
 const message = ref('')
 const errorMessage = ref('')
 
-function stringifyValue(value: unknown, fallback: string) {
-  if (value === undefined || value === null) {
-    return fallback
-  }
+function toRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {}
+}
 
-  try {
-    return JSON.stringify(value, null, 2)
-  }
-  catch {
-    return fallback
-  }
+function addGreetingItem() {
+  form.greetingBoxList.push({ greeting: '', startTime: 0, endTime: 24 })
+}
+
+function removeGreetingItem(index: number) {
+  form.greetingBoxList.splice(index, 1)
 }
 
 function hydrateForm() {
-  const preloader = (settings.value.preloader as Record<string, unknown> | undefined) ?? {}
-  const rightsideItems = (settings.value.rightsideItems as Record<string, unknown> | undefined) ?? {}
-  const navMusic = (settings.value.navMusic as Record<string, unknown> | undefined) ?? {}
-  const translate = (settings.value.translate as Record<string, unknown> | undefined) ?? {}
-  const snackbar = (settings.value.snackbar as Record<string, unknown> | undefined) ?? {}
-  const rightClickMenu = (settings.value.rightClickMenu as Record<string, unknown> | undefined) ?? {}
-  const greetingBox = (settings.value.greetingBox as Record<string, unknown> | undefined) ?? {}
-  const centerConsole = (settings.value.centerConsole as Record<string, unknown> | undefined) ?? {}
+  const preloader = toRecord(settings.value.preloader)
+  const rightsideItems = toRecord(settings.value.rightsideItems)
+  const navMusic = toRecord(settings.value.navMusic)
+  const translate = toRecord(settings.value.translate)
+  const snackbar = toRecord(settings.value.snackbar)
+  const rightClickMenu = toRecord(settings.value.rightClickMenu)
+  const greetingBox = toRecord(settings.value.greetingBox)
+  const centerConsole = toRecord(settings.value.centerConsole)
+  const dynamicEffect = toRecord(settings.value.dynamicEffect)
+  const canvasRibbon = toRecord(settings.value.canvasRibbon)
+  const canvasFlutteringRibbon = toRecord(settings.value.canvasFlutteringRibbon)
+  const canvasNest = toRecord(settings.value.canvasNest)
+  const fireworks = toRecord(settings.value.fireworks)
+  const clickHeart = toRecord(settings.value.clickHeart)
+  const clickShowText = toRecord(settings.value.clickShowText)
+  const activatePowerMode = toRecord(settings.value.activatePowerMode)
+  const universe = toRecord(settings.value.universe)
+  const bubble = toRecord(settings.value.bubble)
+  const aiSummary = toRecord(settings.value.aiSummary)
+  const agreementPopup = toRecord(settings.value.agreementPopup)
+  const friendsVue = toRecord(settings.value.friendsVue)
 
   form.readmode = Boolean(settings.value.readmode)
 
@@ -129,26 +184,60 @@ function hydrateForm() {
 
   form.greetingBoxEnable = greetingBox.enable !== undefined ? Boolean(greetingBox.enable) : false
   form.greetingBoxDefault = String(greetingBox.default ?? '晚上好，欢迎来到这里。')
-  form.greetingBoxListJson = stringifyValue(greetingBox.list, '[]')
+  const rawList = greetingBox.list
+  form.greetingBoxList = Array.isArray(rawList)
+    ? rawList.map((item: unknown) => {
+        const r = item as Record<string, unknown>
+        return { greeting: String(r.greeting ?? ''), startTime: Number(r.startTime ?? 0), endTime: Number(r.endTime ?? 24) }
+      })
+    : []
 
+  const cardTags = toRecord(centerConsole.card_tags ?? centerConsole.cardTags)
+  const cardArchives = toRecord(centerConsole.card_archives ?? centerConsole.cardArchives)
   form.centerConsoleEnable = centerConsole.enable !== undefined ? Boolean(centerConsole.enable) : false
-  form.centerConsoleJson = stringifyValue(centerConsole, form.centerConsoleJson)
+  form.centerConsoleCardTagsEnable = cardTags.enable !== undefined ? Boolean(cardTags.enable) : true
+  form.centerConsoleCardTagsLimit = Number(cardTags.limit ?? 40) || 40
+  form.centerConsoleCardTagsColor = cardTags.color !== undefined ? Boolean(cardTags.color) : false
+  form.centerConsoleCardArchivesEnable = cardArchives.enable !== undefined ? Boolean(cardArchives.enable) : true
+  form.centerConsoleCardArchivesType = String(cardArchives.type ?? 'monthly')
+  form.centerConsoleCardArchivesFormat = String(cardArchives.format ?? 'MMMM YYYY')
+  form.centerConsoleCardArchivesOrder = Number(cardArchives.order ?? -1) >= 0 ? 1 : -1
+  form.centerConsoleCardArchivesLimit = Number(cardArchives.limit ?? 8) || 8
 
-  form.effectsJson = stringifyValue({
-    dynamicEffect: settings.value.dynamicEffect ?? {},
-    canvasRibbon: settings.value.canvasRibbon ?? {},
-    canvasFlutteringRibbon: settings.value.canvasFlutteringRibbon ?? {},
-    canvasNest: settings.value.canvasNest ?? {},
-    fireworks: settings.value.fireworks ?? {},
-    clickHeart: settings.value.clickHeart ?? {},
-    clickShowText: settings.value.clickShowText ?? {},
-    activatePowerMode: settings.value.activatePowerMode ?? {},
-    universe: settings.value.universe ?? {},
-    bubble: settings.value.bubble ?? {},
-  }, form.effectsJson)
-  form.aiSummaryJson = stringifyValue(settings.value.aiSummary, form.aiSummaryJson)
-  form.agreementPopupJson = stringifyValue(settings.value.agreementPopup, form.agreementPopupJson)
-  form.friendsVueJson = stringifyValue(settings.value.friendsVue, form.friendsVueJson)
+  form.dynamicEffectPostTopWave = dynamicEffect.postTopWave !== undefined ? Boolean(dynamicEffect.postTopWave) : true
+  form.dynamicEffectPostTopRollZoomInfo = dynamicEffect.postTopRollZoomInfo !== undefined ? Boolean(dynamicEffect.postTopRollZoomInfo) : false
+  form.dynamicEffectPageCommentsRollZoom = dynamicEffect.pageCommentsRollZoom !== undefined ? Boolean(dynamicEffect.pageCommentsRollZoom) : false
+
+  form.canvasRibbonEnable = canvasRibbon.enable !== undefined ? Boolean(canvasRibbon.enable) : false
+  form.canvasFlutteringRibbonEnable = canvasFlutteringRibbon.enable !== undefined ? Boolean(canvasFlutteringRibbon.enable) : false
+  form.canvasNestEnable = canvasNest.enable !== undefined ? Boolean(canvasNest.enable) : false
+  form.fireworksEnable = fireworks.enable !== undefined ? Boolean(fireworks.enable) : false
+  form.fireworksMobile = fireworks.mobile !== undefined ? Boolean(fireworks.mobile) : false
+  form.clickHeartEnable = clickHeart.enable !== undefined ? Boolean(clickHeart.enable) : false
+  form.clickHeartMobile = clickHeart.mobile !== undefined ? Boolean(clickHeart.mobile) : false
+  form.clickShowTextEnable = clickShowText.enable !== undefined ? Boolean(clickShowText.enable) : false
+  form.clickShowTextMobile = clickShowText.mobile !== undefined ? Boolean(clickShowText.mobile) : false
+  form.activatePowerModeEnable = activatePowerMode.enable !== undefined ? Boolean(activatePowerMode.enable) : false
+  form.activatePowerModeColorful = activatePowerMode.colorful !== undefined ? Boolean(activatePowerMode.colorful) : true
+  form.activatePowerModeShake = activatePowerMode.shake !== undefined ? Boolean(activatePowerMode.shake) : false
+  form.activatePowerModeMobile = activatePowerMode.mobile !== undefined ? Boolean(activatePowerMode.mobile) : false
+  form.universeEnable = universe.enable !== undefined ? Boolean(universe.enable) : false
+  form.bubbleEnable = bubble.enable !== undefined ? Boolean(bubble.enable) : false
+
+  form.aiSummaryEnable = aiSummary.enable !== undefined ? Boolean(aiSummary.enable) : false
+  form.aiSummaryGptName = String(aiSummary.gptName ?? 'AnZhiYu')
+  form.aiSummaryMode = String(aiSummary.mode ?? 'local')
+  form.aiSummarySwitchBtn = aiSummary.switchBtn !== undefined ? Boolean(aiSummary.switchBtn) : false
+  form.aiSummaryBtnLink = String(aiSummary.btnLink ?? '')
+
+  form.agreementPopupEnable = agreementPopup.enable !== undefined ? Boolean(agreementPopup.enable) : false
+  form.agreementPopupUrl = String(agreementPopup.url ?? '/privacy')
+
+  form.friendsVueEnable = friendsVue.enable !== undefined ? Boolean(friendsVue.enable) : false
+  form.friendsVueJs = String(friendsVue.vue_js ?? friendsVue.vueJs ?? '')
+  form.friendsVueApiurl = String(friendsVue.apiurl ?? '')
+  form.friendsVueTopTips = String(friendsVue.top_tips ?? friendsVue.topTips ?? '')
+  form.friendsVueTopBackground = String(friendsVue.top_background ?? friendsVue.topBackground ?? '')
 }
 
 watch(
@@ -158,15 +247,6 @@ watch(
   },
   { deep: true, immediate: true },
 )
-
-function parseJson<T>(value: string, label: string): T {
-  try {
-    return JSON.parse(value) as T
-  }
-  catch {
-    throw new Error(`${label} 不是合法的 JSON，请检查格式后再保存。`)
-  }
-}
 
 function toggleSelection(target: 'rightsideShow' | 'rightsideHide', value: string) {
   if (form[target].includes(value)) {
@@ -182,10 +262,6 @@ async function handleSave() {
   errorMessage.value = ''
 
   try {
-    const greetingList = parseJson<Array<Record<string, unknown>>>(form.greetingBoxListJson, '欢迎语时间段')
-    const centerConsole = parseJson<Record<string, unknown>>(form.centerConsoleJson, '中控台配置')
-    const effects = parseJson<Record<string, Record<string, unknown>>>(form.effectsJson, '动效配置')
-
     await save({
       readmode: form.readmode,
       preloader: {
@@ -227,25 +303,60 @@ async function handleSave() {
       greetingBox: {
         enable: form.greetingBoxEnable,
         default: form.greetingBoxDefault.trim(),
-        list: greetingList,
+        list: form.greetingBoxList,
       },
       centerConsole: {
-        ...centerConsole,
         enable: form.centerConsoleEnable,
+        card_tags: {
+          enable: form.centerConsoleCardTagsEnable,
+          limit: form.centerConsoleCardTagsLimit,
+          color: form.centerConsoleCardTagsColor,
+        },
+        card_archives: {
+          enable: form.centerConsoleCardArchivesEnable,
+          type: form.centerConsoleCardArchivesType,
+          format: form.centerConsoleCardArchivesFormat.trim(),
+          order: form.centerConsoleCardArchivesOrder,
+          limit: form.centerConsoleCardArchivesLimit,
+        },
       },
-      dynamicEffect: effects.dynamicEffect ?? {},
-      canvasRibbon: effects.canvasRibbon ?? {},
-      canvasFlutteringRibbon: effects.canvasFlutteringRibbon ?? {},
-      canvasNest: effects.canvasNest ?? {},
-      fireworks: effects.fireworks ?? {},
-      clickHeart: effects.clickHeart ?? {},
-      clickShowText: effects.clickShowText ?? {},
-      activatePowerMode: effects.activatePowerMode ?? {},
-      universe: effects.universe ?? {},
-      bubble: effects.bubble ?? {},
-      aiSummary: parseJson<Record<string, unknown>>(form.aiSummaryJson, 'AI 摘要配置'),
-      agreementPopup: parseJson<Record<string, unknown>>(form.agreementPopupJson, '协议弹窗配置'),
-      friendsVue: parseJson<Record<string, unknown>>(form.friendsVueJson, '友链朋友圈配置'),
+      dynamicEffect: {
+        postTopWave: form.dynamicEffectPostTopWave,
+        postTopRollZoomInfo: form.dynamicEffectPostTopRollZoomInfo,
+        pageCommentsRollZoom: form.dynamicEffectPageCommentsRollZoom,
+      },
+      canvasRibbon: { enable: form.canvasRibbonEnable },
+      canvasFlutteringRibbon: { enable: form.canvasFlutteringRibbonEnable },
+      canvasNest: { enable: form.canvasNestEnable },
+      fireworks: { enable: form.fireworksEnable, mobile: form.fireworksMobile },
+      clickHeart: { enable: form.clickHeartEnable, mobile: form.clickHeartMobile },
+      clickShowText: { enable: form.clickShowTextEnable, mobile: form.clickShowTextMobile },
+      activatePowerMode: {
+        enable: form.activatePowerModeEnable,
+        colorful: form.activatePowerModeColorful,
+        shake: form.activatePowerModeShake,
+        mobile: form.activatePowerModeMobile,
+      },
+      universe: { enable: form.universeEnable },
+      bubble: { enable: form.bubbleEnable },
+      aiSummary: {
+        enable: form.aiSummaryEnable,
+        gptName: form.aiSummaryGptName.trim(),
+        mode: form.aiSummaryMode.trim(),
+        switchBtn: form.aiSummarySwitchBtn,
+        btnLink: form.aiSummaryBtnLink.trim(),
+      },
+      agreementPopup: {
+        enable: form.agreementPopupEnable,
+        url: form.agreementPopupUrl.trim(),
+      },
+      friendsVue: {
+        enable: form.friendsVueEnable,
+        vue_js: form.friendsVueJs.trim(),
+        apiurl: form.friendsVueApiurl.trim(),
+        top_tips: form.friendsVueTopTips.trim(),
+        top_background: form.friendsVueTopBackground.trim(),
+      },
     })
 
     message.value = '增强功能配置已保存。'
@@ -266,8 +377,7 @@ async function handleSave() {
       <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary/80">Features</p>
       <h1 class="mt-3 text-3xl font-black tracking-tight text-text">增强功能配置</h1>
       <p class="mt-3 max-w-3xl text-sm leading-7 text-muted">
-        这里承接右侧按钮、预加载、导航音乐、翻译、提示消息、欢迎语和部分互动增强功能。
-        先把高频操作拆成表单，复杂动效继续保留 JSON 入口，保证后台先可用、可管、可联调。
+        管理右侧按钮、预加载、导航音乐、翻译、提示消息、欢迎语、动效和互动增强功能。所有配置项均已可视化，保存后前台立刻生效。
       </p>
     </section>
 
@@ -456,52 +566,261 @@ async function handleSave() {
       </article>
     </section>
 
+    <!-- 欢迎语 + 中控台 -->
     <section class="grid gap-6 xl:grid-cols-2">
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">欢迎语与中控台</h2>
+        <h2 class="text-xl font-black text-text">欢迎语</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
           <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.greetingBoxEnable = !form.greetingBoxEnable">
             <span class="text-sm text-text">启用欢迎弹层</span>
             <span class="text-sm text-muted">{{ form.greetingBoxEnable ? '开启' : '关闭' }}</span>
           </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleEnable = !form.centerConsoleEnable">
-            <span class="text-sm text-text">启用右侧设置面板</span>
-            <span class="text-sm text-muted">{{ form.centerConsoleEnable ? '开启' : '关闭' }}</span>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">默认欢迎语</span>
+            <input v-model="form.greetingBoxDefault" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+        </div>
+
+        <div class="mt-5 flex items-center justify-between">
+          <span class="text-sm font-medium text-text">时间段列表</span>
+          <button type="button" class="rounded-2xl border border-primary/30 bg-primary/8 px-3 py-1.5 text-xs font-medium text-primary transition hover:bg-primary/15" @click="addGreetingItem">
+            + 添加
           </button>
         </div>
-        <label class="mt-5 block space-y-2">
-          <span class="text-sm font-medium text-text">默认欢迎语</span>
-          <input v-model="form.greetingBoxDefault" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-        </label>
-        <label class="mt-5 block space-y-2">
-          <span class="text-sm font-medium text-text">欢迎语时间段 `greetingBox.list`</span>
-          <textarea v-model="form.greetingBoxListJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-        </label>
-        <label class="mt-5 block space-y-2">
-          <span class="text-sm font-medium text-text">右侧设置面板 `centerConsole`</span>
-          <textarea v-model="form.centerConsoleJson" rows="10" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
-        </label>
+        <div v-if="form.greetingBoxList.length" class="mt-3 space-y-3">
+          <div v-for="(item, index) in form.greetingBoxList" :key="index" class="rounded-2xl border border-border/60 bg-background/50 p-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-muted">时段 #{{ index + 1 }}</span>
+              <button type="button" class="rounded-xl border border-rose-200 bg-rose-50 px-2 py-1 text-xs text-rose-500 transition hover:bg-rose-100" @click="removeGreetingItem(index)">
+                删除
+              </button>
+            </div>
+            <div class="mt-3 grid gap-3 md:grid-cols-[1fr_auto_auto]">
+              <label class="block space-y-1">
+                <span class="text-xs font-medium text-text">欢迎语</span>
+                <input v-model="item.greeting" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="早上好鸭👋" />
+              </label>
+              <label class="block space-y-1">
+                <span class="text-xs font-medium text-text">开始时</span>
+                <input v-model.number="item.startTime" type="number" min="0" max="24" class="w-full rounded-2xl border border-border bg-background/80 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+              </label>
+              <label class="block space-y-1">
+                <span class="text-xs font-medium text-text">结束时</span>
+                <input v-model.number="item.endTime" type="number" min="0" max="24" class="w-full rounded-2xl border border-border bg-background/80 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+              </label>
+            </div>
+          </div>
+        </div>
+        <div v-else class="mt-3 text-sm text-muted">暂无时间段，点击"添加"新增。</div>
       </article>
 
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
-        <h2 class="text-xl font-black text-text">高级扩展 JSON</h2>
-        <p class="mt-2 text-sm text-muted">特效、AI 摘要、协议弹窗和友链朋友圈仍保留 JSON 入口，便于继续对齐安知鱼原始配置。</p>
-        <div class="mt-5 space-y-5">
+        <h2 class="text-xl font-black text-text">中控台</h2>
+        <div class="mt-5 space-y-4">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleEnable = !form.centerConsoleEnable">
+            <span class="text-sm text-text">启用右侧设置面板</span>
+            <span class="text-sm text-muted">{{ form.centerConsoleEnable ? '开启' : '关闭' }}</span>
+          </button>
+
+          <div class="rounded-3xl border border-border bg-background/60 p-4">
+            <p class="text-sm font-semibold text-text">标签卡片</p>
+            <div class="mt-3 grid gap-4 md:grid-cols-2">
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleCardTagsEnable = !form.centerConsoleCardTagsEnable">
+                <span class="text-sm text-text">启用</span>
+                <span class="text-sm text-muted">{{ form.centerConsoleCardTagsEnable ? '开启' : '关闭' }}</span>
+              </button>
+              <label class="block space-y-2">
+                <span class="text-sm font-medium text-text">数量限制</span>
+                <input v-model.number="form.centerConsoleCardTagsLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+              </label>
+            </div>
+            <button type="button" class="mt-3 flex w-full items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleCardTagsColor = !form.centerConsoleCardTagsColor">
+              <span class="text-sm text-text">标签着色</span>
+              <span class="text-sm text-muted">{{ form.centerConsoleCardTagsColor ? '开启' : '关闭' }}</span>
+            </button>
+          </div>
+
+          <div class="rounded-3xl border border-border bg-background/60 p-4">
+            <p class="text-sm font-semibold text-text">归档卡片</p>
+            <div class="mt-3 grid gap-4 md:grid-cols-2">
+              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleCardArchivesEnable = !form.centerConsoleCardArchivesEnable">
+                <span class="text-sm text-text">启用</span>
+                <span class="text-sm text-muted">{{ form.centerConsoleCardArchivesEnable ? '开启' : '关闭' }}</span>
+              </button>
+              <label class="block space-y-2">
+                <span class="text-sm font-medium text-text">归档维度</span>
+                <select v-model="form.centerConsoleCardArchivesType" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                  <option value="monthly">按月</option>
+                  <option value="yearly">按年</option>
+                </select>
+              </label>
+              <label class="block space-y-2">
+                <span class="text-sm font-medium text-text">日期格式</span>
+                <input v-model="form.centerConsoleCardArchivesFormat" type="text" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+              </label>
+              <label class="block space-y-2">
+                <span class="text-sm font-medium text-text">数量限制</span>
+                <input v-model.number="form.centerConsoleCardArchivesLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+              </label>
+            </div>
+            <button type="button" class="mt-3 flex w-full items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleCardArchivesOrder = form.centerConsoleCardArchivesOrder === -1 ? 1 : -1">
+              <span class="text-sm text-text">排序方向</span>
+              <span class="text-sm text-muted">{{ form.centerConsoleCardArchivesOrder === -1 ? '最新优先' : '最旧优先' }}</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- 动效开关 -->
+    <section class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+      <h2 class="text-xl font-black text-text">页面动效</h2>
+      <p class="mt-2 text-sm text-muted">控制文章顶部波浪、滚动缩放、背景彩带、粒子、烟花、点击特效等。</p>
+      <div class="mt-5 grid gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.dynamicEffectPostTopWave = !form.dynamicEffectPostTopWave">
+          <span class="text-sm text-text">文章顶部波浪</span>
+          <span class="text-sm text-muted">{{ form.dynamicEffectPostTopWave ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.dynamicEffectPostTopRollZoomInfo = !form.dynamicEffectPostTopRollZoomInfo">
+          <span class="text-sm text-text">顶部滚动缩放</span>
+          <span class="text-sm text-muted">{{ form.dynamicEffectPostTopRollZoomInfo ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.dynamicEffectPageCommentsRollZoom = !form.dynamicEffectPageCommentsRollZoom">
+          <span class="text-sm text-text">评论滚动缩放</span>
+          <span class="text-sm text-muted">{{ form.dynamicEffectPageCommentsRollZoom ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.canvasRibbonEnable = !form.canvasRibbonEnable">
+          <span class="text-sm text-text">静止彩带</span>
+          <span class="text-sm text-muted">{{ form.canvasRibbonEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.canvasFlutteringRibbonEnable = !form.canvasFlutteringRibbonEnable">
+          <span class="text-sm text-text">飘动彩带</span>
+          <span class="text-sm text-muted">{{ form.canvasFlutteringRibbonEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.canvasNestEnable = !form.canvasNestEnable">
+          <span class="text-sm text-text">粒子线条</span>
+          <span class="text-sm text-muted">{{ form.canvasNestEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.fireworksEnable = !form.fireworksEnable">
+          <span class="text-sm text-text">烟花效果</span>
+          <span class="text-sm text-muted">{{ form.fireworksEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.fireworksMobile = !form.fireworksMobile">
+          <span class="text-sm text-text">烟花移动端</span>
+          <span class="text-sm text-muted">{{ form.fireworksMobile ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickHeartEnable = !form.clickHeartEnable">
+          <span class="text-sm text-text">点击爱心</span>
+          <span class="text-sm text-muted">{{ form.clickHeartEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickHeartMobile = !form.clickHeartMobile">
+          <span class="text-sm text-text">爱心移动端</span>
+          <span class="text-sm text-muted">{{ form.clickHeartMobile ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickShowTextEnable = !form.clickShowTextEnable">
+          <span class="text-sm text-text">点击文字</span>
+          <span class="text-sm text-muted">{{ form.clickShowTextEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickShowTextMobile = !form.clickShowTextMobile">
+          <span class="text-sm text-text">文字移动端</span>
+          <span class="text-sm text-muted">{{ form.clickShowTextMobile ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeEnable = !form.activatePowerModeEnable">
+          <span class="text-sm text-text">打字粒子</span>
+          <span class="text-sm text-muted">{{ form.activatePowerModeEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeColorful = !form.activatePowerModeColorful">
+          <span class="text-sm text-text">粒子彩色</span>
+          <span class="text-sm text-muted">{{ form.activatePowerModeColorful ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeShake = !form.activatePowerModeShake">
+          <span class="text-sm text-text">打字震动</span>
+          <span class="text-sm text-muted">{{ form.activatePowerModeShake ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeMobile = !form.activatePowerModeMobile">
+          <span class="text-sm text-text">粒子移动端</span>
+          <span class="text-sm text-muted">{{ form.activatePowerModeMobile ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.universeEnable = !form.universeEnable">
+          <span class="text-sm text-text">深色粒子</span>
+          <span class="text-sm text-muted">{{ form.universeEnable ? '开' : '关' }}</span>
+        </button>
+        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.bubbleEnable = !form.bubbleEnable">
+          <span class="text-sm text-text">气泡上升</span>
+          <span class="text-sm text-muted">{{ form.bubbleEnable ? '开' : '关' }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- AI摘要 + 协议弹窗 + 友链朋友圈 -->
+    <section class="grid gap-6 xl:grid-cols-3">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">AI 摘要</h2>
+        <div class="mt-5 space-y-4">
+          <div class="grid gap-4 md:grid-cols-2">
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.aiSummaryEnable = !form.aiSummaryEnable">
+              <span class="text-sm text-text">启用 AI 摘要</span>
+              <span class="text-sm text-muted">{{ form.aiSummaryEnable ? '开启' : '关闭' }}</span>
+            </button>
+            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.aiSummarySwitchBtn = !form.aiSummarySwitchBtn">
+              <span class="text-sm text-text">显示切换按钮</span>
+              <span class="text-sm text-muted">{{ form.aiSummarySwitchBtn ? '开启' : '关闭' }}</span>
+            </button>
+          </div>
           <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">动效合集</span>
-            <textarea v-model="form.effectsJson" rows="10" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+            <span class="text-sm font-medium text-text">GPT 名称</span>
+            <input v-model="form.aiSummaryGptName" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="AnZhiYu" />
           </label>
           <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">AI 摘要配置</span>
-            <textarea v-model="form.aiSummaryJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+            <span class="text-sm font-medium text-text">模式</span>
+            <select v-model="form.aiSummaryMode" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="local">本地</option>
+              <option value="tianli">天理</option>
+            </select>
           </label>
           <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">协议弹窗配置</span>
-            <textarea v-model="form.agreementPopupJson" rows="7" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+            <span class="text-sm font-medium text-text">切换按钮链接</span>
+            <input v-model="form.aiSummaryBtnLink" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="https://..." />
+          </label>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">协议弹窗</h2>
+        <div class="mt-5 space-y-4">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.agreementPopupEnable = !form.agreementPopupEnable">
+            <span class="text-sm text-text">启用协议弹窗</span>
+            <span class="text-sm text-muted">{{ form.agreementPopupEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">协议页面路径</span>
+            <input v-model="form.agreementPopupUrl" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/privacy" />
+          </label>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">友链朋友圈</h2>
+        <div class="mt-5 space-y-4">
+          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.friendsVueEnable = !form.friendsVueEnable">
+            <span class="text-sm text-text">启用友链朋友圈</span>
+            <span class="text-sm text-muted">{{ form.friendsVueEnable ? '开启' : '关闭' }}</span>
+          </button>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">Vue JS 地址</span>
+            <input v-model="form.friendsVueJs" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="https://cdn.../friends/index.js" />
           </label>
           <label class="block space-y-2">
-            <span class="text-sm font-medium text-text">友链朋友圈配置</span>
-            <textarea v-model="form.friendsVueJson" rows="8" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+            <span class="text-sm font-medium text-text">朋友圈后端地址</span>
+            <input v-model="form.friendsVueApiurl" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">顶部提示语</span>
+            <input v-model="form.friendsVueTopTips" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">顶部背景图</span>
+            <input v-model="form.friendsVueTopBackground" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
           </label>
         </div>
       </article>
