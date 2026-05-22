@@ -18,6 +18,18 @@ type PublicArticle = {
   categories?: Array<{ id: number; name: string; slug: string }>
   tags?: Array<{ id: number; name: string; slug: string }>
   author?: { username?: string | null; displayName?: string | null; avatar?: string | null; id?: number }
+  mainColor?: string | null
+  mathjax?: boolean | null
+  katex?: boolean | null
+  toc?: boolean | null
+  ai?: string | null
+  aside?: boolean | null
+  topImg?: string | null
+  keywords?: string | null
+  highlightShrink?: string | null
+  password?: string | null
+  isTop?: boolean | null
+  allowComment?: boolean | null
 }
 
 const route = useRoute()
@@ -185,6 +197,9 @@ const readingTime = computed(() => {
 const showWordCount = computed(() => wordcount.value.enable && wordcount.value.postWordcount)
 const showReadingTime = computed(() => wordcount.value.enable && wordcount.value.min2read)
 
+const showToc = computed(() => article.value?.toc ?? toc.value.post)
+const showAside = computed(() => article.value?.aside ?? true)
+
 const articleUrl = computed(() => {
   if (import.meta.client && canonicalPath.value) {
     return new URL(canonicalPath.value, window.location.origin).toString()
@@ -197,7 +212,7 @@ const authorName = computed(() => article.value?.author?.displayName || article.
 const articleViewCount = computed(() => article.value?.viewCount)
 
 const heroImage = computed(() => {
-  const base = article.value?.coverImage || errorImage.value.post_page || ''
+  const base = article.value?.topImg || article.value?.coverImage || errorImage.value.post_page || ''
   if (!base) {
     return ''
   }
@@ -207,8 +222,7 @@ const heroImage = computed(() => {
 })
 
 const aiSummaryText = computed(() => {
-  const articleValue = article.value as { aiSummary?: string } | undefined
-  return articleValue?.aiSummary || ''
+  return article.value?.ai || (article.value as { aiSummary?: string } | undefined)?.aiSummary || ''
 })
 const aiSummaryConfig = computed(() => {
   const raw = (settings.value.aiSummary as Record<string, unknown> | undefined) ?? {}
@@ -311,6 +325,15 @@ async function resolveMainTone() {
 }
 
 const articleToneStyle = computed(() => {
+  const articleMainColor = article.value?.mainColor
+  if (articleMainColor) {
+    return {
+      '--anzhiyu-main': articleMainColor,
+      '--anzhiyu-main-op': `${articleMainColor}22`,
+      '--anzhiyu-main-op-deep': `${articleMainColor}33`,
+    } as Record<string, string>
+  }
+
   if (!toneColor.value || !mainTone.value.enable) {
     return {}
   }
@@ -439,6 +462,7 @@ useSeoMeta({
   ogDescription: () => article.value?.seoDescription || article.value?.excerpt || '',
   ogImage: () => heroImage.value,
   twitterCard: 'summary_large_image',
+  keywords: () => article.value?.keywords || '',
 })
 </script>
 
@@ -486,7 +510,7 @@ useSeoMeta({
           />
         </div>
 
-        <div v-if="toc.post" class="mb-4 lg:hidden">
+        <div v-if="showToc" class="mb-4 lg:hidden">
           <BlogTableOfContents
             :content="article.content || ''"
             :number="toc.number"
@@ -496,12 +520,15 @@ useSeoMeta({
           />
         </div>
 
-        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div :class="showAside ? 'grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]' : ''">
           <div class="space-y-6">
             <div class="rounded-[30px] border border-[var(--style-border-always)] bg-[var(--anzhiyu-card-bg)] px-5 py-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] md:px-8 md:py-8">
               <BlogArticleContent
                 :content="article.content || ''"
                 :enable-photo-figcaption="photoFigcaption.enable"
+                :article-mathjax="article.mathjax ?? undefined"
+                :article-katex="article.katex ?? undefined"
+                :article-highlight-shrink="article.highlightShrink || undefined"
               />
             </div>
 
@@ -568,10 +595,10 @@ useSeoMeta({
             <BlogCommentWidget />
           </div>
 
-          <aside class="hidden lg:block">
+          <aside v-if="showAside" class="hidden lg:block">
             <div class="sticky top-[96px]">
               <BlogTableOfContents
-                v-if="toc.post"
+                v-if="showToc"
                 :content="article.content || ''"
                 :number="toc.number"
                 :expand="toc.expand"

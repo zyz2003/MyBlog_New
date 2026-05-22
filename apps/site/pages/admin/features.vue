@@ -392,14 +392,8 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">阅读与预加载</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.readmode = !form.readmode">
-            <span class="text-sm text-text">启用阅读模式按钮</span>
-            <span class="text-sm text-muted">{{ form.readmode ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.preloaderEnable = !form.preloaderEnable">
-            <span class="text-sm text-text">启用预加载动画</span>
-            <span class="text-sm text-muted">{{ form.preloaderEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.readmode" label="启用阅读模式按钮" />
+          <AdminToggleSwitch v-model="form.preloaderEnable" label="启用预加载动画" />
         </div>
         <div class="mt-5 grid gap-5 md:grid-cols-2">
           <label class="block space-y-2">
@@ -420,10 +414,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">右侧按钮组</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.rightsideEnableOrder = !form.rightsideEnableOrder">
-            <span class="text-sm text-text">启用自定义排序</span>
-            <span class="text-sm text-muted">{{ form.rightsideEnableOrder ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.rightsideEnableOrder" label="启用自定义排序" class="w-full" />
 
           <div>
             <p class="mb-3 text-sm font-medium text-text">显示按钮</p>
@@ -468,14 +459,8 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">导航音乐</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navMusicEnable = !form.navMusicEnable">
-            <span class="text-sm text-text">启用导航音乐</span>
-            <span class="text-sm text-muted">{{ form.navMusicEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navMusicConsoleWidescreen = !form.navMusicConsoleWidescreen">
-            <span class="text-sm text-text">宽屏控制台音乐</span>
-            <span class="text-sm text-muted">{{ form.navMusicConsoleWidescreen ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.navMusicEnable" label="启用导航音乐" />
+          <AdminToggleSwitch v-model="form.navMusicConsoleWidescreen" label="宽屏控制台音乐" />
         </div>
         <div class="mt-5 grid gap-5 md:grid-cols-2">
           <label class="block space-y-2">
@@ -505,18 +490,9 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">翻译、提示与右键菜单</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-3">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.translateEnable = !form.translateEnable">
-            <span class="text-sm text-text">启用翻译</span>
-            <span class="text-sm text-muted">{{ form.translateEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.snackbarEnable = !form.snackbarEnable">
-            <span class="text-sm text-text">启用消息提醒</span>
-            <span class="text-sm text-muted">{{ form.snackbarEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.rightClickMenuEnable = !form.rightClickMenuEnable">
-            <span class="text-sm text-text">启用右键菜单</span>
-            <span class="text-sm text-muted">{{ form.rightClickMenuEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.translateEnable" label="启用翻译" />
+          <AdminToggleSwitch v-model="form.snackbarEnable" label="启用消息提醒" />
+          <AdminToggleSwitch v-model="form.rightClickMenuEnable" label="启用右键菜单" />
         </div>
 
         <div class="mt-5 grid gap-5 md:grid-cols-2">
@@ -571,10 +547,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">欢迎语</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.greetingBoxEnable = !form.greetingBoxEnable">
-            <span class="text-sm text-text">启用欢迎弹层</span>
-            <span class="text-sm text-muted">{{ form.greetingBoxEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.greetingBoxEnable" label="启用欢迎弹层" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">默认欢迎语</span>
             <input v-model="form.greetingBoxDefault" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
@@ -617,36 +590,24 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">中控台</h2>
         <div class="mt-5 space-y-4">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleEnable = !form.centerConsoleEnable">
-            <span class="text-sm text-text">启用右侧设置面板</span>
-            <span class="text-sm text-muted">{{ form.centerConsoleEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.centerConsoleEnable" label="启用右侧设置面板" class="w-full" />
 
           <div class="rounded-3xl border border-border bg-background/60 p-4">
             <p class="text-sm font-semibold text-text">标签卡片</p>
             <div class="mt-3 grid gap-4 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleCardTagsEnable = !form.centerConsoleCardTagsEnable">
-                <span class="text-sm text-text">启用</span>
-                <span class="text-sm text-muted">{{ form.centerConsoleCardTagsEnable ? '开启' : '关闭' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.centerConsoleCardTagsEnable" label="启用" />
               <label class="block space-y-2">
                 <span class="text-sm font-medium text-text">数量限制</span>
                 <input v-model.number="form.centerConsoleCardTagsLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" />
               </label>
             </div>
-            <button type="button" class="mt-3 flex w-full items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleCardTagsColor = !form.centerConsoleCardTagsColor">
-              <span class="text-sm text-text">标签着色</span>
-              <span class="text-sm text-muted">{{ form.centerConsoleCardTagsColor ? '开启' : '关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.centerConsoleCardTagsColor" label="标签着色" class="mt-3 w-full" />
           </div>
 
           <div class="rounded-3xl border border-border bg-background/60 p-4">
             <p class="text-sm font-semibold text-text">归档卡片</p>
             <div class="mt-3 grid gap-4 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.centerConsoleCardArchivesEnable = !form.centerConsoleCardArchivesEnable">
-                <span class="text-sm text-text">启用</span>
-                <span class="text-sm text-muted">{{ form.centerConsoleCardArchivesEnable ? '开启' : '关闭' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.centerConsoleCardArchivesEnable" label="启用" />
               <label class="block space-y-2">
                 <span class="text-sm font-medium text-text">归档维度</span>
                 <select v-model="form.centerConsoleCardArchivesType" class="w-full rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
@@ -677,78 +638,24 @@ async function handleSave() {
       <h2 class="text-xl font-black text-text">页面动效</h2>
       <p class="mt-2 text-sm text-muted">控制文章顶部波浪、滚动缩放、背景彩带、粒子、烟花、点击特效等。</p>
       <div class="mt-5 grid gap-4 md:grid-cols-3 xl:grid-cols-4">
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.dynamicEffectPostTopWave = !form.dynamicEffectPostTopWave">
-          <span class="text-sm text-text">文章顶部波浪</span>
-          <span class="text-sm text-muted">{{ form.dynamicEffectPostTopWave ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.dynamicEffectPostTopRollZoomInfo = !form.dynamicEffectPostTopRollZoomInfo">
-          <span class="text-sm text-text">顶部滚动缩放</span>
-          <span class="text-sm text-muted">{{ form.dynamicEffectPostTopRollZoomInfo ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.dynamicEffectPageCommentsRollZoom = !form.dynamicEffectPageCommentsRollZoom">
-          <span class="text-sm text-text">评论滚动缩放</span>
-          <span class="text-sm text-muted">{{ form.dynamicEffectPageCommentsRollZoom ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.canvasRibbonEnable = !form.canvasRibbonEnable">
-          <span class="text-sm text-text">静止彩带</span>
-          <span class="text-sm text-muted">{{ form.canvasRibbonEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.canvasFlutteringRibbonEnable = !form.canvasFlutteringRibbonEnable">
-          <span class="text-sm text-text">飘动彩带</span>
-          <span class="text-sm text-muted">{{ form.canvasFlutteringRibbonEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.canvasNestEnable = !form.canvasNestEnable">
-          <span class="text-sm text-text">粒子线条</span>
-          <span class="text-sm text-muted">{{ form.canvasNestEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.fireworksEnable = !form.fireworksEnable">
-          <span class="text-sm text-text">烟花效果</span>
-          <span class="text-sm text-muted">{{ form.fireworksEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.fireworksMobile = !form.fireworksMobile">
-          <span class="text-sm text-text">烟花移动端</span>
-          <span class="text-sm text-muted">{{ form.fireworksMobile ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickHeartEnable = !form.clickHeartEnable">
-          <span class="text-sm text-text">点击爱心</span>
-          <span class="text-sm text-muted">{{ form.clickHeartEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickHeartMobile = !form.clickHeartMobile">
-          <span class="text-sm text-text">爱心移动端</span>
-          <span class="text-sm text-muted">{{ form.clickHeartMobile ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickShowTextEnable = !form.clickShowTextEnable">
-          <span class="text-sm text-text">点击文字</span>
-          <span class="text-sm text-muted">{{ form.clickShowTextEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.clickShowTextMobile = !form.clickShowTextMobile">
-          <span class="text-sm text-text">文字移动端</span>
-          <span class="text-sm text-muted">{{ form.clickShowTextMobile ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeEnable = !form.activatePowerModeEnable">
-          <span class="text-sm text-text">打字粒子</span>
-          <span class="text-sm text-muted">{{ form.activatePowerModeEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeColorful = !form.activatePowerModeColorful">
-          <span class="text-sm text-text">粒子彩色</span>
-          <span class="text-sm text-muted">{{ form.activatePowerModeColorful ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeShake = !form.activatePowerModeShake">
-          <span class="text-sm text-text">打字震动</span>
-          <span class="text-sm text-muted">{{ form.activatePowerModeShake ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.activatePowerModeMobile = !form.activatePowerModeMobile">
-          <span class="text-sm text-text">粒子移动端</span>
-          <span class="text-sm text-muted">{{ form.activatePowerModeMobile ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.universeEnable = !form.universeEnable">
-          <span class="text-sm text-text">深色粒子</span>
-          <span class="text-sm text-muted">{{ form.universeEnable ? '开' : '关' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.bubbleEnable = !form.bubbleEnable">
-          <span class="text-sm text-text">气泡上升</span>
-          <span class="text-sm text-muted">{{ form.bubbleEnable ? '开' : '关' }}</span>
-        </button>
+        <AdminToggleSwitch v-model="form.dynamicEffectPostTopWave" label="文章顶部波浪" />
+        <AdminToggleSwitch v-model="form.dynamicEffectPostTopRollZoomInfo" label="顶部滚动缩放" />
+        <AdminToggleSwitch v-model="form.dynamicEffectPageCommentsRollZoom" label="评论滚动缩放" />
+        <AdminToggleSwitch v-model="form.canvasRibbonEnable" label="静止彩带" />
+        <AdminToggleSwitch v-model="form.canvasFlutteringRibbonEnable" label="飘动彩带" />
+        <AdminToggleSwitch v-model="form.canvasNestEnable" label="粒子线条" />
+        <AdminToggleSwitch v-model="form.fireworksEnable" label="烟花效果" />
+        <AdminToggleSwitch v-model="form.fireworksMobile" label="烟花移动端" />
+        <AdminToggleSwitch v-model="form.clickHeartEnable" label="点击爱心" />
+        <AdminToggleSwitch v-model="form.clickHeartMobile" label="爱心移动端" />
+        <AdminToggleSwitch v-model="form.clickShowTextEnable" label="点击文字" />
+        <AdminToggleSwitch v-model="form.clickShowTextMobile" label="文字移动端" />
+        <AdminToggleSwitch v-model="form.activatePowerModeEnable" label="打字粒子" />
+        <AdminToggleSwitch v-model="form.activatePowerModeColorful" label="粒子彩色" />
+        <AdminToggleSwitch v-model="form.activatePowerModeShake" label="打字震动" />
+        <AdminToggleSwitch v-model="form.activatePowerModeMobile" label="粒子移动端" />
+        <AdminToggleSwitch v-model="form.universeEnable" label="深色粒子" />
+        <AdminToggleSwitch v-model="form.bubbleEnable" label="气泡上升" />
       </div>
     </section>
 
@@ -758,14 +665,8 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">AI 摘要</h2>
         <div class="mt-5 space-y-4">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.aiSummaryEnable = !form.aiSummaryEnable">
-              <span class="text-sm text-text">启用 AI 摘要</span>
-              <span class="text-sm text-muted">{{ form.aiSummaryEnable ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.aiSummarySwitchBtn = !form.aiSummarySwitchBtn">
-              <span class="text-sm text-text">显示切换按钮</span>
-              <span class="text-sm text-muted">{{ form.aiSummarySwitchBtn ? '开启' : '关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.aiSummaryEnable" label="启用 AI 摘要" />
+            <AdminToggleSwitch v-model="form.aiSummarySwitchBtn" label="显示切换按钮" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">GPT 名称</span>
@@ -788,10 +689,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">协议弹窗</h2>
         <div class="mt-5 space-y-4">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.agreementPopupEnable = !form.agreementPopupEnable">
-            <span class="text-sm text-text">启用协议弹窗</span>
-            <span class="text-sm text-muted">{{ form.agreementPopupEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.agreementPopupEnable" label="启用协议弹窗" class="w-full" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">协议页面路径</span>
             <input v-model="form.agreementPopupUrl" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/privacy" />
@@ -802,10 +700,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">友链朋友圈</h2>
         <div class="mt-5 space-y-4">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.friendsVueEnable = !form.friendsVueEnable">
-            <span class="text-sm text-text">启用友链朋友圈</span>
-            <span class="text-sm text-muted">{{ form.friendsVueEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.friendsVueEnable" label="启用友链朋友圈" class="w-full" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">Vue JS 地址</span>
             <input v-model="form.friendsVueJs" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="https://cdn.../friends/index.js" />

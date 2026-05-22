@@ -258,14 +258,8 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">Open Graph</h2>
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.openGraphEnabled = !form.openGraphEnabled">
-              <span class="text-sm text-text">启用 Open Graph</span>
-              <span class="text-sm text-muted">{{ form.openGraphEnabled ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.cssPrefix = !form.cssPrefix">
-              <span class="text-sm text-text">启用 CSS Prefix</span>
-              <span class="text-sm text-muted">{{ form.cssPrefix ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.openGraphEnabled" label="启用 Open Graph" />
+            <AdminToggleSwitch v-model="form.cssPrefix" label="启用 CSS Prefix" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">OG 图片</span>
@@ -309,10 +303,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">广告与统计脚本</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.googleAdsenseEnable = !form.googleAdsenseEnable">
-            <span class="text-sm text-text">启用 Google Adsense</span>
-            <span class="text-sm text-muted">{{ form.googleAdsenseEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.googleAdsenseEnable" label="启用 Google Adsense" class="w-full" />
           <input v-model="form.googleAdsenseJs" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Adsense JS 地址" >
           <input v-model="form.googleAdsenseClient" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Adsense Client" >
           <div class="grid gap-4 md:grid-cols-2">
@@ -325,18 +316,12 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">百度推送与 CNZZ</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.baiduPushEnable = !form.baiduPushEnable">
-            <span class="text-sm text-text">启用百度推送</span>
-            <span class="text-sm text-muted">{{ form.baiduPushEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.baiduPushEnable" label="启用百度推送" class="w-full" />
           <div class="grid gap-4 md:grid-cols-2">
             <input v-model="form.baiduPushToken" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="推送 token" >
             <input v-model="form.baiduPushPath" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="推送路径" >
           </div>
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.cnzzEnable = !form.cnzzEnable">
-            <span class="text-sm text-text">启用 CNZZ</span>
-            <span class="text-sm text-muted">{{ form.cnzzEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.cnzzEnable" label="启用 CNZZ" class="w-full" />
           <div class="grid gap-4 md:grid-cols-2">
             <input v-model="form.cnzzId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="CNZZ ID" >
             <input v-model="form.cnzzWebId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Web ID" >
@@ -350,10 +335,7 @@ async function handleSave() {
       <h2 class="text-xl font-black text-text">结构化数据</h2>
       <div class="mt-5 space-y-5">
         <div class="grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.structuredDataEnable = !form.structuredDataEnable">
-            <span class="text-sm text-text">启用结构化数据</span>
-            <span class="text-sm text-muted">{{ form.structuredDataEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.structuredDataEnable" label="启用结构化数据" />
           <input v-model="form.structuredDataType" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="类型，例如 WebSite / Blog" >
         </div>
         <div class="grid gap-4 md:grid-cols-2">

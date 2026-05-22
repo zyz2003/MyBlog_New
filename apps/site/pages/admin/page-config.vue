@@ -399,18 +399,9 @@ async function handleSave() {
 
       <div class="mt-5 space-y-5">
         <div class="grid gap-4 md:grid-cols-3">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navEnable = !form.navEnable">
-            <span class="text-sm text-text">启用导航</span>
-            <span class="text-sm text-muted">{{ form.navEnable ? '已开启' : '已关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navTravelling = !form.navTravelling">
-            <span class="text-sm text-text">开往</span>
-            <span class="text-sm text-muted">{{ form.navTravelling ? '已开启' : '已关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.navClock = !form.navClock">
-            <span class="text-sm text-text">导航时钟</span>
-            <span class="text-sm text-muted">{{ form.navClock ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.navEnable" label="启用导航" />
+          <AdminToggleSwitch v-model="form.navTravelling" label="开往" />
+          <AdminToggleSwitch v-model="form.navClock" label="导航时钟" />
         </div>
 
         <div class="flex items-center justify-between gap-4">
@@ -475,12 +466,7 @@ async function handleSave() {
           <h2 class="text-xl font-black text-text">纪念日灰色模式</h2>
           <p class="mt-2 text-sm text-muted">特定日期首页变灰，如哀悼日、纪念日。</p>
         </div>
-        <button type="button" class="flex items-center gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-text transition hover:border-primary/20" @click="form.mournEnable = !form.mournEnable">
-          <span>{{ form.mournEnable ? '已开启' : '已关闭' }}</span>
-          <span class="relative inline-flex h-7 w-12 items-center rounded-full transition" :class="form.mournEnable ? 'bg-primary' : 'bg-surface-2'">
-            <span class="inline-block h-5 w-5 rounded-full bg-white transition" :class="form.mournEnable ? 'translate-x-6' : 'translate-x-1'" />
-          </span>
-        </button>
+        <AdminToggleSwitch v-model="form.mournEnable" label="启用哀悼模式" />
       </div>
       <label class="mt-5 block space-y-2">
         <span class="text-sm font-medium text-text">哀悼日期</span>
@@ -518,20 +504,11 @@ async function handleSave() {
             </label>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.highlightCopy = !form.highlightCopy">
-              <span class="text-sm text-text">复制按钮</span>
-              <span class="text-sm text-muted">{{ form.highlightCopy ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.highlightLang = !form.highlightLang">
-              <span class="text-sm text-text">显示语言</span>
-              <span class="text-sm text-muted">{{ form.highlightLang ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.highlightCopy" label="复制按钮" />
+            <AdminToggleSwitch v-model="form.highlightLang" label="显示语言" />
           </div>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.codeWordWrap = !form.codeWordWrap">
-              <span class="text-sm text-text">代码自动换行</span>
-              <span class="text-sm text-muted">{{ form.codeWordWrap ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.codeWordWrap" label="代码自动换行" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">高度限制 (px)</span>
               <input v-model.number="form.highlightHeightLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
@@ -545,14 +522,8 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">复制设置</h2>
         <div class="mt-5 space-y-4">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyEnable = !form.copyEnable">
-              <span class="text-sm text-text">启用复制提示</span>
-              <span class="text-sm text-muted">{{ form.copyEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyrightEnable = !form.copyrightEnable">
-              <span class="text-sm text-text">追加版权信息</span>
-              <span class="text-sm text-muted">{{ form.copyrightEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.copyEnable" label="启用复制提示" />
+            <AdminToggleSwitch v-model="form.copyrightEnable" label="追加版权信息" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">版权字数限制</span>
@@ -581,14 +552,8 @@ async function handleSave() {
 
           <template v-if="form.searchMode === 'local'">
             <div class="grid gap-4 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.localSearchEnable = !form.localSearchEnable">
-                <span class="text-sm text-text">启用本地搜索</span>
-                <span class="text-sm text-muted">{{ form.localSearchEnable ? '已开启' : '已关闭' }}</span>
-              </button>
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.localSearchPreload = !form.localSearchPreload">
-                <span class="text-sm text-text">预加载索引</span>
-                <span class="text-sm text-muted">{{ form.localSearchPreload ? '已开启' : '已关闭' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.localSearchEnable" label="启用本地搜索" />
+              <AdminToggleSwitch v-model="form.localSearchPreload" label="预加载索引" />
             </div>
           </template>
         </div>
@@ -601,32 +566,17 @@ async function handleSave() {
           <div class="rounded-3xl border border-border bg-background/70 p-5">
             <p class="text-sm font-semibold text-text">MathJax</p>
             <div class="mt-3 grid gap-4 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mathjaxEnable = !form.mathjaxEnable">
-                <span class="text-sm text-text">启用 MathJax</span>
-                <span class="text-sm text-muted">{{ form.mathjaxEnable ? '已开启' : '已关闭' }}</span>
-              </button>
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mathjaxPerPage = !form.mathjaxPerPage">
-                <span class="text-sm text-text">每页加载</span>
-                <span class="text-sm text-muted">{{ form.mathjaxPerPage ? '已开启' : '已关闭' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.mathjaxEnable" label="启用 MathJax" />
+              <AdminToggleSwitch v-model="form.mathjaxPerPage" label="每页加载" />
             </div>
           </div>
 
           <div class="rounded-3xl border border-border bg-background/70 p-5">
             <p class="text-sm font-semibold text-text">KaTeX</p>
             <div class="mt-3 grid gap-4 md:grid-cols-3">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexEnable = !form.katexEnable">
-                <span class="text-sm text-text">启用 KaTeX</span>
-                <span class="text-sm text-muted">{{ form.katexEnable ? '已开启' : '已关闭' }}</span>
-              </button>
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexPerPage = !form.katexPerPage">
-                <span class="text-sm text-text">每页加载</span>
-                <span class="text-sm text-muted">{{ form.katexPerPage ? '已开启' : '已关闭' }}</span>
-              </button>
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexHideScrollbar = !form.katexHideScrollbar">
-                <span class="text-sm text-text">隐藏滚动条</span>
-                <span class="text-sm text-muted">{{ form.katexHideScrollbar ? '已开启' : '已关闭' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.katexEnable" label="启用 KaTeX" />
+              <AdminToggleSwitch v-model="form.katexPerPage" label="每页加载" />
+              <AdminToggleSwitch v-model="form.katexHideScrollbar" label="隐藏滚动条" />
             </div>
           </div>
         </div>
@@ -654,17 +604,7 @@ async function handleSave() {
               <p class="text-sm font-medium text-text">表格斑马纹</p>
               <p class="mt-1 text-xs text-muted">控制文章表格的交错背景效果。</p>
             </div>
-            <button
-              type="button"
-              class="relative inline-flex h-7 w-12 items-center rounded-full transition"
-              :class="form.tableInterlacedDiscoloration ? 'bg-primary' : 'bg-surface-2'"
-              @click="form.tableInterlacedDiscoloration = !form.tableInterlacedDiscoloration"
-            >
-              <span
-                class="inline-block h-5 w-5 rounded-full bg-white transition"
-                :class="form.tableInterlacedDiscoloration ? 'translate-x-6' : 'translate-x-1'"
-              />
-            </button>
+            <AdminToggleSwitch v-model="form.tableInterlacedDiscoloration" label="表格斑马纹" />
           </label>
         </div>
       </article>

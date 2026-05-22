@@ -213,25 +213,14 @@ async function handleSave() {
             @input="formState[field.key] = Number(($event.target as HTMLInputElement).value)"
           >
 
-          <button
+          <AdminToggleSwitch
             v-else-if="field.type === 'boolean'"
-            type="button"
-            class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20"
-            @click="formState[field.key] = !Boolean(formState[field.key])"
+            :model-value="Boolean(formState[field.key])"
+            @update:model-value="formState[field.key] = $event"
+            class="w-full"
           >
-            <span class="text-sm text-muted">
-              {{ Boolean(formState[field.key]) ? '当前已开启' : '当前已关闭' }}
-            </span>
-            <span
-              class="relative inline-flex h-7 w-12 items-center rounded-full transition"
-              :class="Boolean(formState[field.key]) ? 'bg-primary' : 'bg-surface-2'"
-            >
-              <span
-                class="inline-block h-5 w-5 rounded-full bg-white transition"
-                :class="Boolean(formState[field.key]) ? 'translate-x-6' : 'translate-x-1'"
-              />
-            </span>
-          </button>
+            <span class="text-sm text-text">{{ field.label }}</span>
+          </AdminToggleSwitch>
 
           <textarea
             v-else

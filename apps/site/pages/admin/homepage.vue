@@ -338,14 +338,8 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">首页欢迎区</h2>
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homeTopEnabled = !form.homeTopEnabled">
-              <span class="text-sm text-text">启用首页欢迎区</span>
-              <span class="text-sm text-muted">{{ form.homeTopEnabled ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homeTopSwiperEnabled = !form.homeTopSwiperEnabled">
-              <span class="text-sm text-text">启用首页轮播</span>
-              <span class="text-sm text-muted">{{ form.homeTopSwiperEnabled ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.homeTopEnabled" label="启用首页欢迎区" />
+            <AdminToggleSwitch v-model="form.homeTopSwiperEnabled" label="启用首页轮播" />
           </div>
 
           <label class="block space-y-2">
@@ -390,22 +384,10 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">列表布局与封面</h2>
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageCoverEnabled = !form.homepageCoverEnabled">
-              <span class="text-sm text-text">启用首页封面</span>
-              <span class="text-sm text-muted">{{ form.homepageCoverEnabled ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageDoubleRow = !form.homepageDoubleRow">
-              <span class="text-sm text-text">启用双列布局</span>
-              <span class="text-sm text-muted">{{ form.homepageDoubleRow ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageAsideCover = !form.homepageAsideCover">
-              <span class="text-sm text-text">侧栏显示封面</span>
-              <span class="text-sm text-muted">{{ form.homepageAsideCover ? '显示' : '隐藏' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageArchivesCover = !form.homepageArchivesCover">
-              <span class="text-sm text-text">归档显示封面</span>
-              <span class="text-sm text-muted">{{ form.homepageArchivesCover ? '显示' : '隐藏' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.homepageCoverEnabled" label="启用首页封面" />
+            <AdminToggleSwitch v-model="form.homepageDoubleRow" label="启用双列布局" />
+            <AdminToggleSwitch v-model="form.homepageAsideCover" label="侧栏显示封面" />
+            <AdminToggleSwitch v-model="form.homepageArchivesCover" label="归档显示封面" />
           </div>
 
           <div class="grid gap-5 md:grid-cols-2">
@@ -564,14 +546,8 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">友链页头与背景扩展</h2>
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.peopleCanvasEnable = !form.peopleCanvasEnable">
-              <span class="text-sm text-text">人物动效背景</span>
-              <span class="text-sm text-muted">{{ form.peopleCanvasEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.linkPageTopEnable = !form.linkPageTopEnable">
-              <span class="text-sm text-text">启用友链页头</span>
-              <span class="text-sm text-muted">{{ form.linkPageTopEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.peopleCanvasEnable" label="人物动效背景" />
+            <AdminToggleSwitch v-model="form.linkPageTopEnable" label="启用友链页头" />
           </div>
 
           <label class="block space-y-2">
@@ -597,14 +573,8 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">顶部图片与主色调</h2>
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.topImageDisableTopImg = !form.topImageDisableTopImg">
-              <span class="text-sm text-text">禁用顶部大图</span>
-              <span class="text-sm text-muted">{{ form.topImageDisableTopImg ? '已禁用' : '正常显示' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mainToneEnable = !form.mainToneEnable">
-              <span class="text-sm text-text">启用主色调提取</span>
-              <span class="text-sm text-muted">{{ form.mainToneEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.topImageDisableTopImg" label="禁用顶部大图" />
+            <AdminToggleSwitch v-model="form.mainToneEnable" label="启用主色调提取" />
           </div>
 
           <label class="block space-y-2">
@@ -636,10 +606,7 @@ async function handleSave() {
                 <option value="both">混合模式</option>
               </select>
             </label>
-            <button type="button" class="mt-7 flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mainToneCoverChange = !form.mainToneCoverChange">
-              <span class="text-sm text-text">封面切换时同步换色</span>
-              <span class="text-sm text-muted">{{ form.mainToneCoverChange ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.mainToneCoverChange" label="封面切换时同步换色" class="mt-7" />
           </div>
 
           <label class="block space-y-2">
@@ -652,10 +619,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">首页右侧栏</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.homepageSidebarEnabled = !form.homepageSidebarEnabled">
-            <span class="text-sm text-text">启用首页右侧栏</span>
-            <span class="text-sm text-muted">{{ form.homepageSidebarEnabled ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.homepageSidebarEnabled" label="启用首页右侧栏" class="w-full" />
 
           <div>
             <p class="mb-3 text-sm font-medium text-text">首页右侧栏组件</p>

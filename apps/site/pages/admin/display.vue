@@ -74,6 +74,22 @@ const form = reactive({
   pjaxExcludeText: '',
 
   instantpage: false,
+
+  beautifyEnable: true,
+  beautifyField: 'post',
+  beautifyTitlePrefixIcon: '\\f0c1',
+  beautifyTitlePrefixIconColor: '#F47466',
+
+  categoryUi: '',
+  tagUi: '',
+
+  hrIconEnable: true,
+  hrIconIcon: '\\f0c4',
+  hrIconIconTop: '',
+
+  rightsideBottom: '100px',
+
+  displayMode: 'light',
 })
 
 const saving = ref(false)
@@ -165,6 +181,23 @@ function hydrateForm() {
   form.pjaxExcludeText = toLines(pjax.exclude)
 
   form.instantpage = Boolean(settings.value.instantpage)
+
+  const beautify = toRecord(settings.value.beautify)
+  form.beautifyEnable = beautify.enable !== undefined ? Boolean(beautify.enable) : true
+  form.beautifyField = String(beautify.field ?? 'post')
+  form.beautifyTitlePrefixIcon = String(beautify.titlePrefixIcon ?? beautify['title-prefix-icon'] ?? '\\f0c1')
+  form.beautifyTitlePrefixIconColor = String(beautify.titlePrefixIconColor ?? beautify['title-prefix-icon-color'] ?? '#F47466')
+
+  form.categoryUi = String(settings.value.category_ui ?? '')
+  form.tagUi = String(settings.value.tag_ui ?? '')
+
+  const hrIcon = toRecord(settings.value.hrIcon)
+  form.hrIconEnable = hrIcon.enable !== undefined ? Boolean(hrIcon.enable) : true
+  form.hrIconIcon = String(hrIcon.icon ?? '\\f0c4')
+  form.hrIconIconTop = String(hrIcon.iconTop ?? hrIcon['icon-top'] ?? '')
+
+  form.rightsideBottom = String(settings.value['rightside-bottom'] ?? '100px')
+  form.displayMode = String(settings.value.displayMode ?? settings.value.display_mode ?? 'light')
 }
 
 watch(
@@ -270,6 +303,21 @@ async function handleSave() {
         exclude: fromLines(form.pjaxExcludeText),
       },
       instantpage: form.instantpage,
+      beautify: {
+        enable: form.beautifyEnable,
+        field: form.beautifyField.trim(),
+        'title-prefix-icon': form.beautifyTitlePrefixIcon.trim(),
+        'title-prefix-icon-color': form.beautifyTitlePrefixIconColor.trim(),
+      },
+      category_ui: form.categoryUi.trim(),
+      tag_ui: form.tagUi.trim(),
+      hrIcon: {
+        enable: form.hrIconEnable,
+        icon: form.hrIconIcon.trim(),
+        'icon-top': form.hrIconIconTop.trim(),
+      },
+      'rightside-bottom': form.rightsideBottom.trim(),
+      displayMode: form.displayMode.trim(),
     })
 
     message.value = '展示配置已保存。'
@@ -320,20 +368,11 @@ async function handleSave() {
             </label>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.codeHighlightCopy = !form.codeHighlightCopy">
-              <span class="text-sm text-text">复制按钮</span>
-              <span class="text-sm text-muted">{{ form.codeHighlightCopy ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.codeHighlightLang = !form.codeHighlightLang">
-              <span class="text-sm text-text">语言标签</span>
-              <span class="text-sm text-muted">{{ form.codeHighlightLang ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.codeHighlightCopy" label="复制按钮" />
+            <AdminToggleSwitch v-model="form.codeHighlightLang" label="语言标签" />
           </div>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.codeWordWrap = !form.codeWordWrap">
-              <span class="text-sm text-text">自动换行</span>
-              <span class="text-sm text-muted">{{ form.codeWordWrap ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.codeWordWrap" label="自动换行" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">高度限制</span>
               <input v-model.number="form.codeHighlightHeightLimit" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
@@ -347,14 +386,8 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">复制设置</h2>
         <div class="mt-5 space-y-4">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyEnable = !form.copyEnable">
-              <span class="text-sm text-text">复制版权提示</span>
-              <span class="text-sm text-muted">{{ form.copyEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyCopyrightEnable = !form.copyCopyrightEnable">
-              <span class="text-sm text-text">追加版权文案</span>
-              <span class="text-sm text-muted">{{ form.copyCopyrightEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.copyEnable" label="复制版权提示" />
+            <AdminToggleSwitch v-model="form.copyCopyrightEnable" label="追加版权文案" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">版权复制阈值</span>
@@ -377,23 +410,14 @@ async function handleSave() {
             </select>
           </label>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.localSearchEnable = !form.localSearchEnable">
-              <span class="text-sm text-text">启用本地搜索</span>
-              <span class="text-sm text-muted">{{ form.localSearchEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.localSearchPreload = !form.localSearchPreload">
-              <span class="text-sm text-text">预加载索引</span>
-              <span class="text-sm text-muted">{{ form.localSearchPreload ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.localSearchEnable" label="启用本地搜索" />
+            <AdminToggleSwitch v-model="form.localSearchPreload" label="预加载索引" />
           </div>
           <input v-model="form.localSearchCDN" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="本地搜索 CDN 地址" >
           <div class="rounded-3xl border border-border bg-background/60 p-4">
             <p class="text-sm font-semibold text-text">Algolia</p>
             <div class="mt-3 grid gap-3 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-3 py-3 text-left transition hover:border-primary/20" @click="form.algoliaEnable = !form.algoliaEnable">
-                <span class="text-xs text-text">启用</span>
-                <span class="text-xs text-muted">{{ form.algoliaEnable ? '开' : '关' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.algoliaEnable" label="启用 Algolia" />
               <input v-model.number="form.algoliaPerPage" type="number" min="1" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每页条数" >
               <input v-model="form.algoliaAppId" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="App ID" >
               <input v-model="form.algoliaApiKey" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Key" >
@@ -403,10 +427,7 @@ async function handleSave() {
           <div class="rounded-3xl border border-border bg-background/60 p-4">
             <p class="text-sm font-semibold text-text">Docsearch</p>
             <div class="mt-3 grid gap-3 md:grid-cols-2">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-3 py-3 text-left transition hover:border-primary/20" @click="form.docsearchEnable = !form.docsearchEnable">
-                <span class="text-xs text-text">启用</span>
-                <span class="text-xs text-muted">{{ form.docsearchEnable ? '开' : '关' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.docsearchEnable" label="启用 Docsearch" />
               <input v-model="form.docsearchAppId" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="App ID" >
               <input v-model="form.docsearchApiKey" type="text" class="rounded-2xl border border-border bg-white/90 px-3 py-2 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Key" >
             </div>
@@ -429,35 +450,17 @@ async function handleSave() {
             </select>
           </label>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mathjaxEnable = !form.mathjaxEnable">
-              <span class="text-sm text-text">启用 MathJax</span>
-              <span class="text-sm text-muted">{{ form.mathjaxEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mathjaxPerPage = !form.mathjaxPerPage">
-              <span class="text-sm text-text">按页控制 MathJax</span>
-              <span class="text-sm text-muted">{{ form.mathjaxPerPage ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexEnable = !form.katexEnable">
-              <span class="text-sm text-text">启用 KaTeX</span>
-              <span class="text-sm text-muted">{{ form.katexEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.katexPerPage = !form.katexPerPage">
-              <span class="text-sm text-text">按页控制 KaTeX</span>
-              <span class="text-sm text-muted">{{ form.katexPerPage ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20 md:col-span-2" @click="form.katexHideScrollbar = !form.katexHideScrollbar">
-              <span class="text-sm text-text">隐藏公式滚动条</span>
-              <span class="text-sm text-muted">{{ form.katexHideScrollbar ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.mathjaxEnable" label="启用 MathJax" />
+            <AdminToggleSwitch v-model="form.mathjaxPerPage" label="按页控制 MathJax" />
+            <AdminToggleSwitch v-model="form.katexEnable" label="启用 KaTeX" />
+            <AdminToggleSwitch v-model="form.katexPerPage" label="按页控制 KaTeX" />
+            <AdminToggleSwitch v-model="form.katexHideScrollbar" label="隐藏公式滚动条" />
           </div>
 
           <div class="rounded-3xl border border-border bg-background/60 p-5">
             <h3 class="text-lg font-black text-text">Mermaid</h3>
             <div class="mt-4 grid gap-4 md:grid-cols-3">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20 md:col-span-1" @click="form.mermaidEnable = !form.mermaidEnable">
-                <span class="text-sm text-text">启用 Mermaid</span>
-                <span class="text-sm text-muted">{{ form.mermaidEnable ? '已开启' : '已关闭' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.mermaidEnable" label="启用 Mermaid" />
               <input v-model="form.mermaidThemeLight" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="浅色主题" >
               <input v-model="form.mermaidThemeDark" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="深色主题" >
             </div>
@@ -487,30 +490,12 @@ async function handleSave() {
             </label>
           </div>
           <div class="grid gap-4 md:grid-cols-3">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.noteIcons = !form.noteIcons">
-              <span class="text-sm text-text">Note 图标</span>
-              <span class="text-sm text-muted">{{ form.noteIcons ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tableInterlacedEnable = !form.tableInterlacedEnable">
-              <span class="text-sm text-text">表格交错行</span>
-              <span class="text-sm text-muted">{{ form.tableInterlacedEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tableInterlacedDiscoloration = !form.tableInterlacedDiscoloration">
-              <span class="text-sm text-text">斑马纹着色</span>
-              <span class="text-sm text-muted">{{ form.tableInterlacedDiscoloration ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.iconsFontawesome = !form.iconsFontawesome">
-              <span class="text-sm text-text">Font Awesome</span>
-              <span class="text-sm text-muted">{{ form.iconsFontawesome ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.fancybox = !form.fancybox">
-              <span class="text-sm text-text">Fancybox</span>
-              <span class="text-sm text-muted">{{ form.fancybox ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.mediumZoom = !form.mediumZoom">
-              <span class="text-sm text-text">Medium Zoom</span>
-              <span class="text-sm text-muted">{{ form.mediumZoom ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.noteIcons" label="Note 图标" />
+            <AdminToggleSwitch v-model="form.tableInterlacedEnable" label="表格交错行" />
+            <AdminToggleSwitch v-model="form.tableInterlacedDiscoloration" label="斑马纹着色" />
+            <AdminToggleSwitch v-model="form.iconsFontawesome" label="Font Awesome" />
+            <AdminToggleSwitch v-model="form.fancybox" label="Fancybox" />
+            <AdminToggleSwitch v-model="form.mediumZoom" label="Medium Zoom" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">Font Awesome 动画样式地址</span>
@@ -525,18 +510,9 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">懒加载与排版</h2>
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.lazyloadEnable = !form.lazyloadEnable">
-              <span class="text-sm text-text">启用图片懒加载</span>
-              <span class="text-sm text-muted">{{ form.lazyloadEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.lazyloadBlur = !form.lazyloadBlur">
-              <span class="text-sm text-text">启用模糊占位</span>
-              <span class="text-sm text-muted">{{ form.lazyloadBlur ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.lazyloadProgressive = !form.lazyloadProgressive">
-              <span class="text-sm text-text">渐进加载</span>
-              <span class="text-sm text-muted">{{ form.lazyloadProgressive ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.lazyloadEnable" label="启用图片懒加载" />
+            <AdminToggleSwitch v-model="form.lazyloadBlur" label="启用模糊占位" />
+            <AdminToggleSwitch v-model="form.lazyloadProgressive" label="渐进加载" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">作用范围</span>
               <select v-model="form.lazyloadField" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
@@ -553,10 +529,7 @@ async function handleSave() {
           <div class="mt-2 h-px bg-border/70" />
 
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.panguEnable = !form.panguEnable">
-              <span class="text-sm text-text">启用中英文空格优化</span>
-              <span class="text-sm text-muted">{{ form.panguEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.panguEnable" label="启用中英文空格优化" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">Pangu 作用范围</span>
               <select v-model="form.panguField" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
@@ -572,19 +545,91 @@ async function handleSave() {
         <h2 class="text-xl font-black text-text">页面交互</h2>
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pjaxEnable = !form.pjaxEnable">
-              <span class="text-sm text-text">启用 PJAX</span>
-              <span class="text-sm text-muted">{{ form.pjaxEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.instantpage = !form.instantpage">
-              <span class="text-sm text-text">启用 Instant.page</span>
-              <span class="text-sm text-muted">{{ form.instantpage ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.pjaxEnable" label="启用 PJAX" />
+            <AdminToggleSwitch v-model="form.instantpage" label="启用 Instant.page" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">PJAX 排除路径</span>
             <textarea v-model="form.pjaxExcludeText" rows="6" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行一个排除路径，例如 /admin /friends" />
           </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-3">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">页面美化</h2>
+        <div class="mt-5 space-y-4">
+          <div class="grid gap-4 md:grid-cols-2">
+            <AdminToggleSwitch v-model="form.beautifyEnable" label="启用美化" />
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">作用范围</span>
+              <select v-model="form.beautifyField" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="post">文章页</option>
+                <option value="site">全站</option>
+              </select>
+            </label>
+          </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">标题前缀图标</span>
+              <input v-model="form.beautifyTitlePrefixIcon" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">图标颜色</span>
+              <input v-model="form.beautifyTitlePrefixIconColor" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">分类与标签页 UI</h2>
+        <div class="mt-5 space-y-4">
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">分类页 UI 风格</span>
+            <select v-model="form.categoryUi" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="">默认（归档样式）</option>
+              <option value="index">首页样式</option>
+            </select>
+          </label>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">标签页 UI 风格</span>
+            <select v-model="form.tagUi" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="">默认（归档样式）</option>
+              <option value="index">首页样式</option>
+            </select>
+          </label>
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">默认显示模式</span>
+              <select v-model="form.displayMode" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+                <option value="light">浅色</option>
+                <option value="dark">深色</option>
+              </select>
+            </label>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">右下角按钮距离</span>
+              <input v-model="form.rightsideBottom" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="100px" >
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">分隔线图标</h2>
+        <div class="mt-5 space-y-4">
+          <AdminToggleSwitch v-model="form.hrIconEnable" label="启用分隔线图标" class="w-full" />
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">图标 Unicode</span>
+              <input v-model="form.hrIconIcon" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="\f0c4" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">图标顶部偏移</span>
+              <input v-model="form.hrIconIconTop" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+          </div>
         </div>
       </article>
     </section>

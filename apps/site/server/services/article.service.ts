@@ -18,6 +18,15 @@ export interface ArticleCreateInput {
   isTop?: boolean
   allowComment?: boolean
   password?: string
+  mainColor?: string
+  mathjax?: boolean
+  katex?: boolean
+  toc?: boolean
+  ai?: string
+  aside?: boolean
+  topImg?: string
+  keywords?: string
+  highlightShrink?: string
   categoryIds?: number[]
   tagIds?: number[]
   primaryCategoryId?: number
@@ -38,6 +47,15 @@ export interface ArticleUpdateInput {
   isTop?: boolean
   allowComment?: boolean
   password?: string | null
+  mainColor?: string | null
+  mathjax?: boolean
+  katex?: boolean
+  toc?: boolean
+  ai?: string | null
+  aside?: boolean
+  topImg?: string | null
+  keywords?: string | null
+  highlightShrink?: string | null
   categoryIds?: number[]
   tagIds?: number[]
   primaryCategoryId?: number
@@ -81,6 +99,15 @@ export interface ArticleWithRelations {
   isTop: boolean
   allowComment: boolean
   password: string | null
+  mainColor: string | null
+  mathjax: boolean
+  katex: boolean
+  toc: boolean
+  ai: string | null
+  aside: boolean
+  topImg: string | null
+  keywords: string | null
+  highlightShrink: string | null
   authorId: number
   createdAt: Date
   updatedAt: Date
@@ -124,6 +151,15 @@ export class ArticleService {
         isTop: input.isTop ?? false,
         allowComment: input.allowComment ?? true,
         password: input.password ?? null,
+        mainColor: input.mainColor ?? null,
+        mathjax: input.mathjax ?? false,
+        katex: input.katex ?? false,
+        toc: input.toc ?? true,
+        ai: input.ai ?? null,
+        aside: input.aside ?? true,
+        topImg: input.topImg ?? null,
+        keywords: input.keywords ?? null,
+        highlightShrink: input.highlightShrink ?? null,
         authorId,
       })
       .returning()
@@ -381,6 +417,7 @@ export class ArticleService {
       'title', 'slug', 'content', 'excerpt', 'coverImage', 'status',
       'publishedAt', 'scheduledAt', 'seoTitle', 'seoDescription',
       'isTop', 'allowComment', 'password',
+      'mainColor', 'mathjax', 'katex', 'toc', 'ai', 'aside', 'topImg', 'keywords', 'highlightShrink',
     ] as const
 
     for (const field of fields) {

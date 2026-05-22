@@ -313,22 +313,10 @@ async function handleSave() {
             </select>
           </label>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.commentsText = !form.commentsText">
-              <span class="text-sm text-text">显示评论文案</span>
-              <span class="text-sm text-muted">{{ form.commentsText ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.commentsLazyload = !form.commentsLazyload">
-              <span class="text-sm text-text">延迟加载评论</span>
-              <span class="text-sm text-muted">{{ form.commentsLazyload ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.commentsCount = !form.commentsCount">
-              <span class="text-sm text-text">显示评论数量</span>
-              <span class="text-sm text-muted">{{ form.commentsCount ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.commentsCardPostCount = !form.commentsCardPostCount">
-              <span class="text-sm text-text">卡片显示文章评论数</span>
-              <span class="text-sm text-muted">{{ form.commentsCardPostCount ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.commentsText" label="显示评论文案" />
+            <AdminToggleSwitch v-model="form.commentsLazyload" label="延迟加载评论" />
+            <AdminToggleSwitch v-model="form.commentsCount" label="显示评论数量" />
+            <AdminToggleSwitch v-model="form.commentsCardPostCount" label="卡片显示文章评论数" />
           </div>
         </div>
       </article>
@@ -344,10 +332,7 @@ async function handleSave() {
             <span class="text-sm font-medium text-text">地域</span>
             <input v-model="form.twikooRegion" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
           </label>
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.twikooVisitor = !form.twikooVisitor">
-            <span class="text-sm text-text">开启访客统计</span>
-            <span class="text-sm text-muted">{{ form.twikooVisitor ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.twikooVisitor" label="开启访客统计" class="w-full" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">高级参数</span>
             <textarea v-model="form.twikooOptionText" rows="5" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行 key=value，例如 env=prod" />
@@ -411,18 +396,9 @@ async function handleSave() {
             </label>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.valineRecordIP = !form.valineRecordIP">
-              <span class="text-sm text-text">记录 IP</span>
-              <span class="text-sm text-muted">{{ form.valineRecordIP ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.valineEnableQQ = !form.valineEnableQQ">
-              <span class="text-sm text-text">启用 QQ 头像</span>
-              <span class="text-sm text-muted">{{ form.valineEnableQQ ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.valineVisitor = !form.valineVisitor">
-              <span class="text-sm text-text">访客统计</span>
-              <span class="text-sm text-muted">{{ form.valineVisitor ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.valineRecordIP" label="记录 IP" />
+            <AdminToggleSwitch v-model="form.valineEnableQQ" label="启用 QQ 头像" />
+            <AdminToggleSwitch v-model="form.valineVisitor" label="访客统计" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">博主标记</span>
@@ -453,18 +429,9 @@ async function handleSave() {
               <input v-model="form.walineBg" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="背景图" >
             </div>
             <div class="mt-4 grid gap-4 md:grid-cols-3">
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.walinePageview = !form.walinePageview">
-                <span class="text-sm text-text">页面浏览统计</span>
-                <span class="text-sm text-muted">{{ form.walinePageview ? '已开启' : '已关闭' }}</span>
-              </button>
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.walineMetaCss = !form.walineMetaCss">
-                <span class="text-sm text-text">启用 Meta CSS</span>
-                <span class="text-sm text-muted">{{ form.walineMetaCss ? '已开启' : '已关闭' }}</span>
-              </button>
-              <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.walineImageUploader = !form.walineImageUploader">
-                <span class="text-sm text-text">启用图片上传</span>
-                <span class="text-sm text-muted">{{ form.walineImageUploader ? '已开启' : '已关闭' }}</span>
-              </button>
+              <AdminToggleSwitch v-model="form.walinePageview" label="页面浏览统计" />
+              <AdminToggleSwitch v-model="form.walineMetaCss" label="启用 Meta CSS" />
+              <AdminToggleSwitch v-model="form.walineImageUploader" label="启用图片上传" />
             </div>
             <textarea v-model="form.walineOptionText" rows="4" class="mt-4 w-full rounded-2xl border border-border bg-white/90 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Waline 高级参数，每行 key=value" />
           </div>
@@ -475,10 +442,7 @@ async function handleSave() {
               <input v-model="form.artalkServer" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="服务端地址" >
               <input v-model="form.artalkSite" type="text" class="rounded-2xl border border-border bg-white/90 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="站点名称" >
             </div>
-            <button type="button" class="mt-4 flex w-full items-center justify-between rounded-2xl border border-border bg-white/90 px-4 py-4 text-left transition hover:border-primary/20" @click="form.artalkVisitor = !form.artalkVisitor">
-              <span class="text-sm text-text">访客统计</span>
-              <span class="text-sm text-muted">{{ form.artalkVisitor ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.artalkVisitor" label="访客统计" class="mt-4 w-full" />
             <textarea v-model="form.artalkOptionText" rows="4" class="mt-4 w-full rounded-2xl border border-border bg-white/90 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Artalk 高级参数，每行 key=value" />
           </div>
 
@@ -504,18 +468,12 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">访客提醒与评论弹幕</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.visitorMailEnable = !form.visitorMailEnable">
-            <span class="text-sm text-text">启用访客邮件提醒</span>
-            <span class="text-sm text-muted">{{ form.visitorMailEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.visitorMailEnable" label="启用访客邮件提醒" class="w-full" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">提醒邮箱</span>
             <input v-model="form.visitorMailAddress" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
           </label>
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.commentBarrageEnable = !form.commentBarrageEnable">
-            <span class="text-sm text-text">启用评论弹幕</span>
-            <span class="text-sm text-muted">{{ form.commentBarrageEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.commentBarrageEnable" label="启用评论弹幕" class="w-full" />
           <div class="grid gap-4 md:grid-cols-2">
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">最大弹幕数</span>
@@ -540,14 +498,8 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">最新评论卡片</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.newestCommentsEnable = !form.newestCommentsEnable">
-            <span class="text-sm text-text">启用最新评论卡片</span>
-            <span class="text-sm text-muted">{{ form.newestCommentsEnable ? '已开启' : '已关闭' }}</span>
-          </button>
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.newestCommentsAvatar = !form.newestCommentsAvatar">
-            <span class="text-sm text-text">显示评论头像</span>
-            <span class="text-sm text-muted">{{ form.newestCommentsAvatar ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.newestCommentsEnable" label="启用最新评论卡片" class="w-full" />
+          <AdminToggleSwitch v-model="form.newestCommentsAvatar" label="显示评论头像" class="w-full" />
           <div class="grid gap-4 md:grid-cols-2">
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">展示条数</span>

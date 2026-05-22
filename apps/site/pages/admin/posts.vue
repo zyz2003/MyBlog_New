@@ -353,22 +353,10 @@ async function handleSave() {
           </label>
         </div>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageCategories = !form.pageCategories">
-            <span class="text-sm text-text">显示分类</span>
-            <span class="text-sm text-muted">{{ form.pageCategories ? '显示' : '隐藏' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageTags = !form.pageTags">
-            <span class="text-sm text-text">显示标签</span>
-            <span class="text-sm text-muted">{{ form.pageTags ? '显示' : '隐藏' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageLabel = !form.pageLabel">
-            <span class="text-sm text-text">显示标签徽记</span>
-            <span class="text-sm text-muted">{{ form.pageLabel ? '显示' : '隐藏' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.pageUnread = !form.pageUnread">
-            <span class="text-sm text-text">显示未读提示</span>
-            <span class="text-sm text-muted">{{ form.pageUnread ? '显示' : '隐藏' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.pageCategories" label="显示分类" />
+          <AdminToggleSwitch v-model="form.pageTags" label="显示标签" />
+          <AdminToggleSwitch v-model="form.pageLabel" label="显示标签徽记" />
+          <AdminToggleSwitch v-model="form.pageUnread" label="显示未读提示" />
         </div>
       </article>
 
@@ -393,22 +381,10 @@ async function handleSave() {
           </label>
         </div>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postCategories = !form.postCategories">
-            <span class="text-sm text-text">显示分类</span>
-            <span class="text-sm text-muted">{{ form.postCategories ? '显示' : '隐藏' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postTags = !form.postTags">
-            <span class="text-sm text-text">显示标签</span>
-            <span class="text-sm text-muted">{{ form.postTags ? '显示' : '隐藏' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postLabel = !form.postLabel">
-            <span class="text-sm text-text">显示文章标签徽记</span>
-            <span class="text-sm text-muted">{{ form.postLabel ? '显示' : '隐藏' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postUnread = !form.postUnread">
-            <span class="text-sm text-text">显示未读提示</span>
-            <span class="text-sm text-muted">{{ form.postUnread ? '显示' : '隐藏' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.postCategories" label="显示分类" />
+          <AdminToggleSwitch v-model="form.postTags" label="显示标签" />
+          <AdminToggleSwitch v-model="form.postLabel" label="显示文章标签徽记" />
+          <AdminToggleSwitch v-model="form.postUnread" label="显示未读提示" />
         </div>
       </article>
     </section>
@@ -417,47 +393,20 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">目录与字数统计</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocPost = !form.tocPost">
-            <span class="text-sm text-text">文章页目录</span>
-            <span class="text-sm text-muted">{{ form.tocPost ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocPage = !form.tocPage">
-            <span class="text-sm text-text">独立页目录</span>
-            <span class="text-sm text-muted">{{ form.tocPage ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocNumber = !form.tocNumber">
-            <span class="text-sm text-text">目录编号</span>
-            <span class="text-sm text-muted">{{ form.tocNumber ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tocExpand = !form.tocExpand">
-            <span class="text-sm text-text">目录默认展开</span>
-            <span class="text-sm text-muted">{{ form.tocExpand ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20 md:col-span-2" @click="form.tocStyleSimple = !form.tocStyleSimple">
-            <span class="text-sm text-text">简洁目录样式</span>
-            <span class="text-sm text-muted">{{ form.tocStyleSimple ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.tocPost" label="文章页目录" />
+          <AdminToggleSwitch v-model="form.tocPage" label="独立页目录" />
+          <AdminToggleSwitch v-model="form.tocNumber" label="目录编号" />
+          <AdminToggleSwitch v-model="form.tocExpand" label="目录默认展开" />
+          <AdminToggleSwitch v-model="form.tocStyleSimple" label="简洁目录样式" class="md:col-span-2" />
         </div>
 
         <div class="mt-6 border-t border-border/60 pt-6">
           <h3 class="text-base font-bold text-text">字数统计</h3>
           <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountEnable = !form.wordcountEnable">
-              <span class="text-sm text-text">启用字数统计</span>
-              <span class="text-sm text-muted">{{ form.wordcountEnable ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountPost = !form.wordcountPost">
-              <span class="text-sm text-text">显示文章字数</span>
-              <span class="text-sm text-muted">{{ form.wordcountPost ? '显示' : '隐藏' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountMin2read = !form.wordcountMin2read">
-              <span class="text-sm text-text">显示阅读时长</span>
-              <span class="text-sm text-muted">{{ form.wordcountMin2read ? '显示' : '隐藏' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.wordcountTotal = !form.wordcountTotal">
-              <span class="text-sm text-text">显示全站字数</span>
-              <span class="text-sm text-muted">{{ form.wordcountTotal ? '显示' : '隐藏' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.wordcountEnable" label="启用字数统计" />
+            <AdminToggleSwitch v-model="form.wordcountPost" label="显示文章字数" />
+            <AdminToggleSwitch v-model="form.wordcountMin2read" label="显示阅读时长" />
+            <AdminToggleSwitch v-model="form.wordcountTotal" label="显示全站字数" />
           </div>
         </div>
       </article>
@@ -465,14 +414,8 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">版权、赞赏与编辑入口</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyrightEnable = !form.copyrightEnable">
-            <span class="text-sm text-text">启用版权声明</span>
-            <span class="text-sm text-muted">{{ form.copyrightEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.copyrightDecode = !form.copyrightDecode">
-            <span class="text-sm text-text">启用解码提示</span>
-            <span class="text-sm text-muted">{{ form.copyrightDecode ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.copyrightEnable" label="启用版权声明" />
+          <AdminToggleSwitch v-model="form.copyrightDecode" label="启用解码提示" />
         </div>
         <div class="mt-5 grid gap-5 md:grid-cols-2">
           <label class="block space-y-2">
@@ -498,14 +441,8 @@ async function handleSave() {
         </div>
 
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.rewardEnable = !form.rewardEnable">
-            <span class="text-sm text-text">启用赞赏模块</span>
-            <span class="text-sm text-muted">{{ form.rewardEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.postEditEnable = !form.postEditEnable">
-            <span class="text-sm text-text">启用编辑入口</span>
-            <span class="text-sm text-muted">{{ form.postEditEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.rewardEnable" label="启用赞赏模块" />
+          <AdminToggleSwitch v-model="form.postEditEnable" label="启用编辑入口" />
         </div>
 
         <div class="mt-5 grid gap-5 md:grid-cols-2">
@@ -561,14 +498,8 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">相关推荐与过期提醒</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.relatedEnable = !form.relatedEnable">
-            <span class="text-sm text-text">启用相关文章</span>
-            <span class="text-sm text-muted">{{ form.relatedEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.noticeEnable = !form.noticeEnable">
-            <span class="text-sm text-text">启用过期提醒</span>
-            <span class="text-sm text-muted">{{ form.noticeEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.relatedEnable" label="启用相关文章" />
+          <AdminToggleSwitch v-model="form.noticeEnable" label="启用过期提醒" />
         </div>
         <div class="mt-5 grid gap-5 md:grid-cols-2">
           <label class="block space-y-2">
@@ -616,14 +547,8 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">其他文章增强</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.photoFigcaptionEnable = !form.photoFigcaptionEnable">
-            <span class="text-sm text-text">启用图片图注</span>
-            <span class="text-sm text-muted">{{ form.photoFigcaptionEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.anchorEnable = !form.anchorEnable">
-            <span class="text-sm text-text">启用标题锚点</span>
-            <span class="text-sm text-muted">{{ form.anchorEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.photoFigcaptionEnable" label="启用图片图注" />
+          <AdminToggleSwitch v-model="form.anchorEnable" label="启用标题锚点" />
         </div>
         <label class="mt-5 block space-y-2">
           <span class="text-sm font-medium text-text">文章分页模式</span>
@@ -638,18 +563,9 @@ async function handleSave() {
         <div class="mt-6 border-t border-border/60 pt-6">
           <h3 class="text-base font-bold text-text">封面配置</h3>
           <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.coverIndexEnable = !form.coverIndexEnable">
-              <span class="text-sm text-text">首页封面</span>
-              <span class="text-sm text-muted">{{ form.coverIndexEnable ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.coverAsideEnable = !form.coverAsideEnable">
-              <span class="text-sm text-text">侧边栏封面</span>
-              <span class="text-sm text-muted">{{ form.coverAsideEnable ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.coverArchivesEnable = !form.coverArchivesEnable">
-              <span class="text-sm text-text">归档页封面</span>
-              <span class="text-sm text-muted">{{ form.coverArchivesEnable ? '开启' : '关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.coverIndexEnable" label="首页封面" />
+            <AdminToggleSwitch v-model="form.coverAsideEnable" label="侧边栏封面" />
+            <AdminToggleSwitch v-model="form.coverArchivesEnable" label="归档页封面" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">封面位置</span>
               <select v-model="form.coverPosition" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
@@ -668,26 +584,11 @@ async function handleSave() {
         <div class="mt-6 border-t border-border/60 pt-6">
           <h3 class="text-base font-bold text-text">阅读工具</h3>
           <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolEnable = !form.ptoolEnable">
-              <span class="text-sm text-text">启用阅读工具</span>
-              <span class="text-sm text-muted">{{ form.ptoolEnable ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolShareMobile = !form.ptoolShareMobile">
-              <span class="text-sm text-text">移动端分享</span>
-              <span class="text-sm text-muted">{{ form.ptoolShareMobile ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolShareWeibo = !form.ptoolShareWeibo">
-              <span class="text-sm text-text">微博分享</span>
-              <span class="text-sm text-muted">{{ form.ptoolShareWeibo ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolShareCopyurl = !form.ptoolShareCopyurl">
-              <span class="text-sm text-text">复制链接分享</span>
-              <span class="text-sm text-muted">{{ form.ptoolShareCopyurl ? '开启' : '关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.ptoolCategories = !form.ptoolCategories">
-              <span class="text-sm text-text">显示分类</span>
-              <span class="text-sm text-muted">{{ form.ptoolCategories ? '开启' : '关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.ptoolEnable" label="启用阅读工具" />
+            <AdminToggleSwitch v-model="form.ptoolShareMobile" label="移动端分享" />
+            <AdminToggleSwitch v-model="form.ptoolShareWeibo" label="微博分享" />
+            <AdminToggleSwitch v-model="form.ptoolShareCopyurl" label="复制链接分享" />
+            <AdminToggleSwitch v-model="form.ptoolCategories" label="显示分类" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">工具模式</span>
               <input v-model="form.ptoolMode" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="留空使用默认" />

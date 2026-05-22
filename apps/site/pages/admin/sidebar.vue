@@ -256,16 +256,7 @@ async function handleSave() {
           <h2 class="text-xl font-black text-text">侧边栏结构</h2>
           <p class="mt-2 text-sm text-muted">控制侧边栏是否启用，以及默认展示哪些卡片。</p>
         </div>
-        <button
-          type="button"
-          class="flex items-center gap-3 rounded-2xl border border-border bg-background/70 px-4 py-3 text-sm text-text transition hover:border-primary/20"
-          @click="form.sidebarEnabled = !form.sidebarEnabled"
-        >
-          <span>{{ form.sidebarEnabled ? '当前已开启' : '当前已关闭' }}</span>
-          <span class="relative inline-flex h-7 w-12 items-center rounded-full transition" :class="form.sidebarEnabled ? 'bg-primary' : 'bg-surface-2'">
-            <span class="inline-block h-5 w-5 rounded-full bg-white transition" :class="form.sidebarEnabled ? 'translate-x-6' : 'translate-x-1'" />
-          </span>
-        </button>
+        <AdminToggleSwitch v-model="form.sidebarEnabled" label="侧边栏开关" class="w-full" />
       </div>
 
       <div class="mt-5">
@@ -300,14 +291,8 @@ async function handleSave() {
             <input v-model="form.authorNameLink" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="/" />
           </label>
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.authorEnable = !form.authorEnable">
-              <span class="text-sm text-text">启用作者卡片</span>
-              <span class="text-sm text-muted">{{ form.authorEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.announcementEnable = !form.announcementEnable">
-              <span class="text-sm text-text">启用公告卡片</span>
-              <span class="text-sm text-muted">{{ form.announcementEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.authorEnable" label="启用作者卡片" />
+            <AdminToggleSwitch v-model="form.announcementEnable" label="启用公告卡片" />
           </div>
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">公告内容</span>
@@ -340,14 +325,8 @@ async function handleSave() {
           </label>
         </div>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.recentEnable = !form.recentEnable">
-            <span class="text-sm text-text">启用最近文章</span>
-            <span class="text-sm text-muted">{{ form.recentEnable ? '已开启' : '已关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.categoriesEnable = !form.categoriesEnable">
-            <span class="text-sm text-text">启用分类卡片</span>
-            <span class="text-sm text-muted">{{ form.categoriesEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.recentEnable" label="启用最近文章" />
+          <AdminToggleSwitch v-model="form.categoriesEnable" label="启用分类卡片" />
         </div>
       </article>
     </section>
@@ -388,40 +367,19 @@ async function handleSave() {
           <input v-model="form.archivesFormat" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="MMMM YYYY" />
         </label>
         <div class="mt-5 grid gap-4 md:grid-cols-3">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tagsEnable = !form.tagsEnable">
-            <span class="text-sm text-text">启用标签卡片</span>
-            <span class="text-sm text-muted">{{ form.tagsEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tagsColor = !form.tagsColor">
-            <span class="text-sm text-text">标签着色</span>
-            <span class="text-sm text-muted">{{ form.tagsColor ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.archivesEnable = !form.archivesEnable">
-            <span class="text-sm text-text">启用归档卡片</span>
-            <span class="text-sm text-muted">{{ form.archivesEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.tagsEnable" label="启用标签卡片" />
+          <AdminToggleSwitch v-model="form.tagsColor" label="标签着色" />
+          <AdminToggleSwitch v-model="form.archivesEnable" label="启用归档卡片" />
         </div>
       </article>
 
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">站点信息与微信卡片</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.webinfoEnable = !form.webinfoEnable">
-            <span class="text-sm text-text">启用站点信息卡片</span>
-            <span class="text-sm text-muted">{{ form.webinfoEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.weixinEnable = !form.weixinEnable">
-            <span class="text-sm text-text">启用微信卡片</span>
-            <span class="text-sm text-muted">{{ form.weixinEnable ? '开启' : '关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.webinfoPostCount = !form.webinfoPostCount">
-            <span class="text-sm text-text">显示文章总数</span>
-            <span class="text-sm text-muted">{{ form.webinfoPostCount ? '显示' : '隐藏' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.webinfoLastPushDate = !form.webinfoLastPushDate">
-            <span class="text-sm text-text">显示最近更新</span>
-            <span class="text-sm text-muted">{{ form.webinfoLastPushDate ? '显示' : '隐藏' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.webinfoEnable" label="启用站点信息卡片" />
+          <AdminToggleSwitch v-model="form.weixinEnable" label="启用微信卡片" />
+          <AdminToggleSwitch v-model="form.webinfoPostCount" label="显示文章总数" />
+          <AdminToggleSwitch v-model="form.webinfoLastPushDate" label="显示最近更新" />
         </div>
         <div class="mt-5 grid gap-5 md:grid-cols-2">
           <label class="block space-y-2">
@@ -434,10 +392,7 @@ async function handleSave() {
           </label>
         </div>
         <div class="mt-5 grid gap-5 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.runtimeShowEnable = !form.runtimeShowEnable">
-            <span class="text-sm text-text">启用运行时间卡片</span>
-            <span class="text-sm text-muted">{{ form.runtimeShowEnable ? '开启' : '关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.runtimeShowEnable" label="启用运行时间卡片" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">运行时间发布日期</span>
             <input v-model="form.runtimeShowPublishDate" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="2024-01-01" />
@@ -450,14 +405,8 @@ async function handleSave() {
       <h2 class="text-xl font-black text-text">移动端侧边栏增强</h2>
       <p class="mt-2 text-sm text-muted">控制移动端侧边栏中标签云和菜单块的显示。</p>
       <div class="mt-5 grid gap-4 md:grid-cols-2">
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.tagsCloudEnable = !form.tagsCloudEnable">
-          <span class="text-sm text-text">启用标签云</span>
-          <span class="text-sm text-muted">{{ form.tagsCloudEnable ? '开启' : '关闭' }}</span>
-        </button>
-        <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.menusItemsEnable = !form.menusItemsEnable">
-          <span class="text-sm text-text">启用菜单块</span>
-          <span class="text-sm text-muted">{{ form.menusItemsEnable ? '开启' : '关闭' }}</span>
-        </button>
+        <AdminToggleSwitch v-model="form.tagsCloudEnable" label="启用标签云" />
+        <AdminToggleSwitch v-model="form.menusItemsEnable" label="启用菜单块" />
       </div>
     </section>
 

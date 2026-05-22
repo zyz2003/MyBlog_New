@@ -84,6 +84,14 @@ const form = reactive({
   footerBarSubtitleLoop: true,
   footerBarSubtitleSource: '',
   footerBarSubtitleText: '',
+
+  darkmodeEnable: true,
+  darkmodeButton: true,
+  darkmodeAutoChangeMode: '1',
+  darkmodeStart: '',
+  darkmodeEnd: '',
+
+  footerBg: false,
 })
 
 const socialLinks = ref<SocialLinkItem[]>([])
@@ -323,6 +331,15 @@ function hydrateForm() {
     : (Array.isArray(footerNestedBar.linkList) ? footerNestedBar.linkList.map(normalizeFooterBarLink) : [])
   footerBarLinks.value = barLinks
 
+  const darkmode = toRecord(settings.value.darkmode)
+  form.darkmodeEnable = darkmode.enable !== undefined ? Boolean(darkmode.enable) : true
+  form.darkmodeButton = darkmode.button !== undefined ? Boolean(darkmode.button) : true
+  form.darkmodeAutoChangeMode = String(darkmode.autoChangeMode ?? '1')
+  form.darkmodeStart = String(darkmode.start ?? '')
+  form.darkmodeEnd = String(darkmode.end ?? '')
+
+  form.footerBg = Boolean(settings.value.footer_bg)
+
   if (!socialLinks.value.length) addSocialLink()
   if (!footerSocials.value.length) {
     addFooterSocial('left')
@@ -546,6 +563,14 @@ async function handleSave() {
         },
         custom_text: form.footerCustomText.trim(),
       },
+      darkmode: {
+        enable: form.darkmodeEnable,
+        button: form.darkmodeButton,
+        autoChangeMode: form.darkmodeAutoChangeMode === 'false' ? false : Number(form.darkmodeAutoChangeMode),
+        start: form.darkmodeStart.trim() ? Number(form.darkmodeStart) : undefined,
+        end: form.darkmodeEnd.trim() ? Number(form.darkmodeEnd) : undefined,
+      },
+      footer_bg: form.footerBg,
     })
 
     message.value = '全局设置已保存。'
@@ -603,14 +628,8 @@ async function handleSave() {
             <span class="text-sm font-medium text-text">头像图片</span>
             <input v-model="form.avatarImg" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
           </label>
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.avatarEffect = !form.avatarEffect">
-            <span class="text-sm text-text">启用头像动效</span>
-            <span class="text-sm text-muted">{{ form.avatarEffect ? '已开启' : '已关闭' }}</span>
-          </button>
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.authorStatusEnable = !form.authorStatusEnable">
-            <span class="text-sm text-text">启用作者状态卡</span>
-            <span class="text-sm text-muted">{{ form.authorStatusEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.avatarEffect" label="启用头像动效" class="w-full" />
+          <AdminToggleSwitch v-model="form.authorStatusEnable" label="启用作者状态卡" class="w-full" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">状态卡图片</span>
             <input v-model="form.authorStatusImg" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
@@ -679,10 +698,7 @@ async function handleSave() {
 
         <div class="mt-5 space-y-5">
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerSocialBarEnable = !form.footerSocialBarEnable">
-              <span class="text-sm text-text">启用页脚社交条</span>
-              <span class="text-sm text-muted">{{ form.footerSocialBarEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.footerSocialBarEnable" label="启用页脚社交条" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">中间头像</span>
               <input v-model="form.footerSocialBarCenterImg" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
@@ -724,10 +740,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">运行时间与异常页</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.runtimeEnable = !form.runtimeEnable">
-            <span class="text-sm text-text">启用站点运行时间</span>
-            <span class="text-sm text-muted">{{ form.runtimeEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.runtimeEnable" label="启用站点运行时间" class="w-full" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">站点上线时间</span>
             <input v-model="form.runtimeLaunchTime" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：2024-01-01 00:00:00" >
@@ -755,10 +768,7 @@ async function handleSave() {
 
           <div class="mt-2 h-px bg-border/70" />
 
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.error404Enable = !form.error404Enable">
-            <span class="text-sm text-text">启用 404 页面文案</span>
-            <span class="text-sm text-muted">{{ form.error404Enable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.error404Enable" label="启用 404 页面文案" class="w-full" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">404 副标题</span>
             <input v-model="form.error404Subtitle" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
@@ -794,10 +804,7 @@ async function handleSave() {
 
       <div class="mt-5 grid gap-5">
         <div class="grid gap-4 md:grid-cols-2">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerListEnable = !form.footerListEnable">
-            <span class="text-sm text-text">启用页脚分组导航</span>
-            <span class="text-sm text-muted">{{ form.footerListEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.footerListEnable" label="启用页脚分组导航" />
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">随机友链数量</span>
             <input v-model.number="form.footerListRandomFriends" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
@@ -845,10 +852,7 @@ async function handleSave() {
         </div>
 
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerBadgeEnable = !form.footerBadgeEnable">
-            <span class="text-sm text-text">启用页脚徽章</span>
-            <span class="text-sm text-muted">{{ form.footerBadgeEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.footerBadgeEnable" label="启用页脚徽章" class="w-full" />
 
           <article v-for="(item, index) in badgeItems" :key="`badge-${index}`" class="rounded-3xl border border-border bg-background/70 p-5">
             <div class="flex items-center justify-between gap-4">
@@ -878,10 +882,7 @@ async function handleSave() {
         </div>
 
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerBarEnable = !form.footerBarEnable">
-            <span class="text-sm text-text">启用页脚底栏</span>
-            <span class="text-sm text-muted">{{ form.footerBarEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.footerBarEnable" label="启用页脚底栏" class="w-full" />
 
           <div class="space-y-3">
             <div v-for="(item, index) in footerBarLinks" :key="`bar-link-${index}`" class="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
@@ -894,10 +895,7 @@ async function handleSave() {
           </div>
 
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerBarCcEnable = !form.footerBarCcEnable">
-              <span class="text-sm text-text">启用 CC 协议链接</span>
-              <span class="text-sm text-muted">{{ form.footerBarCcEnable ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.footerBarCcEnable" label="启用 CC 协议链接" />
             <label class="block space-y-2">
               <span class="text-sm font-medium text-text">CC 协议链接</span>
               <input v-model="form.footerBarCcLink" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
@@ -910,14 +908,8 @@ async function handleSave() {
           </label>
 
           <div class="grid gap-4 md:grid-cols-2">
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerBarSubtitleEnable = !form.footerBarSubtitleEnable">
-              <span class="text-sm text-text">启用滚动副标题</span>
-              <span class="text-sm text-muted">{{ form.footerBarSubtitleEnable ? '已开启' : '已关闭' }}</span>
-            </button>
-            <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerBarSubtitleEffect = !form.footerBarSubtitleEffect">
-              <span class="text-sm text-text">启用打字效果</span>
-              <span class="text-sm text-muted">{{ form.footerBarSubtitleEffect ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.footerBarSubtitleEnable" label="启用滚动副标题" />
+            <AdminToggleSwitch v-model="form.footerBarSubtitleEffect" label="启用打字效果" />
           </div>
 
           <div class="grid gap-4 md:grid-cols-2">
@@ -933,10 +925,7 @@ async function handleSave() {
               <span class="text-sm font-medium text-text">回删速度</span>
               <input v-model.number="form.footerBarSubtitleBackSpeed" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
             </label>
-            <button type="button" class="mt-7 flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.footerBarSubtitleLoop = !form.footerBarSubtitleLoop">
-              <span class="text-sm text-text">循环播放</span>
-              <span class="text-sm text-muted">{{ form.footerBarSubtitleLoop ? '已开启' : '已关闭' }}</span>
-            </button>
+            <AdminToggleSwitch v-model="form.footerBarSubtitleLoop" label="循环播放" class="mt-7" />
           </div>
 
           <label class="block space-y-2">
@@ -947,6 +936,43 @@ async function handleSave() {
             <span class="text-sm font-medium text-text">副标题文本列表</span>
             <textarea v-model="form.footerBarSubtitleText" rows="5" class="w-full rounded-2xl border border-border bg-background/85 px-4 py-3 font-mono text-xs leading-6 text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="每行一句副标题" />
           </label>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">深色模式</h2>
+        <div class="mt-5 space-y-4">
+          <div class="grid gap-4 md:grid-cols-2">
+            <AdminToggleSwitch v-model="form.darkmodeEnable" label="启用深色模式" />
+            <AdminToggleSwitch v-model="form.darkmodeButton" label="显示切换按钮" />
+          </div>
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">自动切换模式</span>
+            <select v-model="form.darkmodeAutoChangeMode" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="false">关闭自动切换</option>
+              <option value="1">跟随系统设置</option>
+              <option value="2">按时段切换（18:00-6:00）</option>
+            </select>
+          </label>
+          <div class="grid gap-4 md:grid-cols-2">
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">自动切换开始时间</span>
+              <input v-model="form.darkmodeStart" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="如 8 或 18" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-sm font-medium text-text">自动切换结束时间</span>
+              <input v-model="form.darkmodeEnd" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="如 6 或 22" >
+            </label>
+          </div>
+        </div>
+      </article>
+
+      <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
+        <h2 class="text-xl font-black text-text">页脚背景</h2>
+        <div class="mt-5 space-y-4">
+          <AdminToggleSwitch v-model="form.footerBg" label="启用页脚背景" class="w-full" />
         </div>
       </article>
     </section>

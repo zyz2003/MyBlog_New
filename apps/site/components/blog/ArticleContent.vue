@@ -7,6 +7,9 @@ const props = withDefaults(defineProps<{
   content: string
   enablePhotoFigcaption?: boolean
   enableH2Divider?: boolean
+  articleMathjax?: boolean
+  articleKatex?: boolean
+  articleHighlightShrink?: string
 }>(), {
   enablePhotoFigcaption: false,
   enableH2Divider: false,
@@ -22,6 +25,10 @@ const enableTableInterlaced = computed(() => {
   const raw = (settings.value.tableInterlaced as Record<string, unknown> | undefined) ?? {}
   return raw.enable !== undefined ? Boolean(raw.enable) : Boolean(settings.value.table_interlaced_discoloration)
 })
+
+const shouldRenderMathjax = computed(() => props.articleMathjax ?? mathjax.value.enable)
+const shouldRenderKatex = computed(() => props.articleKatex ?? katex.value.enable)
+const effectiveHighlightShrink = computed(() => props.articleHighlightShrink ?? codeBlock.value.highlightShrink)
 
 function slugifyHeading(value: string): string {
   return value
@@ -188,7 +195,7 @@ async function renderMath() {
     return
   }
 
-  if (math.value.provider === 'mathjax' && mathjax.value.enable) {
+  if (math.value.provider === 'mathjax' && shouldRenderMathjax.value) {
     const win = window as typeof window & {
       MathJax?: {
         startup?: { promise?: Promise<void> }
@@ -219,7 +226,7 @@ async function renderMath() {
     return
   }
 
-  if (math.value.provider === 'katex' && katex.value.enable) {
+  if (math.value.provider === 'katex' && shouldRenderKatex.value) {
     const win = window as typeof window & {
       renderMathInElement?: (element: HTMLElement, options?: Record<string, unknown>) => void
     }

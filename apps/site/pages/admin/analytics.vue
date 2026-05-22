@@ -143,17 +143,11 @@ async function handleSave() {
             <span class="text-sm font-medium text-text">Google Analytics ID</span>
             <input v-model="form.googleAnalyticsId" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="G-XXXXXXXXXX" >
           </label>
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.googleAnalyticsDebug = !form.googleAnalyticsDebug">
-            <span class="text-sm text-text">Google Analytics 调试模式</span>
-            <span class="text-sm text-muted">{{ form.googleAnalyticsDebug ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.googleAnalyticsDebug" label="Google Analytics 调试模式" class="w-full" />
 
           <div class="mt-2 h-px bg-border/70" />
 
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.baiduAnalyticsEnable = !form.baiduAnalyticsEnable">
-            <span class="text-sm text-text">启用百度统计</span>
-            <span class="text-sm text-muted">{{ form.baiduAnalyticsEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.baiduAnalyticsEnable" label="启用百度统计" class="w-full" />
           <div class="grid gap-4 md:grid-cols-2">
             <input v-model="form.baiduAnalyticsId" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="统计 ID" >
             <input v-model="form.baiduAnalyticsToken" type="text" class="rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Token" >
@@ -165,18 +159,9 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">不蒜子</h2>
         <div class="mt-5 grid gap-4">
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.busuanziSiteUv = !form.busuanziSiteUv">
-            <span class="text-sm text-text">显示站点访客数</span>
-            <span class="text-sm text-muted">{{ form.busuanziSiteUv ? '已开启' : '已关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.busuanziSitePv = !form.busuanziSitePv">
-            <span class="text-sm text-text">显示站点浏览量</span>
-            <span class="text-sm text-muted">{{ form.busuanziSitePv ? '已开启' : '已关闭' }}</span>
-          </button>
-          <button type="button" class="flex items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.busuanziPagePv = !form.busuanziPagePv">
-            <span class="text-sm text-text">显示页面浏览量</span>
-            <span class="text-sm text-muted">{{ form.busuanziPagePv ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.busuanziSiteUv" label="显示站点访客数" />
+          <AdminToggleSwitch v-model="form.busuanziSitePv" label="显示站点浏览量" />
+          <AdminToggleSwitch v-model="form.busuanziPagePv" label="显示页面浏览量" />
         </div>
       </article>
     </section>
@@ -185,10 +170,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">灵雀监控</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.laEnable = !form.laEnable">
-            <span class="text-sm text-text">启用灵雀监控</span>
-            <span class="text-sm text-muted">{{ form.laEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.laEnable" label="启用灵雀监控" class="w-full" />
           <input v-model="form.laCk" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="CK" >
           <input v-model="form.laLingQueMonitorId" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="LingQueMonitorID" >
         </div>
@@ -197,10 +179,7 @@ async function handleSave() {
       <article class="rounded-[28px] border border-border/70 bg-surface/82 p-6 shadow-sm">
         <h2 class="text-xl font-black text-text">Umami</h2>
         <div class="mt-5 space-y-5">
-          <button type="button" class="flex w-full items-center justify-between rounded-2xl border border-border bg-background/70 px-4 py-4 text-left transition hover:border-primary/20" @click="form.umamiEnable = !form.umamiEnable">
-            <span class="text-sm text-text">启用 Umami</span>
-            <span class="text-sm text-muted">{{ form.umamiEnable ? '已开启' : '已关闭' }}</span>
-          </button>
+          <AdminToggleSwitch v-model="form.umamiEnable" label="启用 Umami" class="w-full" />
           <input v-model="form.umamiApiHost" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="API Host" >
           <input v-model="form.umamiWebsiteId" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Website ID" >
           <input v-model="form.umamiToken" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="Token" >

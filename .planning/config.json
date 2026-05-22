@@ -1,19 +1,21 @@
 {
-  "mode": "yolo",
-  "granularity": "fine",
-  "parallelization": true,
-  "commit_docs": false,
-  "model_profile": "balanced",
-  "workflow": {
-    "research": false,
-    "plan_check": true,
-    "verifier": true,
-    "nyquist_validation": false,
-    "auto_advance": true,
-    "_auto_chain_active": true
-  },
-  "planning": {
-    "commit_docs": false,
-    "search_gitignored": true
-  }
+  "projectName": "My Blog (安知鱼复刻)",
+  "createdAt": "2026-04-30",
+  "currentMilestone": "前台完美复刻",
+  "currentPhase": "01-frontend-core-shell",
+  "milestones": [
+    {
+      "id": "M1",
+      "name": "前台完美复刻",
+      "phases": [
+        "01-frontend-core-shell",
+        "02-frontend-homepage-polish",
+        "03-frontend-article-detail",
+        "04-frontend-content-pages",
+        "05-frontend-special-interactions",
+        "06-frontend-animation-polish"
+      ],
+      "status": "in-progress"
+    }
+  ]
 }

@@ -28,6 +28,18 @@ async function fetchArticle() {
   }
 }
 
+async function handleSave(data: Record<string, unknown>) {
+  const id = route.params.id
+  const payload = { ...data }
+  if (payload.categoryId !== undefined) {
+    payload.categoryIds = payload.categoryId ? [Number(payload.categoryId)] : []
+    payload.primaryCategoryId = payload.categoryId ? Number(payload.categoryId) : undefined
+    delete payload.categoryId
+  }
+  await api.put(`/api/articles/${id}`, payload)
+  navigateTo('/admin/articles')
+}
+
 onMounted(() => {
   fetchArticle()
 })
@@ -49,9 +61,9 @@ onMounted(() => {
 
     <AdminArticlesArticleEditor
       v-else-if="article"
-      mode="edit"
-      :initial-data="article"
-      @saved="navigateTo('/admin/articles')"
+      :article="article"
+      @save="handleSave"
+      @cancel="navigateTo('/admin/articles')"
     />
   </div>
 </template>

@@ -132,16 +132,10 @@ const mountPointLabels: Record<string, string> = {
 
       <!-- Toggle -->
       <div class="flex-shrink-0">
-        <button
-          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-          :class="plugin.enabled ? 'bg-primary' : 'bg-gray-300'"
-          @click="emit('toggle', { name: plugin.meta.name, enable: !plugin.enabled })"
-        >
-          <span
-            class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-            :class="plugin.enabled ? 'translate-x-6' : 'translate-x-1'"
-          />
-        </button>
+        <AdminToggleSwitch
+          :model-value="plugin.enabled"
+          @update:model-value="emit('toggle', { name: plugin.meta.name, enable: $event })"
+        />
       </div>
     </div>
 

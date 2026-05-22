@@ -1,180 +1,132 @@
-# Roadmap: 重构恢复路线图
+# 前台复刻路线图 — 安知鱼主题完美复刻
 
-## Overview
-
-当前重构分为四个阶段：
-
-1. 先修复架构链路与前后台设置读取的一致性
-2. 再完成前台壳层与首页结构重建
-3. 然后补齐前台搜索、评论、文章详情等交互能力
-4. 最后收口后台配置页、管理体验与前后台配置闭环
-
-## Phases
-
-- [x] **Phase 1: Recovery**  
-  收口主题链路、前后台设置读取链路与页面层重复逻辑。
-
-- [x] **Phase 2: Frontend Shell**  
-  完成首页、导航、页脚、归档页等前台壳层重建，让整体结构贴近安知鱼主题。
-
-- [x] **Phase 3: Frontend Features**  
-  完成搜索、评论、文章增强组件与剩余前台交互能力。
-
-- [x] **Phase 4: Admin Completion**  
-  统一后台设置页、补齐保存链路、修复乱码文案，并打通“后台可改 -> 数据持久化 -> 前台真实生效”的闭环。
-
-## Phase 1 Summary
-
-### Goal
-
-让代码库从“半重构”状态回到“单一路径、单一入口、可继续开发”的稳定状态。
-
-### Achieved
-
-1. 首页、主题与后台设置链路统一到更稳定的 composable 和 theme manager。
-2. `useSiteSettings()` / `useAdminSettings()` 成为核心配置消费路径。
-3. 关键后台设置页完成迁移。
-4. `.planning` 与真实执行状态重新对齐。
-
-## Phase 2 Summary
-
-### Goal
-
-让首页、导航、页脚、归档页不再像通用博客模板，而是具备明确的安知鱼风格壳层。
-
-### Achieved
-
-1. 首页 top/banner/category/post 组合完成重建。
-2. 导航壳层与右侧悬浮按钮完成前台可用性修复。
-3. 页脚三段式结构与归档页壳层补齐。
-4. 前台可见乱码、分页点透明、按钮空心等问题完成清理。
-5. `pnpm.cmd type-check` 通过，前台页面未引入新的阻断性错误。
-
-### Deferred
-
-- 更高保真的像素级对齐
-- 顶部 banner、推荐卡片与文章流的视觉细磨
-- 页脚与文章流的进一步细节精修
-
-## Phase 3 Summary
-
-### Goal
-
-补齐前台剩余核心交互，让搜索、评论与文章详情页从“占位状态”升级为可实际使用的完整链路。
-
-### Achieved
-
-1. 搜索弹层改为真实调用 `/api/search`，支持防抖、键盘选择与正确跳转。
-2. 独立搜索页补齐分页、空状态、错误状态与更清晰的搜索体验。
-3. 评论模块增加 `post-comment` 锚点、Twikoo 安全加载与未配置时的友好提示。
-4. 最新评论卡片从占位符改为真实状态卡，避免继续暴露假数据。
-5. 文章详情页统一到日期路由，补齐 AI 摘要、目录、版权卡片与评论区联动。
-6. Markdown 标题自动生成稳定锚点，目录组件能跟随标题工作。
-7. `pnpm.cmd type-check` 通过，搜索页与文章页链路已完成功能级联调。
-
-### Residual Risk
-
-- 开发环境仍存在既有 hydration warning，主要集中在旧壳层区域与富文本渲染链路，属于后续 SSR 细修项。
-- `Nuxt Site Config` 仍提示 localhost 构建地址，该问题并非本阶段新增。
-
-## Phase 4 Summary
-
-### Goal
-
-把后台管理端从“部分可编辑、部分无效、文案乱码”的状态，收口到“配置页结构统一、保存字段完整、前台能真实消费”的可维护状态。
-
-### Achieved
-
-1. `comments`、`features`、`seo`、`posts`、`sidebar`、`display`、`general` 等后台页完成统一整理，文案恢复可读中文。
-2. 多个设置页迁移为统一的 `useAdminSettings()` 保存模式，减少各页手写请求导致的漂移。
-3. `settings.schema.ts` 补齐 Phase 4 相关 key 的 Zod 校验覆盖，避免后台新增字段绕过结构约束。
-4. `useSiteSettings()` 与前台类型定义更新，评论、侧边栏、右侧按钮等配置可被前台真实消费。
-5. 右侧悬浮按钮接入 `rightsideItems` 配置，后台保存后前台显隐会同步生效。
-6. 侧边栏设置同时写入新 `sidebar` 对象和兼容字段，修复“后台保存了但首页没变化”的链路问题。
-7. 设置写入接口的错误提示恢复为正常中文，后台异常更容易排查。
-8. `pnpm.cmd type-check` 通过。
-
-## Current Status
-
-四个阶段已按当前重构路线完成。后续如果继续推进，建议进入“验收与精修”路线，而不是再回到结构性重写。
-
-### Phase 5: Frontend Settings Consumption
-
-**Goal:** Close the remaining admin-to-frontend configuration loop so backend-managed settings produce real public-site changes
-**Requirements**: Consume the highest-impact existing admin settings on the homepage, global shell, and selected fallback paths
-**Depends on:** Phase 4
-**Plans:** 1 plan
-
-Plans:
-- [x] 05-01 Frontend Consumption Of Admin-Controlled Settings
-
-### Phase 5 Summary
-
-#### Goal
-
-Make the backend configuration center a real frontend driver so public-site behavior changes when
-admins update the corresponding settings, rather than leaving AnZhiYu-aligned keys stored but
-unused.
-
-#### Achieved
-
-1. `useSiteSettings()` now normalizes more of the admin-managed frontend contract, including
-   `peoplecanvas`, `linkPageTop`, `pageThumbnailSuffix`, `topImage`, `mourn`, `error_404`,
-   `error_img`, footer subtitle/cc, and rightside button ordering
-2. Homepage top-area rendering is now config-driven for peoplecanvas mode, top image behavior,
-   category cards, thumbnail suffixes, and fallback cover strategy
-3. Public shell and detail surfaces now consume settings more broadly:
-   navbar/profile/footer/rightside buttons/article detail/friends page all honor backend-managed
-   values instead of relying on hardcoded-only output
-4. Previously dead settings paths were activated, including friends-page top copy, footer bar
-   subtitle and cc display, homepage comment-count toggles, mourn-day grayscale behavior, and
-   article/recent-post image fallback chains
-5. `pnpm.cmd type-check` passes after the settings-consumption wave
-
-#### Residual Risk
-
-- Verification has reached code-level and type-level completion, but a final manual admin-save ->
-  frontend-visible-change smoke pass is still valuable before calling the whole frontend migration
-  fully stabilized
-- `nuxt-site-config` still warns about localhost build URL; this predates the phase and was not
-  introduced here
-
-### Phase 6: Frontend Parity Polish
-
-**Goal:** Shrink the remaining visual, structural, and interaction gap between the current public frontend and the AnZhiYu reference theme
-**Requirements**: Audit the highest-traffic public pages first, fix the largest parity deviations before expanding page count, and preserve the working admin-to-frontend config loop from Phase 5
-**Depends on:** Phase 5
-**Plans:** 1 plan
-
-Plans:
-- [x] 06-01 High-Traffic Frontend Parity Audit And First Repair Wave
-
-### Phase 6 Summary
-
-#### Goal
-
-Shrink the remaining visual, structural, and interaction gap between the current public frontend
-and the AnZhiYu reference on the pages users notice most.
-
-#### Achieved
-
-1. Completed a concrete parity audit for the highest-traffic public frontend surfaces rather than
-   relying on vague visual complaints
-2. Rebuilt the search page, archive page, sidebar recent-post hierarchy, homepage article stream,
-   article detail hero/summary/copyright shell, friends page wrapper, homepage top section, and
-   footer shell to more closely follow the reference structure and rhythm
-3. Removed or reduced visible garbled fallback copy across key public-facing surfaces, including
-   homepage, detail pages, friends page, dynamic-page fallback, and footer/top-level shell text
-4. Preserved the admin-driven settings-consumption chain established in Phase 5 while increasing
-   public-theme parity
-5. Re-ran `pnpm.cmd type-check` throughout the repair waves and kept the frontend type-clean aside
-   from the pre-existing `nuxt-site-config` localhost warning
-
-#### Result
-
-Phase 6 closed the highest-value public parity gap. Further frontend work should now be treated as
-fine polish, screenshot-level comparison, or incremental UX refinement instead of core parity
-recovery.
+> 目标：将安知鱼 (AnZhiYu) 主题的所有视觉交互效果完整复刻到 Nuxt 3 前台
+> 参考：`docs/anzhiyu-reference/hexo-theme-anzhiyu/`
+> 当前状态：后台管理面板已完成，前台已复刻约 25%
 
 ---
-*Last updated: 2026-05-19*
+
+## 现有前台完成度评估
+
+### 已完成（约 25%）
+- 首页基本结构：HomeTop（轮播/推荐）、HomePostList（文章列表）
+- 侧边栏骨架：BlogSidebar（作者卡片、标签、分类、最近文章、归档、站点信息）
+- 文章详情页：基本渲染 + Vditor 样式
+- 分类/标签列表页：基础列表
+- 布局：BlogLayout（导航栏 + 内容 + 侧边栏 + 页脚）
+- 主题色系统：CSS Variables 基础架构
+
+### 未完成（约 75%）
+- 导航栏：缺少搜索、暗色模式切换、移动端菜单
+- 页脚：缺少安知鱼特色页脚（随机友链、备案信息等）
+- 搜索：本地搜索/Algolia/Docsearch 均未对接
+- 评论：Twikoo/Valine/Waline 组件未实现
+- 右键菜单：安知鱼特色右键菜单
+- 音乐播放器：APlayer 集成
+- AI 摘要：文章 AI 摘要区块
+- 速达：键盘快捷键导航
+- 相册页：瀑布流相册
+- 友链页：随机友链 + 申请
+- 关于页：个人介绍
+- 留言板：基于评论系统
+- 404 页：安知鱼特色 404
+- 动画效果：页面切换、滚动、悬浮等
+- 响应式：移动端适配
+- 后台配置消费：前台读取后台设置驱动渲染
+
+---
+
+## Phase 规划
+
+### Phase 1: 核心骨架 — 导航栏 + 页脚 + 布局
+**目标**：完成全站通用骨架，所有页面都有完整的导航和页脚
+**参考**：`layout/includes/header/`, `layout/includes/footer.pug`
+**交付物**：
+- BlogNavbar：logo、导航菜单、搜索入口、暗色模式切换、移动端汉堡菜单
+- BlogFooter：安知鱼特色页脚（随机友链、运行时间、备案信息）
+- BlogLayout 完善：导航栏固定、页脚吸底、内容区最小高度
+- 移动端响应式导航
+
+### Phase 2: 首页完善 — 轮播 + 文章列表 + 侧边栏
+**目标**：首页视觉效果与安知鱼一致
+**参考**：`layout/includes/top/`, `layout/includes/post-list.pug`, `layout/includes/sidebar.pug`
+**交付物**：
+- HomeTop 完善：轮播图动画、推荐文章卡片悬浮效果
+- HomePostList 完善：文章卡片悬浮效果、封面图懒加载、分类/标签筛选
+- BlogSidebar 完善：所有卡片组件对接后台配置、动画效果
+- 首页响应式布局
+
+### Phase 3: 文章详情页 — 渲染 + 目录 + 评论
+**目标**：文章阅读体验与安知鱼一致
+**参考**：`layout/post.pug`, `layout/includes/post/`, `layout/includes/widget/toc.pug`
+**交付物**：
+- 文章渲染：Front Matter 字段消费（mainColor、topImg、toc、aside 等）
+- 目录组件：TOC 浮动导航、滚动高亮
+- 评论系统：Twikoo/Valine/Waline 集成，后台配置驱动
+- AI 摘要区块
+- 代码块：高亮、复制按钮、折叠（highlightShrink）
+- 数学公式：MathJax/KaTeX 按需加载
+- 文章版权声明
+- 上下篇导航
+
+### Phase 4: 功能页面 — 分类/标签/归档/友链/相册/关于/留言板/404
+**目标**：完成所有内容页面
+**参考**：`layout/categories.pug`, `layout/tags.pug`, `layout/link.pug`, `layout/about.pug`
+**交付物**：
+- 分类页：安知鱼分类云样式
+- 标签页：标签云 + 标签详情
+- 归档页：时间线样式
+- 友链页：随机友链 + 申请功能
+- 相册页：瀑布流 + 灯箱
+- 关于页：个人介绍模板
+- 留言板页
+- 404 页
+
+### Phase 5: 特色交互 — 右键菜单 + 音乐 + 搜索 + 快捷键
+**目标**：实现安知鱼特色交互功能
+**参考**：`layout/includes/rightside.pug`, `layout/includes/musci.pug`, `layout/includes/search.pug`
+**交付物**：
+- 右键菜单：自定义右键菜单（主题、暗色模式、回到顶部等）
+- 音乐播放器：APlayer + MetingJS 集成
+- 搜索：本地搜索 + Algolia + Docsearch 三种模式
+- 快捷键：键盘导航（S 搜索、D 暗色模式等）
+- 右侧工具栏：回到顶部、暗色模式、目录等快捷按钮
+
+### Phase 6: 动画与打磨 — 过渡动画 + 性能 + 响应式
+**目标**：视觉交互细节与安知鱼完全对齐
+**参考**：`source/css/_layout/animation.styl`, `source/js/main.js`
+**交付物**：
+- 页面切换过渡动画
+- 滚动动画（淡入、滑入）
+- 悬浮效果（卡片、按钮、链接）
+- 加载骨架屏
+- 全站响应式适配（移动端、平板、桌面）
+- 性能优化（懒加载、代码分割、图片优化）
+- PWA 完善
+
+---
+
+## 依赖关系
+
+```
+Phase 1 (骨架) → Phase 2 (首页) → Phase 3 (文章页)
+                                    ↓
+                              Phase 4 (功能页)
+                                    ↓
+                              Phase 5 (特色交互)
+                                    ↓
+                              Phase 6 (动画打磨)
+```
+
+Phase 1 是所有后续 Phase 的基础。Phase 2-4 可部分并行，但建议按顺序。Phase 5-6 依赖前面所有 Phase。
+
+---
+
+## 验收标准
+
+每个 Phase 完成后需满足：
+1. 与安知鱼主题截图/演示站对比，视觉一致度 ≥ 90%
+2. 后台配置能正确驱动前台渲染
+3. 移动端基本可用（不要求完美，但不能布局错乱）
+4. 无 TypeScript 类型错误
+5. 页面加载性能可接受（LCP < 3s）

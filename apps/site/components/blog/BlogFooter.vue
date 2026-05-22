@@ -258,7 +258,7 @@ onUnmounted(() => {
           <div class="footer-title-group">
             <span>{{ group.title }}</span>
             <button
-              v-if="isFriendGroup(group.title) && footer.list.randomFriends > 0"
+              v-if="isFriendGroup(group.title) && (footer.list.randomFriends ?? 0) > 0"
               type="button"
               class="friend-refresh-btn"
               :aria-label="'刷新友链'"

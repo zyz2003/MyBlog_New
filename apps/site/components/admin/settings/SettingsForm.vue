@@ -69,20 +69,12 @@ function updateField(key: string, value: unknown) {
       />
 
       <!-- Boolean toggle -->
-      <div v-else-if="field.type === 'boolean'" class="flex items-center gap-3">
-        <button
-          type="button"
-          class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
-          :class="modelValue[field.key] ? 'bg-primary' : 'bg-surface-2'"
-          @click="updateField(field.key, !modelValue[field.key])"
-        >
-          <span
-            class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-            :class="modelValue[field.key] ? 'translate-x-6' : 'translate-x-1'"
-          />
-        </button>
-        <span class="text-sm text-muted">{{ modelValue[field.key] ? '已启用' : '已禁用' }}</span>
-      </div>
+      <AdminToggleSwitch
+        v-else-if="field.type === 'boolean'"
+        :model-value="Boolean(modelValue[field.key])"
+        @update:model-value="updateField(field.key, $event)"
+        :label="field.label"
+      />
 
       <!-- Select -->
       <select
