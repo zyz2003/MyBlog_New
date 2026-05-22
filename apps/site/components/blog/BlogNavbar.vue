@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 import { useScrollDirection } from '@/composables/frontend/useScrollDirection'
+import { useNavbarState } from '@/composables/frontend/useNavbarState'
 import { useTheme } from '@/composables/useTheme'
 import type { SocialLink } from '@/composables/frontend/site-settings.types'
 
 const { nav, search, settings, social } = useSiteSettings()
 const { isDark, toggleDark } = useTheme()
 const { direction, isScrolledPastThreshold, scrollPercent, scrollY } = useScrollDirection(56)
+const { isNavbarHidden } = useNavbarState()
 
 const config = useRuntimeConfig()
 const route = useRoute()
@@ -55,10 +57,7 @@ let clockTimer: ReturnType<typeof setInterval> | null = null
 let removeSiteActionListeners: (() => void) | null = null
 
 // Scroll-driven navbar classes
-const navHideClass = computed(() => {
-  if (!isScrolledPastThreshold.value) return false
-  return direction.value === 'down'
-})
+const navHideClass = computed(() => isNavbarHidden.value)
 const navVisibleClass = computed(() => {
   if (!isScrolledPastThreshold.value) return false
   return direction.value === 'up'

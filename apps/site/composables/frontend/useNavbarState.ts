@@ -20,6 +20,10 @@ import { useScrollDirection } from './useScrollDirection'
  * SSR-safe: all reactive state starts in the "visible" position so the
  * navbar renders on first paint without a hydration flash.
  */
+
+// Module-level state: shared across all useNavbarState() callers
+const isNavbarHidden = ref(false)
+
 export function useNavbarState() {
   const { direction, isScrolledPastThreshold } = useScrollDirection(56)
 
@@ -47,6 +51,11 @@ export function useNavbarState() {
 
     // Rule 3/4: auto behavior based on scroll direction
     return direction.value !== 'down'
+  })
+
+  // Sync isNavbarHidden with isVisible (inverse)
+  watch(isVisible, (visible) => {
+    isNavbarHidden.value = !visible
   })
 
   function toggleMobileMenu() {
@@ -80,6 +89,7 @@ export function useNavbarState() {
 
   return {
     isVisible,
+    isNavbarHidden,
     isMobileMenuOpen,
     direction,
     isScrolledPastThreshold,
