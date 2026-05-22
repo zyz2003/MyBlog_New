@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 
-const { home } = useSiteSettings()
+const { homepage } = useSiteSettings()
 
 const categoryList = computed(() => {
-  const list = home.value?.categories || []
+  const list = homepage.value?.categories || []
   return list.slice(0, 6)
 })
 </script>

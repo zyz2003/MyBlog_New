@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 
-const { home } = useSiteSettings()
+const { homepage } = useSiteSettings()
 
 const todayPick = computed(() => {
-  const pick = home.value?.todayCard
+  const pick = homepage.value?.todayCard
   if (!pick) return null
   return {
     title: pick.title,

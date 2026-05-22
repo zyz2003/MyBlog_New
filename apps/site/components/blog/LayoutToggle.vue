@@ -1,23 +1,18 @@
 <script setup lang="ts">
-const { homepage, updateHomepage } = useSiteSettings()
-
-const isDoubleColumn = computed({
-  get: () => homepage.value?.doubleRow ?? false,
-  set: (value: boolean) => {
-    updateHomepage({ doubleRow: value })
-    localStorage.setItem('homepage_layout', value ? 'double' : 'single')
-  },
-})
+const isDoubleColumn = ref(false)
 
 const layoutIconClass = computed(() => isDoubleColumn.value ? 'i-heroicons-squares-2x2-solid' : 'i-heroicons-bars-3-bottom-left-solid')
 const layoutLabel = computed(() => isDoubleColumn.value ? '双列布局' : '单列布局')
 
 onMounted(() => {
   const savedLayout = localStorage.getItem('homepage_layout')
-  if (savedLayout && savedLayout !== (isDoubleColumn.value ? 'double' : 'single').toString()) {
-    isDoubleColumn.value = savedLayout === 'double'
-  }
+  isDoubleColumn.value = savedLayout === 'double'
 })
+
+function toggleLayout() {
+  isDoubleColumn.value = !isDoubleColumn.value
+  localStorage.setItem('homepage_layout', isDoubleColumn.value ? 'double' : 'single')
+}
 </script>
 
 <template>

@@ -14,9 +14,17 @@ const tags = computed(() => data.value?.data ?? [])
 const containerRef = ref<HTMLElement>()
 const { elementX, elementY, isOutside } = useMouseInElement(containerRef)
 
+interface Tag3D extends TagItem {
+  x: number
+  y: number
+  z: number
+  scale: number
+  opacity: number
+}
+
 // Distribute tags on sphere using Fibonacci sphere algorithm
 const radius = 100
-const tags3D = computed(() => {
+const tags3D = computed<Tag3D[]>(() => {
   const n = tags.value.length
   if (n === 0) return []
 
@@ -68,7 +76,7 @@ onUnmounted(() => {
   cancelAnimationFrame(animationFrame)
 })
 
-function transformStyle(tag: ReturnType<typeof tags3D.value>[number]) {
+function transformStyle(tag: Tag3D) {
   const cosX = Math.cos(rotation.value.x)
   const sinX = Math.sin(rotation.value.x)
   const cosY = Math.cos(rotation.value.y)

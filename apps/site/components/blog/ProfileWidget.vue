@@ -76,12 +76,28 @@ const authorSkills = computed(() => authorStatus.value.enable ? authorStatus.val
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.45s ease, filter 0.45s ease;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.45s ease;
 }
 
 .profile-avatar.is-effect:hover img {
-  transform: scale(1.08) rotate(2deg);
-  filter: saturate(1.08);
+  transform: scale(1.1) rotate(-5deg);
+  filter: saturate(1.15) brightness(1.05);
+}
+
+.profile-avatar.is-effect img {
+  animation: avatarRotate 8s ease-in-out infinite;
+}
+
+@keyframes avatarRotate {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(2deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(-2deg);
+  }
 }
 
 .profile-name {
@@ -148,11 +164,34 @@ const authorSkills = computed(() => authorStatus.value.enable ? authorStatus.val
   background: color-mix(in srgb, var(--anzhiyu-main) 8%, white);
   color: var(--anzhiyu-main);
   text-decoration: none;
-  transition: 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .profile-social:hover {
   background: var(--anzhiyu-main);
   color: var(--anzhiyu-white);
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--anzhiyu-main) 30%, transparent);
+}
+
+/* Individual social link colors on hover */
+.profile-social:nth-child(1):hover {
+  background: linear-gradient(135deg, #07c160, #10b981);
+}
+
+.profile-social:nth-child(2):hover {
+  background: linear-gradient(135deg, #1da1f2, #0d8bd9);
+}
+
+.profile-social:nth-child(3):hover {
+  background: linear-gradient(135deg, #ea4c89, #c73e75);
+}
+
+.profile-social:nth-child(4):hover {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+}
+
+.profile-social:nth-child(5):hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 </style>

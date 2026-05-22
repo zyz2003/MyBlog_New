@@ -23,7 +23,7 @@ interface TopPostItem {
   cover: string
 }
 
-defineProps<{
+const props = defineProps<{
   swiperList?: SwiperItem[]
   topPostList?: TopPostItem[]
 }>()
@@ -31,6 +31,7 @@ defineProps<{
 const modules = [Autoplay, EffectCreative, Pagination, Navigation]
 
 const safeSwiperList = computed(() => props.swiperList || [])
+const activeSlide = ref(0)
 const activeItem = computed(() => safeSwiperList.value[activeSlide.value])
 </script>
 
