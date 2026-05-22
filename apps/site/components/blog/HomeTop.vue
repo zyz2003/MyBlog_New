@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
+
 interface CategoryConfig {
   name: string
   path: string
@@ -112,6 +114,12 @@ function toRandomPost() {
           :today-card="todayCard"
         />
       </div>
+
+      <!-- Category entry buttons -->
+      <CategoryEntryButtons />
+
+      <!-- Today's pick banner -->
+      <TodayPickBanner />
     </div>
   </section>
 </template>
