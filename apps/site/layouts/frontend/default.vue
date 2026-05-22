@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useScrollDirection } from '@/composables/frontend/useScrollDirection'
 const config = useRuntimeConfig()
 const {
   settings,
@@ -27,6 +28,9 @@ const {
 const { resolveAssetUrl } = useCdnAsset()
 const { isDark } = useTheme()
 const route = useRoute()
+
+const { isScrolledPastThreshold } = useScrollDirection(56)
+const navbarHeight = computed(() => isScrolledPastThreshold.value ? '50px' : '64px')
 
 await refresh()
 
@@ -852,13 +856,14 @@ if (import.meta.client) {
   <div
     class="frontend-shell min-h-screen flex flex-col bg-background transition-colors duration-300"
     :class="[{ 'is-mourn': isMourningDay, 'hr-icon-enabled': hrIcon.enable }, beautifyScopeClass]"
+    :style="{ '--navbar-height': navbarHeight }"
   >
     <div class="shell-orb shell-orb-left" />
     <div class="shell-orb shell-orb-right" />
 
     <BlogNavbar />
 
-    <main class="relative z-1 flex-1 w-full pt-6 pb-16">
+    <main class="relative z-1 flex-1 w-full pb-16 main-content-area">
       <div class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <slot />
       </div>
@@ -1292,5 +1297,10 @@ if (import.meta.client) {
   .shortcut-head {
     flex-direction: column;
   }
+}
+
+.main-content-area {
+  padding-top: calc(var(--navbar-height, 64px) + 12px);
+  transition: padding-top 0.3s ease;
 }
 </style>
