@@ -6,6 +6,7 @@ const config = useRuntimeConfig()
 
 const runtimeText = ref('')
 const footerSubtitleIndex = ref(0)
+const friendLinksRefreshKey = ref(0)
 let runtimeTimer: ReturnType<typeof setInterval> | null = null
 let footerSubtitleTimer: ReturnType<typeof setInterval> | null = null
 let footerSubtitleDelayTimer: ReturnType<typeof setTimeout> | null = null
@@ -59,6 +60,14 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+function isFriendGroup(title: string) {
+  return /友链|友情链接|friends/i.test(title)
+}
+
+function refreshFriendLinks() {
+  friendLinksRefreshKey.value++
+}
+
 function iconClass(icon: string) {
   return icon
 }
@@ -108,6 +117,10 @@ const footerSubtitleText = computed(() => {
 const footerCcLink = computed(() => footer.value.footerBar.cc.link || '/copyright')
 const footerBgEnabled = computed(() => Boolean(settings.value.footer_bg))
 const footerGroups = computed(() => {
+  // Depend on friendLinksRefreshKey so incrementing it forces re-shuffle
+  const _refreshKey = friendLinksRefreshKey.value
+  void _refreshKey
+
   const groups = footer.value.list.project || []
   const randomFriends = Number(footer.value.list.randomFriends || 0)
 
@@ -242,7 +255,18 @@ onUnmounted(() => {
           :key="index"
           class="footer-group"
         >
-          <div class="footer-title">{{ group.title }}</div>
+          <div class="footer-title-group">
+            <span>{{ group.title }}</span>
+            <button
+              v-if="isFriendGroup(group.title) && footer.list.randomFriends > 0"
+              type="button"
+              class="friend-refresh-btn"
+              :aria-label="'刷新友链'"
+              @click="refreshFriendLinks"
+            >
+              <i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" />
+            </button>
+          </div>
           <div class="footer-links">
             <a
               v-for="(link, linkIndex) in group.links"
@@ -381,6 +405,8 @@ onUnmounted(() => {
   background: transparent;
   cursor: pointer;
   overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
   transition: cubic-bezier(0, 0, 0, 1.29) 0.5s;
 }
 
@@ -450,12 +476,34 @@ onUnmounted(() => {
   min-width: 120px;
 }
 
-.footer-title {
+.footer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin: 1rem 0;
   color: var(--anzhiyu-secondtext);
   font-size: 1rem;
   font-weight: 600;
   text-align: left;
+}
+
+.friend-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.6;
+  color: var(--anzhiyu-secondtext);
+  transition: 0.3s;
+}
+
+.friend-refresh-btn:hover {
+  color: var(--anzhiyu-main);
+  opacity: 1;
 }
 
 .footer-links {
@@ -475,6 +523,7 @@ onUnmounted(() => {
   white-space: nowrap;
   text-overflow: ellipsis;
   text-decoration: none;
+  cursor: pointer;
   transition: 0.3s;
 }
 
@@ -572,6 +621,10 @@ onUnmounted(() => {
   color: var(--anzhiyu-main);
 }
 
+.footer-bar-cc i {
+  font-size: 18px;
+}
+
 .back-top-button {
   margin-top: 8px;
   margin-bottom: 8px;
@@ -586,7 +639,7 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .footer-wrap {
-    padding: 32px 16px 0;
+    padding: 0;
   }
 
   .footer-deal {
