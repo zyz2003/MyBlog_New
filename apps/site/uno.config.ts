@@ -18,6 +18,7 @@ export default defineConfig({
   ],
 
   safelist: [
+    // Heroicons outline
     'i-heroicons-archive-box',
     'i-heroicons-arrow-path',
     'i-heroicons-arrow-top-right-on-square',
@@ -70,6 +71,17 @@ export default defineConfig({
     'i-heroicons-tag',
     'i-heroicons-user',
     'i-heroicons-x-mark',
+    // Heroicons solid (for category cards and other UI elements)
+    'i-heroicons-archive-box-solid',
+    'i-heroicons-code-bracket-solid',
+    'i-heroicons-computer-desktop-solid',
+    'i-heroicons-document-solid',
+    'i-heroicons-folder-solid',
+    'i-heroicons-rectangle-group-solid',
+    'i-heroicons-server-solid',
+    'i-heroicons-sparkles-solid',
+    'i-heroicons-user-group-solid',
+    // Brand icons
     'i-simple-icons-bilibili',
     'i-simple-icons-github',
     'i-simple-icons-twitter',

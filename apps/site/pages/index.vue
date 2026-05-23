@@ -7,6 +7,7 @@ interface CategoryConfig {
   icon?: string
   shadow?: string
   bgColor?: string
+  cls?: string
 }
 
 interface TodayCardConfig {
@@ -52,36 +53,37 @@ const { data: articlesData } = await useAsyncData(
 const { data: categoriesData } = await useAsyncData('home-categories', () => getCategoryTree())
 
 const homepageCategoryCards = computed<CategoryConfig[]>(() => {
-  const fallbackGradients = [
-    'linear-gradient(to right, #358bff, #15c6ff)',
-    'linear-gradient(to right, #f65, #ffbf37)',
-    'linear-gradient(to right, #18e7ae, #1eebeb)',
-  ]
+  const configuredCards = (homepage.value.categories as CategoryConfig[]).slice(0, 3).map((card, index) => ({
+    name: card.name,
+    path: card.path,
+    icon: card.icon || ['anzhiyu-icon-dove', 'anzhiyu-icon-fire', 'anzhiyu-icon-book'][index % 3],
+    shadow: card.shadow || ['var(--anzhiyu-shadow-blue)', 'var(--anzhiyu-shadow-red)', 'var(--anzhiyu-shadow-green)'][index % 3],
+    bgColor: card.bgColor,
+    cls: card.cls || ['blue', 'red', 'green'][index % 3],
+  }))
 
-  const configuredCards = (homepage.value.categories as CategoryConfig[]).slice(0, 3)
   const generatedCards = (categoriesData.value?.data || []).slice(0, 3).map((category, index) => ({
     name: category.name,
     path: `/categories/${category.slug}`,
-    icon: index === 0
-      ? 'i-heroicons-computer-desktop-solid'
-      : index === 1
-        ? 'i-heroicons-sparkles-solid'
-        : 'i-heroicons-rectangle-group-solid',
-    bgColor: fallbackGradients[index % fallbackGradients.length],
+    icon: ['anzhiyu-icon-dove', 'anzhiyu-icon-fire', 'anzhiyu-icon-book'][index % 3],
+    shadow: ['var(--anzhiyu-shadow-blue)', 'var(--anzhiyu-shadow-red)', 'var(--anzhiyu-shadow-green)'][index % 3],
+    cls: ['blue', 'red', 'green'][index % 3],
   }))
 
   const fallbackCards: CategoryConfig[] = [
     {
       name: archiveText,
       path: '/archives',
-      icon: 'i-heroicons-archive-box-solid',
-      bgColor: fallbackGradients[1],
+      icon: 'anzhiyu-icon-book',
+      shadow: 'var(--anzhiyu-shadow-red)',
+      cls: 'red',
     },
     {
       name: friendsText,
       path: '/friends',
-      icon: 'i-heroicons-user-group-solid',
-      bgColor: fallbackGradients[2],
+      icon: 'anzhiyu-icon-dove',
+      shadow: 'var(--anzhiyu-shadow-green)',
+      cls: 'green',
     },
   ]
 
@@ -169,8 +171,6 @@ useSeoMeta({
     <div id="content-inner" class="layout">
       <div id="recent-posts" class="recent-posts">
         <BlogCategoryBar :categories="categoriesData?.data || []" />
-
-        <LayoutToggle />
 
         <div class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
           <BlogPostItem

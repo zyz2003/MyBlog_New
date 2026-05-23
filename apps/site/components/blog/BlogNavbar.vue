@@ -242,7 +242,7 @@ onUnmounted(() => {
             :title="link.name"
             class="social-icon"
           >
-            <i v-if="link.icon" :class="link.icon" />
+            <i v-if="link.icon" class="anzhiyufont" :class="link.icon" />
           </a>
         </div>
 

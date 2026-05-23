@@ -3,66 +3,118 @@ interface CategoryNode {
   id: number
   name: string
   slug: string
+  description: string | null
+  parentId: number | null
+  sortOrder: number
   count: number
-  children?: CategoryNode[]
+  children: CategoryNode[]
 }
 
 const { data } = await useFetch<{ code: number; data: CategoryNode[] }>('/api/categories/tree')
 const categories = computed(() => data.value?.data ?? [])
 
-const expanded = ref<Set<string>>(new Set())
-
-function toggle(name: string) {
-  if (expanded.value.has(name)) {
-    expanded.value.delete(name)
-  } else {
-    expanded.value.add(name)
+// Compute total including child counts
+const totalCount = computed(() => {
+  function sum(node: CategoryNode): number {
+    return node.count + (node.children?.reduce((s, c) => s + sum(c), 0) || 0)
   }
+  return categories.value.reduce((s, c) => s + sum(c), 0)
+})
+
+const expanded = ref<Set<number>>(new Set())
+
+function toggle(id: number) {
+  if (expanded.value.has(id)) {
+    expanded.value.delete(id)
+  } else {
+    expanded.value.add(id)
+  }
+}
+
+function hasChildren(cat: CategoryNode): boolean {
+  return cat.children?.length > 0
+}
+
+function isExpanded(cat: CategoryNode): boolean {
+  return expanded.value.has(cat.id) || !hasChildren(cat)
 }
 </script>
 
 <template>
-  <div class="card-title">分类</div>
+  <div class="card-widget card-categories">
+    <div class="item-headline">
+      <i class="anzhiyufont anzhiyu-icon-folder-open" />
+      <span>分类</span>
+      <span class="card-category-count">{{ totalCount }}</span>
+    </div>
 
-  <div v-if="categories.length === 0" class="empty-state">
-    暂无分类
-  </div>
+    <div v-if="categories.length === 0" class="empty-state">暂无分类</div>
 
-  <div v-else class="category-tree">
-    <template v-for="cat in categories" :key="cat.id">
-      <div class="category-node">
-        <div class="category-label" @click="toggle(cat.name)">
-          <span class="chevron" :class="{ expanded: expanded.has(cat.name) || !cat.children?.length }">
-            <i class="anzhiyufont anzhiyu-icon-chevron-right" />
-          </span>
-          <NuxtLink :to="`/categories/${cat.slug}`" class="category-name">
+    <ul v-else class="card-category-list">
+      <li v-for="cat in categories" :key="cat.id" class="card-category-list-item parent">
+        <div class="card-category-list-link" :class="{ expand: isExpanded(cat) }">
+          <NuxtLink :to="`/categories/${cat.slug}`" class="card-category-list-name">
             {{ cat.name }}
           </NuxtLink>
-          <span class="category-count">{{ cat.count || 0 }}</span>
+          <span class="card-category-list-count" @click="toggle(cat.id)">{{ cat.count }}</span>
+          <i v-if="hasChildren(cat)" class="anzhiyufont anzhiyu-icon-chevron-right expand-icon" :class="{ rotated: isExpanded(cat) }" @click="toggle(cat.id)" />
         </div>
-        <div v-if="cat.children?.length && expanded.has(cat.name)" class="category-children">
-          <template v-for="child in cat.children" :key="child.id">
-            <div class="category-child">
+
+        <ul v-if="hasChildren(cat) && isExpanded(cat)" class="card-category-list child">
+          <li v-for="child in cat.children" :key="child.id" class="card-category-list-item">
+            <div class="card-category-list-link child-link">
               <span class="child-dot" />
-              <NuxtLink :to="`/categories/${child.slug}`" class="child-name">
+              <NuxtLink :to="`/categories/${child.slug}`" class="card-category-list-name">
                 {{ child.name }}
               </NuxtLink>
-              <span class="child-count">{{ child.count || 0 }}</span>
+              <span class="card-category-list-count">{{ child.count }}</span>
             </div>
-          </template>
-        </div>
-      </div>
-    </template>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </div>
 </template>
 
 <style scoped>
-.card-title {
-  margin-bottom: 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+.card-widget {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--anzhiyu-card-bg);
+  border: var(--style-border-always);
+  border-radius: 12px;
+  box-shadow: var(--anzhiyu-shadow-border);
+  transition: 0.3s;
+}
+
+.card-widget:hover {
+  box-shadow: var(--anzhiyu-shadow-main);
+  border: var(--style-border-hover);
+}
+
+.item-headline {
+  padding-bottom: 0;
+  margin-bottom: 0.6rem;
+  margin-left: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+
+  i {
+    margin-right: 6px;
+  }
+
+  span {
+    margin-left: 6px;
+  }
+}
+
+.card-category-count {
+  font-size: 0.8em;
   color: var(--anzhiyu-secondtext);
+  font-weight: normal;
+  margin-left: auto;
 }
 
 .empty-state {
@@ -72,81 +124,102 @@ function toggle(name: string) {
   padding: 0.75rem 0;
 }
 
-.category-tree {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+/* AnZhiYu card-category-list style */
+.card-category-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.category-node {
-  display: flex;
-  flex-direction: column;
+.card-category-list.child {
+  padding: 0 0 0 16px;
 }
 
-.category-label {
+.card-category-list-item {
+  margin: 0;
+  padding: 0;
+
+  &.parent > .card-category-list-link {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+}
+
+.card-category-list-link {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  padding: 6px 10px;
   border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s ease;
+  color: var(--anzhiyu-fontcolor);
+  transition: all 0.2s;
+  cursor: default;
+
+  &:hover {
+    background: color-mix(in srgb, var(--anzhiyu-main) 6%, transparent);
+  }
 }
 
-.category-label:hover {
-  background: color-mix(in srgb, var(--anzhiyu-main) 6%, white);
-}
-
-.chevron {
-  display: inline-flex;
-  align-items: center;
-  color: var(--anzhiyu-secondtext);
-  font-size: 12px;
-  transition: transform 0.3s ease;
-}
-
-.chevron.expanded {
-  transform: rotate(90deg);
-}
-
-.category-name {
+.card-category-list-name {
   flex: 1;
   color: var(--anzhiyu-fontcolor);
-  font-size: 14px;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.2s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--anzhiyu-main);
+  }
 }
 
-.category-name:hover {
-  color: var(--anzhiyu-main);
-}
-
-.category-count {
-  min-width: 2rem;
-  color: var(--anzhiyu-secondtext);
-  font-size: 12px;
+.card-category-list-count {
   text-align: right;
+  color: var(--anzhiyu-secondtext);
+  font-size: 0.78rem;
+  font-weight: normal;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--anzhiyu-main);
+  }
+
+  &::before {
+    content: '(';
+  }
+
+  &::after {
+    content: ')';
+  }
 }
 
-.category-children {
-  margin-left: 1.5rem;
-  margin-top: 0.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+.expand-icon {
+  float: right;
+  margin-right: -0.5em;
+  padding: 0.5em;
+  font-size: 0.75rem;
+  color: var(--anzhiyu-secondtext);
+  transition: transform 0.3s;
+  transform: rotate(0);
+  cursor: pointer;
+
+  &.rotated {
+    transform: rotate(-90deg);
+  }
+
+  &:hover {
+    color: var(--anzhiyu-main);
+  }
 }
 
-.category-child {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.5rem 0.35rem 0.75rem;
-  border-radius: 6px;
-  transition: background 0.3s ease;
-}
-
-.category-child:hover {
-  background: color-mix(in srgb, var(--anzhiyu-main) 4%, white);
+.child-link {
+  font-weight: normal;
+  font-size: 0.85rem;
+  padding: 4px 10px;
 }
 
 .child-dot {
@@ -155,24 +228,7 @@ function toggle(name: string) {
   border-radius: 50%;
   background: var(--anzhiyu-main);
   flex-shrink: 0;
-}
-
-.child-name {
-  flex: 1;
-  color: var(--anzhiyu-fontcolor);
-  font-size: 13px;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.child-name:hover {
-  color: var(--anzhiyu-main);
-}
-
-.child-count {
-  min-width: 1.5rem;
-  color: var(--anzhiyu-secondtext);
-  font-size: 11px;
-  text-align: right;
+  margin-right: 8px;
+  opacity: 0.6;
 }
 </style>

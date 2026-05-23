@@ -7,6 +7,7 @@ interface CategoryConfig {
   icon?: string
   shadow?: string
   bgColor?: string
+  cls?: string
 }
 
 interface SwiperArticle {
@@ -99,6 +100,7 @@ function toRandomPost() {
               :icon="cat.icon"
               :shadow="cat.shadow"
               :bg-color="cat.bgColor"
+              :cls="cat.cls"
             />
           </template>
         </BlogBannerGroup>
@@ -116,10 +118,10 @@ function toRandomPost() {
       </div>
 
       <!-- Category entry buttons -->
-      <CategoryEntryButtons />
+      <BlogCategoryEntryButtons />
 
       <!-- Today's pick banner -->
-      <TodayPickBanner />
+      <BlogTodayPickBanner />
     </div>
   </section>
 </template>

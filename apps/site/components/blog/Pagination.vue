@@ -5,9 +5,11 @@ const props = defineProps<{
   baseUrl: string
 }>()
 
-const emit = defineEmits<{
-  pageChange: [page: number]
-}>()
+const router = useRouter()
+
+function goToPage(page: number) {
+  router.push({ path: props.baseUrl, query: page > 1 ? { page } : undefined })
+}
 
 const pages = computed(() => {
   const result: (number | string)[] = []
@@ -35,7 +37,7 @@ const pages = computed(() => {
       type="button"
       class="pagination-btn pagination-prev"
       :to="`${baseUrl}?page=${currentPage - 1}`"
-      @click="emit('pageChange', currentPage - 1)"
+      @click="goToPage(currentPage - 1)"
     >
       <i class="anzhiyufont anzhiyu-icon-angle-left" />
       <span>上一页</span>
@@ -52,7 +54,7 @@ const pages = computed(() => {
         type="button"
         class="pagination-page"
         :class="{ active: page === currentPage }"
-        @click="emit('pageChange', page as number)"
+        @click="goToPage(page as number)"
       >
         {{ page }}
       </button>
@@ -63,7 +65,7 @@ const pages = computed(() => {
       type="button"
       class="pagination-btn pagination-next"
       :to="`${baseUrl}?page=${currentPage + 1}`"
-      @click="emit('pageChange', currentPage + 1)"
+      @click="goToPage(currentPage + 1)"
     >
       <span>下一页</span>
       <i class="anzhiyufont anzhiyu-icon-angle-right" />

@@ -21,6 +21,25 @@ const currentLanguage = useState<'simplified' | 'traditional'>('site-language-mo
   translateConfig.value.defaultEncoding === 1 ? 'traditional' : 'simplified',
 )
 
+// Layout toggle
+const isDoubleColumn = ref(false)
+
+onMounted(() => {
+  isMounted.value = true
+  const savedLayout = localStorage.getItem('homepage_layout')
+  isDoubleColumn.value = savedLayout === 'double'
+})
+
+function toggleLayout() {
+  isDoubleColumn.value = !isDoubleColumn.value
+  localStorage.setItem('homepage_layout', isDoubleColumn.value ? 'double' : 'single')
+  // Update the post grid class
+  const grid = document.getElementById('recent-posts')?.querySelector('.post-grid')
+  if (grid) {
+    grid.classList.toggle('post-grid-double', isDoubleColumn.value)
+  }
+}
+
 function normalizeButtonId(id: string): ButtonId | 'go-up' | 'chat' | '' {
   const aliasMap: Record<string, ButtonId | 'go-up' | 'chat'> = {
     readmode: 'readmode',
@@ -154,10 +173,6 @@ function handleAction(id: ButtonId) {
 
   actions[id]()
 }
-
-onMounted(() => {
-  isMounted.value = true
-})
 </script>
 
 <template>
@@ -226,6 +241,23 @@ onMounted(() => {
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 8.25A3.75 3.75 0 1 0 12 15.75A3.75 3.75 0 1 0 12 8.25Z" fill="none" stroke="currentColor" stroke-width="1.7" />
         <path d="M19.4 15a1 1 0 0 0 .2 1.1l.05.05a1 1 0 0 1 0 1.42l-1.12 1.12a1 1 0 0 1-1.42 0l-.05-.05a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.92V20a1 1 0 0 1-1 1h-1.6a1 1 0 0 1-1-1v-.08a1 1 0 0 0-.6-.92 1 1 0 0 0-1.1.2l-.05.05a1 1 0 0 1-1.42 0l-1.12-1.12a1 1 0 0 1 0-1.42l.05-.05a1 1 0 0 0 .2-1.1 1 1 0 0 0-.92-.6H4a1 1 0 0 1-1-1v-1.6a1 1 0 0 1 1-1h.08a1 1 0 0 0 .92-.6 1 1 0 0 0-.2-1.1l-.05-.05a1 1 0 0 1 0-1.42l1.12-1.12a1 1 0 0 1 1.42 0l.05.05a1 1 0 0 0 1.1.2h.02a1 1 0 0 0 .58-.92V4a1 1 0 0 1 1-1h1.6a1 1 0 0 1 1 1v.08a1 1 0 0 0 .6.92 1 1 0 0 0 1.1-.2l.05-.05a1 1 0 0 1 1.42 0l1.12 1.12a1 1 0 0 1 0 1.42l-.05.05a1 1 0 0 0-.2 1.1v.02a1 1 0 0 0 .92.58H20a1 1 0 0 1 1 1v1.6a1 1 0 0 1-1 1h-.08a1 1 0 0 0-.92.6Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.4" />
+      </svg>
+    </button>
+
+    <button
+      type="button"
+      title="切换布局"
+      aria-label="切换布局"
+      :class="actionButtonClass"
+      @click="toggleLayout"
+    >
+      <svg v-if="isDoubleColumn" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="5" width="8" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <rect x="13" y="5" width="8" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7" />
+      </svg>
+      <svg v-else viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7" />
+        <path d="M3 12h18" fill="none" stroke="currentColor" stroke-width="1.7" />
       </svg>
     </button>
 

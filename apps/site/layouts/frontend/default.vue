@@ -103,6 +103,7 @@ const openGraphMeta = computed(() => (settings.value.openGraphMeta as Record<str
 const iconLinks = computed<Array<Record<string, string>>>(() => {
   const links: Array<Record<string, string>> = [
     { rel: 'stylesheet', href: '/api/themes/active.css' },
+    { rel: 'stylesheet', href: '/fonts/ali_iconfont_css.css' },
     { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap' },
   ]
 
