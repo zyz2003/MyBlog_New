@@ -470,6 +470,14 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
   keywords: () => article.value?.keywords || '',
 })
+
+const tocMobileRef = ref<{ forceReobserve: () => void } | null>(null)
+const tocDesktopRef = ref<{ forceReobserve: () => void } | null>(null)
+
+function handleContentUpdated(): void {
+  tocMobileRef.value?.forceReobserve()
+  tocDesktopRef.value?.forceReobserve()
+}
 </script>
 
 <template>
@@ -504,6 +512,14 @@ useSeoMeta({
         :summary="aiSummaryText"
         :gpt-name="aiSummaryConfig.gptName"
         :btn-link="aiSummaryConfig.btnLink"
+      />
+
+      <BlogPostInfoBar
+        :word-count="wordCountValue"
+        :reading-time="readingTime"
+        :publish-date="displayDate"
+        :update-date="updatedDate"
+        :categories="article.categories || []"
       />
 
       <div class="mx-auto max-w-[1240px] px-4">
