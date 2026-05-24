@@ -114,6 +114,29 @@ function handleToggle(): void {
   }
 }
 
+function forceReobserve(): void {
+  if (!import.meta.client) {
+    return
+  }
+
+  nextTick(() => {
+    const article = document.querySelector('.article-content') as HTMLElement | null
+    if (!article) {
+      return
+    }
+
+    disconnect()
+    if (expanded.value) {
+      observe(article)
+      startMutationObserver(article)
+    }
+  })
+}
+
+defineExpose({
+  forceReobserve,
+})
+
 onMounted(() => {
   initObservers()
 })

@@ -534,6 +534,7 @@ function handleContentUpdated(): void {
 
         <div v-if="showToc" class="mb-4 lg:hidden">
           <BlogTableOfContents
+            ref="tocMobileRef"
             :content="article.content || ''"
             :number="toc.number"
             :expand="toc.expand"
@@ -620,6 +621,7 @@ function handleContentUpdated(): void {
           <aside v-if="showAside" class="hidden lg:block">
             <div class="sticky top-[96px]">
               <BlogTableOfContents
+                ref="tocDesktopRef"
                 v-if="showToc"
                 :content="article.content || ''"
                 :number="toc.number"

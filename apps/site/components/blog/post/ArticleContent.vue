@@ -15,6 +15,10 @@ const props = withDefaults(defineProps<{
   enableH2Divider: false,
 })
 
+const emit = defineEmits<{
+  (e: 'content-updated'): void
+}>()
+
 const { themeConfig, isDark } = useTheme()
 const { codeBlock, copySettings, math, mathjax, katex, settings, displayEnhancements } = useSiteSettings()
 const { resolveAssetUrl } = useCdnAsset()
@@ -234,6 +238,8 @@ async function renderMath() {
     if (win.MathJax?.typesetPromise) {
       await win.MathJax.typesetPromise([articleRef.value])
     }
+
+    emit('content-updated')
     return
   }
 
@@ -257,6 +263,8 @@ async function renderMath() {
         throwOnError: false,
       })
     }
+
+    emit('content-updated')
   }
 }
 
