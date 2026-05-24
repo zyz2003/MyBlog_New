@@ -1,6 +1,19 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'frontend-default' })
 
+/**
+ * Front Matter field wiring status (Task 3.1 audit):
+ * 1. mainColor   — WIRED → articleToneStyle (CSS vars on root div)
+ * 2. topImg      — WIRED → heroImage computed (fallback in PostHeader coverImage)
+ * 3. toc         — WIRED → showToc (controls TOC visibility), MISSING string/bool normalization
+ * 4. aside       — WIRED → showAside (controls sidebar visibility), MISSING string/bool normalization
+ * 5. mathjax     — WIRED → ArticleContent :article-mathjax (ArticleContent normalizes internally)
+ * 6. katex       — WIRED → ArticleContent :article-katex (ArticleContent normalizes internally)
+ * 7. ai          — WIRED → aiSummaryText (AiSummary v-if="summary", ai is text not bool)
+ * 8. highlightShrink — WIRED → ArticleContent :article-highlight-shrink (ArticleContent normalizes internally)
+ * 9. allowComment — WIRED → allowCommentValue (CommentWidget normalizes internally), MISSING consistent normalization
+ */
+
 type PublicArticle = {
   id: number
   title: string
