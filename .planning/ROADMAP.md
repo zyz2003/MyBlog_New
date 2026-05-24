@@ -2,31 +2,34 @@
 
 > 目标：将安知鱼 (AnZhiYu) 主题的所有视觉交互效果完整复刻到 Nuxt 3 前台
 > 参考：`docs/anzhiyu-reference/hexo-theme-anzhiyu/`
-> 当前状态：**Phase 1 已完成** - 核心骨架（导航栏 + 页脚 + 布局）✅
+> 当前状态：**Phase 2 已完成** - 首页完善 ✅
 
 ---
 
 ## 现有前台完成度评估
 
-### 已完成（约 35%）
-- **Phase 1 完成**：导航栏 + 页脚 + 布局核心骨架
+### 已完成（约 45%）
+- **Phase 1 完成**：导航栏 + 页脚 + 布局核心骨架 ✅
   - BlogNavbar：滚动隐藏/显示、社交图标行、移动端 300px 抽屉、深色模式切换
   - BlogFooter：运行时间计数器、随机友链刷新、社交栏、版权/备案信息
   - BlogLayout：动态 padding-top 补偿、sticky footer 布局
+- **Phase 2 完成**：首页轮播 + 文章列表 + 侧边栏 ✅
+  - Swiper 11 轮播、分类入口、今日推荐、双列布局切换
+  - 3D 标签云、树形分类、归档时间线、微信翻转卡片
 - 首页基本结构：HomeTop（轮播/推荐）、HomePostList（文章列表）
 - 侧边栏骨架：BlogSidebar（作者卡片、标签、分类、最近文章、归档、站点信息）
 - 文章详情页：基本渲染 + Vditor 样式
 - 分类/标签列表页：基础列表
 - 主题色系统：CSS Variables 基础架构
 
-### 未完成（约 65%）
+### 未完成（约 55%）
 - 导航栏：功能已完整，但搜索功能未对接
 - 页脚：随机友链功能已实现，需后台配置 randomFriends 参数
 - 搜索：本地搜索/Algolia/Docsearch 均未对接
-- 评论：Twikoo/Valine/Waline 组件未实现
+- 评论：Twikoo/Valine/Waline 组件已有骨架，需修复和加固
 - 右键菜单：安知鱼特色右键菜单
 - 音乐播放器：APlayer 集成
-- AI 摘要：文章 AI 摘要区块
+- AI 摘要：文章 AI 摘要区块（已有骨架）
 - 速达：键盘快捷键导航
 - 相册页：瀑布流相册
 - 友链页：完整友链页面（区别于 footer 随机展示）
@@ -51,34 +54,41 @@
 **验证**：8/8 自动化通过，5/6 手动测试通过，视觉一致性 ≥90%
 **文档**：`.planning/phases/01-frontend-core-shell/PHASE-SUMMARY.md`
 
-### Phase 2: 首页完善 — 轮播 + 文章列表 + 侧边栏
+### Phase 2: 首页完善 — 轮播 + 文章列表 + 侧边栏 ✅ COMPLETED (2026-05-22)
+
 **目标**：首页视觉效果与安知鱼一致
 **参考**：`layout/includes/top/`, `layout/includes/post-list.pug`, `layout/includes/sidebar.pug`
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — 首页顶部 + Swiper 集成 (Wave 1)
-- [ ] 02-02-PLAN.md — 文章列表完善 (Wave 2)
-- [ ] 02-03-PLAN.md — 侧边栏完善 (Wave 2)
+- [x] 02-01-PLAN.md — 首页顶部 + Swiper 集成 (Wave 1)
+- [x] 02-02-PLAN.md — 文章列表完善 (Wave 2)
+- [x] 02-03-PLAN.md — 侧边栏完善 (Wave 3)
 
-**交付物**：
-- HomeTop 完善：轮播图动画、推荐文章卡片悬浮效果
-- HomePostList 完善：文章卡片悬浮效果、封面图懒加载、分类/标签筛选
-- BlogSidebar 完善：所有卡片组件对接后台配置、动画效果
-- 首页响应式布局
+**验证**：10/10 自动化通过，视觉一致性 ≥88%
+**文档**：`.planning/phases/02-frontend-homepage-polish/PHASE-SUMMARY.md`
 
 ### Phase 3: 文章详情页 — 渲染 + 目录 + 评论
-**目标**：文章阅读体验与安知鱼一致
+**目标**：文章阅读体验与安知鱼一致 — Front Matter 字段消费、TOC 滚动高亮、评论系统加固、辅助组件完善
 **参考**：`layout/post.pug`, `layout/includes/post/`, `layout/includes/widget/toc.pug`
+**Requirements:** REQ-03-01, REQ-03-02, REQ-03-03, REQ-03-04
+**Plans:** 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — ArticleContent + TableOfContents 修复 (Wave 1)
+- [ ] 03-02-PLAN.md — CommentWidget 修复 + 辅助组件完善 (Wave 1)
+- [ ] 03-03-PLAN.md — 页面集成 + ReadingProgress + 人工验证 (Wave 2)
+
 **交付物**：
-- 文章渲染：Front Matter 字段消费（mainColor、topImg、toc、aside 等）
-- 目录组件：TOC 浮动导航、滚动高亮
-- 评论系统：Twikoo/Valine/Waline 集成，后台配置驱动
-- AI 摘要区块
-- 代码块：高亮、复制按钮、折叠（highlightShrink）
-- 数学公式：MathJax/KaTeX 按需加载
-- 文章版权声明
-- 上下篇导航
+- 文章渲染：Front Matter 字段消费（mainColor、topImg、toc、aside 等）— highlightShrink 类型修复、数学渲染后事件通知
+- 目录组件：TOC 浮动导航 + IntersectionObserver 重新观察 + 滚动高亮 + 移动端折叠
+- 评论系统：allowComment 门控 + 路由安全初始化 + Giscus 主题同步
+- AI 摘要区块：条件渲染 + 视觉打磨
+- 代码块：复制按钮 + 折叠控制（highlightShrink boolean/string 双类型支持）
+- 数学公式：MathJax/KaTeX 按需加载 + 渲染后 DOM 变化通知 TOC
+- 文章版权声明：permalink 复制 + license 显示
+- 上下篇导航：prev/next + fallback
+- 阅读进度条：滚动追踪 + 视觉反馈
 
 ### Phase 4: 功能页面 — 分类/标签/归档/友链/相册/关于/留言板/404
 **目标**：完成所有内容页面
