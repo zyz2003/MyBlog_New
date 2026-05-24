@@ -29,6 +29,17 @@ const enableTableInterlaced = computed(() => {
 const shouldRenderMathjax = computed(() => props.articleMathjax ?? mathjax.value.enable)
 const shouldRenderKatex = computed(() => props.articleKatex ?? katex.value.enable)
 const effectiveHighlightShrink = computed(() => props.articleHighlightShrink ?? codeBlock.value.highlightShrink)
+const isHighlightShrink = computed(() => {
+  const value = effectiveHighlightShrink.value
+  if (value === true || value === 'true') {
+    return true
+  }
+  if (value === false || value === 'false' || value === '' || value === null || value === undefined) {
+    return false
+  }
+  // 'none' or other values: treat as false (no shrink toggle)
+  return false
+})
 
 function slugifyHeading(value: string): string {
   return value
@@ -94,8 +105,8 @@ function createMarkdownRenderer() {
       ? hljs.highlight(str, { language: lang }).value
       : md.utils.escapeHtml(str)
     const languageLabel = lang || 'TEXT'
-    const shrinkMode = codeBlock.value.highlightShrink
-    const enableCollapse = shrinkMode !== false && shrinkMode !== 'none'
+    const shrinkMode = effectiveHighlightShrink.value
+    const enableCollapse = isHighlightShrink.value && shrinkMode !== 'none'
     const showToggle = shrinkMode !== 'none'
     const showCopy = codeBlock.value.highlightCopy
     const showLanguage = codeBlock.value.highlightLang
