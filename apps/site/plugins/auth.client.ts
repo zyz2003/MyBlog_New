@@ -1,4 +1,4 @@
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from '~/stores/admin/auth'
 
 /**
  * Client-side auth initialization plugin

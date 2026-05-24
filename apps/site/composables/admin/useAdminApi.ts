@@ -1,5 +1,4 @@
-import { useAuthStore } from '~/stores/auth'
-import { useAuth } from '~/composables/useAuth'
+import { useAuthStore } from '~/stores/admin/auth'
 
 export function useAdminApi() {
   const store = useAuthStore()

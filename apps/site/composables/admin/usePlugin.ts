@@ -1,4 +1,4 @@
-import { usePluginStore } from '~/stores/plugin'
+import { usePluginStore } from '~/stores/admin/plugin'
 
 /**
  * Composable for reactive plugin access

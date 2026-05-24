@@ -1,13 +1,12 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'frontend-default' })
 
-interface CategoryConfig {
+interface CategoryCard {
   name: string
   path: string
-  icon?: string
-  shadow?: string
-  bgColor?: string
-  cls?: string
+  icon: string
+  shadow: string
+  cls: string
 }
 
 interface TodayCardConfig {
@@ -52,13 +51,12 @@ const { data: articlesData } = await useAsyncData(
 
 const { data: categoriesData } = await useAsyncData('home-categories', () => getCategoryTree())
 
-const homepageCategoryCards = computed<CategoryConfig[]>(() => {
-  const configuredCards = (homepage.value.categories as CategoryConfig[]).slice(0, 3).map((card, index) => ({
+const homepageCategoryCards = computed<CategoryCard[]>(() => {
+  const configuredCards = (homepage.value.categories as CategoryCard[]).slice(0, 3).map((card, index) => ({
     name: card.name,
     path: card.path,
     icon: card.icon || ['anzhiyu-icon-dove', 'anzhiyu-icon-fire', 'anzhiyu-icon-book'][index % 3],
     shadow: card.shadow || ['var(--anzhiyu-shadow-blue)', 'var(--anzhiyu-shadow-red)', 'var(--anzhiyu-shadow-green)'][index % 3],
-    bgColor: card.bgColor,
     cls: card.cls || ['blue', 'red', 'green'][index % 3],
   }))
 
@@ -70,7 +68,7 @@ const homepageCategoryCards = computed<CategoryConfig[]>(() => {
     cls: ['blue', 'red', 'green'][index % 3],
   }))
 
-  const fallbackCards: CategoryConfig[] = [
+  const fallbackCards: CategoryCard[] = [
     {
       name: archiveText,
       path: '/archives',

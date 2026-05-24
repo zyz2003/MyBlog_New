@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import '~/assets/css/variables.css'
-import { useAuth } from '~/composables/useAuth'
 
 const { user, logout } = useAuth()
 const { currentGroup } = useAdminNavigation()

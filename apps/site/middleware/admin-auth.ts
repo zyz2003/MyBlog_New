@@ -1,4 +1,4 @@
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from '~/stores/admin/auth'
 
 export default defineNuxtRouteMiddleware((to) => {
   // Skip middleware for the login page itself

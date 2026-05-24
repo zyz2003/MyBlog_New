@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AuthUser } from '~/stores/auth'
+import type { AuthUser } from '~/stores/admin/auth'
 
 defineProps<{
   user: AuthUser | null

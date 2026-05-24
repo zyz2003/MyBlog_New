@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ArticleWithRelations } from '~/server/services/article.service'
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from '~/stores/admin/auth'
 
 definePageMeta({
   layout: 'admin-default',

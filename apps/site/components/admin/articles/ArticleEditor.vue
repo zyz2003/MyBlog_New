@@ -188,6 +188,8 @@ interface Article {
   topImg: string
   keywords: string
   highlightShrink: string
+  categories?: Array<{ id: number; isPrimary?: boolean }>
+  tags?: Array<{ id: number }>
 }
 
 const props = defineProps<{
@@ -237,8 +239,8 @@ watch(() => props.article, (val) => {
     form.excerpt = val.excerpt || ''
     form.coverImage = val.coverImage || ''
     form.status = val.status || 'draft'
-    form.categoryId = val.categoryId ?? (val.categories as Array<{id: number; isPrimary?: boolean}> | undefined)?.find(c => c.isPrimary)?.id ?? (val.categories as Array<{id: number}> | undefined)?.[0]?.id ?? null
-    form.tagIds = val.tagIds || (val.tags as Array<{id: number}> | undefined)?.map(t => t.id) || []
+    form.categoryId = val.categoryId ?? val.categories?.find(c => c.isPrimary)?.id ?? val.categories?.[0]?.id ?? null
+    form.tagIds = val.tagIds || val.tags?.map(t => t.id) || []
     form.scheduledAt = val.scheduledAt ? new Date(val.scheduledAt as Date | string).toISOString().slice(0, 16) : ''
     form.isTop = val.isTop ?? false
     form.allowComment = val.allowComment ?? true

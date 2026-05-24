@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useTheme } from '@/composables/useTheme'
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 
 type ButtonId = 'readmode' | 'translate' | 'darkmode' | 'hide-aside-btn' | 'mobile-toc-button' | 'to_comment'

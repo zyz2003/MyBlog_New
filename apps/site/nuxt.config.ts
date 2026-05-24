@@ -65,6 +65,18 @@ export default defineNuxtConfig({
     ],
   },
 
+  // Component auto-import: blog subdirectory keeps 'Blog' prefix but
+  // drops subdirectory names so sidebar/ProfileWidget.vue registers as
+  // <BlogProfileWidget>, not <BlogSidebarProfileWidget>
+  components: [
+    {
+      path: '~/components/blog',
+      prefix: 'Blog',
+      pathPrefix: false,
+    },
+    '~/components',
+  ],
+
   modules: [
     '@unocss/nuxt',
     '@pinia/nuxt',

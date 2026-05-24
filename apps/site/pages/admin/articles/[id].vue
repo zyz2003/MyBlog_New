@@ -40,6 +40,40 @@ async function handleSave(data: Record<string, unknown>) {
   navigateTo('/admin/articles')
 }
 
+// Map API response to editor's expected shape
+const editorArticle = computed(() => {
+  if (!article.value) return undefined
+  const a = article.value
+  return {
+    id: a.id,
+    title: a.title ?? '',
+    slug: a.slug ?? '',
+    content: a.content ?? '',
+    excerpt: a.excerpt ?? '',
+    coverImage: a.coverImage ?? '',
+    status: a.status ?? 'draft',
+    categoryId: a.categories?.find(c => c.isPrimary)?.id ?? a.categories?.[0]?.id ?? null,
+    tagIds: a.tags?.map(t => t.id) ?? [],
+    scheduledAt: a.scheduledAt ? new Date(a.scheduledAt).toISOString().slice(0, 16) : '',
+    isTop: a.isTop ?? false,
+    allowComment: a.allowComment ?? true,
+    password: a.password ?? '',
+    seoTitle: a.seoTitle ?? '',
+    seoDescription: a.seoDescription ?? '',
+    mainColor: a.mainColor ?? '',
+    mathjax: a.mathjax ?? false,
+    katex: a.katex ?? false,
+    toc: a.toc ?? true,
+    ai: a.ai ?? '',
+    aside: a.aside ?? true,
+    topImg: a.topImg ?? '',
+    keywords: a.keywords ?? '',
+    highlightShrink: a.highlightShrink ?? '',
+    categories: a.categories,
+    tags: a.tags,
+  }
+})
+
 onMounted(() => {
   fetchArticle()
 })
@@ -60,8 +94,8 @@ onMounted(() => {
     </div>
 
     <AdminArticlesArticleEditor
-      v-else-if="article"
-      :article="article"
+      v-else-if="editorArticle"
+      :article="editorArticle"
       @save="handleSave"
       @cancel="navigateTo('/admin/articles')"
     />

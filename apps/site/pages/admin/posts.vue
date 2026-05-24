@@ -176,7 +176,7 @@ function hydrateForm() {
   form.coverArchivesEnable = cover.archives_enable !== undefined ? Boolean(cover.archives_enable) : Boolean(cover.archivesEnable ?? true)
   form.coverPosition = String(cover.position ?? 'left')
   form.coverDefaultCovers = Array.isArray(cover.default_cover ?? cover.defaultCover)
-    ? (cover.default_cover ?? cover.defaultCover).map((s: unknown) => String(s)).join('\n')
+    ? ((cover.default_cover ?? cover.defaultCover) as string[]).map(s => String(s)).join('\n')
     : ''
 
   form.ptoolEnable = ptool.enable !== undefined ? Boolean(ptool.enable) : false

@@ -5,7 +5,8 @@ const { homepage } = useSiteSettings()
 
 const categoryList = computed(() => {
   const list = homepage.value?.categories || []
-  return list.slice(0, 6)
+  // Skip the first 3 (already shown as CategoryItem big buttons)
+  return list.slice(3, 9)
 })
 </script>
 

@@ -1,4 +1,4 @@
-import { useAuthStore, type AuthUser } from '~/stores/auth'
+import { useAuthStore, type AuthUser } from '~/stores/admin/auth'
 
 export function useAuth() {
   const store = useAuthStore()
