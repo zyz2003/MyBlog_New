@@ -19,17 +19,26 @@ function slugifyHeading(value: string): string {
     || 'section'
 }
 
+function normalizeContent(raw: string): string {
+  if (!raw) return ''
+  if (!raw.includes('\n') && raw.includes('\\n')) {
+    return raw.replace(/\\n/g, '\n')
+  }
+  return raw
+}
+
 export function useTableOfContents(content: Ref<string>) {
   const activeId = ref('')
   let observer: IntersectionObserver | null = null
 
   const headings = computed<Heading[]>(() => {
+    const normalized = normalizeContent(content.value)
     const items: Heading[] = []
     const slugCounts = new Map<string, number>()
     const regex = /^(#{1,4})\s+(.+)$/gm
     let match: RegExpExecArray | null
 
-    while ((match = regex.exec(content.value)) !== null) {
+    while ((match = regex.exec(normalized)) !== null) {
       const level = match[1].length
       const text = match[2].trim()
       const baseId = slugifyHeading(text)

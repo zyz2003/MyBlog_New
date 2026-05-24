@@ -154,9 +154,20 @@ function createMarkdownRenderer() {
   return md
 }
 
+/** Normalize content line endings: if the DB stored literal \n strings instead of real newlines, convert them back */
+function normalizeContent(raw: string): string {
+  if (!raw) return ''
+  // If content has no real newlines but has escaped \n sequences, unescape them
+  if (!raw.includes('\n') && raw.includes('\\n')) {
+    return raw.replace(/\\n/g, '\n')
+  }
+  return raw
+}
+
 const renderedHtml = computed(() => {
   const renderer = createMarkdownRenderer()
-  return renderer.render(props.content || '', {
+  const normalized = normalizeContent(props.content || '')
+  return renderer.render(normalized, {
     headingSlugCounts: new Map<string, number>(),
   })
 })
