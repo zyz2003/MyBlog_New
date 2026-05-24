@@ -20,15 +20,21 @@ const error = ref('')
 const widgetVisible = ref(false)
 let visibilityObserver: IntersectionObserver | null = null
 
+// Track provider instance for cleanup on route change
+const providerInstance = ref<unknown>(null)
+
+type WalineInstance = { destroy: () => void }
+type ArtalkInstance = { destroy: () => void; setDark: (dark: boolean) => void }
+
 type TwikooWindow = Window & {
   twikoo?: {
     init: (options: Record<string, unknown>) => void
   }
   Valine?: new (options: Record<string, unknown>) => unknown
   Waline?: {
-    init: (options: Record<string, unknown>) => void
+    init: (options: Record<string, unknown>) => WalineInstance
   }
-  Artalk?: new (options: Record<string, unknown>) => unknown
+  Artalk?: new (options: Record<string, unknown>) => ArtalkInstance
   __commentScriptPromises__?: Record<string, Promise<void>>
 }
 
@@ -120,6 +126,53 @@ function resetMount() {
   }
 }
 
+/** Clean up the current provider instance before reinit or unmount */
+function cleanUp() {
+  if (!providerInstance.value) {
+    resetMount()
+    return
+  }
+
+  try {
+    const inst = providerInstance.value
+    if (currentProvider.value === 'Waline') {
+      (inst as WalineInstance).destroy()
+    }
+    else if (currentProvider.value === 'Artalk') {
+      (inst as ArtalkInstance).destroy()
+    }
+    // Twikoo and Valine don't have explicit destroy APIs;
+    // clearing the mount container is sufficient to prevent double-init
+  }
+  catch {
+    // Swallow cleanup errors — stale instances are acceptable on failure
+  }
+
+  providerInstance.value = null
+  resetMount()
+}
+
+/** Sync Giscus iframe theme with the current site theme */
+function syncGiscusTheme() {
+  if (currentProvider.value !== 'Giscus') {
+    return
+  }
+
+  const iframe = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame')
+  if (!iframe || !iframe.contentWindow) {
+    return
+  }
+
+  const theme = currentTheme.value === 'dark'
+    ? giscus.value.theme.dark
+    : giscus.value.theme.light
+
+  iframe.contentWindow.postMessage(
+    { giscus: { setConfig: { theme } } },
+    'https://giscus.app',
+  )
+}
+
 async function initTwikoo() {
   await loadScriptOnce('twikoo', resolveAssetUrl('twikoo', 'https://cdn.jsdelivr.net/npm/twikoo@1.6.41/dist/twikoo.all.min.js'))
   const instance = (window as TwikooWindow).twikoo
@@ -141,11 +194,11 @@ async function initWaline() {
     ensureStylesheet('waline-meta', resolveAssetUrl('waline_meta_css', 'https://cdn.jsdelivr.net/npm/@waline/client@3/dist/waline-meta.css'))
   }
   await loadScriptOnce('waline', resolveAssetUrl('waline_js', 'https://cdn.jsdelivr.net/npm/@waline/client@3/dist/waline.js'))
-  const instance = (window as TwikooWindow).Waline
-  if (!instance) {
+  const WalineLib = (window as TwikooWindow).Waline
+  if (!WalineLib) {
     throw new Error('Waline 未正确加载')
   }
-  instance.init({
+  const walineInstance = WalineLib.init({
     el: `#${mountId.value}`,
     serverURL: waline.value.serverURL,
     path: route.path,
@@ -153,6 +206,7 @@ async function initWaline() {
     imageUploader: waline.value.imageUploader,
     ...(waline.value.option || {}),
   })
+  providerInstance.value = walineInstance
 }
 
 async function initArtalk() {
@@ -162,7 +216,7 @@ async function initArtalk() {
   if (!ArtalkCtor) {
     throw new Error('Artalk 未正确加载')
   }
-  new ArtalkCtor({
+  const artalkInstance = new ArtalkCtor({
     el: `#${mountId.value}`,
     pageKey: route.path,
     pageTitle: document.title,
@@ -170,6 +224,7 @@ async function initArtalk() {
     site: artalk.value.site,
     ...(artalk.value.option || {}),
   })
+  providerInstance.value = artalkInstance
 }
 
 async function initValine() {
@@ -206,6 +261,12 @@ function initGiscus() {
   const mountPoint = document.getElementById(mountId.value)
   if (!mountPoint) {
     throw new Error('Giscus 容器不存在')
+  }
+
+  // Remove existing Giscus iframe before reinit
+  const existingIframe = mountPoint.querySelector('iframe.giscus-frame')
+  if (existingIframe) {
+    existingIframe.remove()
   }
 
   const script = document.createElement('script')
@@ -328,12 +389,32 @@ onMounted(() => {
   visibilityObserver = observer
 })
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
+  cleanUp()
   visibilityObserver?.disconnect()
 })
 
+// Re-init comments when provider config changes
 watch([currentProvider, hasCommentConfig], () => {
   initComments()
+})
+
+// Clean up + reinit on client-side route navigation (prevents double-init)
+watch(() => route.path, async () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  cleanUp()
+  await nextTick()
+  // Update theme on route change
+  currentTheme.value = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  initComments()
+})
+
+// Sync Giscus theme when dark mode changes
+watch(currentTheme, () => {
+  syncGiscusTheme()
 })
 </script>
 
