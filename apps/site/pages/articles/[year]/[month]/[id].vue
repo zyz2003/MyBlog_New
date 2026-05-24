@@ -493,6 +493,8 @@ function handleContentUpdated(): void {
 
 <template>
   <div :style="articleToneStyle">
+    <BlogReadingProgress v-if="!pending && article" />
+
     <div v-if="pending" class="mx-auto max-w-[1100px] px-4 py-24 text-center text-[var(--anzhiyu-secondtext)]">
       正在加载文章内容...
     </div>
