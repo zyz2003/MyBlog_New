@@ -32,6 +32,25 @@ const url = computed(() => {
 
   return props.articleUrl || ''
 })
+
+const copied = ref(false)
+
+async function copyPermalink() {
+  if (!url.value) {
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(url.value)
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  }
+  catch {
+    // Fallback: do nothing, clipboard API may be blocked
+  }
+}
 </script>
 
 <template>
@@ -58,8 +77,20 @@ const url = computed(() => {
             </a>
           </div>
 
+          <div v-if="title" class="text-[var(--anzhiyu-secondtext)]">文章标题</div>
+          <div v-if="title">{{ title }}</div>
+
           <div v-if="url" class="text-[var(--anzhiyu-secondtext)]">文章链接</div>
-          <a v-if="url" :href="url" class="break-all text-[var(--anzhiyu-main)] no-underline hover:underline">{{ url }}</a>
+          <div v-if="url" class="flex items-center gap-2">
+            <a :href="url" class="min-w-0 break-all text-[var(--anzhiyu-main)] no-underline hover:underline">{{ url }}</a>
+            <button
+              type="button"
+              class="shrink-0 cursor-pointer rounded-full border-none bg-[var(--anzhiyu-main-op-deep)] px-3 py-1 text-xs text-[var(--anzhiyu-main)] transition-all hover:bg-[var(--anzhiyu-main-op)]"
+              @click="copyPermalink"
+            >
+              {{ copied ? '已复制' : '复制' }}
+            </button>
+          </div>
 
           <div v-if="location" class="text-[var(--anzhiyu-secondtext)]">版权归属</div>
           <div v-if="location">{{ location }}</div>
@@ -70,9 +101,6 @@ const url = computed(() => {
             <a :href="licenseUrl" target="_blank" rel="noreferrer" class="text-[var(--anzhiyu-main)] no-underline hover:underline">{{ license }}</a>
             协议，转载请注明来源与本文链接。
           </div>
-
-          <div v-if="title" class="text-[var(--anzhiyu-secondtext)]">文章标题</div>
-          <div v-if="title">{{ title }}</div>
         </div>
       </div>
     </div>
