@@ -200,6 +200,12 @@ const showReadingTime = computed(() => wordcount.value.enable && wordcount.value
 const showToc = computed(() => article.value?.toc ?? toc.value.post)
 const showAside = computed(() => article.value?.aside ?? true)
 
+const allowCommentValue = computed(() => {
+  const raw = article.value?.allowComment
+  if (raw === undefined || raw === null) return true
+  return raw
+})
+
 const articleUrl = computed(() => {
   if (import.meta.client && canonicalPath.value) {
     return new URL(canonicalPath.value, window.location.origin).toString()
@@ -592,7 +598,7 @@ useSeoMeta({
               :next="paginationLinks.next"
             />
 
-            <BlogCommentWidget />
+            <BlogCommentWidget :allow-comment="allowCommentValue" />
           </div>
 
           <aside v-if="showAside" class="hidden lg:block">

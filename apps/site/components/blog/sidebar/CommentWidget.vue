@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 
+const props = withDefaults(defineProps<{
+  allowComment?: boolean
+}>(), {
+  allowComment: true,
+})
+
 const { comments, twikoo, valine, waline, artalk, giscus, visitorMail, settings } = useSiteSettings()
 const { resolveAssetUrl } = useCdnAsset()
 const route = useRoute()
 const currentTheme = ref<'light' | 'dark'>('light')
+
+const shouldShowComments = computed(() => ['true', true, 1, '1'].includes(props.allowComment) && props.allowComment !== false)
 
 const loaded = ref(false)
 const initializing = ref(false)
@@ -330,7 +338,7 @@ watch([currentProvider, hasCommentConfig], () => {
 </script>
 
 <template>
-  <div id="post-comment" class="comment-widget mx-auto max-w-[800px] px-4 py-8" :class="{ 'comment-roll-zoom': dynamicEffect.pageCommentsRollZoom, 'comment-roll-zoom-visible': widgetVisible }">
+  <div v-if="shouldShowComments" id="post-comment" class="comment-widget mx-auto max-w-[800px] px-4 py-8" :class="{ 'comment-roll-zoom': dynamicEffect.pageCommentsRollZoom, 'comment-roll-zoom-visible': widgetVisible }">
     <div v-if="comments.text !== false" class="mb-6 flex items-center gap-2">
       <i class="anzhiyufont anzhiyu-icon-comments text-lg text-[var(--anzhiyu-main)]" />
       <h3 class="m-0 text-base font-semibold text-[var(--anzhiyu-fontcolor)]">评论</h3>
