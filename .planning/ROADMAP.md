@@ -116,6 +116,12 @@ Plans:
 - 全站响应式适配（移动端、平板、桌面）
 - 性能优化（懒加载、代码分割、图片优化）
 - PWA 完善
+**Plans:** 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Animation foundation: page transitions, useScrollReveal, UnoCSS shortcuts, prefers-reduced-motion (Wave 1)
+- [ ] 06-02-PLAN.md — Loading states: SkeletonLoader, SpinnerIcon, integration into pages (Wave 1)
+- [ ] 06-03-PLAN.md — Scroll animations + hover enhancements on all components (Wave 2)
 
 ---
 

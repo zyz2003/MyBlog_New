@@ -43,7 +43,7 @@ onBeforeUnmount(() => {
   top: 60px;
   left: 0;
   height: 3px;
-  background: var(--anzhiyu-main);
+  background: var(--anzhiyu-reading-progress-color, var(--anzhiyu-main));
   z-index: 999;
   transition: width 0.1s linear;
   will-change: width;

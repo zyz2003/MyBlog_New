@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useScrollDirection } from '@/composables/frontend/useScrollDirection'
+import { useSearchWidget } from '@/composables/frontend/useSearchWidget'
 const config = useRuntimeConfig()
 const {
   settings,
@@ -30,6 +31,7 @@ const { isDark } = useTheme()
 const route = useRoute()
 
 const { isScrolledPastThreshold } = useScrollDirection(56)
+const { openSearch: openSearchWidget } = useSearchWidget()
 const navbarHeight = computed(() => isScrolledPastThreshold.value ? '50px' : '64px')
 
 await refresh()
@@ -345,7 +347,7 @@ function runShortcutAction(key: string) {
       navigateTo('/friends')
       break
     case 's':
-      window.dispatchEvent(new CustomEvent('site:open-search'))
+      openSearchWidget()
       break
     case 'd':
       window.dispatchEvent(new CustomEvent('site:toggle-dark'))
