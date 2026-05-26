@@ -186,6 +186,13 @@ export interface NavMusicConfig {
   allPlaylist: string
 }
 
+export interface MusicPlayerConfig {
+  enabled: boolean
+  autoPlay: boolean
+  volume: number
+  source: 'meting' | 'custom'
+}
+
 export interface FriendsVueConfig {
   enable: boolean
   vueJs: string
@@ -276,6 +283,29 @@ export interface SocialLink {
   icon?: string
 }
 
+export interface RightClickMenuConfig {
+  /** Whether the custom right-click menu is enabled globally */
+  enable: boolean
+  /** Navigation items */
+  home: boolean
+  archives: boolean
+  tags: boolean
+  categories: boolean
+  /** Copy items */
+  copyText: boolean
+  copyLink: boolean
+  copyImageUrl: boolean
+  /** Image items (only shown when right-clicking an image) */
+  viewImage: boolean
+  newTabImage: boolean
+  downloadImage: boolean
+  /** Utility items */
+  darkMode: boolean
+  backForward: boolean
+  print: boolean
+  readingMode: boolean
+}
+
 export interface SidebarConfig {
   enabled?: boolean
   widgets: string[]
@@ -364,6 +394,11 @@ export interface RightsideButtonsConfig {
   hide: string[]
   show: string[]
   enableOrder?: boolean
+  backToTop?: boolean
+  darkMode?: boolean
+  music?: boolean
+  search?: boolean
+  readingMode?: boolean
 }
 
 export interface PeopleCanvasConfig {
@@ -577,6 +612,7 @@ export type SiteSettingsMap = Record<string, unknown> & {
   commentBarrage?: Partial<CommentBarrageConfig>
   greetingBox?: Partial<GreetingBoxConfig>
   navMusic?: Partial<NavMusicConfig>
+  musicPlayer?: MusicPlayerConfig
   friendsVue?: Partial<FriendsVueConfig>
   diytitle?: Partial<DiyTitleConfig>
   consoleLog?: Partial<ConsoleLogConfig>
@@ -588,6 +624,7 @@ export type SiteSettingsMap = Record<string, unknown> & {
   error_404?: ErrorPageConfig
   error_img?: ErrorImageConfig
   mourn?: MournConfig
+  rightClickMenu?: RightClickMenuConfig
 }
 
 export const defaultAnnouncement: AnnouncementConfig = {

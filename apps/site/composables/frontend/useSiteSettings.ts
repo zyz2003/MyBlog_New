@@ -20,6 +20,7 @@ import type {
   CommentBarrageConfig,
   GreetingBoxConfig,
   NavMusicConfig,
+  MusicPlayerConfig,
   FriendsVueConfig,
   DiyTitleConfig,
   ConsoleLogConfig,
@@ -625,6 +626,16 @@ export function useSiteSettings() {
     }
   })
 
+  const musicPlayer = computed<MusicPlayerConfig>(() => {
+    const raw = (settings.value.musicPlayer as Record<string, unknown> | undefined) ?? {}
+    return {
+      enabled: raw.enabled !== undefined ? Boolean(raw.enabled) : true,
+      autoPlay: raw.autoPlay !== undefined ? Boolean(raw.autoPlay) : false,
+      volume: Math.max(0, Math.min(1, Number(raw.volume ?? 0.7))),
+      source: raw.source === 'custom' ? 'custom' : 'meting',
+    }
+  })
+
   const friendsVue = computed<FriendsVueConfig>(() => {
     const raw = (settings.value.friendsVue as Record<string, unknown> | undefined) ?? {}
     return {
@@ -926,10 +937,24 @@ export function useSiteSettings() {
     }
   })
 
-  const rightClickMenu = computed(() => {
+  const rightClickMenu = computed<RightClickMenuConfig>(() => {
     const raw = (settings.value.rightClickMenu as Record<string, unknown> | undefined) ?? {}
     return {
       enable: raw.enable !== undefined ? Boolean(raw.enable) : false,
+      home: raw.home !== undefined ? Boolean(raw.home) : true,
+      archives: raw.archives !== undefined ? Boolean(raw.archives) : true,
+      tags: raw.tags !== undefined ? Boolean(raw.tags) : true,
+      categories: raw.categories !== undefined ? Boolean(raw.categories) : true,
+      copyText: raw.copyText !== undefined ? Boolean(raw.copyText) : true,
+      copyLink: raw.copyLink !== undefined ? Boolean(raw.copyLink) : true,
+      copyImageUrl: raw.copyImageUrl !== undefined ? Boolean(raw.copyImageUrl) : true,
+      viewImage: raw.viewImage !== undefined ? Boolean(raw.viewImage) : true,
+      newTabImage: raw.newTabImage !== undefined ? Boolean(raw.newTabImage) : true,
+      downloadImage: raw.downloadImage !== undefined ? Boolean(raw.downloadImage) : true,
+      darkMode: raw.darkMode !== undefined ? Boolean(raw.darkMode) : true,
+      backForward: raw.backForward !== undefined ? Boolean(raw.backForward) : true,
+      print: raw.print !== undefined ? Boolean(raw.print) : true,
+      readingMode: raw.readingMode !== undefined ? Boolean(raw.readingMode) : true,
     }
   })
 
@@ -1464,6 +1489,7 @@ export function useSiteSettings() {
     commentBarrage,
     greetingBox,
     navMusic,
+    musicPlayer,
     friendsVue,
     addtoany,
     codeBlock,
