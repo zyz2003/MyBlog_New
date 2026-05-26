@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useRightClickMenu } from '@/composables/frontend/useRightClickMenu'
+import { useSearchWidget } from '@/composables/frontend/useSearchWidget'
 
 const { isDark, toggleDark } = useTheme()
 const { rightClickMenu, translateConfig } = useSiteSettings()
+const { openSearch } = useSearchWidget()
 
 const {
   visible,
@@ -97,6 +99,11 @@ function scrollToComments() {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' })
   }
+  closeMenu()
+}
+
+function handleOpenSearch() {
+  openSearch()
   closeMenu()
 }
 
@@ -222,6 +229,10 @@ onUnmounted(() => {
           <button class="rightMenu-item" @click="randomPost">
             <i class="anzhiyufont anzhiyu-icon-shuffle" />
             <span>随便逛逛</span>
+          </button>
+          <button class="rightMenu-item" @click="handleOpenSearch">
+            <i class="anzhiyufont anzhiyu-icon-magnifying-glass" />
+            <span>搜索文章</span>
           </button>
           <button class="rightMenu-item" @click="scrollToComments">
             <i class="anzhiyufont anzhiyu-icon-comments" />

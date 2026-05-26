@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 import { useScrollDirection } from '@/composables/frontend/useScrollDirection'
+import { useSearchWidget } from '@/composables/frontend/useSearchWidget'
 
 const { nav, menuGroups, search, settings, social } = useSiteSettings()
 const { isDark, toggleDark } = useTheme()
 const { direction, isScrolledPastThreshold, scrollPercent } = useScrollDirection(26)
+const { openSearch: openSearchWidget } = useSearchWidget()
 
 const config = useRuntimeConfig()
 const route = useRoute()
@@ -51,7 +53,6 @@ const primaryLinks = computed(() => {
 })
 
 const mobileMenuOpen = ref(false)
-const searchOpen = ref(false)
 const allArticles = ref<Array<{ id: number, publishedAt?: string | null, createdAt?: string | null }>>([])
 const clockTime = ref('')
 const darkModeAnimating = ref(false)
@@ -78,7 +79,7 @@ function openSearch() {
   if (!searchEnabled.value) {
     return
   }
-  searchOpen.value = true
+  openSearchWidget()
 }
 
 function scrollToTop() {
@@ -361,8 +362,6 @@ onUnmounted(() => {
       </div>
     </div>
   </Teleport>
-
-  <BlogSearchWidget v-if="searchOpen" @close="searchOpen = false" />
 </template>
 
 <style scoped>

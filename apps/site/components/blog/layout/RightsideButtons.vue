@@ -82,9 +82,11 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from '#imports'
 import { useSiteSettings } from '~/composables/frontend/useSiteSettings'
 import { useTheme } from '~/composables/frontend/useTheme'
+import { useSearchWidget } from '~/composables/frontend/useSearchWidget'
 
 const { rightsideButtons, navMusic, musicPlayer } = useSiteSettings()
 const { isDark, toggleDark } = useTheme()
+const { openSearch } = useSearchWidget()
 const route = useRoute()
 
 const config = computed(() => rightsideButtons.value)
@@ -134,7 +136,7 @@ function handleDarkToggle() {
 
 // ---- Search ----
 function handleSearch() {
-  window.dispatchEvent(new CustomEvent('site:open-search'))
+  openSearch()
 }
 
 // ---- Music ----
