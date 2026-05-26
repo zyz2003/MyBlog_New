@@ -896,6 +896,7 @@ if (import.meta.client) {
     <BlogChatServices />
     <BlogRightClickMenu />
     <BlogMusicPlayer />
+    <BlogLayoutSearchWidget />
     <BlogGreetingBox v-if="greetingBox.enable" />
   </ClientOnly>
 

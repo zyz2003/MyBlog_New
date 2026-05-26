@@ -1,621 +1,410 @@
-<script setup lang="ts">
-import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
-
-const emit = defineEmits<{ close: [] }>()
-
-interface SearchItem {
-  id: number
-  title: string
-  slug?: string | null
-  excerpt?: string | null
-  coverImage?: string | null
-  publishedAt?: string | null
-  createdAt?: string | null
-  categories?: Array<{ id: number; name: string; slug: string }>
-  tags?: Array<{ id: number; name: string; slug: string; color?: string | null }>
-}
-
-interface SearchResponse {
-  code: number
-  data: {
-    items: SearchItem[]
-    total: number
-    page: number
-    pageSize: number
-  }
-}
-
-const router = useRouter()
-const { search, algoliaSearch } = useSiteSettings()
-
-const query = ref('')
-const inputRef = ref<HTMLInputElement>()
-const results = ref<SearchItem[]>([])
-const loading = ref(false)
-const error = ref('')
-const total = ref(0)
-const selectedIndex = ref(0)
-
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
-let requestId = 0
-
-const trimmedQuery = computed(() => query.value.trim())
-const currentProvider = computed(() => search.value.provider || 'local')
-const pageSize = computed(() => currentProvider.value === 'algolia'
-  ? Math.max(1, Number(algoliaSearch.value.perPage || 6))
-  : 8)
-
-function articlePath(article: SearchItem): string {
-  if (article.slug) {
-    return `/articles/${article.slug}`
-  }
-
-  const sourceDate = article.publishedAt || article.createdAt
-  if (!sourceDate) {
-    return `/articles/${article.id}`
-  }
-
-  const date = new Date(sourceDate)
-  if (Number.isNaN(date.getTime())) {
-    return `/articles/${article.id}`
-  }
-
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  return `/articles/${year}/${month}/${article.id}`
-}
-
-function formatDate(article: SearchItem) {
-  const sourceDate = article.publishedAt || article.createdAt
-  if (!sourceDate) return ''
-  return new Date(sourceDate).toLocaleDateString('zh-CN')
-}
-
-function highlight(text: string, term: string): string {
-  if (!term) return text
-  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return text.replace(
-    new RegExp(`(${escaped})`, 'gi'),
-    '<mark class="search-keyword">$1</mark>',
-  )
-}
-
-function formatSnippet(article: SearchItem): string {
-  const text = (article.excerpt || '').trim()
-  if (!text) return '暂无摘要，点击查看完整内容。'
-  if (!trimmedQuery.value) return text.slice(0, 120)
-
-  const lowerText = text.toLowerCase()
-  const lowerQuery = trimmedQuery.value.toLowerCase()
-  const matchIndex = lowerText.indexOf(lowerQuery)
-  if (matchIndex < 0) return text.slice(0, 120)
-
-  const start = Math.max(0, matchIndex - 28)
-  const end = Math.min(text.length, matchIndex + trimmedQuery.value.length + 72)
-  const prefix = start > 0 ? '...' : ''
-  const suffix = end < text.length ? '...' : ''
-  return `${prefix}${text.slice(start, end)}${suffix}`
-}
-
-async function searchArticles() {
-  const currentQuery = trimmedQuery.value
-  requestId += 1
-  const currentRequest = requestId
-
-  if (!currentQuery) {
-    results.value = []
-    total.value = 0
-    error.value = ''
-    loading.value = false
-    selectedIndex.value = 0
-    return
-  }
-
-  if (currentProvider.value === 'docsearch') {
-    results.value = []
-    total.value = 0
-    error.value = '当前选择了 DocSearch，弹窗暂不支持 DocSearch UI。'
-    loading.value = false
-    selectedIndex.value = 0
-    return
-  }
-
-  loading.value = true
-  error.value = ''
-
-  try {
-    const response = await $fetch<SearchResponse>('/api/search', {
-      params: {
-        q: currentQuery,
-        page: 1,
-        pageSize: pageSize.value,
-        provider: currentProvider.value,
-      },
-    })
-
-    if (currentRequest !== requestId) return
-
-    results.value = response.data.items ?? []
-    total.value = response.data.total ?? 0
-    selectedIndex.value = 0
-  }
-  catch (searchError) {
-    if (currentRequest !== requestId) return
-    results.value = []
-    total.value = 0
-    error.value = searchError instanceof Error ? searchError.message : '搜索暂时不可用，请稍后再试。'
-  }
-  finally {
-    if (currentRequest === requestId) {
-      loading.value = false
-    }
-  }
-}
-
-function queueSearch() {
-  if (debounceTimer) clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => searchArticles(), 240)
-}
-
-async function openSelectedResult() {
-  const target = results.value[selectedIndex.value]
-  if (!target) {
-    if (trimmedQuery.value) {
-      await router.push({ path: '/search', query: { q: trimmedQuery.value } })
-      emit('close')
-    }
-    return
-  }
-  await router.push(articlePath(target))
-  emit('close')
-}
-
-function handleKeydown(event: KeyboardEvent) {
-  if (event.key === 'ArrowDown') {
-    event.preventDefault()
-    if (results.value.length > 0) {
-      selectedIndex.value = (selectedIndex.value + 1) % results.value.length
-    }
-    return
-  }
-
-  if (event.key === 'ArrowUp') {
-    event.preventDefault()
-    if (results.value.length > 0) {
-      selectedIndex.value = (selectedIndex.value - 1 + results.value.length) % results.value.length
-    }
-    return
-  }
-
-  if (event.key === 'Enter') {
-    event.preventDefault()
-    openSelectedResult()
-  }
-}
-
-watch(trimmedQuery, () => queueSearch())
-watch(currentProvider, () => queueSearch())
-
-onMounted(() => {
-  setTimeout(() => inputRef.value?.focus(), 80)
-})
-
-onUnmounted(() => {
-  if (debounceTimer) clearTimeout(debounceTimer)
-})
-</script>
-
 <template>
   <Teleport to="body">
-    <!-- Mask overlay -->
-    <div class="search-mask" @click="emit('close')" />
-
-    <!-- Search dialog -->
-    <div class="search-dialog">
-      <!-- Search input header -->
-      <div class="search-dialog-header">
-        <div class="search-dialog-title">
-          <i class="anzhiyufont anzhiyu-icon-magnifying-glass" />
-          <span>站内搜索</span>
-        </div>
-        <button
-          type="button"
-          class="search-close-button"
-          @click="emit('close')"
-        >
-          <i class="anzhiyufont anzhiyu-icon-xmark" />
-        </button>
-      </div>
-
-      <!-- Search input -->
-      <div class="search-input-box">
-        <input
-          ref="inputRef"
-          v-model="query"
-          type="text"
-          class="search-input-field"
-          placeholder="输入关键词搜索文章..."
-          @keydown="handleKeydown"
-          @keyup.esc="emit('close')"
-        >
-      </div>
-
-      <!-- Status bar -->
-      <div v-if="trimmedQuery && !loading" class="search-status-bar">
-        找到 {{ total }} 条结果
-      </div>
-      <div v-else-if="loading" class="search-status-bar">
-        <i class="anzhiyufont anzhiyu-icon-spinner animate-spin" />
-        搜索中...
-      </div>
-      <div v-else-if="error" class="search-status-bar error">
-        {{ error }}
-      </div>
-      <div v-else class="search-status-bar">
-        输入关键词后实时搜索文章
-      </div>
-
-      <!-- Results area -->
-      <div class="search-results-scroll">
-        <div v-if="!trimmedQuery" class="search-empty">
-          <i class="anzhiyufont anzhiyu-icon-magnifying-glass search-empty-icon" />
-          <p>输入关键词开始搜索</p>
-        </div>
-
-        <div v-else-if="loading && results.length === 0" class="search-empty">
-          <i class="anzhiyufont anzhiyu-icon-spinner animate-spin search-empty-icon" />
-          <p>正在搜索中...</p>
-        </div>
-
-        <div v-else-if="error && results.length === 0" class="search-empty">
-          <p>{{ error }}</p>
-        </div>
-
-        <div v-else-if="results.length === 0 && trimmedQuery" class="search-empty">
-          <i class="anzhiyufont anzhiyu-icon-file-lines search-empty-icon" />
-          <p>没有找到相关结果，试试更简短的关键词</p>
-        </div>
-
-        <!-- Result items (anzhiyu local-search style with dot indicator) -->
-        <NuxtLink
-          v-for="(article, index) in results"
-          :key="`${article.id}-${article.slug || ''}`"
-          :to="articlePath(article)"
-          class="search-hit-item"
-          :class="{ selected: index === selectedIndex }"
-          @click="emit('close')"
-          @mouseenter="selectedIndex = index"
-        >
-          <div class="search-hit-title" v-html="highlight(article.title, trimmedQuery)" />
-          <div
-            v-if="article.excerpt"
-            class="search-hit-excerpt"
-            v-html="highlight(formatSnippet(article), trimmedQuery)"
-          />
-          <div class="search-hit-meta">
-            <span class="search-hit-date">{{ formatDate(article) }}</span>
-            <span v-if="article.categories?.length" class="search-hit-category">{{ article.categories[0].name }}</span>
+    <Transition name="search-fade">
+      <div
+        v-if="isOpen"
+        class="search-overlay"
+        @click.self="closeSearch"
+      >
+        <div class="search-dialog">
+          <!-- Search input -->
+          <div class="search-input-row">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              ref="inputRef"
+              v-model="localQuery"
+              type="text"
+              class="search-input"
+              :placeholder="placeholder"
+              autocomplete="off"
+              @keydown.escape.prevent="closeSearch"
+            />
+            <button
+              v-if="localQuery"
+              class="search-clear-btn"
+              @click="clearQuery"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <kbd class="search-esc-hint">ESC</kbd>
           </div>
-        </NuxtLink>
-      </div>
 
-      <!-- Keyboard hints -->
-      <div class="search-dialog-footer">
-        <span><kbd>Enter</kbd> 打开</span>
-        <span><kbd>↑↓</kbd> 切换</span>
-        <span><kbd>Esc</kbd> 关闭</span>
+          <!-- Results area -->
+          <div v-if="localQuery.length > 0" class="search-results-area">
+            <!-- Loading -->
+            <div v-if="pending" class="search-loading">
+              <div class="search-spinner" />
+              <span>搜索中...</span>
+            </div>
+
+            <!-- Results list -->
+            <div v-else-if="results.length > 0" class="search-results-list">
+              <NuxtLink
+                v-for="item in results"
+                :key="item.slug || item.id"
+                :to="buildArticleLink(item)"
+                class="search-result-item"
+                @click="closeSearch"
+              >
+                <div class="result-title">{{ item.title }}</div>
+                <div v-if="item.excerpt" class="result-excerpt">{{ truncateExcerpt(item.excerpt) }}</div>
+                <div v-if="item.category" class="result-category">{{ item.category }}</div>
+              </NuxtLink>
+            </div>
+
+            <!-- No results -->
+            <div v-else class="search-no-results">
+              <svg
+                viewBox="0 0 24 24"
+                width="32"
+                height="32"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <span>未找到相关文章</span>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div v-else class="search-empty">
+            <span>输入关键词搜索文章</span>
+            <div class="search-shortcuts">
+              <kbd>Ctrl+K</kbd> 搜索
+              <kbd>Esc</kbd> 关闭
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
+<script setup lang="ts">
+import { ref, watch, nextTick, computed } from 'vue'
+import { useSearchWidget } from '~/composables/frontend/useSearchWidget'
+import { useSiteSettings } from '~/composables/frontend/useSiteSettings'
+
+interface SearchResult {
+  id: number
+  title: string
+  slug?: string | null
+  excerpt?: string
+  category?: string
+  publishedAt?: string | null
+  createdAt?: string | null
+}
+
+const { isOpen, closeSearch } = useSearchWidget()
+const { settings } = useSiteSettings()
+
+const placeholder = computed(() => settings.value.search?.placeholder || '搜索文章...')
+const maxResults = computed(() => settings.value.search?.maxResults || 10)
+
+const inputRef = ref<HTMLInputElement | null>(null)
+const localQuery = ref('')
+const results = ref<SearchResult[]>([])
+const pending = ref(false)
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+// Focus input when overlay opens
+watch(isOpen, async (val) => {
+  if (val) {
+    await nextTick()
+    inputRef.value?.focus()
+  } else {
+    localQuery.value = ''
+    results.value = []
+  }
+})
+
+// Debounced search
+watch(localQuery, (val) => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  if (!val.trim()) {
+    results.value = []
+    return
+  }
+  debounceTimer = setTimeout(() => performSearch(), 300)
+})
+
+function clearQuery() {
+  localQuery.value = ''
+  results.value = []
+  inputRef.value?.focus()
+}
+
+async function performSearch() {
+  const q = localQuery.value.trim()
+  if (!q) return
+
+  pending.value = true
+  try {
+    const data = await $fetch<{ code: number, data: { items: SearchResult[] } }>('/api/search', {
+      params: { q, pageSize: maxResults.value },
+    })
+    results.value = data?.data?.items || []
+  } catch {
+    results.value = []
+  } finally {
+    pending.value = false
+  }
+}
+
+function truncateExcerpt(excerpt: string, maxLen = 150): string {
+  if (!excerpt) return ''
+  return excerpt.length > maxLen ? excerpt.slice(0, maxLen) + '...' : excerpt
+}
+
+function buildArticleLink(item: SearchResult): string {
+  if (item.slug) {
+    return `/posts/${item.slug}`
+  }
+  // Fallback: use date-based path from publishedAt/createdAt
+  const date = new Date(item.publishedAt || item.createdAt || Date.now())
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `/articles/${year}/${month}/${item.id}`
+}
+</script>
+
 <style scoped>
-/* --- Mask (anzhiyu style) --- */
-.search-mask {
+.search-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  animation: search-mask-in 0.3s ease;
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-@keyframes search-mask-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* --- Dialog (anzhiyu style) --- */
 .search-dialog {
-  position: fixed;
-  top: 5rem;
-  left: 50%;
-  z-index: 1001;
-  transform: translateX(-50%);
-  width: 37.5rem;
-  max-height: 80vh;
+  width: 640px;
+  max-width: 90vw;
+  max-height: 70vh;
   display: flex;
   flex-direction: column;
-  padding: 1.25rem;
-  border-radius: 12px;
-  background: var(--anzhiyu-card-bg);
-  border: var(--style-border-always);
-  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.14);
-  animation: search-dialog-in 0.3s ease;
+  background: color-mix(in srgb, var(--anzhiyu-card-bg) 88%, transparent);
+  border: 1px solid var(--style-border-always);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
 }
 
-@keyframes search-dialog-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-/* --- Header --- */
-.search-dialog-header {
+/* Input row */
+.search-input-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--style-border-always);
 }
 
-.search-dialog-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--anzhiyu-main);
-  font-size: 1.1rem;
-  font-weight: 700;
+.search-icon {
+  flex-shrink: 0;
+  color: var(--anzhiyu-secondtext);
 }
 
-.search-close-button {
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  color: var(--anzhiyu-fontcolor);
+}
+
+.search-input::placeholder {
+  color: var(--anzhiyu-secondtext);
+}
+
+.search-clear-btn {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 24px;
+  height: 24px;
   border: none;
-  border-radius: 999px;
-  background: transparent;
+  border-radius: 6px;
+  background: var(--anzhiyu-secondbg);
   color: var(--anzhiyu-secondtext);
   cursor: pointer;
-  font-size: 1rem;
-  transition: 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
-.search-close-button:hover {
-  color: var(--anzhiyu-main);
-  background: color-mix(in srgb, var(--anzhiyu-main) 8%, white);
+.search-clear-btn:hover {
+  background: var(--anzhiyu-main);
+  color: var(--anzhiyu-white);
 }
 
-/* --- Input (anzhiyu local-search style with rounded border) --- */
-.search-input-box {
-  margin-bottom: 0.75rem;
-}
-
-.search-input-field {
-  width: 100%;
-  padding: 0.6rem 1rem;
-  outline: none;
-  border: 2px solid var(--anzhiyu-main);
-  border-radius: 40px;
-  background: var(--anzhiyu-card-bg);
-  color: var(--anzhiyu-fontcolor);
-  font-size: 0.95rem;
-  transition: 0.3s;
-}
-
-.search-input-field::placeholder {
+.search-esc-hint {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: inherit;
   color: var(--anzhiyu-secondtext);
+  background: var(--anzhiyu-secondbg);
+  border: 1px solid var(--style-border-always);
+  border-radius: 4px;
 }
 
-.search-input-field:focus {
-  border-color: var(--anzhiyu-main);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--anzhiyu-main) 12%, transparent);
-}
-
-/* --- Status bar --- */
-.search-status-bar {
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.82rem;
-  color: var(--anzhiyu-secondtext);
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.search-status-bar.error {
-  color: var(--anzhiyu-red, #f65);
-}
-
-/* --- Results scroll --- */
-.search-results-scroll {
+/* Results area */
+.search-results-area {
   flex: 1;
   overflow-y: auto;
-  max-height: calc(80vh - 12rem);
-  scrollbar-width: thin;
+  padding: 8px 0;
 }
 
-.search-results-scroll::-webkit-scrollbar {
-  width: 4px;
+.search-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  color: var(--anzhiyu-secondtext);
+  font-size: 14px;
 }
 
-.search-results-scroll::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--anzhiyu-main) 30%, transparent);
-  border-radius: 2px;
+.search-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--style-border-always);
+  border-top-color: var(--anzhiyu-main);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
 }
 
-/* --- Empty state --- */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: var(--anzhiyu-fontcolor);
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: color-mix(in srgb, var(--anzhiyu-main) 8%, transparent);
+}
+
+.result-title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.result-excerpt {
+  font-size: 13px;
+  color: var(--anzhiyu-secondtext);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-category {
+  font-size: 12px;
+  color: var(--anzhiyu-main);
+}
+
+/* No results */
+.search-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--anzhiyu-secondtext);
+  font-size: 14px;
+}
+
+/* Empty state */
 .search-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  gap: 12px;
+  padding: 40px 20px;
   color: var(--anzhiyu-secondtext);
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
-.search-empty-icon {
-  font-size: 2rem;
-  color: color-mix(in srgb, var(--anzhiyu-main) 40%, transparent);
-  margin-bottom: 0.5rem;
-}
-
-/* --- Hit items (anzhiyu local-search dot style) --- */
-.search-hit-item {
-  position: relative;
-  padding-left: 1.5rem;
-  padding-top: 0.65rem;
-  padding-bottom: 0.65rem;
-  padding-right: 0.75rem;
-  line-height: 1.7;
-  display: block;
-  border-bottom: 1px solid var(--style-border-always);
-  text-decoration: none;
-  color: var(--anzhiyu-fontcolor);
-  transition: 0.2s;
-}
-
-.search-hit-item:last-child {
-  border-bottom: none;
-}
-
-/* Dot indicator (anzhiyu local-search style) */
-.search-hit-item::before {
-  content: '';
-  position: absolute;
-  top: 0.85rem;
-  left: 0.4rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  border: 3px solid var(--anzhiyu-main);
-  border-radius: 50%;
-  background: transparent;
-  transition: 0.2s;
-}
-
-.search-hit-item:hover::before,
-.search-hit-item.selected::before {
-  border-color: var(--anzhiyu-main);
-  background: var(--anzhiyu-main);
-}
-
-.search-hit-item:hover,
-.search-hit-item.selected {
-  background: color-mix(in srgb, var(--anzhiyu-main) 6%, white);
-}
-
-.search-hit-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--anzhiyu-fontcolor);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.search-hit-item:hover .search-hit-title {
-  color: var(--anzhiyu-main);
-}
-
-.search-hit-excerpt {
-  margin-top: 0.2rem;
-  font-size: 0.82rem;
-  color: var(--anzhiyu-secondtext);
-  line-height: 1.6;
-  word-break: break-all;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.search-keyword {
-  color: var(--anzhiyu-main);
-  font-weight: bold;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--anzhiyu-main) 12%, transparent);
-  padding: 0 2px;
-}
-
-.search-hit-meta {
-  margin-top: 0.3rem;
-  font-size: 0.75rem;
-  color: var(--anzhiyu-secondtext);
-  display: flex;
-  gap: 0.5rem;
-}
-
-.search-hit-category {
-  background: color-mix(in srgb, var(--anzhiyu-main) 10%, transparent);
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-}
-
-/* --- Footer (keyboard hints) --- */
-.search-dialog-footer {
+.search-shortcuts {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding-top: 0.75rem;
-  margin-top: 0.5rem;
-  border-top: var(--style-border-always);
-  font-size: 0.78rem;
-  color: var(--anzhiyu-secondtext);
+  gap: 6px;
+  font-size: 12px;
 }
 
-.search-dialog-footer kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--anzhiyu-secondtext) 10%, transparent);
-  font-size: 0.72rem;
-  font-family: monospace;
+.search-shortcuts kbd {
+  padding: 1px 5px;
+  font-size: 11px;
+  font-family: inherit;
+  background: var(--anzhiyu-secondbg);
+  border: 1px solid var(--style-border-always);
+  border-radius: 3px;
 }
 
-/* --- Responsive (anzhiyu style: full-screen on mobile) --- */
-@media (max-width: 768px) {
-  .search-dialog {
-    top: 0;
-    left: 0;
-    transform: none;
-    width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-    padding: 1rem;
-  }
-
-  .search-results-scroll {
-    max-height: calc(100vh - 10rem);
-  }
-
-  .search-mask {
-    backdrop-filter: none;
-  }
+/* Transitions: fade-in backdrop + slide-down search card over 200ms ease-out */
+.search-fade-enter-active {
+  transition: opacity 0.2s ease-out;
 }
-
-@media (max-height: 580px) {
-  .search-dialog {
-    top: 0;
-    left: 0;
-    transform: none;
-    width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-  }
+.search-fade-enter-active .search-dialog {
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+.search-fade-leave-active {
+  transition: opacity 0.15s ease-in;
+}
+.search-fade-leave-active .search-dialog {
+  transition: transform 0.15s ease-in, opacity 0.15s ease-in;
+}
+.search-fade-enter-from {
+  opacity: 0;
+}
+.search-fade-enter-from .search-dialog {
+  transform: translateY(-12px);
+  opacity: 0;
+}
+.search-fade-leave-to {
+  opacity: 0;
+}
+.search-fade-leave-to .search-dialog {
+  transform: translateY(-8px);
+  opacity: 0;
 }
 </style>

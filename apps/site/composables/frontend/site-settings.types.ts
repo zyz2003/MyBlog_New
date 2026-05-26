@@ -53,6 +53,9 @@ export interface CopySettingsConfig {
 }
 
 export interface SearchConfig {
+  enabled: boolean
+  placeholder: string
+  maxResults: number
   provider: '' | 'local' | 'algolia' | 'docsearch'
 }
 
@@ -671,6 +674,9 @@ export const defaultCopySettingsConfig: CopySettingsConfig = {
 }
 
 export const defaultSearchConfig: SearchConfig = {
+  enabled: true,
+  placeholder: '搜索文章...',
+  maxResults: 10,
   provider: '',
 }
 
