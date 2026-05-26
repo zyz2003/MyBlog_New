@@ -1,9 +1,9 @@
 <script setup lang="ts">
 const { homepage, errorImage, postMetaPost, settings } = useSiteSettings()
 
-const props = defineProps<{
-  title: string
-  date: string
+const props = withDefaults(defineProps<{
+  title?: string
+  date?: string
   updatedDate?: string
   author?: string
   viewCount?: number
@@ -15,7 +15,21 @@ const props = defineProps<{
   showUnread?: boolean
   showReadingTime?: boolean
   showWordCount?: boolean
-}>()
+}>(), {
+  title: '',
+  date: '',
+  updatedDate: '',
+  author: '',
+  viewCount: 0,
+  categories: () => [],
+  tags: () => [],
+  coverImage: '',
+  readingTime: '',
+  wordCount: 0,
+  showUnread: false,
+  showReadingTime: false,
+  showWordCount: false,
+})
 
 function applyThumbnailSuffix(url: string) {
   const suffix = homepage.value.pageThumbnailSuffix
@@ -140,6 +154,20 @@ onUnmounted(() => {
   </div>
 
   <div class="post-header relative z-1 mx-auto max-w-[980px] px-4" :class="{ '-mt-40 md:-mt-44': resolvedHeroCover, 'pt-10': !resolvedHeroCover }">
+    <nav class="post-breadcrumb mb-3 flex items-center gap-1.5 text-sm text-[var(--anzhiyu-secondtext)]">
+      <NuxtLink to="/" class="inline-flex items-center gap-1 text-[var(--anzhiyu-secondtext)] no-underline transition-colors hover:text-[var(--anzhiyu-main)]">
+        <i class="anzhiyufont anzhiyu-icon-house-chimney text-xs" />
+      </NuxtLink>
+      <template v-for="(category, index) in displayCategories" :key="category.id">
+        <i class="anzhiyufont anzhiyu-icon-angle-right text-[0.6rem] text-[var(--anzhiyu-thirdtext)]" />
+        <NuxtLink :to="`/categories/${category.slug}`" class="text-[var(--anzhiyu-secondtext)] no-underline transition-colors hover:text-[var(--anzhiyu-main)]">
+          {{ category.name }}
+        </NuxtLink>
+      </template>
+      <i class="anzhiyufont anzhiyu-icon-angle-right text-[0.6rem] text-[var(--anzhiyu-thirdtext)]" />
+      <span class="truncate text-[var(--anzhiyu-fontcolor)]">{{ title }}</span>
+    </nav>
+
     <div class="overflow-hidden rounded-[30px] border border-[var(--style-border-always)] bg-[color-mix(in_srgb,var(--anzhiyu-card-bg)_88%,white)] px-5 py-6 shadow-[0_22px_60px_rgba(15,23,42,0.08)] backdrop-blur transition-transform duration-300 md:px-8 md:py-8" :style="dynamicEffect.postTopRollZoomInfo ? { transform: `translateY(${-scrollProgress * 18}px) scale(${1 - scrollProgress * 0.04})` } : undefined">
       <div v-if="displayCategories.length > 0" class="mb-4 flex flex-wrap items-center gap-2">
         <NuxtLink

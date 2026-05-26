@@ -854,6 +854,8 @@ if (import.meta.client) {
     <BlogPreloader />
   </ClientOnly>
 
+  <BlogNavbar />
+
   <div
     class="frontend-shell min-h-screen flex flex-col bg-background transition-colors duration-300"
     :class="[{ 'is-mourn': isMourningDay, 'hr-icon-enabled': hrIcon.enable }, beautifyScopeClass]"
@@ -861,8 +863,6 @@ if (import.meta.client) {
   >
     <div class="shell-orb shell-orb-left" />
     <div class="shell-orb shell-orb-right" />
-
-    <BlogNavbar />
 
     <main class="relative z-1 flex-1 w-full pb-16 main-content-area">
       <div class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">

@@ -6,15 +6,19 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
  * Tracks the user's scroll direction (up/down/none), whether they've scrolled
  * past a configurable threshold, and the scroll progress percentage.
  * Uses requestAnimationFrame with a ticking flag pattern to avoid jank,
- * and a 5px dead zone to prevent flickering near the threshold.
+ * and a dead zone to prevent flickering near the threshold.
  *
- * SSR-safe: initializes direction as 'none' so the navbar starts visible,
- * avoiding hydration flash. The scroll listener is only attached in onMounted.
+ * Matches AnZhiYu's scroll logic:
+ *   - direction = 'down' only when delta > 0 AND past threshold
+ *   - direction = 'up' for any upward scroll (including near top)
+ *   - Small scrolls (delta < 20px when past 60px) are ignored
+ *
+ * SSR-safe: initializes direction as 'none' so the navbar starts visible.
  *
  * @param threshold - The scroll distance (in px) past which the navbar
- *   should start reacting. Default 56 matches AnZhiYu's behavior.
+ *   should start reacting. Default 26 matches AnZhiYu's behavior.
  */
-export function useScrollDirection(threshold = 56) {
+export function useScrollDirection(threshold = 26) {
   const scrollY = ref(0)
   const lastScrollY = ref(0)
   const direction = ref<'up' | 'down' | 'none'>('none')
@@ -31,6 +35,12 @@ export function useScrollDirection(threshold = 56) {
   function updateScroll() {
     scrollY.value = window.scrollY
     const delta = scrollY.value - lastScrollY.value
+
+    // AnZhiYu: ignore small scrolls when past 60px (delta < 20px)
+    if (scrollY.value > 60 && Math.abs(delta) < 20 && delta !== 0) {
+      ticking.value = false
+      return
+    }
 
     // Dead zone: ignore scroll deltas smaller than 5px to prevent flickering
     if (Math.abs(delta) >= 5) {

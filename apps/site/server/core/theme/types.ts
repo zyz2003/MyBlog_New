@@ -15,6 +15,8 @@ export interface ThemeColors {
   background: string
   /** Card/surface color (default: '#F8FAFC') */
   surface: string
+  /** Border color (default: '#E2E8F0') */
+  border: string
   /** Primary text color (default: '#0F172A') */
   text: string
   /** Muted/secondary text color (default: '#64748B') */
@@ -195,12 +197,26 @@ export function CSSVariablesMap(config: ThemeConfig): Record<string, string> {
   vars['--anzhiyu-main'] = config.colors.primary
   vars['--anzhiyu-main-op'] = `${config.colors.primary}23`
   vars['--anzhiyu-white'] = '#FFFFFF'
+  vars['--anzhiyu-white-op'] = `${config.colors.primary}4D`
+  vars['--anzhiyu-black-op'] = `${config.colors.text}4D`
   vars['--anzhiyu-background'] = config.colors.background
   vars['--anzhiyu-card-bg'] = config.colors.surface
   vars['--anzhiyu-card-bg-none'] = 'transparent'
+  vars['--anzhiyu-card-border'] = config.colors.border
   vars['--anzhiyu-fontcolor'] = config.colors.text
   vars['--anzhiyu-secondtext'] = config.colors.textMuted
-  vars['--style-border-always'] = config.colors.textMuted
+  vars['--anzhiyu-secondbg'] = config.colors.surface
+  vars['--anzhiyu-none'] = 'transparent'
+  vars['--anzhiyu-maskbgdeep'] = `${config.colors.background}CC`
+  vars['--font-color'] = config.colors.text
+  vars['--light-grey'] = config.colors.textMuted
+  vars['--style-border-always'] = config.colors.border
+  vars['--style-border'] = `${config.colors.border}28`
+  vars['--style-border-hover'] = `${config.colors.primary}36`
+  vars['--anzhiyu-shadow-main'] = `0 4px 14px ${config.colors.primary}40`
+  vars['--anzhiyu-shadow-border'] = `0 8px 24px ${config.colors.text}08`
+  vars['--anzhiyu-shadow-black'] = `0 4px 12px ${config.colors.text}14`
+  vars['--global-font-size'] = '16px'
 
   // Font variables
   for (const [key, value] of Object.entries(config.fonts)) {

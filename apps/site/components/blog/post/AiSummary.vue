@@ -36,9 +36,10 @@ onMounted(() => {
           <div class="flex items-center gap-2">
             <i class="anzhiyufont anzhiyu-icon-lightbulb text-lg text-[var(--anzhiyu-main)]" />
             <span class="text-sm font-semibold text-[var(--anzhiyu-fontcolor)]">AI 摘要</span>
-            <span class="rounded-full bg-[var(--anzhiyu-main-op-deep)] px-2.5 py-0.5 text-xs text-[var(--anzhiyu-main)]">
-              {{ gptName || 'GPT' }}
-            </span>
+            <div class="mask-name-container inline-flex items-center gap-1 rounded-full bg-[var(--anzhiyu-main-op-deep)] px-2.5 py-0.5 text-xs text-[var(--anzhiyu-main)]">
+              <i class="anzhiyufont anzhiyu-icon-lightbulb text-[0.7rem]" />
+              <span>{{ gptName || 'GPT' }}</span>
+            </div>
           </div>
           <button
             v-if="needsCollapse"

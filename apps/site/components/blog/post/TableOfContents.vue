@@ -159,6 +159,28 @@ const numberedHeadings = computed(() => {
     return { ...heading, number: serial }
   })
 })
+
+// TOC scroll percentage — matches AnZhiYu's toc-percentage feature
+const scrollPercent = ref(0)
+
+function updateScrollPercent() {
+  if (!import.meta.client) return
+  const scrollTop = window.scrollY || document.documentElement.scrollTop
+  const scrollHeight = document.documentElement.scrollHeight - window.innerHeight
+  scrollPercent.value = scrollHeight > 0 ? Math.min(Math.round((scrollTop / scrollHeight) * 100), 100) : 0
+}
+
+onMounted(() => {
+  if (import.meta.client) {
+    window.addEventListener('scroll', updateScrollPercent, { passive: true })
+  }
+})
+
+onBeforeUnmount(() => {
+  if (import.meta.client) {
+    window.removeEventListener('scroll', updateScrollPercent)
+  }
+})
 </script>
 
 <template>
@@ -172,7 +194,10 @@ const numberedHeadings = computed(() => {
       class="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
       @click="handleToggle"
     >
-      <span class="text-sm font-semibold text-[var(--anzhiyu-fontcolor)]">文章目录</span>
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-semibold text-[var(--anzhiyu-fontcolor)]">文章目录</span>
+        <span class="toc-percentage text-xs text-[var(--anzhiyu-secondtext)]">{{ scrollPercent }}%</span>
+      </div>
       <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--anzhiyu-secondbg)] text-[var(--anzhiyu-secondtext)] transition-transform" :class="{ 'rotate-180': expanded }">
         <i class="anzhiyufont anzhiyu-icon-chevron-down text-xs" />
       </span>

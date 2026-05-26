@@ -28,7 +28,7 @@ const emit = defineEmits<{
 
 const showDetail = ref(false)
 
-const colorKeys = ['primary', 'secondary', 'accent', 'background', 'surface', 'text', 'textMuted'] as const
+const colorKeys = ['primary', 'secondary', 'accent', 'background', 'surface', 'border', 'text', 'textMuted'] as const
 
 const colorLabels: Record<string, string> = {
   primary: '主色',
@@ -36,6 +36,7 @@ const colorLabels: Record<string, string> = {
   accent: '强调',
   background: '背景',
   surface: '卡片',
+  border: '边框',
   text: '文字',
   textMuted: '辅助文字',
 }

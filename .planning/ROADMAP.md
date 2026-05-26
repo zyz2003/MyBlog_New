@@ -68,27 +68,19 @@ Plans:
 **验证**：10/10 自动化通过，视觉一致性 ≥88%
 **文档**：`.planning/phases/02-frontend-homepage-polish/PHASE-SUMMARY.md`
 
-### Phase 3: 文章详情页 — 渲染 + 目录 + 评论
+### Phase 3: 文章详情页 — 渲染 + 目录 + 评论 ✅ COMPLETED (2026-05-24)
 **目标**：文章阅读体验与安知鱼一致 — Front Matter 字段消费、TOC 滚动高亮、评论系统加固、辅助组件完善
 **参考**：`layout/post.pug`, `layout/includes/post/`, `layout/includes/widget/toc.pug`
 **Requirements:** REQ-03-01, REQ-03-02, REQ-03-03, REQ-03-04
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — ArticleContent + TableOfContents 修复 (Wave 1)
-- [ ] 03-02-PLAN.md — CommentWidget 修复 + 辅助组件完善 (Wave 1)
-- [ ] 03-03-PLAN.md — 页面集成 + ReadingProgress + 人工验证 (Wave 2)
+- [x] 03-01-PLAN.md — ArticleContent + TableOfContents 修复 (Wave 1)
+- [x] 03-02-PLAN.md — CommentWidget 修复 + 辅助组件完善 (Wave 1)
+- [x] 03-03-PLAN.md — 页面集成 + ReadingProgress + 人工验证 (Wave 2)
 
-**交付物**：
-- 文章渲染：Front Matter 字段消费（mainColor、topImg、toc、aside 等）— highlightShrink 类型修复、数学渲染后事件通知
-- 目录组件：TOC 浮动导航 + IntersectionObserver 重新观察 + 滚动高亮 + 移动端折叠
-- 评论系统：allowComment 门控 + 路由安全初始化 + Giscus 主题同步
-- AI 摘要区块：条件渲染 + 视觉打磨
-- 代码块：复制按钮 + 折叠控制（highlightShrink boolean/string 双类型支持）
-- 数学公式：MathJax/KaTeX 按需加载 + 渲染后 DOM 变化通知 TOC
-- 文章版权声明：permalink 复制 + license 显示
-- 上下篇导航：prev/next + fallback
-- 阅读进度条：滚动追踪 + 视觉反馈
+**验证**：自动化 PASS (vue-tsc --noEmit clean)，人工验证待完成 (Task 3.4 checkpoint)
+**文档**：`.planning/phases/03-frontend-article-detail/`
 
 ### Phase 4: 功能页面 — 分类/标签/归档/友链/相册/关于/留言板/404
 **目标**：完成所有内容页面

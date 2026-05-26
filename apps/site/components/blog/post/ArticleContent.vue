@@ -121,13 +121,14 @@ function createMarkdownRenderer() {
       '<div class="code-block-toolbar">',
       showLanguage ? `<span class="code-block-language">${md.utils.escapeHtml(languageLabel.toUpperCase())}</span>` : '<span class="code-block-language is-empty"></span>',
       '<div class="code-block-actions">',
-      showCopy
-        ? `<button type="button" class="code-block-action" data-action="copy" data-code="${encodeCodePayload(str)}">复制</button>`
-        : '',
       showToggle && enableCollapse
-        ? '<button type="button" class="code-block-action" data-action="toggle">展开</button>'
+        ? '<button type="button" class="code-block-action code-block-toggle" data-action="toggle"><i class="anzhiyufont anzhiyu-icon-angle-down"></i></button>'
+        : '',
+      showCopy
+        ? `<button type="button" class="code-block-action code-block-copy" data-action="copy" data-code="${encodeCodePayload(str)}"><i class="anzhiyufont anzhiyu-icon-paste"></i></button>`
         : '',
       '</div>',
+      `<span class="copy-notice"></span>`,
       '</div>',
       `<pre class="hljs" data-collapsible="${enableCollapse ? 'true' : 'false'}"><code class="language-${md.utils.escapeHtml(lang || 'plaintext')}">${highlighted}</code></pre>`,
       '</div>',
@@ -477,11 +478,18 @@ async function copyCode(button: HTMLButtonElement) {
   }
 
   await navigator.clipboard.writeText(textToCopy)
-  const previousText = button.textContent || '复制'
-  button.textContent = '已复制'
-  window.setTimeout(() => {
-    button.textContent = previousText
-  }, 1200)
+
+  // Show copy-notice toast in the toolbar
+  const toolbar = button.closest<HTMLElement>('.code-block-toolbar')
+  const notice = toolbar?.querySelector<HTMLElement>('.copy-notice')
+  if (notice) {
+    notice.textContent = '复制成功'
+    notice.classList.add('is-visible')
+    window.setTimeout(() => {
+      notice.textContent = ''
+      notice.classList.remove('is-visible')
+    }, 1500)
+  }
 }
 
 function toggleCodeBlock(button: HTMLButtonElement) {
@@ -490,9 +498,13 @@ function toggleCodeBlock(button: HTMLButtonElement) {
     return
   }
 
-  const expanded = shell.dataset.expanded === 'true'
-  shell.dataset.expanded = expanded ? 'false' : 'true'
-  button.textContent = expanded ? '展开' : '收起'
+  const isExpanded = shell.dataset.expanded === 'true'
+  shell.dataset.expanded = isExpanded ? 'false' : 'true'
+  // Rotate the angle-down icon
+  const icon = button.querySelector<HTMLElement>('i')
+  if (icon) {
+    icon.style.transform = isExpanded ? '' : 'rotate(180deg)'
+  }
 }
 
 function handleArticleClick(event: MouseEvent) {
@@ -759,6 +771,7 @@ watch([renderedHtml, math, mathjax, katex, () => props.enablePhotoFigcaption, di
 }
 
 .article-content :deep(.code-block-toolbar) {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -804,7 +817,34 @@ watch([renderedHtml, math, mathjax, katex, () => props.enablePhotoFigcaption, di
 .article-content :deep(.code-block-action:hover) {
   transform: translateY(-1px);
   background: rgba(59, 130, 246, 0.24);
-  color: #fff;
+  color: var(--anzhiyu-main);
+}
+
+.article-content :deep(.code-block-toggle i) {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 14px;
+}
+
+.article-content :deep(.code-block-copy i) {
+  font-size: 14px;
+}
+
+.article-content :deep(.copy-notice) {
+  position: absolute;
+  right: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--anzhiyu-main);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.article-content :deep(.copy-notice.is-visible) {
+  opacity: 1;
 }
 
 .article-content :deep(.code-block-shell[data-expanded='false'] pre[data-collapsible='true']) {

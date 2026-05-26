@@ -1,46 +1,66 @@
 <script setup lang="ts">
-defineProps<{
-  mode: number
-  previous?: {
-    title: string
-    path: string
-    coverImage?: string | null
-  } | null
-  next?: {
-    title: string
-    path: string
-    coverImage?: string | null
-  } | null
-}>()
+interface PaginationItem {
+  title: string
+  path: string
+  coverImage?: string
+}
+
+const props = withDefaults(defineProps<{
+  mode?: number
+  previous?: PaginationItem | null
+  next?: PaginationItem | null
+}>(), {
+  mode: 1,
+})
+
+const hasPrevious = computed(() => !!props.previous)
+const hasNext = computed(() => !!props.next)
+
+function truncate(text: string, max: number) {
+  return text.length > max ? `${text.slice(0, max)}...` : text
+}
 </script>
 
 <template>
-  <section v-if="previous || next" class="grid gap-4" :class="mode >= 3 ? 'md:grid-cols-1' : 'md:grid-cols-2'">
+  <nav v-if="hasPrevious || hasNext" class="post-nav my-6 grid gap-4" :class="hasPrevious && hasNext ? 'grid-cols-2' : 'grid-cols-1'">
     <NuxtLink
-      v-if="mode < 3 && previous"
+      v-if="previous"
       :to="previous.path"
-      class="group rounded-[26px] border border-[var(--style-border-always)] bg-[var(--anzhiyu-card-bg)] p-5 no-underline transition hover:-translate-y-1 hover:border-[var(--anzhiyu-main)]"
+      class="post-nav-item group relative flex items-center gap-3 overflow-hidden rounded-[24px] border border-[var(--style-border-always)] bg-[var(--anzhiyu-card-bg)] p-4 no-underline shadow-[var(--anzhiyu-shadow-border)] transition-all hover:border-[var(--anzhiyu-main)] hover:shadow-[var(--anzhiyu-shadow-hover)]"
     >
-      <p class="text-xs uppercase tracking-[0.18em] text-[var(--anzhiyu-secondtext)]">上一篇</p>
-      <h4 class="mt-3 text-lg font-semibold text-[var(--anzhiyu-fontcolor)]">{{ previous.title }}</h4>
+      <div v-if="previous.coverImage" class="absolute inset-0 bg-cover bg-center opacity-10 transition-opacity group-hover:opacity-20" :style="{ backgroundImage: `url(${previous.coverImage})` }" />
+      <div class="relative z-1 flex w-full items-center gap-3">
+        <i class="anzhiyufont anzhiyu-icon-arrow-left shrink-0 text-sm text-[var(--anzhiyu-secondtext)] group-hover:text-[var(--anzhiyu-main)]" />
+        <div class="min-w-0 flex-1">
+          <div class="mb-1 text-xs text-[var(--anzhiyu-secondtext)]">
+            {{ mode === 2 ? '下一篇' : '上一篇' }}
+          </div>
+          <div class="truncate text-sm font-semibold text-[var(--anzhiyu-fontcolor)] group-hover:text-[var(--anzhiyu-main)]">
+            {{ truncate(previous.title, 30) }}
+          </div>
+        </div>
+      </div>
     </NuxtLink>
+
+    <div v-else-if="hasNext" />
 
     <NuxtLink
       v-if="next"
       :to="next.path"
-      class="group overflow-hidden rounded-[26px] border border-[var(--style-border-always)] bg-[var(--anzhiyu-card-bg)] no-underline transition hover:-translate-y-1 hover:border-[var(--anzhiyu-main)]"
-      :class="mode >= 3 ? 'grid md:grid-cols-[220px_minmax(0,1fr)]' : 'p-5'"
+      class="post-nav-item group relative flex items-center gap-3 overflow-hidden rounded-[24px] border border-[var(--style-border-always)] bg-[var(--anzhiyu-card-bg)] p-4 no-underline shadow-[var(--anzhiyu-shadow-border)] transition-all hover:border-[var(--anzhiyu-main)] hover:shadow-[var(--anzhiyu-shadow-hover)]"
     >
-      <img
-        v-if="mode === 4 && next.coverImage"
-        :src="next.coverImage"
-        :alt="next.title"
-        class="h-full min-h-[160px] w-full object-cover"
-      >
-      <div class="p-5">
-        <p class="text-xs uppercase tracking-[0.18em] text-[var(--anzhiyu-secondtext)]">下一篇</p>
-        <h4 class="mt-3 text-lg font-semibold text-[var(--anzhiyu-fontcolor)]">{{ next.title }}</h4>
+      <div v-if="next.coverImage" class="absolute inset-0 bg-cover bg-center opacity-10 transition-opacity group-hover:opacity-20" :style="{ backgroundImage: `url(${next.coverImage})` }" />
+      <div class="relative z-1 flex w-full items-center justify-end gap-3">
+        <div class="min-w-0 flex-1 text-right">
+          <div class="mb-1 text-xs text-[var(--anzhiyu-secondtext)]">
+            {{ mode === 2 ? '上一篇' : '下一篇' }}
+          </div>
+          <div class="truncate text-sm font-semibold text-[var(--anzhiyu-fontcolor)] group-hover:text-[var(--anzhiyu-main)]">
+            {{ truncate(next.title, 30) }}
+          </div>
+        </div>
+        <i class="anzhiyufont anzhiyu-icon-arrow-right shrink-0 text-sm text-[var(--anzhiyu-secondtext)] group-hover:text-[var(--anzhiyu-main)]" />
       </div>
     </NuxtLink>
-  </section>
+  </nav>
 </template>

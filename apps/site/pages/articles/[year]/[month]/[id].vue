@@ -580,6 +580,7 @@ function handleContentUpdated(): void {
             <BlogPostCopyright
               :enabled="postCopyright.enable"
               :author="authorName"
+              :author-avatar="article?.author?.avatar || undefined"
               :article-url="articleUrl"
               :title="article.title"
               :license="postCopyright.license"

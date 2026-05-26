@@ -2,6 +2,7 @@
 const props = withDefaults(defineProps<{
   enabled?: boolean
   author?: string
+  authorAvatar?: string
   articleUrl?: string
   title?: string
   license?: string
@@ -20,7 +21,7 @@ const props = withDefaults(defineProps<{
 
 const config = useRuntimeConfig()
 
-const author = computed(() => props.author || config.public.siteName || '本站作者')
+const authorName = computed(() => props.author || config.public.siteName || '本站作者')
 const url = computed(() => {
   if (props.articleUrl?.startsWith('http')) {
     return props.articleUrl
@@ -71,9 +72,15 @@ async function copyPermalink() {
 
         <div class="grid gap-3 text-sm text-[var(--anzhiyu-fontcolor)] md:grid-cols-[110px_minmax(0,1fr)]">
           <div class="text-[var(--anzhiyu-secondtext)]">文章作者</div>
-          <div class="font-medium">
+          <div class="flex items-center gap-2 font-medium">
+            <img
+              v-if="authorAvatar"
+              :src="authorAvatar"
+              :alt="authorName"
+              class="h-6 w-6 rounded-full object-cover ring-1 ring-[var(--style-border-always)]"
+            >
             <a :href="authorLink" class="text-[var(--anzhiyu-fontcolor)] no-underline hover:text-[var(--anzhiyu-main)]">
-              {{ author }}
+              {{ authorName }}
             </a>
           </div>
 
