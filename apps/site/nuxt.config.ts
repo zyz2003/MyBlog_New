@@ -40,6 +40,8 @@ export default defineNuxtConfig({
         { name: 'twitter:card', content: 'summary_large_image' },
       ],
     },
+    // Per D-01: Page transition with fade+slide, 300ms duration
+    pageTransition: { name: 'page', mode: 'out-in' },
   },
 
   routeRules: {
@@ -85,6 +87,7 @@ export default defineNuxtConfig({
 
   css: [
     '@unocss/reset/tailwind-compat.css',
+    '@/assets/css/transitions.css',
   ],
 
   // TypeScript strict mode

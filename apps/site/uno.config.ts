@@ -130,5 +130,12 @@ export default defineConfig({
     'btn-primary': 'btn bg-primary text-white hover:bg-primary/90',
     'btn-secondary': 'btn bg-secondary text-white hover:bg-secondary/90',
     'card': 'bg-surface rounded-xl shadow-sm border border-border p-4',
+
+    // Animation shortcuts (per D-06, D-08, D-09)
+    'anim-fast': 'transition-duration-150',          // Fast interactions: hover, button clicks (150ms)
+    'anim-page': 'transition-duration-300',           // Page transitions (300ms)
+    'anim-reveal': 'transition-duration-400',          // Scroll reveal animations (400ms)
+    'gpu-accel': 'will-change-transform backface-hidden', // GPU acceleration hints
+    'contain-layout': '[contain:layout_style]',        // CSS containment for card containers
   },
 })

@@ -1,19 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { nextTick } from 'vue'
 
-// RED phase: Tests for useScrollReveal composable
-// These should FAIL until the composable is implemented
+/**
+ * Tests for useScrollReveal composable.
+ * Uses class-based IntersectionObserver mock so `new IntersectionObserver()` works.
+ */
+
+class MockIntersectionObserver {
+  callback: IntersectionObserverCallback
+  options?: IntersectionObserverInit
+  observe = vi.fn()
+  unobserve = vi.fn()
+  disconnect = vi.fn()
+
+  constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+    this.callback = callback
+    this.options = options
+  }
+}
 
 describe('useScrollReveal', () => {
   beforeEach(() => {
     vi.resetModules()
-    // Mock IntersectionObserver
-    const mockObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    }))
-    vi.stubGlobal('IntersectionObserver', mockObserver)
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver)
   })
 
   afterEach(() => {
@@ -29,20 +37,6 @@ describe('useScrollReveal', () => {
   })
 
   it('should add scroll-reveal-visible class when element intersects', async () => {
-    let observerCallback: IntersectionObserverCallback | null = null
-    const mockObserve = vi.fn()
-    const mockUnobserve = vi.fn()
-    const mockDisconnect = vi.fn()
-
-    vi.stubGlobal('IntersectionObserver', vi.fn().mockImplementation((cb) => {
-      observerCallback = cb
-      return {
-        observe: mockObserve,
-        unobserve: mockUnobserve,
-        disconnect: mockDisconnect,
-      }
-    }))
-
     const { useScrollReveal } = await import('~/composables/frontend/useScrollReveal')
     const { observe } = useScrollReveal()
 
@@ -50,28 +44,59 @@ describe('useScrollReveal', () => {
     el.classList.add('scroll-reveal')
     observe(el)
 
-    // Simulate intersection
-    expect(observerCallback).not.toBeNull()
-    observerCallback!(
-      [{ isIntersecting: true, target: el } as unknown as IntersectionObserverEntry],
+    // Get the observer instance that was created
+    const observer = (IntersectionObserver as unknown as typeof MockIntersectionObserver)
+    // The mock class stores instances; we need to trigger the callback
+    // Since MockIntersectionObserver stores callback, we need to access the instance
+    // Use a different approach: create a fresh mock that captures the callback
+
+    // Re-do with a capturing mock
+    vi.restoreAllMocks()
+    vi.resetModules()
+
+    let capturedCallback: IntersectionObserverCallback | null = null
+
+    class CapturingObserver {
+      cb: IntersectionObserverCallback
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+      constructor(cb: IntersectionObserverCallback) {
+        capturedCallback = cb
+        this.cb = cb
+      }
+    }
+
+    vi.stubGlobal('IntersectionObserver', CapturingObserver)
+
+    const { useScrollReveal: useScrollReveal2 } = await import('~/composables/frontend/useScrollReveal')
+    const { observe: observe2 } = useScrollReveal2()
+
+    const el2 = document.createElement('div')
+    el2.classList.add('scroll-reveal')
+    observe2(el2)
+
+    expect(capturedCallback).not.toBeNull()
+    capturedCallback!(
+      [{ isIntersecting: true, target: el2 } as unknown as IntersectionObserverEntry],
       {} as IntersectionObserver,
     )
 
-    expect(el.classList.contains('scroll-reveal-visible')).toBe(true)
+    expect(el2.classList.contains('scroll-reveal-visible')).toBe(true)
   })
 
   it('should unobserve element after intersection (auto-disconnect)', async () => {
-    let observerCallback: IntersectionObserverCallback | null = null
-    const mockUnobserve = vi.fn()
+    let mockUnobserve: ReturnType<typeof vi.fn> = vi.fn()
 
-    vi.stubGlobal('IntersectionObserver', vi.fn().mockImplementation((cb) => {
-      observerCallback = cb
-      return {
-        observe: vi.fn(),
-        unobserve: mockUnobserve,
-        disconnect: vi.fn(),
-      }
-    }))
+    class CapturingObserver {
+      observe = vi.fn()
+      unobserve = mockUnobserve
+      disconnect = vi.fn()
+      constructor(_cb: IntersectionObserverCallback) {}
+    }
+
+    vi.stubGlobal('IntersectionObserver', CapturingObserver)
+    vi.resetModules()
 
     const { useScrollReveal } = await import('~/composables/frontend/useScrollReveal')
     const { observe } = useScrollReveal()
@@ -80,21 +105,58 @@ describe('useScrollReveal', () => {
     el.classList.add('scroll-reveal')
     observe(el)
 
-    observerCallback!(
-      [{ isIntersecting: true, target: el } as unknown as IntersectionObserverEntry],
+    // Simulate intersection through the observer
+    const observerInstance = new CapturingObserver(() => {})
+    // We need to directly trigger the behavior by calling the observer callback
+    // Let's re-approach: the observe function creates an IntersectionObserver internally
+    // and we need to access its callback
+
+    // Actually, let's verify the behavior differently: call observe, then verify
+    // that when IntersectionObserver fires with isIntersecting=true, unobserve is called
+    mockUnobserve = vi.fn()
+
+    let capturedCb: IntersectionObserverCallback | null = null
+    class ObserverWithUnobserve {
+      observe = vi.fn()
+      unobserve = mockUnobserve
+      disconnect = vi.fn()
+      constructor(cb: IntersectionObserverCallback) {
+        capturedCb = cb
+      }
+    }
+
+    vi.stubGlobal('IntersectionObserver', ObserverWithUnobserve)
+    vi.resetModules()
+
+    const { useScrollReveal: useSR2 } = await import('~/composables/frontend/useScrollReveal')
+    const { observe: observe2 } = useSR2()
+
+    const el2 = document.createElement('div')
+    el2.classList.add('scroll-reveal')
+    observe2(el2)
+
+    capturedCb!(
+      [{ isIntersecting: true, target: el2 } as unknown as IntersectionObserverEntry],
       {} as IntersectionObserver,
     )
 
-    expect(mockUnobserve).toHaveBeenCalledWith(el)
+    expect(mockUnobserve).toHaveBeenCalledWith(el2)
   })
 
   it('should not add class when element is not intersecting', async () => {
-    let observerCallback: IntersectionObserverCallback | null = null
+    let capturedCb: IntersectionObserverCallback | null = null
 
-    vi.stubGlobal('IntersectionObserver', vi.fn().mockImplementation((cb) => {
-      observerCallback = cb
-      return { observe: vi.fn(), unobserve: vi.fn(), disconnect: vi.fn() }
-    }))
+    class CapturingObserver {
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+      constructor(cb: IntersectionObserverCallback) {
+        capturedCb = cb
+      }
+    }
+
+    vi.stubGlobal('IntersectionObserver', CapturingObserver)
+    vi.resetModules()
 
     const { useScrollReveal } = await import('~/composables/frontend/useScrollReveal')
     const { observe } = useScrollReveal()
@@ -103,7 +165,7 @@ describe('useScrollReveal', () => {
     el.classList.add('scroll-reveal')
     observe(el)
 
-    observerCallback!(
+    capturedCb!(
       [{ isIntersecting: false, target: el } as unknown as IntersectionObserverEntry],
       {} as IntersectionObserver,
     )
@@ -112,12 +174,19 @@ describe('useScrollReveal', () => {
   })
 
   it('should accept custom threshold and rootMargin options', async () => {
-    const mockImpl = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    }))
-    vi.stubGlobal('IntersectionObserver', mockImpl)
+    let capturedOptions: IntersectionObserverInit | null = null
+
+    class CapturingObserver {
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+      constructor(_cb: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+        capturedOptions = options ?? null
+      }
+    }
+
+    vi.stubGlobal('IntersectionObserver', CapturingObserver)
+    vi.resetModules()
 
     const { useScrollReveal } = await import('~/composables/frontend/useScrollReveal')
     const { observe } = useScrollReveal()
@@ -125,8 +194,7 @@ describe('useScrollReveal', () => {
     const el = document.createElement('div')
     observe(el, { threshold: 0.5, rootMargin: '0px 0px -100px 0px' })
 
-    expect(mockImpl).toHaveBeenCalledWith(
-      expect.any(Function),
+    expect(capturedOptions).toEqual(
       expect.objectContaining({
         threshold: 0.5,
         rootMargin: '0px 0px -100px 0px',
@@ -135,12 +203,19 @@ describe('useScrollReveal', () => {
   })
 
   it('should use default threshold 0.1 and rootMargin "0px 0px -50px 0px"', async () => {
-    const mockImpl = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    }))
-    vi.stubGlobal('IntersectionObserver', mockImpl)
+    let capturedOptions: IntersectionObserverInit | null = null
+
+    class CapturingObserver {
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+      constructor(_cb: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+        capturedOptions = options ?? null
+      }
+    }
+
+    vi.stubGlobal('IntersectionObserver', CapturingObserver)
+    vi.resetModules()
 
     const { useScrollReveal } = await import('~/composables/frontend/useScrollReveal')
     const { observe } = useScrollReveal()
@@ -148,8 +223,7 @@ describe('useScrollReveal', () => {
     const el = document.createElement('div')
     observe(el)
 
-    expect(mockImpl).toHaveBeenCalledWith(
-      expect.any(Function),
+    expect(capturedOptions).toEqual(
       expect.objectContaining({
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px',
@@ -158,24 +232,27 @@ describe('useScrollReveal', () => {
   })
 
   it('should disconnect all observers on cleanup', async () => {
-    const mockDisconnect = vi.fn()
-    vi.stubGlobal('IntersectionObserver', vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: mockDisconnect,
-    })))
+    const disconnectSpy = vi.fn()
+
+    class ObserverWithDisconnect {
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = disconnectSpy
+      constructor(_cb: IntersectionObserverCallback) {}
+    }
+
+    vi.stubGlobal('IntersectionObserver', ObserverWithDisconnect)
+    vi.resetModules()
 
     const { useScrollReveal } = await import('~/composables/frontend/useScrollReveal')
     const { observe, cleanup } = useScrollReveal()
 
-    const el1 = document.createElement('div')
-    const el2 = document.createElement('div')
-    observe(el1)
-    observe(el2)
+    observe(document.createElement('div'))
+    observe(document.createElement('div'))
 
     cleanup()
 
-    // Should disconnect all observers (2 elements = potentially 2 observers)
-    expect(mockDisconnect).toHaveBeenCalled()
+    // Each observe() creates its own observer, so disconnect should be called twice
+    expect(disconnectSpy).toHaveBeenCalledTimes(2)
   })
 })

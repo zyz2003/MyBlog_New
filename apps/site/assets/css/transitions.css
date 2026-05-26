@@ -1,0 +1,150 @@
+/*
+ * Animation infrastructure — transitions, scroll-reveal, and reduced-motion support.
+ *
+ * Per D-01: Page transitions via app.pageTransition (name="page", mode="out-in")
+ * Per D-02: Scroll-reveal using CSS classes toggled by useScrollReveal composable
+ * Per D-08: Unified timing — fast 150ms, page 300ms, reveal 400ms, cascade 80ms
+ * Per D-09: GPU acceleration — only transform/opacity animated, will-change applied
+ * Per D-10: prefers-reduced-motion respected — disables transforms, shortens page transitions
+ */
+
+/* ============================================================
+   Page Transition Classes (per D-01, D-08)
+   Nuxt pageTransition with name="page" generates these classes.
+   Duration: 300ms, ease timing.
+   ============================================================ */
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.page-enter-to,
+.page-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   Scroll Reveal Classes (per D-02, D-08, D-09)
+   Elements start hidden (scroll-reveal), become visible
+   (scroll-reveal-visible) when useScrollReveal adds the class.
+   Duration: 400ms, ease timing.
+   ============================================================ */
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 400ms ease, transform 400ms ease;
+  will-change: transform, opacity;
+}
+
+.scroll-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  will-change: transform, opacity;
+}
+
+/* Left-variant for horizontal reveal (e.g., timeline items) */
+.scroll-reveal-left {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 400ms ease, transform 400ms ease;
+  will-change: transform, opacity;
+}
+
+.scroll-reveal-left.scroll-reveal-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ============================================================
+   Cascade Delays (per D-08)
+   80ms increment per item for staggered reveal effect.
+   ============================================================ */
+
+.scroll-reveal-delay-1 {
+  transition-delay: 80ms;
+}
+
+.scroll-reveal-delay-2 {
+  transition-delay: 160ms;
+}
+
+.scroll-reveal-delay-3 {
+  transition-delay: 240ms;
+}
+
+.scroll-reveal-delay-4 {
+  transition-delay: 320ms;
+}
+
+.scroll-reveal-delay-5 {
+  transition-delay: 400ms;
+}
+
+.scroll-reveal-delay-6 {
+  transition-delay: 480ms;
+}
+
+/* ============================================================
+   Shimmer Keyframe (for skeleton loader, plan 06-02)
+   Animated gradient sweep effect for loading placeholders.
+   ============================================================ */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ============================================================
+   Prefers Reduced Motion (per D-10)
+   Disables scroll-reveal transforms and shortens page transitions.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable scroll-reveal animations */
+  .scroll-reveal,
+  .scroll-reveal-left {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+
+  .scroll-reveal-visible {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+
+  /* Shorten page transitions to 100ms (keep some feedback) */
+  .page-enter-active,
+  .page-leave-active {
+    transition: opacity 100ms ease, transform 100ms ease;
+  }
+
+  /* Disable cascade delays */
+  .scroll-reveal-delay-1,
+  .scroll-reveal-delay-2,
+  .scroll-reveal-delay-3,
+  .scroll-reveal-delay-4,
+  .scroll-reveal-delay-5,
+  .scroll-reveal-delay-6 {
+    transition-delay: 0ms;
+  }
+}
