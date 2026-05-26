@@ -55,7 +55,7 @@ export function useSearchWidget() {
     if (event.key === '/' && !isOpen.value) {
       const active = document.activeElement
       const tag = active?.tagName ?? ''
-      const isEditable = active?.isContentEditable ?? false
+      const isEditable = (active as HTMLElement | null)?.isContentEditable ?? false
       const isInputField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)
 
       if (!isInputField && !isEditable) {
