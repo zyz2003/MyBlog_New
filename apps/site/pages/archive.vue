@@ -7,16 +7,30 @@ const { data, pending, error } = await useFetch<{
     years: Array<{
       year: number
       count: number
-      articles: Array<{ id: number, title: string, publishedAt: number | null, createdAt: number }>
+      articles: Array<{
+        id: number
+        title: string
+        publishedAt: number | null
+        createdAt: number
+        coverImage: string | null
+        categories: Array<{ name: string; slug: string }>
+      }>
     }>
   }
 }>('/api/articles/archive')
+
+interface CategoryBadge {
+  name: string
+  slug: string
+}
 
 interface ArticleItem {
   id: number
   title: string
   publishedAt: number | null
   createdAt: number
+  coverImage: string | null
+  categories: CategoryBadge[]
 }
 
 interface YearGroup {
@@ -97,8 +111,29 @@ useSeoMeta({
               :to="articlePath(article)"
               class="timeline-item"
             >
-              <span class="timeline-date">{{ formatDate(article.publishedAt, article.createdAt) }}</span>
-              <span class="timeline-item-title">{{ article.title }}</span>
+              <div class="timeline-item-content">
+                <div class="timeline-item-text">
+                  <span class="timeline-date">{{ formatDate(article.publishedAt, article.createdAt) }}</span>
+                  <span class="timeline-item-title">{{ article.title }}</span>
+                  <div v-if="article.categories?.length" class="timeline-categories">
+                    <NuxtLink
+                      v-for="cat in article.categories"
+                      :key="cat.slug"
+                      :to="`/categories/${cat.slug}`"
+                      class="timeline-cat-badge"
+                    >
+                      {{ cat.name }}
+                    </NuxtLink>
+                  </div>
+                </div>
+                <img
+                  v-if="article.coverImage"
+                  :src="article.coverImage"
+                  alt=""
+                  class="timeline-thumb"
+                  loading="lazy"
+                />
+              </div>
             </NuxtLink>
           </div>
         </section>
@@ -233,33 +268,83 @@ useSeoMeta({
 }
 
 .timeline-item {
-  display: flex;
-  align-items: baseline;
-  gap: 0.85rem;
-  padding: 0.8rem 0.95rem;
-  border-radius: 16px;
+  display: block;
+  padding: 0.55rem 0.65rem 0.55rem 1.1rem;
+  border-radius: 12px;
   color: inherit;
   text-decoration: none;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .timeline-item:hover {
-  background: color-mix(in srgb, var(--anzhiyu-main) 7%, transparent);
-  transform: translateX(2px);
+  transform: translateX(4px);
+  background: color-mix(in srgb, var(--anzhiyu-main) 6%, transparent);
+  box-shadow: 0 4px 16px var(--anzhiyu-shadow-border);
+}
+
+.timeline-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.timeline-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .timeline-date {
-  min-width: 3.5rem;
   color: var(--anzhiyu-secondtext);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .timeline-item-title {
   color: var(--anzhiyu-fontcolor);
-  font-size: 0.97rem;
-  line-height: 1.6;
+  font-size: 0.95rem;
+  line-height: 1.5;
   font-weight: 600;
+}
+
+.timeline-item:hover .timeline-item-title {
+  color: var(--anzhiyu-main);
+}
+
+.timeline-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.timeline-cat-badge {
+  display: inline-flex;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--anzhiyu-main) 10%, transparent);
+  color: var(--anzhiyu-main);
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.timeline-cat-badge:hover {
+  background: var(--anzhiyu-main);
+  color: white;
+}
+
+.timeline-thumb {
+  width: 76px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: var(--style-border-always);
 }
 
 @media (max-width: 768px) {
