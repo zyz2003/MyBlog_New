@@ -2,7 +2,7 @@
 import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 import { useScrollDirection } from '@/composables/frontend/useScrollDirection'
 
-const { nav, search, settings, social } = useSiteSettings()
+const { nav, menuGroups, search, settings, social } = useSiteSettings()
 const { isDark, toggleDark } = useTheme()
 const { direction, isScrolledPastThreshold, scrollPercent } = useScrollDirection(26)
 
@@ -21,6 +21,12 @@ const homeAccessKey = computed(() => {
   return raw.enable === false ? undefined : 'h'
 })
 const useImageIcon = (icon: string) => /^(https?:)?\/\//.test(icon) || icon.startsWith('/')
+function isMenuGroup(item: NavbarMenuItem): item is NavbarMenuGroup {
+  return 'children' in item && Array.isArray(item.children)
+}
+function isMenuLink(item: NavbarMenuItem): item is NavbarMenuLink {
+  return 'link' in item && !('children' in item)
+}
 const primaryLinks = computed(() => {
   const defaults = [
     { label: '首页', to: '/' },
@@ -197,10 +203,33 @@ onUnmounted(() => {
         <!-- Center: menus (absolute positioned, full width, centered items) -->
         <div id="menus">
           <div class="menus_items">
-            <div v-for="link in primaryLinks" :key="link.to" class="menus_item">
-              <NuxtLink :to="link.to" class="site-page" active-class="menus_item-active">
-                <span>{{ link.label }}</span>
+            <!-- Grouped menu items with sub-navigation support -->
+            <div
+              v-for="item in menuGroups"
+              :key="item.name"
+              class="menus_item"
+              :class="{ 'has-children': isMenuGroup(item) }"
+            >
+              <!-- Single link -->
+              <NuxtLink v-if="isMenuLink(item)" :to="item.link" class="site-page">
+                <span>{{ item.name }}</span>
               </NuxtLink>
+
+              <!-- Group with sub-menu -->
+              <template v-else-if="isMenuGroup(item)">
+                <a class="site-page" href="javascript:void(0)">
+                  <span>{{ item.name }}</span>
+                  <i class="anzhiyufont anzhiyu-icon-chevron-down sub-menu-arrow" />
+                </a>
+                <ul class="menus_item_child">
+                  <li v-for="child in item.children" :key="child.link">
+                    <NuxtLink :to="child.link" class="site-page child">
+                      <i v-if="child.icon" :class="['anzhiyufont', child.icon]" />
+                      <span>{{ child.name }}</span>
+                    </NuxtLink>
+                  </li>
+                </ul>
+              </template>
             </div>
           </div>
         </div>
@@ -273,6 +302,36 @@ onUnmounted(() => {
         </a>
       </div>
       <div class="mobile-drawer-content">
+        <template v-for="item in menuGroups" :key="item.name">
+          <!-- Group with children -->
+          <div v-if="isMenuGroup(item)" class="mb-4">
+            <div class="mobile-drawer-group-title">{{ item.name }}</div>
+            <div class="flex flex-col gap-1">
+              <NuxtLink
+                v-for="child in item.children"
+                :key="child.link"
+                :to="child.link"
+                class="mobile-drawer-link"
+                @click="closeMobileMenu"
+              >
+                <i v-if="child.icon" :class="['anzhiyufont', child.icon]" class="w-5 h-5 text-base flex items-center justify-center" />
+                <span class="text-sm">{{ child.name }}</span>
+              </NuxtLink>
+            </div>
+          </div>
+          <!-- Single link -->
+          <NuxtLink
+            v-else-if="isMenuLink(item)"
+            :to="item.link"
+            class="mobile-drawer-link"
+            @click="closeMobileMenu"
+          >
+            <i v-if="item.icon" :class="['anzhiyufont', item.icon]" class="w-5 h-5 text-base flex items-center justify-center" />
+            <span class="text-sm">{{ item.name }}</span>
+          </NuxtLink>
+        </template>
+
+        <!-- Nine-grid button groups (nav.menu) -->
         <div v-for="group in navMenu" :key="group.title" class="mb-4">
           <div class="mobile-drawer-group-title">{{ group.title }}</div>
           <div class="flex flex-col gap-1">
@@ -288,17 +347,6 @@ onUnmounted(() => {
               <span class="text-sm">{{ item.name }}</span>
             </NuxtLink>
           </div>
-        </div>
-        <div v-if="navMenu.length === 0" class="flex flex-col gap-1">
-          <NuxtLink
-            v-for="link in primaryLinks"
-            :key="link.to"
-            :to="link.to"
-            class="mobile-drawer-link"
-            @click="closeMobileMenu"
-          >
-            <span class="text-sm">{{ link.label }}</span>
-          </NuxtLink>
         </div>
       </div>
       <div class="mobile-drawer-footer">
@@ -762,6 +810,80 @@ onUnmounted(() => {
 
 .menus_item-active {
   color: var(--anzhiyu-main) !important;
+}
+
+/* ===== Sub-menu dropdown (AnZhiYu menus_item_child) ===== */
+.menus_item.has-children {
+  position: relative;
+}
+
+.sub-menu-arrow {
+  font-size: 0.6rem;
+  margin-left: 0.3rem;
+  transition: transform 0.3s;
+}
+
+.menus_item.has-children:hover .sub-menu-arrow {
+  transform: rotate(180deg);
+}
+
+.menus_item_child {
+  position: absolute;
+  top: 55px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: var(--style-border-always);
+  background: var(--anzhiyu-maskbgdeep);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--anzhiyu-shadow-border);
+  padding: 6px 0;
+  min-width: 120px;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 100;
+}
+
+.menus_item.has-children:hover .menus_item_child {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.menus_item_child::before {
+  content: "";
+  position: absolute;
+  top: -16px;
+  left: 0;
+  width: 100%;
+  height: 16px;
+}
+
+.menus_item_child li {
+  list-style: none;
+}
+
+.menus_item_child li a.site-page.child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  color: var(--anzhiyu-fontcolor);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.05rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.menus_item_child li a.site-page.child:hover {
+  background: var(--anzhiyu-main);
+  color: var(--anzhiyu-white);
 }
 
 /* ===== Nav right (absolute positioned right, z-index above menus) ===== */

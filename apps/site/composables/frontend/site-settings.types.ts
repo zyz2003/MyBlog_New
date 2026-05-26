@@ -14,6 +14,21 @@ export interface NavMenuGroup {
   item: NavMenuItem[]
 }
 
+/** Top navbar menu item — can be a direct link or a group with children */
+export interface NavbarMenuLink {
+  name: string
+  link: string
+  icon: string
+}
+
+export interface NavbarMenuGroup {
+  name: string
+  icon: string
+  children: NavbarMenuLink[]
+}
+
+export type NavbarMenuItem = NavbarMenuLink | NavbarMenuGroup
+
 export interface NavConfig {
   enable: boolean
   travelling: boolean
@@ -579,6 +594,21 @@ export const defaultAnnouncement: AnnouncementConfig = {
   text: '欢迎来到我的博客',
   icon: 'anzhiyu-icon-bullhorn',
 }
+
+export const defaultNavbarMenu: NavbarMenuItem[] = [
+  { name: '首页', link: '/', icon: 'anzhiyu-icon-house-chimney' },
+  {
+    name: '文章',
+    icon: 'anzhiyu-icon-box-archive',
+    children: [
+      { name: '归档', link: '/archive', icon: 'anzhiyu-icon-box-archive' },
+      { name: '分类', link: '/categories', icon: 'anzhiyu-icon-shapes' },
+      { name: '标签', link: '/tags', icon: 'anzhiyu-icon-tags' },
+    ],
+  },
+  { name: '友链', link: '/links', icon: 'anzhiyu-icon-link' },
+  { name: '关于', link: '/about', icon: 'anzhiyu-icon-paper-plane' },
+]
 
 export const defaultNavConfig: NavConfig = {
   enable: false,

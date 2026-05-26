@@ -34,6 +34,7 @@ import type {
   MathJaxConfig,
   MournConfig,
   NavConfig,
+  NavbarMenuItem,
   NoticeOutdateConfig,
   PhotoFigcaptionConfig,
   PostCopyrightConfig,
@@ -93,6 +94,7 @@ import {
   defaultMathJaxConfig,
   defaultMournConfig,
   defaultNavConfig,
+  defaultNavbarMenu,
   defaultNoticeOutdateConfig,
   defaultPhotoFigcaptionConfig,
   defaultPostCopyrightConfig,
@@ -459,6 +461,42 @@ export function useSiteSettings() {
   const nav = computed<NavConfig>(() =>
     (settings.value.nav as NavConfig | undefined) ?? defaultNavConfig,
   )
+
+  const menuGroups = computed<NavbarMenuItem[]>(() => {
+    const raw = settings.value.menu
+    if (!raw || typeof raw !== 'object') return defaultNavbarMenu
+
+    const items: NavbarMenuItem[] = []
+    const record = raw as Record<string, unknown>
+    for (const [key, val] of Object.entries(record)) {
+      if (!val || typeof val !== 'object') continue
+      const entry = val as Record<string, unknown>
+
+      if (Array.isArray(entry.children)) {
+        const children = entry.children
+          .filter((c): c is Record<string, unknown> => typeof c === 'object' && c !== null)
+          .map(c => ({
+            name: String(c.name ?? ''),
+            link: String(c.link ?? '#'),
+            icon: String(c.icon ?? ''),
+          }))
+          .filter(c => c.name)
+        items.push({
+          name: key,
+          icon: String(entry.icon ?? ''),
+          children,
+        })
+      }
+      else if (entry.link) {
+        items.push({
+          name: key,
+          link: String(entry.link),
+          icon: String(entry.icon ?? ''),
+        })
+      }
+    }
+    return items.length ? items : defaultNavbarMenu
+  })
 
   const commentsRaw = computed(() => ((settings.value.comments as unknown as Record<string, unknown> | undefined) ?? {}))
 
@@ -1415,6 +1453,7 @@ export function useSiteSettings() {
     loading: readonly(loading),
     announcement,
     nav,
+    menuGroups,
     comments,
     twikoo: computed(() => comments.value.twikoo),
     valine,
