@@ -68,6 +68,19 @@
   transform: translateX(0);
 }
 
+/* Scale-variant for sidebar cards — subtle zoom-in reveal */
+.scroll-reveal-scale {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 400ms ease, transform 400ms ease;
+  will-change: transform, opacity;
+}
+
+.scroll-reveal-scale.scroll-reveal-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* ============================================================
    Cascade Delays (per D-08)
    80ms increment per item for staggered reveal effect.
@@ -119,7 +132,8 @@
 @media (prefers-reduced-motion: reduce) {
   /* Disable scroll-reveal animations */
   .scroll-reveal,
-  .scroll-reveal-left {
+  .scroll-reveal-left,
+  .scroll-reveal-scale {
     opacity: 1;
     transform: none;
     transition: none;

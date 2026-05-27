@@ -80,7 +80,7 @@ onUnmounted(() => {
       </div>
       <template v-else>
         <template v-for="(name, widgetIndex) in widgetList" :key="name">
-          <div v-if="widgetList.length > 0" :ref="(el) => { if (el) sidebarCardRefs.push(el as HTMLElement) }" class="sidebar-card card-hover scroll-reveal" :class="sidebarCardDelayClass(widgetIndex + 1)">
+          <div v-if="widgetList.length > 0" :ref="(el) => { if (el) sidebarCardRefs.push(el as HTMLElement) }" class="sidebar-card card-hover scroll-reveal-scale" :class="sidebarCardDelayClass(widgetIndex + 1)">
             <BlogProfileWidget v-if="name === 'profile'" />
             <BlogStatsWidget
               v-else-if="name === 'stats'"
