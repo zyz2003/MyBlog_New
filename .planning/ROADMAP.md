@@ -105,7 +105,7 @@ Plans:
 - 快捷键：键盘导航（S 搜索、D 暗色模式等）
 - 右侧工具栏：回到顶部、暗色模式、目录等快捷按钮
 
-### Phase 6: 动画与打磨 — 过渡动画 + 性能 + 响应式
+### Phase 6: 动画与打磨 — 过渡动画 + 性能 + 响应式 ✅ COMPLETED (2026-05-27)
 **目标**：视觉交互细节与安知鱼完全对齐
 **参考**：`source/css/_layout/animation.styl`, `source/js/main.js`
 **交付物**：
@@ -119,9 +119,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Animation foundation: page transitions, useScrollReveal, UnoCSS shortcuts, prefers-reduced-motion (Wave 1)
-- [ ] 06-02-PLAN.md — Loading states: SkeletonLoader, SpinnerIcon, integration into pages (Wave 1)
-- [ ] 06-03-PLAN.md — Scroll animations + hover enhancements on all components (Wave 2)
+- [x] 06-01-PLAN.md — Animation foundation: page transitions, useScrollReveal, UnoCSS shortcuts, prefers-reduced-motion (Wave 1) ✓ 2026-05-27
+- [x] 06-02-PLAN.md — Loading states: SkeletonLoader, SpinnerIcon, integration into pages (Wave 1) ✓ 2026-05-27
+- [x] 06-03-PLAN.md — Scroll animations + hover enhancements on all components (Wave 2) ✓ 2026-05-27
 
 ---
 
