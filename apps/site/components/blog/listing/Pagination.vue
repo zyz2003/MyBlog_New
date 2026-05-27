@@ -131,6 +131,7 @@ const pages = computed(() => {
   background: color-mix(in srgb, var(--anzhiyu-main) 10%, white);
   border-color: var(--anzhiyu-main);
   color: var(--anzhiyu-main);
+  transform: scale(1.05);
 }
 
 .pagination-page.active {

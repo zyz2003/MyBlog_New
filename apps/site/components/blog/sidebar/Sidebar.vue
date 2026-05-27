@@ -123,11 +123,12 @@ onUnmounted(() => {
   box-shadow: var(--anzhiyu-shadow-border);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  contain: layout;
 }
 
 .sidebar-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--anzhiyu-shadow-hover);
   border: var(--style-border-hover);
 }
 

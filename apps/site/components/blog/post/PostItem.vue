@@ -265,7 +265,8 @@ function handleCoverError() {
 
 .recent-post-item:hover {
   border: var(--style-border-hover);
-  box-shadow: var(--anzhiyu-shadow-main);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
 }
 
 .recent-post-link {
@@ -295,7 +296,7 @@ function handleCoverError() {
 }
 
 .recent-post-item:hover .post_bg {
-  transform: scale(1.04);
+  transform: scale(1.08);
 }
 
 .recent-post-info {

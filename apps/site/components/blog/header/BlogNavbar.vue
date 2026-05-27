@@ -794,6 +794,32 @@ onUnmounted(() => {
   color: var(--light-grey);
   text-decoration: none;
   transition: color 0s, background 0.3s;
+  position: relative;
+}
+
+/* Underline slide-in effect on nav links (per D-07) */
+.menus_item a.site-page::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--anzhiyu-main);
+  border-radius: 1px;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.menus_item a.site-page:hover::after {
+  width: 60%;
+  left: 20%;
+}
+
+/* Disable underline transition for reduced motion (per D-10) */
+@media (prefers-reduced-motion: reduce) {
+  .menus_item a.site-page::after {
+    transition: none;
+  }
 }
 
 #page-header.nav-fixed .menus_item a.site-page {

@@ -57,14 +57,14 @@ function handleCoverError() {
 </script>
 
 <template>
-  <article class="group bg-surface rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-border">
+  <article class="group bg-surface rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-border article-card-container">
     <NuxtLink :to="articleUrl" class="block">
       <!-- Cover image -->
       <div class="relative h-48 overflow-hidden bg-surface-2">
         <img
           :src="resolvedCover"
           :alt="article.title"
-          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          class="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-500"
           @error="handleCoverError"
         >
         <!-- Category badge -->
@@ -119,5 +119,9 @@ function handleCoverError() {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.article-card-container {
+  contain: layout;
 }
 </style>
