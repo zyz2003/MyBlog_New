@@ -43,13 +43,13 @@ function resolveCover(coverImage: string | null | undefined, id: number, fallbac
   return suffix && base ? `${base}${suffix}` : base
 }
 
-const { data: articlesData } = await useAsyncData(
+const { data: articlesData, pending: articlesPending } = await useAsyncData(
   'home-articles',
   () => getArticles({ page: page.value, pageSize: homePageSize.value }),
   { watch: [page, homePageSize] },
 )
 
-const { data: categoriesData } = await useAsyncData('home-categories', () => getCategoryTree())
+const { data: categoriesData, pending: categoriesPending } = await useAsyncData('home-categories', () => getCategoryTree())
 
 const homepageCategoryCards = computed<CategoryCard[]>(() => {
   const configuredCards = (homepage.value.categories as CategoryCard[]).slice(0, 3).map((card, index) => ({
@@ -170,7 +170,10 @@ useSeoMeta({
       <div id="recent-posts" class="recent-posts">
         <BlogCategoryBar :categories="categoriesData?.data || []" />
 
-        <div class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
+        <div v-if="articlesPending" class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
+          <USkeletonLoader mode="card" :count="4" />
+        </div>
+        <div v-else class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
           <BlogPostItem
             v-for="(article, index) in allArticles"
             :key="article.id"
@@ -181,7 +184,7 @@ useSeoMeta({
           />
         </div>
 
-        <div v-if="!allArticles.length" class="text-center py-16 text-muted">
+        <div v-if="!articlesPending && !allArticles.length" class="text-center py-16 text-muted">
           <span class="i-heroicons-document-text w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>{{ noArticlesText }}</p>
         </div>
@@ -197,6 +200,7 @@ useSeoMeta({
       <BlogSidebar
         :enabled="homepage.sidebarEnabled"
         :widgets="homepage.sidebarWidgets"
+        :loading="categoriesPending"
       />
     </div>
   </div>

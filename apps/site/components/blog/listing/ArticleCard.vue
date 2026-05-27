@@ -1,5 +1,6 @@
 <script setup lang="ts">
 interface ArticleCardProps {
+  loading?: boolean
   article: {
     id: number
     title: string
@@ -14,7 +15,9 @@ interface ArticleCardProps {
   }
 }
 
-const props = defineProps<ArticleCardProps>()
+const props = withDefaults(defineProps<ArticleCardProps>(), {
+  loading: false,
+})
 const { homepage, errorImage } = useSiteSettings()
 
 const displayDate = computed(() => {

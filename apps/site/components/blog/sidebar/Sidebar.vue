@@ -5,12 +5,14 @@ interface Props {
   enabled?: boolean
   widgets?: string[]
   sidebarWidth?: string
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   enabled: true,
   widgets: () => ['profile', 'stats', 'tags', 'categories', 'recent'],
   sidebarWidth: '300px',
+  loading: false,
 })
 
 const { sidebar, aside, sidebarCards } = useSiteSettings()
@@ -45,29 +47,34 @@ const stats = computed(() => ({
 
 <template>
   <aside
-    v-if="enabled && aside.enable && widgetList.length > 0"
+    v-if="enabled && aside.enable"
     id="aside-content"
     class="sidebar-widget"
     :style="{ width: sidebarWidth }"
   >
     <div class="sticky_layout">
-      <template v-for="name in widgetList" :key="name">
-        <div class="sidebar-card card-hover">
-          <BlogProfileWidget v-if="name === 'profile'" />
-          <BlogStatsWidget
-            v-else-if="name === 'stats'"
-            :articles="stats.articles"
-            :categories="stats.categories"
-            :tags="stats.tags"
-          />
-          <BlogTagCloud v-else-if="name === 'tags'" />
-          <BlogCategoriesWidget v-else-if="name === 'categories'" />
-          <BlogRecentPostsWidget v-else-if="name === 'recent'" />
-          <BlogAnnounceWidget v-else-if="name === 'announcement'" />
-          <BlogArchiveWidget v-else-if="name === 'archive'" />
-          <BlogWechatWidget v-else-if="name === 'wechat'" />
-          <BlogRecentCommentsWidget v-else-if="name === 'recent_comments'" />
-        </div>
+      <div v-if="loading" class="sidebar-skeleton">
+        <USkeletonLoader mode="sidebar" />
+      </div>
+      <template v-else>
+        <template v-for="name in widgetList" :key="name">
+          <div v-if="widgetList.length > 0" class="sidebar-card card-hover">
+            <BlogProfileWidget v-if="name === 'profile'" />
+            <BlogStatsWidget
+              v-else-if="name === 'stats'"
+              :articles="stats.articles"
+              :categories="stats.categories"
+              :tags="stats.tags"
+            />
+            <BlogTagCloud v-else-if="name === 'tags'" />
+            <BlogCategoriesWidget v-else-if="name === 'categories'" />
+            <BlogRecentPostsWidget v-else-if="name === 'recent'" />
+            <BlogAnnounceWidget v-else-if="name === 'announcement'" />
+            <BlogArchiveWidget v-else-if="name === 'archive'" />
+            <BlogWechatWidget v-else-if="name === 'wechat'" />
+            <BlogRecentCommentsWidget v-else-if="name === 'recent_comments'" />
+          </div>
+        </template>
       </template>
     </div>
   </aside>
