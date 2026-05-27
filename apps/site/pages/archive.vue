@@ -132,7 +132,7 @@ useSeoMeta({
             <NuxtLink
               v-for="(article, articleIndex) in yearGroup.articles"
               :key="article.id"
-              :ref="(el) => { if (el?.$el) timelineItemRefs.push(el.$el) }"
+              :ref="(el) => { if ((el as any)?.$el) timelineItemRefs.push((el as any).$el as HTMLElement) }"
               :to="articlePath(article)"
               class="timeline-item scroll-reveal-left"
               :class="timelineItemDelayClass(yearIndex, articleIndex)"
