@@ -91,6 +91,7 @@ describe('SpinnerIcon', () => {
   it('uses custom color from prop', () => {
     const wrapper = mount(SpinnerIcon, { props: { color: '#ff0000' } })
     const spinner = wrapper.find('.spinner-icon')
-    expect(spinner.attributes('style')).toContain('#ff0000')
+    // Browser converts hex to rgb in inline style
+    expect(spinner.attributes('style')).toContain('rgb(255, 0, 0)')
   })
 })
