@@ -3,10 +3,28 @@ definePageMeta({ layout: 'frontend-default' })
 
 const { profile, social, settings, refresh } = useSiteSettings()
 const { articleCount, categoryCount, tagCount } = useSiteStats()
+const { observe, cleanup } = useScrollReveal()
 
 await refresh()
 
 const aboutContent = computed(() => String(settings.value.aboutContent || ''))
+
+// Template refs for about sections
+const aboutHeroRef = ref<HTMLElement | null>(null)
+const statsRef = ref<HTMLElement | null>(null)
+const aboutContentRef = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  nextTick(() => {
+    if (aboutHeroRef.value) observe(aboutHeroRef.value)
+    if (statsRef.value) observe(statsRef.value)
+    if (aboutContentRef.value) observe(aboutContentRef.value)
+  })
+})
+
+onUnmounted(() => {
+  cleanup()
+})
 
 useSeoMeta({
   title: '关于',
@@ -18,7 +36,7 @@ useSeoMeta({
 
 <template>
   <div class="about-page">
-    <section class="about-hero">
+    <section ref="aboutHeroRef" class="about-hero scroll-reveal">
       <div class="author-card">
         <div class="avatar-wrapper">
           <img
@@ -51,7 +69,7 @@ useSeoMeta({
       </div>
     </section>
 
-    <section class="stats-section">
+    <section ref="statsRef" class="stats-section scroll-reveal scroll-reveal-delay-1">
       <div class="stat-card">
         <span class="stat-count">{{ articleCount }}</span>
         <span class="stat-label">文章</span>
@@ -66,7 +84,7 @@ useSeoMeta({
       </div>
     </section>
 
-    <section v-if="aboutContent" class="about-content">
+    <section v-if="aboutContent" ref="aboutContentRef" class="about-content scroll-reveal scroll-reveal-delay-2">
       <ArticleContent :content="aboutContent" />
     </section>
   </div>
