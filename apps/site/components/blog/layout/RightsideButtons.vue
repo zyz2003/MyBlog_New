@@ -1,7 +1,7 @@
 <template>
   <div
-    ref="containerRef"
-    class="rightside-buttons"
+    ref="rightsideRef"
+    class="rightside-buttons scroll-reveal"
     :class="{
       'rightside-buttons--hidden': isHidden,
       'rightside-buttons--home-hidden': isHomeHidden,
@@ -87,10 +87,14 @@ import { useSearchWidget } from '~/composables/frontend/useSearchWidget'
 const { rightsideButtons, navMusic, musicPlayer } = useSiteSettings()
 const { isDark, toggleDark } = useTheme()
 const { openSearch } = useSearchWidget()
+const { observe, cleanup: revealCleanup } = useScrollReveal()
 const route = useRoute()
 
 const config = computed(() => rightsideButtons.value)
 const musicPlayerConfig = computed(() => musicPlayer.value)
+
+// ---- Scroll Reveal ----
+const rightsideRef = ref<HTMLElement | null>(null)
 
 // ---- Scroll Direction ----
 const scrollDirection = ref<'up' | 'down' | 'idle'>('idle')
@@ -194,6 +198,11 @@ onMounted(() => {
   // Attach ripple to all buttons
   const btns = document.querySelectorAll('.rightside-btn')
   btns.forEach(btn => btn.addEventListener('click', addRipple as EventListener))
+
+  // Observe rightside buttons container for scroll-reveal
+  if (rightsideRef.value) {
+    observe(rightsideRef.value)
+  }
 })
 
 onUnmounted(() => {
@@ -202,6 +211,8 @@ onUnmounted(() => {
 
   const btns = document.querySelectorAll('.rightside-btn')
   btns.forEach(btn => btn.removeEventListener('click', addRipple as EventListener))
+
+  revealCleanup()
 })
 
 // Sync music playing state on mount
