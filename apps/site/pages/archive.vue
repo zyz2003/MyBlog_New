@@ -19,6 +19,11 @@ const { data, pending, error } = await useFetch<{
   }
 }>('/api/articles/archive')
 
+const { observe, cleanup } = useScrollReveal()
+
+// Template ref for timeline item elements
+const timelineItemRefs = ref<HTMLElement[]>([])
+
 interface CategoryBadge {
   name: string
   slug: string
@@ -51,6 +56,25 @@ function articlePath(article: ArticleItem): string {
   const date = new Date(article.publishedAt ?? article.createdAt)
   return `/articles/${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${article.id}`
 }
+
+// Compute cascade delay class for a timeline item based on its overall index
+function timelineItemDelayClass(yearIndex: number, articleIndex: number): string {
+  const overallIndex = yearIndex * 3 + articleIndex + 1
+  const delay = Math.min(overallIndex, 6)
+  return delay > 0 ? `scroll-reveal-delay-${delay}` : ''
+}
+
+onMounted(() => {
+  nextTick(() => {
+    timelineItemRefs.value.forEach((el) => {
+      observe(el)
+    })
+  })
+})
+
+onUnmounted(() => {
+  cleanup()
+})
 
 useSeoMeta({
   title: '文章归档',
@@ -94,7 +118,7 @@ useSeoMeta({
         <div class="timeline-line" />
 
         <section
-          v-for="yearGroup in years"
+          v-for="(yearGroup, yearIndex) in years"
           :key="yearGroup.year"
           class="timeline-group"
         >
@@ -106,10 +130,12 @@ useSeoMeta({
 
           <div class="timeline-list">
             <NuxtLink
-              v-for="article in yearGroup.articles"
+              v-for="(article, articleIndex) in yearGroup.articles"
               :key="article.id"
+              :ref="(el) => { if (el?.$el) timelineItemRefs.push(el.$el) }"
               :to="articlePath(article)"
-              class="timeline-item"
+              class="timeline-item scroll-reveal-left"
+              :class="timelineItemDelayClass(yearIndex, articleIndex)"
             >
               <div class="timeline-item-content">
                 <div class="timeline-item-text">

@@ -21,10 +21,14 @@ const props = withDefaults(defineProps<{
   coverPosition?: 'left' | 'right' | 'both'
   coverEnabled?: boolean
   index?: number
+  scrollReveal?: boolean
+  delayIndex?: number
 }>(), {
   coverPosition: 'left',
   coverEnabled: true,
   index: 0,
+  scrollReveal: true,
+  delayIndex: 0,
 })
 
 const { homepage, errorImage, comments, postMetaPage, postMetaPost, indexPostContent } = useSiteSettings()
@@ -154,6 +158,16 @@ const coverUrl = computed(() => applyThumbnailSuffix(props.article.coverImage ||
 const hasCover = computed(() => Boolean(props.coverEnabled && coverUrl.value))
 const resolvedCover = ref(coverUrl.value)
 
+const scrollRevealClasses = computed(() => {
+  if (!props.scrollReveal) return []
+  const classes: string[] = ['scroll-reveal']
+  const delay = Math.min(props.delayIndex, 6)
+  if (delay > 0) {
+    classes.push(`scroll-reveal-delay-${delay}`)
+  }
+  return classes
+})
+
 const cardDirection = computed<'left' | 'right'>(() => {
   if (props.coverPosition === 'both') {
     return (props.index || 0) % 2 === 0 ? 'left' : 'right'
@@ -177,7 +191,7 @@ function handleCoverError() {
 </script>
 
 <template>
-  <article class="recent-post-item" :class="[`cover-${cardDirection}`, { 'no-cover': !hasCover }]">
+  <article class="recent-post-item" :class="[`cover-${cardDirection}`, { 'no-cover': !hasCover }, scrollRevealClasses]">
     <NuxtLink :to="articleUrl" class="recent-post-link">
       <div v-if="hasCover" class="post_cover">
         <img :src="resolvedCover" :alt="article.title" class="post_bg" @error="handleCoverError">
@@ -246,6 +260,7 @@ function handleCoverError() {
   border: var(--style-border-always);
   box-shadow: var(--anzhiyu-shadow-border);
   transition: 0.3s;
+  contain: layout;
 }
 
 .recent-post-item:hover {

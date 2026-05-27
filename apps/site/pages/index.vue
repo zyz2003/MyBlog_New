@@ -31,6 +31,35 @@ const noArticlesText = '暂无文章'
 const page = computed(() => Number(route.query.page) || 1)
 const { getArticles, getCategoryTree } = usePublicApi()
 const { homepage, errorImage, refresh } = useSiteSettings()
+const { observe, cleanup } = useScrollReveal()
+
+// Template ref for PostItem elements
+const postItemRefs = ref<HTMLElement[]>([])
+
+onMounted(() => {
+  // Observe each PostItem for scroll-reveal after data is loaded
+  nextTick(() => {
+    postItemRefs.value.forEach((el) => {
+      observe(el)
+    })
+  })
+})
+
+onUnmounted(() => {
+  cleanup()
+})
+
+// Re-observe when page changes (new articles loaded)
+watch(page, () => {
+  postItemRefs.value = []
+  nextTick(() => {
+    nextTick(() => {
+      postItemRefs.value.forEach((el) => {
+        observe(el)
+      })
+    })
+  })
+})
 
 await refresh()
 const homepageSkills = computed<SkillItem[]>(() => homepage.value.skills as SkillItem[])
@@ -177,10 +206,13 @@ useSeoMeta({
           <BlogPostItem
             v-for="(article, index) in allArticles"
             :key="article.id"
+            :ref="(el) => { if (el?.$el) postItemRefs.push(el.$el) }"
             :article="article as any"
             :cover-position="homepage.coverPosition"
             :cover-enabled="homepage.coverEnabled"
             :index="index"
+            :scroll-reveal="true"
+            :delay-index="Math.min(index + 1, 6)"
           />
         </div>
 

@@ -17,6 +17,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { sidebar, aside, sidebarCards } = useSiteSettings()
 const { getArticles, getCategoryTree } = usePublicApi()
+const { observe, cleanup } = useScrollReveal()
+
+// Template ref for sidebar card elements
+const sidebarCardRefs = ref<HTMLElement[]>([])
 
 const widgetList = computed(() => {
   const base = props.widgets || sidebar.value.widgets || ['profile', 'stats', 'tags', 'categories', 'recent']
@@ -34,6 +38,12 @@ const widgetList = computed(() => {
   })
 })
 
+// Compute cascade delay class for each sidebar card
+function sidebarCardDelayClass(widgetIndex: number): string {
+  const delay = Math.min(widgetIndex, 6)
+  return delay > 0 ? `scroll-reveal-delay-${delay}` : ''
+}
+
 const { data: articleStats } = await useAsyncData('sidebar-article-stats', () => getArticles({ pageSize: 1 }))
 const { data: categoryStats } = await useAsyncData('sidebar-category-stats', () => getCategoryTree())
 const { data: tagStats } = await useFetch<{ code: number, data: Array<{ id: number }> }>('/api/tags')
@@ -43,6 +53,18 @@ const stats = computed(() => ({
   categories: categoryStats.value?.data?.length || 0,
   tags: tagStats.value?.data?.length || 0,
 }))
+
+onMounted(() => {
+  nextTick(() => {
+    sidebarCardRefs.value.forEach((el) => {
+      observe(el)
+    })
+  })
+})
+
+onUnmounted(() => {
+  cleanup()
+})
 </script>
 
 <template>
@@ -57,8 +79,8 @@ const stats = computed(() => ({
         <USkeletonLoader mode="sidebar" />
       </div>
       <template v-else>
-        <template v-for="name in widgetList" :key="name">
-          <div v-if="widgetList.length > 0" class="sidebar-card card-hover">
+        <template v-for="(name, widgetIndex) in widgetList" :key="name">
+          <div v-if="widgetList.length > 0" :ref="(el) => { if (el) sidebarCardRefs.push(el as HTMLElement) }" class="sidebar-card card-hover scroll-reveal" :class="sidebarCardDelayClass(widgetIndex + 1)">
             <BlogProfileWidget v-if="name === 'profile'" />
             <BlogStatsWidget
               v-else-if="name === 'stats'"
