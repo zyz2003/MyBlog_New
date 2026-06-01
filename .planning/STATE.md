@@ -1,61 +1,40 @@
----
-gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: complete
-last_updated: "2026-05-27T12:00:00.000Z"
-progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 17
-  completed_plans: 18
-  percent: 100
----
+# 项目状态
 
-# GSD State
+> 最后更新: 2026-06-01
+> 分支: v2
 
-## Current Phase
+## 已完成
 
-- Phase: 06-frontend-animation-polish
-- Status: completed
-- Started: 2026-05-26
-- Completed: 2026-05-27
+### 后台管理 (完整)
+- 仪表盘、文章管理(CRUD+Vditor+批量导入)、页面管理、草稿箱
+- 分类管理(树形)、标签管理、媒体库(上传/预览/筛选/批量操作/视图切换)
+- 11 个配置页面：首页设置、侧栏设置、SEO、全局、文章、评论、代码与搜索、统计分析、特效与功能、主题管理、插件管理
 
-## Plan Status
+### 前台博客 (安知鱼风格) — 基础 Phase 1-6 已完成
+- 导航栏 + 页脚 + 布局骨架
+- 首页轮播 + 文章列表 + 侧边栏
+- 文章详情页(渲染/目录/评论)
+- 功能页面(分类/标签/归档/友链等)
+- 特色交互(右键菜单/音乐/搜索/快捷键)
+- 动画打磨(过渡动画/骨架屏/响应式)
 
-| Plan | Wave | Status | Tasks |
-|------|------|--------|-------|
-| 06-01 | 1 | completed | 2 (useScrollReveal + useReducedMotion composables, transitions.css + UnoCSS shortcuts + pageTransition config) |
-| 06-02 | 1 | completed | 2 (SkeletonLoader 4-mode shimmer + SpinnerIcon, integration into home/sidebar/ArticleCard) |
-| 06-03 | 2 | completed | 5 (scroll-reveal on articles/archive/sidebar/about, hover enhancements on cards/nav/sidebar/buttons, scroll-reveal-scale variant, RightsideButtons scroll-reveal, about page sections) |
+### 插件系统
+- 钩子系统(6 个挂载点)、插件注册/启用/禁用、friends-links 插件已验证
 
-## Execution Log
+### 主题系统
+- CSS 变量驱动、后台可视化配置、深色模式
 
-- 2026-05-22: Phase 1 execution completed
-- 2026-05-22: Phase 2 execution completed
-- 2026-05-24: Phase 3 execution completed
-- 2026-05-26: Phase 4 execution completed
-- 2026-05-26: Phase 5 execution completed
-- 2026-05-26: Phase 6 context gathered — 10 decisions captured
-- 2026-05-26: Phase 6 plans created (06-01, 06-02, 06-03)
-- 2026-05-27: Phase 6 Wave 1 executed (06-01, 06-02) — 4 tasks complete, type check PASS
-- 2026-05-27: Phase 6 Wave 2 executed (06-03) — 5 tasks complete, TS fix applied, type check PASS
+## 已知架构问题 (待修)
 
-## Key Decisions (from discuss-phase)
+| 问题 | 严重度 | Phase |
+|------|--------|-------|
+| 两套配置系统互相隔离 | 严重 | Phase 7 |
+| 主题 CSS 变量无法注入前台 | 严重 | Phase 7 |
+| Composables 层缺失 | 严重 | Phase 7 |
+| admin.vue 布局双重嵌套 | 中等 | Phase 7 |
+| batchUpdate 非事务 | 中等 | Phase 7 |
+| Settings 值类型丢失 | 中等 | Phase 7 |
 
-- 友链架构：Vue 组件 + API（不用 componentCode）
-- 友链数据：system_settings JSON（不新建数据表）
-- 分类球体：推迟到 Phase 6（只做 bento grid）
-- 关于页内容：settings.aboutContent + profile 结合
+## 当前阶段
 
-## Verification Summary
-
-- Phase 1: Automated PASS (8/8), Manual PASS (5/6)
-- Phase 2: Automated PASS (10/10)
-- Phase 3: Automated PASS (vue-tsc --noEmit clean)
-- Phase 4: Automated PASS (vue-tsc --noEmit clean)
-- Phase 5: Automated PASS (vue-tsc --noEmit clean)
-- Phase 6: Automated PASS (vue-tsc --noEmit clean, one TS fix applied for $el access)
-
----
-*Last updated: 2026-05-27 - Phase 6 COMPLETED — All 6 phases done*
+**视觉对齐打磨 — 待开始** (Phase 1-7, ROADMAP 已规划)

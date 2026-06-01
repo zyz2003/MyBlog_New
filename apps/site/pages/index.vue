@@ -200,7 +200,7 @@ useSeoMeta({
         <BlogCategoryBar :categories="categoriesData?.data || []" />
 
         <div v-if="articlesPending" class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
-          <USkeletonLoader mode="card" :count="4" />
+          <UiSkeletonLoader mode="card" :count="4" />
         </div>
         <div v-else class="post-grid" :class="{ 'post-grid-double': homepage.doubleRow }">
           <BlogPostItem

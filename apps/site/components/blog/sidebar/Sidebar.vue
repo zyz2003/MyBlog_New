@@ -76,7 +76,7 @@ onUnmounted(() => {
   >
     <div class="sticky_layout">
       <div v-if="loading" class="sidebar-skeleton">
-        <USkeletonLoader mode="sidebar" />
+        <UiSkeletonLoader mode="sidebar" />
       </div>
       <template v-else>
         <template v-for="(name, widgetIndex) in widgetList" :key="name">
