@@ -192,6 +192,11 @@ useSeoMeta({
       :top-group-list="topGroupList"
       :today-card="homepage.todayCard as TodayCardConfig"
       :categories="homepageCategoryCards"
+      :hero-full-screen-enable="homepage.heroFullScreenEnable"
+      :hero-parallax-enable="homepage.heroParallaxEnable"
+      :hero-scroll-indicator-enable="homepage.heroScrollIndicatorEnable"
+      :sub-title-source="homepage.subTitleSource"
+      :typed-options="homepage.typedOptions"
       @random-post="toRandomPost"
     />
 

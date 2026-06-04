@@ -527,6 +527,11 @@ export interface HomepageConfig {
   subTitle: string
   siteText: string
   swiperEnabled: boolean
+  heroFullScreenEnable: boolean
+  heroParallaxEnable: boolean
+  heroScrollIndicatorEnable: boolean
+  subTitleSource: 'custom' | 'hitokoto'
+  typedOptions: Record<string, unknown>
   coverPosition: 'left' | 'right' | 'both'
   coverEnabled: boolean
   doubleRow: boolean
@@ -943,6 +948,17 @@ export const defaultHomepageConfig: HomepageConfig = {
   subTitle: 'AnZhiYu',
   siteText: '生活明朗，万物可爱。',
   swiperEnabled: true,
+  heroFullScreenEnable: false,
+  heroParallaxEnable: true,
+  heroScrollIndicatorEnable: true,
+  subTitleSource: 'custom',
+  typedOptions: {
+    typeSpeed: 100,
+    backSpeed: 50,
+    startDelay: 500,
+    backDelay: 2000,
+    loop: true,
+  },
   coverPosition: 'left',
   coverEnabled: true,
   doubleRow: true,

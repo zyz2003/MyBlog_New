@@ -798,6 +798,19 @@ export function useSiteSettings() {
       swiperEnabled: settings.value.homeTopSwiperEnabled !== undefined
         ? Boolean(settings.value.homeTopSwiperEnabled)
         : defaultHomepageConfig.swiperEnabled,
+      heroFullScreenEnable: settings.value.heroFullScreenEnable !== undefined
+        ? Boolean(settings.value.heroFullScreenEnable)
+        : defaultHomepageConfig.heroFullScreenEnable,
+      heroParallaxEnable: settings.value.heroParallaxEnable !== undefined
+        ? Boolean(settings.value.heroParallaxEnable)
+        : defaultHomepageConfig.heroParallaxEnable,
+      heroScrollIndicatorEnable: settings.value.heroScrollIndicatorEnable !== undefined
+        ? Boolean(settings.value.heroScrollIndicatorEnable)
+        : defaultHomepageConfig.heroScrollIndicatorEnable,
+      subTitleSource: (settings.value.homeTopSubTitleSource as 'custom' | 'hitokoto' | undefined)
+        ?? defaultHomepageConfig.subTitleSource,
+      typedOptions: (settings.value.homeTopTypedOptions as Record<string, unknown> | undefined)
+        ?? defaultHomepageConfig.typedOptions,
       coverPosition: ((settings.value.homepageCoverPosition as 'left' | 'right' | 'both') || defaultHomepageConfig.coverPosition),
       coverEnabled: settings.value.homepageCoverEnabled !== undefined
         ? Boolean(settings.value.homepageCoverEnabled)

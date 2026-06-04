@@ -40,6 +40,15 @@ const form = reactive({
   homeTopTimemode: 'date',
   homeTopDefaultDescr: '',
   homeTopSwiperEnabled: true,
+  heroFullScreenEnable: false,
+  heroParallaxEnable: true,
+  heroScrollIndicatorEnable: true,
+  homeTopSubTitleSource: 'custom' as 'custom' | 'hitokoto',
+  homeTopTypedTypeSpeed: 100,
+  homeTopTypedBackSpeed: 50,
+  homeTopTypedStartDelay: 500,
+  homeTopTypedBackDelay: 2000,
+  homeTopTypedLoop: true,
 
   homepageCoverEnabled: true,
   homepageCoverPosition: 'left',
@@ -170,6 +179,16 @@ function hydrateForm() {
   form.homeTopTimemode = String(settings.value.homeTopTimemode ?? 'date')
   form.homeTopDefaultDescr = String(settings.value.homeTopDefaultDescr ?? '')
   form.homeTopSwiperEnabled = settings.value.homeTopSwiperEnabled !== undefined ? Boolean(settings.value.homeTopSwiperEnabled) : true
+  form.heroFullScreenEnable = settings.value.heroFullScreenEnable !== undefined ? Boolean(settings.value.heroFullScreenEnable) : false
+  form.heroParallaxEnable = settings.value.heroParallaxEnable !== undefined ? Boolean(settings.value.heroParallaxEnable) : true
+  form.heroScrollIndicatorEnable = settings.value.heroScrollIndicatorEnable !== undefined ? Boolean(settings.value.heroScrollIndicatorEnable) : true
+  form.homeTopSubTitleSource = (settings.value.homeTopSubTitleSource as 'custom' | 'hitokoto' | undefined) ?? 'custom'
+  const typedOpts = (settings.value.homeTopTypedOptions as Record<string, unknown> | undefined) ?? {}
+  form.homeTopTypedTypeSpeed = Number(typedOpts.typeSpeed ?? 100)
+  form.homeTopTypedBackSpeed = Number(typedOpts.backSpeed ?? 50)
+  form.homeTopTypedStartDelay = Number(typedOpts.startDelay ?? 500)
+  form.homeTopTypedBackDelay = Number(typedOpts.backDelay ?? 2000)
+  form.homeTopTypedLoop = typedOpts.loop !== undefined ? Boolean(typedOpts.loop) : true
 
   form.homepageCoverEnabled = settings.value.homepageCoverEnabled !== undefined ? Boolean(settings.value.homepageCoverEnabled) : true
   form.homepageCoverPosition = String(settings.value.homepageCoverPosition ?? 'left')
@@ -238,6 +257,17 @@ async function handleSave() {
       homeTopTimemode: form.homeTopTimemode,
       homeTopDefaultDescr: form.homeTopDefaultDescr.trim(),
       homeTopSwiperEnabled: form.homeTopSwiperEnabled,
+    heroFullScreenEnable: form.heroFullScreenEnable,
+    heroParallaxEnable: form.heroParallaxEnable,
+    heroScrollIndicatorEnable: form.heroScrollIndicatorEnable,
+    homeTopSubTitleSource: form.homeTopSubTitleSource,
+    homeTopTypedOptions: {
+      typeSpeed: form.homeTopTypedTypeSpeed,
+      backSpeed: form.homeTopTypedBackSpeed,
+      startDelay: form.homeTopTypedStartDelay,
+      backDelay: form.homeTopTypedBackDelay,
+      loop: form.homeTopTypedLoop,
+    },
 
       homepageCoverEnabled: form.homepageCoverEnabled,
       homepageCoverPosition: form.homepageCoverPosition,
@@ -351,6 +381,40 @@ async function handleSave() {
             <span class="text-sm font-medium text-text">首页副标题</span>
             <input v-model="form.homeTopSubTitle" type="text" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" placeholder="例如：AnZhiYu" >
           </label>
+
+          <div class="grid gap-4 md:grid-cols-3">
+            <AdminToggleSwitch v-model="form.heroFullScreenEnable" label="全屏 Hero" />
+            <AdminToggleSwitch v-model="form.heroParallaxEnable" label="视差滚动" />
+            <AdminToggleSwitch v-model="form.heroScrollIndicatorEnable" label="向下滚动指示器" />
+          </div>
+
+          <label class="block space-y-2">
+            <span class="text-sm font-medium text-text">副标题数据源</span>
+            <select v-model="form.homeTopSubTitleSource" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10">
+              <option value="custom">自定义文本</option>
+              <option value="hitokoto">一言 API</option>
+            </select>
+          </label>
+
+          <div class="grid gap-4 md:grid-cols-5">
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">打字速度</span>
+              <input v-model.number="form.homeTopTypedTypeSpeed" type="number" min="10" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">删除速度</span>
+              <input v-model.number="form.homeTopTypedBackSpeed" type="number" min="10" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">开始延迟</span>
+              <input v-model.number="form.homeTopTypedStartDelay" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+            <label class="block space-y-2">
+              <span class="text-xs font-medium text-muted">删除延迟</span>
+              <input v-model.number="form.homeTopTypedBackDelay" type="number" min="0" class="w-full rounded-2xl border border-border bg-background/80 px-4 py-3 text-sm text-text outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" >
+            </label>
+            <AdminToggleSwitch v-model="form.homeTopTypedLoop" label="循环" class="mt-7" />
+          </div>
 
           <label class="block space-y-2">
             <span class="text-sm font-medium text-text">站点文案</span>

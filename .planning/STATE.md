@@ -1,40 +1,49 @@
-# 项目状态
+# Project State
 
-> 最后更新: 2026-06-01
-> 分支: v2
+> Last updated: 2026-06-01
 
-## 已完成
+## Current Phase
 
-### 后台管理 (完整)
-- 仪表盘、文章管理(CRUD+Vditor+批量导入)、页面管理、草稿箱
-- 分类管理(树形)、标签管理、媒体库(上传/预览/筛选/批量操作/视图切换)
-- 11 个配置页面：首页设置、侧栏设置、SEO、全局、文章、评论、代码与搜索、统计分析、特效与功能、主题管理、插件管理
+**Phase 01: Hero + Navbar Core Experience** — ✅ COMPLETED
 
-### 前台博客 (安知鱼风格) — 基础 Phase 1-6 已完成
-- 导航栏 + 页脚 + 布局骨架
-- 首页轮播 + 文章列表 + 侧边栏
-- 文章详情页(渲染/目录/评论)
-- 功能页面(分类/标签/归档/友链等)
-- 特色交互(右键菜单/音乐/搜索/快捷键)
-- 动画打磨(过渡动画/骨架屏/响应式)
+### Phase Status
 
-### 插件系统
-- 钩子系统(6 个挂载点)、插件注册/启用/禁用、friends-links 插件已验证
+| Phase | Name | Status |
+|-------|------|--------|
+| 01 | Hero + Navbar Core Experience | ✅ Completed |
+| 02 | Article Page Enhancements | 🔲 Not Started |
+| 03 | Sidebar & Widget System | 🔲 Not Started |
+| 04 | Footer & Mobile Experience | 🔲 Not Started |
+| 05 | Special Effects & Interactions | 🔲 Not Started |
+| 06 | Search, Comments & Integrations | 🔲 Not Started |
+| 07 | Architecture Refactoring | 🔲 Not Started |
 
-### 主题系统
-- CSS 变量驱动、后台可视化配置、深色模式
+### Phase 01 Completion Summary
 
-## 已知架构问题 (待修)
+| Plan | Description | Status |
+|------|-------------|--------|
+| 1-1 | Backend Hero config fields + Schema | ✅ Done |
+| 1-2 | Full-screen Hero + Parallax + Scroll indicator | ✅ Done |
+| 1-3 | Navbar scroll progress + Page name indicator | ✅ Done |
 
-| 问题 | 严重度 | Phase |
-|------|--------|-------|
-| 两套配置系统互相隔离 | 严重 | Phase 7 |
-| 主题 CSS 变量无法注入前台 | 严重 | Phase 7 |
-| Composables 层缺失 | 严重 | Phase 7 |
-| admin.vue 布局双重嵌套 | 中等 | Phase 7 |
-| batchUpdate 非事务 | 中等 | Phase 7 |
-| Settings 值类型丢失 | 中等 | Phase 7 |
+### Files Changed in Phase 01
 
-## 当前阶段
+| File | Change |
+|------|--------|
+| `server/services/settings.schema.ts` | Added heroFullScreenEnable, heroParallaxEnable, heroScrollIndicatorEnable, homeTopSubTitleSource, homeTopTypedOptions |
+| `composables/frontend/site-settings.types.ts` | Added fields to HomepageConfig + defaults |
+| `composables/frontend/useSiteSettings.ts` | Mapped new settings keys to homepage computed |
+| `pages/admin/homepage.vue` | Added Hero config UI controls (fullscreen toggle, parallax, scroll indicator, subtitle source, typed options) |
+| `components/blog/home/HomeTop.vue` | Full-screen mode, parallax background, typed subtitle, scroll-down indicator |
+| `components/blog/header/BlogNavbar.vue` | Scroll progress bar, page name indicator, back-to-top with percentage |
+| `pages/index.vue` | Pass new hero props to HomeTop |
 
-**视觉对齐打磨 — 待开始** (Phase 1-7, ROADMAP 已规划)
+## Next Phase
+
+**Phase 02: Article Page Enhancements** — Ready to plan
+
+Recommended: Phase 07 (Architecture Refactoring) can run in parallel with Phase 02.
+
+## Blockers
+
+None.

@@ -67,6 +67,12 @@ export const settingSchemas = {
   peoplecanvas: z.record(z.string(), z.unknown()),
   linkPageTop: z.record(z.string(), z.unknown()),
   pageThumbnailSuffix: z.string(),
+  homepageDefaultCoversText: z.string(),
+  heroFullScreenEnable: z.boolean(),
+  heroParallaxEnable: z.boolean(),
+  heroScrollIndicatorEnable: z.boolean(),
+  homeTopSubTitleSource: z.enum(['custom', 'hitokoto']),
+  homeTopTypedOptions: z.record(z.string(), z.unknown()),
 
   // --- posts (admin/posts.vue) ---
   postMetaPage: z.record(z.string(), z.unknown()),

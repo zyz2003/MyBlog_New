@@ -30,6 +30,39 @@ const { resolveAssetUrl } = useCdnAsset()
 const { isDark } = useTheme()
 const route = useRoute()
 
+const { homepage } = useSiteSettings()
+const isFullscreenHero = computed(() => route.path === '/' && homepage.value.heroFullScreenEnable && homepage.value.enabled)
+
+// One-stream background: set background image URL via CSS custom property
+const bgImageUrl = computed(() => {
+  if (!isFullscreenHero.value) return ''
+  return homepage.value.topImage?.indexImg || homepage.value.topImage?.defaultTopImg || ''
+})
+
+// Scroll-driven effects: background blur + shell opacity overlay
+const bgBlur = ref(0)
+const shellBgOpacity = ref(0) // 0 = transparent, 1 = fully opaque (white/dark)
+
+let scrollRafId: number | null = null
+function handleScrollBgEffect() {
+  if (!import.meta.client || !isFullscreenHero.value) return
+  if (scrollRafId) cancelAnimationFrame(scrollRafId)
+  scrollRafId = requestAnimationFrame(() => {
+    const scrollY = window.scrollY
+    const viewportHeight = window.innerHeight
+    // Target: scroll distance = hero height minus navbar height
+    // When cards reach navbar bottom, background is fully covered
+    const navbarH = 56 // collapsed navbar height
+    const maxScroll = viewportHeight - navbarH
+    const progress = Math.min(Math.max(scrollY / maxScroll, 0), 1)
+
+    bgBlur.value = progress * 20 // Max 20px blur at full scroll
+    shellBgOpacity.value = progress // Shell opacity: 0 → 1
+
+    scrollRafId = null
+  })
+}
+
 const { isScrolledPastThreshold } = useScrollDirection(56)
 const { openSearch: openSearchWidget } = useSearchWidget()
 const navbarHeight = computed(() => isScrolledPastThreshold.value ? '50px' : '64px')
@@ -723,6 +756,9 @@ if (import.meta.client) {
       }
     }) as EventListener)
 
+    // One-stream scroll effect: blur background + fade shell overlay
+    window.addEventListener('scroll', handleScrollBgEffect, { passive: true })
+
     if (translateConfig.value.enable) {
       applyTranslate(currentLanguage.value).catch(() => {})
     }
@@ -785,6 +821,7 @@ if (import.meta.client) {
   onUnmounted(() => {
     document.removeEventListener('click', handlePointerEffect)
     window.removeEventListener('site:translate-toggle', handleTranslateToggle as EventListener)
+    window.removeEventListener('scroll', handleScrollBgEffect)
     mediaQueryCleanup?.()
     titleRestoreCleanup?.()
     clearShortcutTimers()
@@ -852,6 +889,16 @@ if (import.meta.client) {
 </script>
 
 <template>
+  <!-- One-stream fixed background layer (一图流固定背景层) -->
+  <div
+    v-if="isFullscreenHero"
+    class="global-bg-layer"
+    :style="{
+      '--site-bg-image': bgImageUrl ? `url(${bgImageUrl})` : '',
+      filter: `blur(${bgBlur}px)`,
+    }"
+  />
+
   <ClientOnly fallback-tag="div">
     <BlogPreloader />
   </ClientOnly>
@@ -859,14 +906,16 @@ if (import.meta.client) {
   <BlogNavbar />
 
   <div
-    class="frontend-shell min-h-screen flex flex-col bg-background transition-colors duration-300"
-    :class="[{ 'is-mourn': isMourningDay, 'hr-icon-enabled': hrIcon.enable }, beautifyScopeClass]"
-    :style="{ '--navbar-height': navbarHeight }"
+    class="frontend-shell min-h-screen flex flex-col transition-colors duration-300"
+    :class="[{ 'is-mourn': isMourningDay, 'hr-icon-enabled': hrIcon.enable, 'overflow-x-clip': !isFullscreenHero, 'one-graph-flow': isFullscreenHero }, beautifyScopeClass]"
+    :style="{ '--navbar-height': navbarHeight, '--shell-overlay-opacity': shellBgOpacity }"
   >
     <div class="shell-orb shell-orb-left" />
     <div class="shell-orb shell-orb-right" />
 
-    <main class="relative z-1 flex-1 w-full pb-16 main-content-area">
+    <slot name="hero" />
+
+    <main class="relative z-1 flex-1 w-full pb-16 main-content-area" :class="{ 'main-content-area--no-padding': isFullscreenHero }">
       <div class="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
         <slot />
       </div>
@@ -950,10 +999,6 @@ if (import.meta.client) {
   overflow-x: clip;
   font-family: var(--global-font-family, inherit);
   font-size: var(--global-font-size, 16px);
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--anzhiyu-main) 12%, transparent) 0, transparent 28rem),
-    radial-gradient(circle at top right, color-mix(in srgb, var(--anzhiyu-main) 8%, transparent) 0, transparent 22rem),
-    linear-gradient(180deg, color-mix(in srgb, var(--anzhiyu-background) 92%, white 8%) 0%, var(--anzhiyu-background) 22rem, var(--anzhiyu-background) 100%);
 }
 
 :global(::selection) {
@@ -1306,5 +1351,90 @@ if (import.meta.client) {
 .main-content-area {
   padding-top: calc(var(--navbar-height, 64px) + 12px);
   transition: padding-top 0.3s ease;
+}
+
+.main-content-area--no-padding {
+  padding-top: 0;
+}
+
+/* ===== One-stream background (一图流) ===== */
+.global-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--site-bg-image) center / cover no-repeat fixed;
+  pointer-events: none;
+}
+
+/* Dark overlay for text readability on background image */
+.global-bg-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+:global(.dark) .global-bg-layer::after {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* When one-graph-flow is active, shell is transparent with overlay */
+.frontend-shell.one-graph-flow {
+  background: transparent !important;
+  position: relative;
+}
+
+/* White overlay that fades in on scroll — covers the fixed background */
+.frontend-shell.one-graph-flow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 255, 255, var(--shell-overlay-opacity, 0));
+  pointer-events: none;
+  transition: background 0.05s linear;
+}
+
+:global(.dark) .frontend-shell.one-graph-flow::before {
+  background: rgba(24, 23, 29, var(--shell-overlay-opacity, 0));
+}
+
+/* Semi-transparent cards in one-graph-flow mode */
+.one-graph-flow :global(.recent-post-item),
+.one-graph-flow :global(.card-widget),
+.one-graph-flow :global(.blog-slider-container),
+.one-graph-flow :global(.top-group-container),
+.one-graph-flow :global(.banner-group),
+.one-graph-flow :global(.category-bar) {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(12px);
+}
+
+:global(.dark) .one-graph-flow :global(.recent-post-item),
+:global(.dark) .one-graph-flow :global(.card-widget),
+:global(.dark) .one-graph-flow :global(.blog-slider-container),
+:global(.dark) .one-graph-flow :global(.top-group-container),
+:global(.dark) .one-graph-flow :global(.banner-group),
+:global(.dark) .one-graph-flow :global(.category-bar) {
+  background: rgba(29, 30, 34, 0.88) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Normal mode (non one-graph-flow): solid background */
+.frontend-shell:not(.one-graph-flow) {
+  position: relative;
+  overflow-x: clip;
+  font-family: var(--global-font-family, inherit);
+  font-size: var(--global-font-size, 16px);
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--anzhiyu-main) 12%, transparent) 0, transparent 28rem),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--anzhiyu-main) 8%, transparent) 0, transparent 22rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--anzhiyu-background) 92%, white 8%) 0%, var(--anzhiyu-background) 22rem, var(--anzhiyu-background) 100%);
+}
+
+/* Make main content area transparent */
+.main-content-area {
+  background: transparent;
 }
 </style>

@@ -3,7 +3,7 @@ import { useSiteSettings } from '@/composables/frontend/useSiteSettings'
 import { useScrollDirection } from '@/composables/frontend/useScrollDirection'
 import { useSearchWidget } from '@/composables/frontend/useSearchWidget'
 
-const { nav, menuGroups, search, settings, social } = useSiteSettings()
+const { nav, menuGroups, search, settings, social, homepage } = useSiteSettings()
 const { isDark, toggleDark } = useTheme()
 const { direction, isScrolledPastThreshold, scrollPercent } = useScrollDirection(26)
 const { openSearch: openSearchWidget } = useSearchWidget()
@@ -64,14 +64,28 @@ const isFixed = computed(() => isScrolledPastThreshold.value)
 // AnZhiYu: nav-visible when scrolled past threshold AND scrolling up
 const isVisible = computed(() => isScrolledPastThreshold.value && direction.value === 'up')
 
+// Page name display for navbar center
+const pageNameDisplay = computed(() => {
+  const path = route.path
+  if (path === '/') return '首页'
+  if (path.startsWith('/articles/') && path.split('/').length === 5) return '文章详情'
+  if (path === '/articles') return '文章列表'
+  if (path.startsWith('/categories')) return '分类'
+  if (path.startsWith('/tags')) return '标签'
+  if (path === '/archive') return '归档'
+  if (path === '/about') return '关于'
+  if (path === '/links') return '友链'
+  return route.meta?.title || '首页'
+})
+
 // AnZhiYu page type class for #page-header
-// Currently no banner/cover image support, so all pages use 'not-top-img'
-// When banner support is added, home = 'full_page', article = 'post-bg'
 const headerPageClass = computed(() => {
   const path = route.path
-  // Article detail pages with cover: /articles/YYYY/MM/id
+  // Homepage with fullscreen hero enabled
+  if (path === '/' && homepage.value.heroFullScreenEnable) return 'full_page'
+  // Article detail pages with cover
   if (/^\/articles\/\d{4}\/\d{2}\/\d+/.test(path)) return 'post-bg'
-  // All other pages (no banner) — including home until banner is implemented
+  // All other pages (no banner)
   return 'not-top-img'
 })
 
@@ -197,7 +211,7 @@ onUnmounted(() => {
         <!-- Center: page name overlay (visible on scroll) -->
         <div class="mask-name-container">
           <div id="name-container">
-            <NuxtLink id="page-name" :to="route.path">{{ route.meta?.title || '' }}</NuxtLink>
+            <NuxtLink id="page-name" :to="route.path">{{ pageNameDisplay }}</NuxtLink>
           </div>
         </div>
 
@@ -283,6 +297,14 @@ onUnmounted(() => {
         </div>
       </div>
     </nav>
+    <!-- Scroll progress bar -->
+    <div class="nav-scroll-progress" :style="{ width: scrollPercent + '%' }" />
+
+    <!-- Hero overlay (Teleport target for HomeTop fullscreen content) -->
+    <div id="hero-overlay" />
+
+    <!-- Scroll-down indicator target -->
+    <div id="hero-scroll-indicator" />
   </header>
 
   <!-- Mobile drawer -->
@@ -372,8 +394,40 @@ onUnmounted(() => {
   transition: all 0.5s ease;
 }
 
-/* AnZhiYu: full_page (home with banner) — currently unused until banner is implemented */
-/* #page-header.full_page { height: 100vh; } */
+/* AnZhiYu: full_page (home with fullscreen hero) — header is transparent, nav floats above hero */
+#page-header.full_page {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-bottom: 0;
+}
+
+#page-header.full_page #nav {
+  backdrop-filter: none;
+  background: transparent;
+  border-bottom: none;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Hero overlay inside page-header (Teleport target for HomeTop) */
+#hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#hero-scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  width: 100%;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* AnZhiYu: post-bg (article detail with cover) — currently unused until cover images are implemented */
 /* #page-header.post-bg { height: 31.25rem; transition: 0.6s; overflow: hidden; } */
@@ -1339,5 +1393,21 @@ onUnmounted(() => {
     border-bottom: none;
     background: var(--anzhiyu-background);
   }
+}
+
+/* ===== Scroll progress bar ===== */
+.nav-scroll-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--anzhiyu-main);
+  transition: width 0.1s linear;
+  z-index: 92;
+}
+
+/* Hide progress bar when at top */
+#page-header:not(.nav-fixed) .nav-scroll-progress {
+  opacity: 0;
 }
 </style>
